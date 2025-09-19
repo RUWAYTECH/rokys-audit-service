@@ -1,4 +1,4 @@
-﻿namespace Retail.CheckList.Infrastructure.IMapping
+﻿namespace Rokys.Audit.Infrastructure.IMapping
 {
     public interface IAMapper
     {

@@ -1,8 +1,8 @@
-﻿using Retail.CheckList.Infrastructure.Persistence.EF.Storage;
-using Retail.CheckList.Infrastructure.Repositories;
-using Retail.CheckList.Model.Tables;
+﻿using Rokys.Audit.Infrastructure.Persistence.EF.Storage;
+using Rokys.Audit.Infrastructure.Repositories;
+using Rokys.Audit.Model.Tables;
 
-namespace Retail.CheckList.Infrastructure.Persistence.EF.Repositories
+namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
 {
     public class ProveedorRepository : EFRepository<Proveedor>, IProveedorRepository
     {

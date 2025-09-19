@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Retail.CheckList.DTOs.Common
+namespace Rokys.Audit.DTOs.Common
 {
     public class JwtSettings
     {

@@ -1,12 +1,12 @@
 ﻿using FluentValidation.Results;
-using Retail.CheckList.DTOs.Responses.Common;
+using Rokys.Audit.DTOs.Responses.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Retail.CheckList.Services.Validations
+namespace Rokys.Audit.Services.Validations
 {
     public static class ValidationResultExtensions
     {

@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Retail.CheckList.Infrastructure.Persistence.Abstract
+namespace Rokys.Audit.Infrastructure.Persistence.Abstract
 {
     public interface IUnitOfWork : IDisposable
     {

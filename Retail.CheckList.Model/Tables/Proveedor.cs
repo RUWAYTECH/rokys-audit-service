@@ -1,4 +1,4 @@
-﻿namespace Retail.CheckList.Model.Tables
+﻿namespace Rokys.Audit.Model.Tables
 {
     public class Proveedor: AuditEntity
     {

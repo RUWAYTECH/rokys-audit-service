@@ -1,5 +1,5 @@
 ﻿using System;
-namespace Retail.CheckList.DTOs.Requests.User
+namespace Rokys.Audit.DTOs.Requests.User
 {
 	public class LoginRequestDto
 	{

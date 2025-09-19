@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
-using Retail.CheckList.Infrastructure.IMapping;
+using Rokys.Audit.Infrastructure.IMapping;
 
-namespace Retail.CheckList.Infrastructure.Mapping.AM
+namespace Rokys.Audit.Infrastructure.Mapping.AM
 {
     public class AMMapper : IAMapper
     {

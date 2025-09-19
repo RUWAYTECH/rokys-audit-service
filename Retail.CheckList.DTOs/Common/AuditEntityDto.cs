@@ -1,10 +1,10 @@
-﻿using Retail.CheckList.Common.Constant;
+﻿using Rokys.Audit.Common.Constant;
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.Serialization;
 using System.Security.Principal;
 
-namespace Retail.CheckList.DTOs.Common
+namespace Rokys.Audit.DTOs.Common
 {
     public class AuditEntityDto
     {

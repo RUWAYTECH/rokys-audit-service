@@ -1,6 +1,6 @@
-﻿using Retail.CheckList.Model.Tables;
+﻿using Rokys.Audit.Model.Tables;
 
-namespace Retail.CheckList.Infrastructure.IQuery
+namespace Rokys.Audit.Infrastructure.IQuery
 {
     public interface IProveedorQuery
     {

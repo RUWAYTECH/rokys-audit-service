@@ -2,20 +2,20 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Reatil.Services.Services;
-using Retail.CheckList.DTOs.Requests.Proveedor;
-using Retail.CheckList.DTOs.Responses.Common;
-using Retail.CheckList.DTOs.Responses.Proveedor;
-using Retail.CheckList.Globalization;
-using Retail.CheckList.Infrastructure.IMapping;
-using Retail.CheckList.Infrastructure.IQuery;
-using Retail.CheckList.Infrastructure.Persistence.Abstract;
-using Retail.CheckList.Infrastructure.Repositories;
-using Retail.CheckList.Model.Tables;
-using Retail.CheckList.Services.Interfaces;
-using Retail.CheckList.Services.Validations;
+using Rokys.Audit.DTOs.Requests.Proveedor;
+using Rokys.Audit.DTOs.Responses.Common;
+using Rokys.Audit.DTOs.Responses.Proveedor;
+using Rokys.Audit.Globalization;
+using Rokys.Audit.Infrastructure.IMapping;
+using Rokys.Audit.Infrastructure.IQuery;
+using Rokys.Audit.Infrastructure.Persistence.Abstract;
+using Rokys.Audit.Infrastructure.Repositories;
+using Rokys.Audit.Model.Tables;
+using Rokys.Audit.Services.Interfaces;
+using Rokys.Audit.Services.Validations;
 using System.Linq.Expressions;
 
-namespace Retail.CheckList.Services.Services
+namespace Rokys.Audit.Services.Services
 {
     public class ProveedorService : IProveedorService
     {

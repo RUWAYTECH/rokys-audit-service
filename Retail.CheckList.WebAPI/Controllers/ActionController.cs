@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Retail.CheckList.Services.Interfaces;
+using Rokys.Audit.Services.Interfaces;
 
-namespace Retail.CheckList.WebAPI.Controllers
+namespace Rokys.Audit.WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

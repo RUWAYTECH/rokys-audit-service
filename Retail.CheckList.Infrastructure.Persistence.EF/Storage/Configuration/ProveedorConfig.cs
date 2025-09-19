@@ -1,9 +1,9 @@
 ﻿using System.Reflection.Emit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Retail.CheckList.Model.Tables;
+using Rokys.Audit.Model.Tables;
 
-namespace Retail.CheckList.Infrastructure.Persistence.EF.Storage.Configuration
+namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
 {
     public class ProveedorConfig : IEntityTypeConfiguration<Proveedor>
     {

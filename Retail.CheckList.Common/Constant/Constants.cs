@@ -1,4 +1,4 @@
-﻿namespace Retail.CheckList.Common.Constant
+﻿namespace Rokys.Audit.Common.Constant
 {
     public class Constants
     {

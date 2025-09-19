@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Retail.CheckList.Infrastructure.Persistence.EF.Storage.Configuration;
+using Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration;
 
-namespace Retail.CheckList.Infrastructure.Persistence.EF.Storage
+namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
 {
     public class ApplicationDbContext : DbContext
     {

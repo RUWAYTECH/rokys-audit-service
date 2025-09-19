@@ -699,33 +699,39 @@
     ]
   },
   "packageFolders": {
-    "/Users/cristianvillegas/.nuget/packages/": {}
+    "C:\\Users\\user\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.External.Services/Retail.CheckList.External.Services.csproj",
+      "projectUniqueName": "C:\\Users\\user\\Documents\\ruway\\rokys-audit-service\\Retail.CheckList.External.Services\\Retail.CheckList.External.Services.csproj",
       "projectName": "Retail.CheckList.External.Services",
-      "projectPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.External.Services/Retail.CheckList.External.Services.csproj",
-      "packagesPath": "/Users/cristianvillegas/.nuget/packages/",
-      "outputPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.External.Services/obj/",
+      "projectPath": "C:\\Users\\user\\Documents\\ruway\\rokys-audit-service\\Retail.CheckList.External.Services\\Retail.CheckList.External.Services.csproj",
+      "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\user\\Documents\\ruway\\rokys-audit-service\\Retail.CheckList.External.Services\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "/Users/cristianvillegas/.nuget/NuGet/NuGet.Config"
+        "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net9.0"
       ],
       "sources": {
-        "/usr/local/share/dotnet/library-packs": {},
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net9.0": {
           "targetAlias": "net9.0",
           "projectReferences": {
-            "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.External.Services.Interfaces/Retail.CheckList.External.Services.Interfaces.csproj": {
-              "projectPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.External.Services.Interfaces/Retail.CheckList.External.Services.Interfaces.csproj"
+            "C:\\Users\\user\\Documents\\ruway\\rokys-audit-service\\Retail.CheckList.External.Services.Interfaces\\Retail.CheckList.External.Services.Interfaces.csproj": {
+              "projectPath": "C:\\Users\\user\\Documents\\ruway\\rokys-audit-service\\Retail.CheckList.External.Services.Interfaces\\Retail.CheckList.External.Services.Interfaces.csproj"
             }
           }
         }
@@ -771,7 +777,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.303/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.303/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

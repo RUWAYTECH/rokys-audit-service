@@ -1,11 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "MS4awFgNupg=",
+  "dgSpecHash": "LV3lgUwIvmY=",
   "success": true,
-  "projectFilePath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.DataBase/Retail.CheckList.DataBase.csproj",
-  "expectedPackageFiles": [
-    "/Users/cristianvillegas/.nuget/packages/microsoft.netcore.app.ref/6.0.36/microsoft.netcore.app.ref.6.0.36.nupkg.sha512",
-    "/Users/cristianvillegas/.nuget/packages/microsoft.aspnetcore.app.ref/6.0.36/microsoft.aspnetcore.app.ref.6.0.36.nupkg.sha512"
-  ],
+  "projectFilePath": "C:\\Users\\user\\Documents\\ruway\\rokys-audit-service\\Retail.CheckList.DataBase\\Retail.CheckList.DataBase.csproj",
+  "expectedPackageFiles": [],
   "logs": []
 }

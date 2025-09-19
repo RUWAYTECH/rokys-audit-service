@@ -7,6 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Retail.CheckList.DTOs\Retail.CheckList.DTOs.csproj" />
+    <ProjectReference Include="..\Rokys.Audit.DTOs\Rokys.Audit.DTOs.csproj" />
   </ItemGroup>
 </Project>

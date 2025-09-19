@@ -1,7 +1,7 @@
-using Retail.CheckList.DTOs.Responses.Action;
-using Retail.CheckList.Model.Tables;
+using Rokys.Audit.DTOs.Responses.Action;
+using Rokys.Audit.Model.Tables;
 
-namespace Retail.CheckList.Infrastructure.IQuery
+namespace Rokys.Audit.Infrastructure.IQuery
 {
     public interface IActionQuery: IBaseQuery<ActionResponseDto>
     {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Retail.CheckList.Model.Tables
+namespace Rokys.Audit.Model.Tables
 {
     public class AuditEntity
     {

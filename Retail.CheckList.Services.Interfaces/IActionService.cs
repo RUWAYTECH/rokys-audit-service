@@ -1,7 +1,7 @@
 using System;
-using Retail.CheckList.DTOs.Responses.Action;
+using Rokys.Audit.DTOs.Responses.Action;
 
-namespace Retail.CheckList.Services.Interfaces;
+namespace Rokys.Audit.Services.Interfaces;
 
 public interface IActionService: IBaseQueryService<ActionResponseDto>
 {

@@ -3,12 +3,12 @@ using System.Data;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using FluentValidation;
-using Retail.CheckList.Infrastructure.IMapping;
-using Retail.CheckList.Infrastructure.Mapping.AM;
-using Retail.CheckList.Services.Validations;
-using Retail.CheckList.WebAPI.DependencyInjection.Modules;
+using Rokys.Audit.Infrastructure.IMapping;
+using Rokys.Audit.Infrastructure.Mapping.AM;
+using Rokys.Audit.Services.Validations;
+using Rokys.Audit.WebAPI.DependencyInjection.Modules;
 
-namespace Retail.CheckList.WebAPI.DependencyInjection
+namespace Rokys.Audit.WebAPI.DependencyInjection
 {
     public class DependencyConfig
     {

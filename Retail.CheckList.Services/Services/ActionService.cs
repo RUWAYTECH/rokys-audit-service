@@ -1,11 +1,11 @@
 using System;
-using Retail.CheckList.DTOs.Responses.Action;
-using Retail.CheckList.DTOs.Responses.Common;
-using Retail.CheckList.Infrastructure.IMapping;
-using Retail.CheckList.Infrastructure.IQuery;
-using Retail.CheckList.Services.Interfaces;
+using Rokys.Audit.DTOs.Responses.Action;
+using Rokys.Audit.DTOs.Responses.Common;
+using Rokys.Audit.Infrastructure.IMapping;
+using Rokys.Audit.Infrastructure.IQuery;
+using Rokys.Audit.Services.Interfaces;
 
-namespace Retail.CheckList.Services.Services;
+namespace Rokys.Audit.Services.Services;
 
 public class ActionService : IActionService
 {

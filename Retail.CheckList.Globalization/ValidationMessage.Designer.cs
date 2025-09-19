@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Retail.CheckList.Globalization {
+namespace Rokys.Audit.Globalization {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace Retail.CheckList.Globalization {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Retail.CheckList.Globalization.ValidationMessage", typeof(ValidationMessage).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Rokys.Audit.Globalization.ValidationMessage", typeof(ValidationMessage).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

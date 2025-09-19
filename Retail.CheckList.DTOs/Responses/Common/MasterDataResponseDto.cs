@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Retail.CheckList.DTOs.Responses.Common
+namespace Rokys.Audit.DTOs.Responses.Common
 {
     public class MasterDataResponseDto
     {

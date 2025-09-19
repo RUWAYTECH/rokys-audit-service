@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq.Expressions;
 
-namespace Retail.CheckList.Infrastructure.Persistence.Abstract
+namespace Rokys.Audit.Infrastructure.Persistence.Abstract
 {
     public class OrderExpression<T>
     {

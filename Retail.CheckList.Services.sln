@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Retail.CheckList.WebAPI", "Retail.CheckList.WebAPI\Retail.CheckList.WebAPI.csproj", "{C5EA919D-345D-4BE2-8AB8-405B36B93144}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rokys.Audit.WebAPI", "Rokys.Audit.WebAPI\Rokys.Audit.WebAPI.csproj", "{C5EA919D-345D-4BE2-8AB8-405B36B93144}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "0. DataBase", "0. DataBase", "{EA7E3E05-AE6B-4FB0-A37D-0CBD02DCB1BA}"
 EndProject
@@ -11,7 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1. Presentation Layer", "1.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2. Application Layer", "2. Application Layer", "{7292F4D9-E591-4326-89F4-5A9A44E72D6D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Retail.CheckList.DTOs", "Retail.CheckList.DTOs\Retail.CheckList.DTOs.csproj", "{70E683F0-1AB3-44C6-800C-AD0B681AAC48}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rokys.Audit.DTOs", "Rokys.Audit.DTOs\Rokys.Audit.DTOs.csproj", "{70E683F0-1AB3-44C6-800C-AD0B681AAC48}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3. Service Layer", "3. Service Layer", "{4D6C7F8D-6C8D-4442-94E3-5F1A5F5F10D8}"
 EndProject
@@ -21,38 +21,38 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "5. Infraestructure Layer", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "6. Cross Cutting Layer", "6. Cross Cutting Layer", "{B10D9EAB-BF6E-4C73-90F1-3704A22C21BB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Retail.CheckList.Services", "Retail.CheckList.Services\Retail.CheckList.Services.csproj", "{8074FF0E-7EB6-48C1-9DBB-E30B7B613F5C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rokys.Audit.Services", "Rokys.Audit.Services\Rokys.Audit.Services.csproj", "{8074FF0E-7EB6-48C1-9DBB-E30B7B613F5C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Retail.CheckList.Services.Interfaces", "Retail.CheckList.Services.Interfaces\Retail.CheckList.Services.Interfaces.csproj", "{F13C3ED0-EDD2-4984-A8AB-EF1E50866674}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rokys.Audit.Services.Interfaces", "Rokys.Audit.Services.Interfaces\Rokys.Audit.Services.Interfaces.csproj", "{F13C3ED0-EDD2-4984-A8AB-EF1E50866674}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Retail.CheckList.Model", "Retail.CheckList.Model\Retail.CheckList.Model.csproj", "{DBC3A0A6-2A03-4495-A06B-08B9DDDFC3F4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rokys.Audit.Model", "Rokys.Audit.Model\Rokys.Audit.Model.csproj", "{DBC3A0A6-2A03-4495-A06B-08B9DDDFC3F4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Retail.CheckList.Infrastructure", "Retail.CheckList.Infrastructure\Retail.CheckList.Infrastructure.csproj", "{A1627D86-0603-4FCB-8EF4-67F61FDD8BFF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rokys.Audit.Infrastructure", "Rokys.Audit.Infrastructure\Rokys.Audit.Infrastructure.csproj", "{A1627D86-0603-4FCB-8EF4-67F61FDD8BFF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Retail.CheckList.Infrastructure.Mapping.AM", "Retail.CheckList.Infrastructure.Mapping.AM\Retail.CheckList.Infrastructure.Mapping.AM.csproj", "{3BFA658B-05C4-4EC3-A634-C9DEB8967194}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rokys.Audit.Infrastructure.Mapping.AM", "Rokys.Audit.Infrastructure.Mapping.AM\Rokys.Audit.Infrastructure.Mapping.AM.csproj", "{3BFA658B-05C4-4EC3-A634-C9DEB8967194}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Retail.CheckList.Infrastructure.Persistence", "Retail.CheckList.Infrastructure.Persistence\Retail.CheckList.Infrastructure.Persistence.csproj", "{43FDBD29-63D6-474F-BF99-FE6E088A3394}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rokys.Audit.Infrastructure.Persistence", "Rokys.Audit.Infrastructure.Persistence\Rokys.Audit.Infrastructure.Persistence.csproj", "{43FDBD29-63D6-474F-BF99-FE6E088A3394}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Retail.CheckList.Infrastructure.Persistence.EF", "Retail.CheckList.Infrastructure.Persistence.EF\Retail.CheckList.Infrastructure.Persistence.EF.csproj", "{4B900F06-9E8B-4F9A-AAF4-EB6A3C08631D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rokys.Audit.Infrastructure.Persistence.EF", "Rokys.Audit.Infrastructure.Persistence.EF\Rokys.Audit.Infrastructure.Persistence.EF.csproj", "{4B900F06-9E8B-4F9A-AAF4-EB6A3C08631D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Retail.CheckList.Common", "Retail.CheckList.Common\Retail.CheckList.Common.csproj", "{82C68B53-CF7C-4635-A5E5-E83CD819305B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rokys.Audit.Common", "Rokys.Audit.Common\Rokys.Audit.Common.csproj", "{82C68B53-CF7C-4635-A5E5-E83CD819305B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Retail.CheckList.Globalization", "Retail.CheckList.Globalization\Retail.CheckList.Globalization.csproj", "{85417AF6-50A5-4387-9F3E-5DB3E76889EC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rokys.Audit.Globalization", "Rokys.Audit.Globalization\Rokys.Audit.Globalization.csproj", "{85417AF6-50A5-4387-9F3E-5DB3E76889EC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C92BA89A-831B-4BE6-9057-12F6BC3F986C}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Retail.CheckList.DataBase", "Retail.CheckList.DataBase\Retail.CheckList.DataBase.csproj", "{8CC19201-C6DF-4206-AE9A-0C580A33D09F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rokys.Audit.DataBase", "Rokys.Audit.DataBase\Rokys.Audit.DataBase.csproj", "{8CC19201-C6DF-4206-AE9A-0C580A33D09F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "7. External services", "7. External services", "{0072268A-9495-4239-81CD-924943CC74EF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Retail.CheckList.External.Services", "Retail.CheckList.External.Services\Retail.CheckList.External.Services.csproj", "{EFD24323-5916-4D79-AFCE-0D39E666347D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rokys.Audit.External.Services", "Rokys.Audit.External.Services\Rokys.Audit.External.Services.csproj", "{EFD24323-5916-4D79-AFCE-0D39E666347D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Retail.CheckList.External.Services.Interfaces", "Retail.CheckList.External.Services.Interfaces\Retail.CheckList.External.Services.Interfaces.csproj", "{9076043D-53E9-4295-96D2-E0A590D35B91}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rokys.Audit.External.Services.Interfaces", "Rokys.Audit.External.Services.Interfaces\Rokys.Audit.External.Services.Interfaces.csproj", "{9076043D-53E9-4295-96D2-E0A590D35B91}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Retail.CheckList.Infrastructure.Persistence.Dp", "Retail.CheckList.Infrastructure.Persistence.Dp\Retail.CheckList.Infrastructure.Persistence.Dp.csproj", "{36990870-1ECA-4752-BB2B-FC65F89F0BCA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rokys.Audit.Infrastructure.Persistence.Dp", "Rokys.Audit.Infrastructure.Persistence.Dp\Rokys.Audit.Infrastructure.Persistence.Dp.csproj", "{36990870-1ECA-4752-BB2B-FC65F89F0BCA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Elementos de la solución", "Elementos de la solución", "{97063CFB-2FF9-4FAF-A968-E9AA919C8BAF}"
 	ProjectSection(SolutionItems) = preProject

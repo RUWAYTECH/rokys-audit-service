@@ -1,14 +1,14 @@
 ﻿using System.Reflection;
 using Autofac;
 using Microsoft.EntityFrameworkCore;
-using Retail.CheckList.DTOs.Common;
-using Retail.CheckList.Infrastructure.Persistence.Abstract;
-using Retail.CheckList.Infrastructure.Persistence.Dp.Query;
-using Retail.CheckList.Infrastructure.Persistence.EF;
-using Retail.CheckList.Infrastructure.Persistence.EF.Repositories;
-using Retail.CheckList.Infrastructure.Persistence.EF.Storage;
+using Rokys.Audit.DTOs.Common;
+using Rokys.Audit.Infrastructure.Persistence.Abstract;
+using Rokys.Audit.Infrastructure.Persistence.Dp.Query;
+using Rokys.Audit.Infrastructure.Persistence.EF;
+using Rokys.Audit.Infrastructure.Persistence.EF.Repositories;
+using Rokys.Audit.Infrastructure.Persistence.EF.Storage;
 
-namespace Retail.CheckList.WebAPI.DependencyInjection.Modules
+namespace Rokys.Audit.WebAPI.DependencyInjection.Modules
 {
     public class InfrastructureModule : Autofac.Module
     {

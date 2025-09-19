@@ -1,4 +1,4 @@
-﻿namespace Retail.CheckList.DTOs.Common
+﻿namespace Rokys.Audit.DTOs.Common
 {
     public class ProveedorDto
     {

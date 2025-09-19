@@ -1,6 +1,6 @@
-using Retail.CheckList.DTOs.Responses.Common;
+using Rokys.Audit.DTOs.Responses.Common;
 
-namespace Retail.CheckList.DTOs.Responses.Action
+namespace Rokys.Audit.DTOs.Responses.Action
 {
     public class ActionResponseDto: MasterDataResponseDto
     {

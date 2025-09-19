@@ -1,8 +1,8 @@
 ﻿using System.Reflection;
 using Autofac;
-using Retail.CheckList.Services.Services;
+using Rokys.Audit.Services.Services;
 
-namespace Retail.CheckList.WebAPI.DependencyInjection.Modules
+namespace Rokys.Audit.WebAPI.DependencyInjection.Modules
 {
     public class ApplicationServicesModule : Autofac.Module
     {

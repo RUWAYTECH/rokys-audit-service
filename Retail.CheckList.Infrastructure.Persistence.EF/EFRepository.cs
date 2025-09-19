@@ -1,9 +1,9 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-using Retail.CheckList.Infrastructure.Persistence.Abstract;
-using Retail.CheckList.Infrastructure.Persistence.EF.Storage;
+using Rokys.Audit.Infrastructure.Persistence.Abstract;
+using Rokys.Audit.Infrastructure.Persistence.EF.Storage;
 
-namespace Retail.CheckList.Infrastructure.Persistence.EF
+namespace Rokys.Audit.Infrastructure.Persistence.EF
 {
     public class EFRepository<TEntity> : IRepository<TEntity> where TEntity : class
     {

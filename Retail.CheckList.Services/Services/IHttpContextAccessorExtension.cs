@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Retail.CheckList.Common.Constant;
-using Retail.CheckList.DTOs.Responses.User;
+using Rokys.Audit.Common.Constant;
+using Rokys.Audit.DTOs.Responses.User;
 
 namespace Reatil.Services.Services
 {

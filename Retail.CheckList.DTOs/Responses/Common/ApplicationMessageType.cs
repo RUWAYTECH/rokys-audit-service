@@ -1,4 +1,4 @@
-﻿namespace Retail.CheckList.DTOs.Responses.Common
+﻿namespace Rokys.Audit.DTOs.Responses.Common
 {
     public enum ApplicationMessageType
     {

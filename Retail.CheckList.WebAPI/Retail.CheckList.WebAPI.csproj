@@ -35,20 +35,20 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Retail.CheckList.DTOs\Retail.CheckList.DTOs.csproj" />
-    <ProjectReference Include="..\Retail.CheckList.Infrastructure.Mapping.AM\Retail.CheckList.Infrastructure.Mapping.AM.csproj" />
-    <ProjectReference Include="..\Retail.CheckList.Infrastructure.Persistence.Dp\Retail.CheckList.Infrastructure.Persistence.Dp.csproj" />
-    <ProjectReference Include="..\Retail.CheckList.Infrastructure.Persistence.EF\Retail.CheckList.Infrastructure.Persistence.EF.csproj" />
-    <ProjectReference Include="..\Retail.CheckList.Infrastructure\Retail.CheckList.Infrastructure.csproj" />
-    <ProjectReference Include="..\Retail.CheckList.Services.Interfaces\Retail.CheckList.Services.Interfaces.csproj" />
-    <ProjectReference Include="..\Retail.CheckList.Services\Retail.CheckList.Services.csproj" />
-    <ProjectReference Include="..\Retail.CheckList.External.Services.Interfaces\Retail.CheckList.External.Services.Interfaces.csproj">
+    <ProjectReference Include="..\Rokys.Audit.DTOs\Rokys.Audit.DTOs.csproj" />
+    <ProjectReference Include="..\Rokys.Audit.Infrastructure.Mapping.AM\Rokys.Audit.Infrastructure.Mapping.AM.csproj" />
+    <ProjectReference Include="..\Rokys.Audit.Infrastructure.Persistence.Dp\Rokys.Audit.Infrastructure.Persistence.Dp.csproj" />
+    <ProjectReference Include="..\Rokys.Audit.Infrastructure.Persistence.EF\Rokys.Audit.Infrastructure.Persistence.EF.csproj" />
+    <ProjectReference Include="..\Rokys.Audit.Infrastructure\Rokys.Audit.Infrastructure.csproj" />
+    <ProjectReference Include="..\Rokys.Audit.Services.Interfaces\Rokys.Audit.Services.Interfaces.csproj" />
+    <ProjectReference Include="..\Rokys.Audit.Services\Rokys.Audit.Services.csproj" />
+    <ProjectReference Include="..\Rokys.Audit.External.Services.Interfaces\Rokys.Audit.External.Services.Interfaces.csproj">
       <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
     </ProjectReference>
-    <ProjectReference Include="..\Retail.CheckList.External.Services\Retail.CheckList.External.Services.csproj">
+    <ProjectReference Include="..\Rokys.Audit.External.Services\Rokys.Audit.External.Services.csproj">
       <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
     </ProjectReference>
-    <ProjectReference Include="..\Retail.CheckList.Globalization\Retail.CheckList.Globalization.csproj">
+    <ProjectReference Include="..\Rokys.Audit.Globalization\Rokys.Audit.Globalization.csproj">
       <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
     </ProjectReference>
   </ItemGroup>

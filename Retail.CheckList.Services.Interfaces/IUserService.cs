@@ -1,8 +1,8 @@
-﻿using Retail.CheckList.DTOs.Requests.User;
-using Retail.CheckList.DTOs.Responses.Common;
-using Retail.CheckList.DTOs.Responses.User;
+﻿using Rokys.Audit.DTOs.Requests.User;
+using Rokys.Audit.DTOs.Responses.Common;
+using Rokys.Audit.DTOs.Responses.User;
 
-namespace Retail.CheckList.Services.Interfaces
+namespace Rokys.Audit.Services.Interfaces
 {
     public interface IUserService
     {

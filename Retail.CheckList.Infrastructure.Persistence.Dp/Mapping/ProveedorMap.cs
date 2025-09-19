@@ -1,7 +1,7 @@
 ﻿using Dapper.FluentMap.Mapping;
-using Retail.CheckList.DTOs.Responses.Proveedor;
+using Rokys.Audit.DTOs.Responses.Proveedor;
 
-namespace Retail.CheckList.Infrastructure.Persistence.Dp.Mapping
+namespace Rokys.Audit.Infrastructure.Persistence.Dp.Mapping
 {
     public class ProveedorMap : EntityMap<ProveedorResponseDto>
     {

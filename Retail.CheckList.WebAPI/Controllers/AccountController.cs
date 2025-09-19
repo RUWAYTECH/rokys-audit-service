@@ -1,17 +1,17 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using Retail.CheckList.Common.Constant;
-using Retail.CheckList.DTOs.Common;
-using Retail.CheckList.DTOs.Requests.User;
-using Retail.CheckList.DTOs.Responses.Common;
-using Retail.CheckList.DTOs.Responses.User;
-using Retail.CheckList.Services.Interfaces;
+using Rokys.Audit.Common.Constant;
+using Rokys.Audit.DTOs.Common;
+using Rokys.Audit.DTOs.Requests.User;
+using Rokys.Audit.DTOs.Responses.Common;
+using Rokys.Audit.DTOs.Responses.User;
+using Rokys.Audit.Services.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace Retail.CheckList.WebAPI.Controllers
+namespace Rokys.Audit.WebAPI.Controllers
 {
     [Route("api/accounts")]
     [ApiController]

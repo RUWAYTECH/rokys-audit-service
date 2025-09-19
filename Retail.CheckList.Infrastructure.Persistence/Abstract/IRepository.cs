@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Retail.CheckList.Infrastructure.Persistence.Abstract
+namespace Rokys.Audit.Infrastructure.Persistence.Abstract
 {
     public interface IRepository<TEntity> : IDisposable where TEntity : class
     {

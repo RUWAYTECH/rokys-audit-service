@@ -1,8 +1,8 @@
 using System;
 using Dapper.FluentMap.Mapping;
-using Retail.CheckList.DTOs.Responses.Action;
+using Rokys.Audit.DTOs.Responses.Action;
 
-namespace Retail.CheckList.Infrastructure.Persistence.Dp.Mapping;
+namespace Rokys.Audit.Infrastructure.Persistence.Dp.Mapping;
 
 public class ActionMap : EntityMap<ActionResponseDto>
 {

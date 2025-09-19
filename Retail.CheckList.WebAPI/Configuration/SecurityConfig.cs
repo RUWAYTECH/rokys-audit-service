@@ -2,7 +2,7 @@
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-namespace Retail.CheckList.WebAPI.Configuration
+namespace Rokys.Audit.WebAPI.Configuration
 {
     public static class SecurityConfig
     {

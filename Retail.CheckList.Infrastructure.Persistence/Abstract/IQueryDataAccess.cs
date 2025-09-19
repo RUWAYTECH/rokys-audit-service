@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace Retail.CheckList.Infrastructure.Persistence.Abstract
+namespace Rokys.Audit.Infrastructure.Persistence.Abstract
 {
     public interface IQueryDataAccess<T> where T : class
     {

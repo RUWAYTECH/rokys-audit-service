@@ -9,7 +9,7 @@
     }
   },
   "profiles": {
-    "Retail.CheckList.WebAPI": {
+    "Rokys.Audit.WebAPI": {
       "commandName": "Project",
       "launchBrowser": true,
       "applicationUrl": "http://localhost:5209",

@@ -6905,60 +6905,66 @@
     ]
   },
   "packageFolders": {
-    "/Users/cristianvillegas/.nuget/packages/": {}
+    "C:\\Users\\user\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.WebAPI/Retail.CheckList.WebAPI.csproj",
+      "projectUniqueName": "C:\\Users\\user\\Documents\\ruway\\rokys-audit-service\\Retail.CheckList.WebAPI\\Retail.CheckList.WebAPI.csproj",
       "projectName": "Retail.CheckList.WebAPI",
-      "projectPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.WebAPI/Retail.CheckList.WebAPI.csproj",
-      "packagesPath": "/Users/cristianvillegas/.nuget/packages/",
-      "outputPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.WebAPI/obj/",
+      "projectPath": "C:\\Users\\user\\Documents\\ruway\\rokys-audit-service\\Retail.CheckList.WebAPI\\Retail.CheckList.WebAPI.csproj",
+      "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\user\\Documents\\ruway\\rokys-audit-service\\Retail.CheckList.WebAPI\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "/Users/cristianvillegas/.nuget/NuGet/NuGet.Config"
+        "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net9.0"
       ],
       "sources": {
-        "/usr/local/share/dotnet/library-packs": {},
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net9.0": {
           "targetAlias": "net9.0",
           "projectReferences": {
-            "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.DTOs/Retail.CheckList.DTOs.csproj": {
-              "projectPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.DTOs/Retail.CheckList.DTOs.csproj"
+            "C:\\Users\\user\\Documents\\ruway\\rokys-audit-service\\Retail.CheckList.DTOs\\Retail.CheckList.DTOs.csproj": {
+              "projectPath": "C:\\Users\\user\\Documents\\ruway\\rokys-audit-service\\Retail.CheckList.DTOs\\Retail.CheckList.DTOs.csproj"
             },
-            "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.External.Services.Interfaces/Retail.CheckList.External.Services.Interfaces.csproj": {
-              "projectPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.External.Services.Interfaces/Retail.CheckList.External.Services.Interfaces.csproj"
+            "C:\\Users\\user\\Documents\\ruway\\rokys-audit-service\\Retail.CheckList.External.Services.Interfaces\\Retail.CheckList.External.Services.Interfaces.csproj": {
+              "projectPath": "C:\\Users\\user\\Documents\\ruway\\rokys-audit-service\\Retail.CheckList.External.Services.Interfaces\\Retail.CheckList.External.Services.Interfaces.csproj"
             },
-            "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.External.Services/Retail.CheckList.External.Services.csproj": {
-              "projectPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.External.Services/Retail.CheckList.External.Services.csproj"
+            "C:\\Users\\user\\Documents\\ruway\\rokys-audit-service\\Retail.CheckList.External.Services\\Retail.CheckList.External.Services.csproj": {
+              "projectPath": "C:\\Users\\user\\Documents\\ruway\\rokys-audit-service\\Retail.CheckList.External.Services\\Retail.CheckList.External.Services.csproj"
             },
-            "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Globalization/Retail.CheckList.Globalization.csproj": {
-              "projectPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Globalization/Retail.CheckList.Globalization.csproj"
+            "C:\\Users\\user\\Documents\\ruway\\rokys-audit-service\\Retail.CheckList.Globalization\\Retail.CheckList.Globalization.csproj": {
+              "projectPath": "C:\\Users\\user\\Documents\\ruway\\rokys-audit-service\\Retail.CheckList.Globalization\\Retail.CheckList.Globalization.csproj"
             },
-            "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Infrastructure.Mapping.AM/Retail.CheckList.Infrastructure.Mapping.AM.csproj": {
-              "projectPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Infrastructure.Mapping.AM/Retail.CheckList.Infrastructure.Mapping.AM.csproj"
+            "C:\\Users\\user\\Documents\\ruway\\rokys-audit-service\\Retail.CheckList.Infrastructure.Mapping.AM\\Retail.CheckList.Infrastructure.Mapping.AM.csproj": {
+              "projectPath": "C:\\Users\\user\\Documents\\ruway\\rokys-audit-service\\Retail.CheckList.Infrastructure.Mapping.AM\\Retail.CheckList.Infrastructure.Mapping.AM.csproj"
             },
-            "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Infrastructure.Persistence.Dp/Retail.CheckList.Infrastructure.Persistence.Dp.csproj": {
-              "projectPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Infrastructure.Persistence.Dp/Retail.CheckList.Infrastructure.Persistence.Dp.csproj"
+            "C:\\Users\\user\\Documents\\ruway\\rokys-audit-service\\Retail.CheckList.Infrastructure.Persistence.Dp\\Retail.CheckList.Infrastructure.Persistence.Dp.csproj": {
+              "projectPath": "C:\\Users\\user\\Documents\\ruway\\rokys-audit-service\\Retail.CheckList.Infrastructure.Persistence.Dp\\Retail.CheckList.Infrastructure.Persistence.Dp.csproj"
             },
-            "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Infrastructure.Persistence.EF/Retail.CheckList.Infrastructure.Persistence.EF.csproj": {
-              "projectPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Infrastructure.Persistence.EF/Retail.CheckList.Infrastructure.Persistence.EF.csproj"
+            "C:\\Users\\user\\Documents\\ruway\\rokys-audit-service\\Retail.CheckList.Infrastructure.Persistence.EF\\Retail.CheckList.Infrastructure.Persistence.EF.csproj": {
+              "projectPath": "C:\\Users\\user\\Documents\\ruway\\rokys-audit-service\\Retail.CheckList.Infrastructure.Persistence.EF\\Retail.CheckList.Infrastructure.Persistence.EF.csproj"
             },
-            "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Infrastructure/Retail.CheckList.Infrastructure.csproj": {
-              "projectPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Infrastructure/Retail.CheckList.Infrastructure.csproj"
+            "C:\\Users\\user\\Documents\\ruway\\rokys-audit-service\\Retail.CheckList.Infrastructure\\Retail.CheckList.Infrastructure.csproj": {
+              "projectPath": "C:\\Users\\user\\Documents\\ruway\\rokys-audit-service\\Retail.CheckList.Infrastructure\\Retail.CheckList.Infrastructure.csproj"
             },
-            "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Services.Interfaces/Retail.CheckList.Services.Interfaces.csproj": {
-              "projectPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Services.Interfaces/Retail.CheckList.Services.Interfaces.csproj"
+            "C:\\Users\\user\\Documents\\ruway\\rokys-audit-service\\Retail.CheckList.Services.Interfaces\\Retail.CheckList.Services.Interfaces.csproj": {
+              "projectPath": "C:\\Users\\user\\Documents\\ruway\\rokys-audit-service\\Retail.CheckList.Services.Interfaces\\Retail.CheckList.Services.Interfaces.csproj"
             },
-            "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Services/Retail.CheckList.Services.csproj": {
-              "projectPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Services/Retail.CheckList.Services.csproj"
+            "C:\\Users\\user\\Documents\\ruway\\rokys-audit-service\\Retail.CheckList.Services\\Retail.CheckList.Services.csproj": {
+              "projectPath": "C:\\Users\\user\\Documents\\ruway\\rokys-audit-service\\Retail.CheckList.Services\\Retail.CheckList.Services.csproj"
             }
           }
         }
@@ -7059,7 +7065,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.303/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.303/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

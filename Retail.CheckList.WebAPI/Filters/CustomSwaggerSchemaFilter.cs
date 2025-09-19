@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace Retail.CheckList.WebAPI.Filters
+namespace Rokys.Audit.WebAPI.Filters
 {
 	public class CustomSwaggerSchemaFilter: ISchemaFilter
     {

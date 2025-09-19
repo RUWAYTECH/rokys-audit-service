@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 
-namespace Retail.CheckList.WebAPI
+namespace Rokys.Audit.WebAPI
 {
     public class Program
     {

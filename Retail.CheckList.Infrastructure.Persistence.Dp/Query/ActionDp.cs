@@ -1,11 +1,11 @@
 using System.Data;
 using Dapper;
-using Retail.CheckList.DTOs.Responses.Action;
-using Retail.CheckList.DTOs.Responses.Common;
-using Retail.CheckList.Infrastructure.IQuery;
-using Retail.CheckList.Model.Tables;
+using Rokys.Audit.DTOs.Responses.Action;
+using Rokys.Audit.DTOs.Responses.Common;
+using Rokys.Audit.Infrastructure.IQuery;
+using Rokys.Audit.Model.Tables;
 
-namespace Retail.CheckList.Infrastructure.Persistence.Dp.Query
+namespace Rokys.Audit.Infrastructure.Persistence.Dp.Query
 {
     public class ActionDp : IActionQuery
     {

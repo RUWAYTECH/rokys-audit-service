@@ -1,5 +1,5 @@
 ﻿using System;
-namespace Retail.CheckList.DTOs.Responses.User
+namespace Rokys.Audit.DTOs.Responses.User
 {
 	public class PermissionResponseDto
 	{

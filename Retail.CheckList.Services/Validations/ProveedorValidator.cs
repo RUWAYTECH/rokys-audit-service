@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
-using Retail.CheckList.DTOs.Requests.Proveedor;
+using Rokys.Audit.DTOs.Requests.Proveedor;
 
-namespace Retail.CheckList.Services.Validations
+namespace Rokys.Audit.Services.Validations
 {
     public class ProveedorValidator: AbstractValidator<ProveedorRequestDto>
     {

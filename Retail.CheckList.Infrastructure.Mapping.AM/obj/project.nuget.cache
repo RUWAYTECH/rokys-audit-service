@@ -1,18 +1,18 @@
 {
   "version": 2,
-  "dgSpecHash": "3Q+F6SwKDLE=",
+  "dgSpecHash": "z5bqPCMY/zo=",
   "success": true,
-  "projectFilePath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Infrastructure.Mapping.AM/Retail.CheckList.Infrastructure.Mapping.AM.csproj",
+  "projectFilePath": "C:\\Users\\user\\Documents\\ruway\\rokys-audit-service\\Retail.CheckList.Infrastructure.Mapping.AM\\Retail.CheckList.Infrastructure.Mapping.AM.csproj",
   "expectedPackageFiles": [
-    "/Users/cristianvillegas/.nuget/packages/automapper/10.0.0/automapper.10.0.0.nupkg.sha512",
-    "/Users/cristianvillegas/.nuget/packages/microsoft.aspnetcore.http.features/5.0.17/microsoft.aspnetcore.http.features.5.0.17.nupkg.sha512",
-    "/Users/cristianvillegas/.nuget/packages/microsoft.csharp/4.7.0/microsoft.csharp.4.7.0.nupkg.sha512",
-    "/Users/cristianvillegas/.nuget/packages/microsoft.extensions.primitives/5.0.1/microsoft.extensions.primitives.5.0.1.nupkg.sha512",
-    "/Users/cristianvillegas/.nuget/packages/microsoft.netcore.platforms/1.1.1/microsoft.netcore.platforms.1.1.1.nupkg.sha512",
-    "/Users/cristianvillegas/.nuget/packages/microsoft.netcore.targets/1.1.3/microsoft.netcore.targets.1.1.3.nupkg.sha512",
-    "/Users/cristianvillegas/.nuget/packages/system.io.pipelines/5.0.2/system.io.pipelines.5.0.2.nupkg.sha512",
-    "/Users/cristianvillegas/.nuget/packages/system.reflection.emit/4.7.0/system.reflection.emit.4.7.0.nupkg.sha512",
-    "/Users/cristianvillegas/.nuget/packages/system.runtime/4.3.1/system.runtime.4.3.1.nupkg.sha512"
+    "C:\\Users\\user\\.nuget\\packages\\automapper\\10.0.0\\automapper.10.0.0.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\microsoft.aspnetcore.http.features\\5.0.17\\microsoft.aspnetcore.http.features.5.0.17.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\microsoft.csharp\\4.7.0\\microsoft.csharp.4.7.0.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\microsoft.extensions.primitives\\5.0.1\\microsoft.extensions.primitives.5.0.1.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\microsoft.netcore.platforms\\1.1.1\\microsoft.netcore.platforms.1.1.1.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\microsoft.netcore.targets\\1.1.3\\microsoft.netcore.targets.1.1.3.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\system.io.pipelines\\5.0.2\\system.io.pipelines.5.0.2.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\system.reflection.emit\\4.7.0\\system.reflection.emit.4.7.0.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\system.runtime\\4.3.1\\system.runtime.4.3.1.nupkg.sha512"
   ],
   "logs": []
 }

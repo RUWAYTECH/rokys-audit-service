@@ -1,7 +1,7 @@
 ﻿using Dapper.FluentMap;
-using Retail.CheckList.Infrastructure.Persistence.Dp.Mapping;
+using Rokys.Audit.Infrastructure.Persistence.Dp.Mapping;
 
-namespace Retail.CheckList.Infrastructure.Persistence.Dp
+namespace Rokys.Audit.Infrastructure.Persistence.Dp
 {
     public class ContextDp
     {

@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "VzMEuVfGcDc=",
+  "dgSpecHash": "MCsNh7dZEZ8=",
   "success": true,
-  "projectFilePath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.DTOs/Retail.CheckList.DTOs.csproj",
+  "projectFilePath": "C:\\Users\\user\\Documents\\ruway\\rokys-audit-service\\Retail.CheckList.DTOs\\Retail.CheckList.DTOs.csproj",
   "expectedPackageFiles": [
-    "/Users/cristianvillegas/.nuget/packages/microsoft.aspnetcore.http.features/5.0.17/microsoft.aspnetcore.http.features.5.0.17.nupkg.sha512",
-    "/Users/cristianvillegas/.nuget/packages/microsoft.extensions.primitives/5.0.1/microsoft.extensions.primitives.5.0.1.nupkg.sha512",
-    "/Users/cristianvillegas/.nuget/packages/system.io.pipelines/5.0.2/system.io.pipelines.5.0.2.nupkg.sha512"
+    "C:\\Users\\user\\.nuget\\packages\\microsoft.aspnetcore.http.features\\5.0.17\\microsoft.aspnetcore.http.features.5.0.17.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\microsoft.extensions.primitives\\5.0.1\\microsoft.extensions.primitives.5.0.1.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\system.io.pipelines\\5.0.2\\system.io.pipelines.5.0.2.nupkg.sha512"
   ],
   "logs": []
 }

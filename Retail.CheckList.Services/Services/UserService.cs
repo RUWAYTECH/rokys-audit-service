@@ -1,10 +1,10 @@
-﻿using Retail.CheckList.DTOs.Common;
-using Retail.CheckList.DTOs.Requests.User;
-using Retail.CheckList.DTOs.Responses.Common;
-using Retail.CheckList.DTOs.Responses.User;
-using Retail.CheckList.Services.Interfaces;
+﻿using Rokys.Audit.DTOs.Common;
+using Rokys.Audit.DTOs.Requests.User;
+using Rokys.Audit.DTOs.Responses.Common;
+using Rokys.Audit.DTOs.Responses.User;
+using Rokys.Audit.Services.Interfaces;
 
-namespace Retail.CheckList.Services.Services
+namespace Rokys.Audit.Services.Services
 {
     public class UserService: IUserService
     {

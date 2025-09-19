@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Retail.CheckList.DTOs.Requests.Proveedor;
-using Retail.CheckList.Services.Interfaces;
-using Retail.CheckList.WebAPI.Configuration;
+using Rokys.Audit.DTOs.Requests.Proveedor;
+using Rokys.Audit.Services.Interfaces;
+using Rokys.Audit.WebAPI.Configuration;
 
-namespace Retail.CheckList.WebAPI.Controllers
+namespace Rokys.Audit.WebAPI.Controllers
 {
     [Authorize]
     [ApiController]

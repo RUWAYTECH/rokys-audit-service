@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Retail.CheckList.Common\Retail.CheckList.Common.csproj" />
+    <ProjectReference Include="..\Rokys.Audit.Common\Rokys.Audit.Common.csproj" />
     <Folder Include="Requests\Common\" />
     <Folder Include="Responses\User\" />
   </ItemGroup>

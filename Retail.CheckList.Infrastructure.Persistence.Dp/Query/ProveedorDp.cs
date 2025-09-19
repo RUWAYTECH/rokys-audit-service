@@ -1,9 +1,9 @@
 ﻿using Dapper;
-using Retail.CheckList.Model.Tables;
+using Rokys.Audit.Model.Tables;
 using System.Data;
-using Retail.CheckList.Infrastructure.IQuery;
+using Rokys.Audit.Infrastructure.IQuery;
 
-namespace Retail.CheckList.Infrastructure.Persistence.Dp.Query
+namespace Rokys.Audit.Infrastructure.Persistence.Dp.Query
 {
     
     public class ProveedorDp: IProveedorQuery

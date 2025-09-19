@@ -1,8 +1,8 @@
-﻿using Retail.CheckList.DTOs.Requests.Proveedor;
-using Retail.CheckList.DTOs.Responses.Common;
-using Retail.CheckList.DTOs.Responses.Proveedor;
+﻿using Rokys.Audit.DTOs.Requests.Proveedor;
+using Rokys.Audit.DTOs.Responses.Common;
+using Rokys.Audit.DTOs.Responses.Proveedor;
 
-namespace Retail.CheckList.Services.Interfaces
+namespace Rokys.Audit.Services.Interfaces
 {
     public interface IProveedorService: IBaseService<ProveedorRequestDto, ProveedorResponseDto>
     {

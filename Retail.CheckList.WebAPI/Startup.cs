@@ -1,15 +1,15 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using Retail.CheckList.Infrastructure.Mapping.AM;
-using Retail.CheckList.Infrastructure.Persistence.Dp;
-using Retail.CheckList.Infrastructure.Persistence.EF.Storage;
-using Retail.CheckList.WebAPI.Configuration;
-using Retail.CheckList.WebAPI.DependencyInjection;
-using Retail.CheckList.WebAPI.Filters;
+using Rokys.Audit.Infrastructure.Mapping.AM;
+using Rokys.Audit.Infrastructure.Persistence.Dp;
+using Rokys.Audit.Infrastructure.Persistence.EF.Storage;
+using Rokys.Audit.WebAPI.Configuration;
+using Rokys.Audit.WebAPI.DependencyInjection;
+using Rokys.Audit.WebAPI.Filters;
 using System.Data;
 
-namespace Retail.CheckList.WebAPI
+namespace Rokys.Audit.WebAPI
 {
     public class Startup
     {

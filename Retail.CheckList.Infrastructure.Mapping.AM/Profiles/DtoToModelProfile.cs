@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
-using Retail.CheckList.DTOs.Requests.Proveedor;
-using Retail.CheckList.Model.Tables;
+using Rokys.Audit.DTOs.Requests.Proveedor;
+using Rokys.Audit.Model.Tables;
 
-namespace Retail.CheckList.Infrastructure.Mapping.AM.Profiles
+namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
 {
     public class DtoToModelProfile : Profile
     {

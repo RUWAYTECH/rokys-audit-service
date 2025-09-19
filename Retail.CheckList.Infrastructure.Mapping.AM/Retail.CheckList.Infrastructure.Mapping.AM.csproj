@@ -11,8 +11,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Retail.CheckList.DTOs\Retail.CheckList.DTOs.csproj" />
-    <ProjectReference Include="..\Retail.CheckList.Infrastructure\Retail.CheckList.Infrastructure.csproj" />
+    <ProjectReference Include="..\Rokys.Audit.DTOs\Rokys.Audit.DTOs.csproj" />
+    <ProjectReference Include="..\Rokys.Audit.Infrastructure\Rokys.Audit.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

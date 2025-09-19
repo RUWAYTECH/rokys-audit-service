@@ -1,6 +1,6 @@
-﻿using Retail.CheckList.DTOs.Responses.Common;
+﻿using Rokys.Audit.DTOs.Responses.Common;
 
-namespace Retail.CheckList.Services.Interfaces
+namespace Rokys.Audit.Services.Interfaces
 {
     public interface IBaseService<TRequest, TResponse>
     {

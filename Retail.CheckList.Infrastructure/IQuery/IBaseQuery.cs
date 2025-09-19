@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Retail.CheckList.DTOs.Responses.Common;
+using Rokys.Audit.DTOs.Responses.Common;
 
-namespace Retail.CheckList.Infrastructure.IQuery
+namespace Rokys.Audit.Infrastructure.IQuery
 {
     public interface IBaseQuery<TResponse>
     {

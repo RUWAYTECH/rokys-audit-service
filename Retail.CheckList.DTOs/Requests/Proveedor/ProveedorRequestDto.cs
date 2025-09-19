@@ -1,6 +1,6 @@
-﻿using Retail.CheckList.DTOs.Common;
+﻿using Rokys.Audit.DTOs.Common;
 
-namespace Retail.CheckList.DTOs.Requests.Proveedor
+namespace Rokys.Audit.DTOs.Requests.Proveedor
 {
     public class ProveedorRequestDto: ProveedorDto
     {
