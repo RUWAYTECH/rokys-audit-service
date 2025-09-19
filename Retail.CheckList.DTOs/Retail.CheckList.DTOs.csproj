@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+  <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Requests\Common\**" />
+    <EmbeddedResource Remove="Requests\Common\**" />
+    <None Remove="Requests\Common\**" />
+    <None Remove="Responses\UserOca\" />
+    <None Remove="Responses\CentroCosto\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Retail.CheckList.Common\Retail.CheckList.Common.csproj" />
+    <Folder Include="Requests\Common\" />
+    <Folder Include="Responses\User\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Responses\User\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
+  </ItemGroup>
+</Project>

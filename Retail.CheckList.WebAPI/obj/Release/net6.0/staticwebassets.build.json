@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "PXtxQdSP472napBHvd9L/FsUuISUmB+PZgZumd3URLE=",
+  "Source": "Retail.CheckList.WebAPI",
+  "BasePath": "_content/Retail.CheckList.WebAPI",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

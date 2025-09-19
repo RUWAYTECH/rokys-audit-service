@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+  <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Procedure/Checklist_sp_ListarAccion.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Procedure/Checklist_sp_ListarAccion.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Index\" />
+    <Folder Include="Init\" />
+    <Folder Include="Inserts\" />
+    <Folder Include="Table\" />
+    <Folder Include="Procedure\" />
+  </ItemGroup>
+
+</Project>

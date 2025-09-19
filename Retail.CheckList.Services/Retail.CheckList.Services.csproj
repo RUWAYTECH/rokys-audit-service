@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+  <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="11.4.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Retail.CheckList.Globalization\Retail.CheckList.Globalization.csproj" />
+    <ProjectReference Include="..\Retail.CheckList.Infrastructure\Retail.CheckList.Infrastructure.csproj" />
+    <ProjectReference Include="..\Retail.CheckList.Services.Interfaces\Retail.CheckList.Services.Interfaces.csproj" />
+    <ProjectReference Include="..\Retail.CheckList.External.Services.Interfaces\Retail.CheckList.External.Services.Interfaces.csproj" />
+  </ItemGroup>
+
+</Project>

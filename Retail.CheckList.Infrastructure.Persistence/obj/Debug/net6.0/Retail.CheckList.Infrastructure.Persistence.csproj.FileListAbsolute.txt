@@ -1,0 +1,12 @@
+/Applications/Ruwaytech/retail-check-list-service/Retail.CheckList.Infrastructure.Persistence/bin/Debug/net6.0/Retail.CheckList.Infrastructure.Persistence.deps.json
+/Applications/Ruwaytech/retail-check-list-service/Retail.CheckList.Infrastructure.Persistence/bin/Debug/net6.0/Retail.CheckList.Infrastructure.Persistence.dll
+/Applications/Ruwaytech/retail-check-list-service/Retail.CheckList.Infrastructure.Persistence/bin/Debug/net6.0/Retail.CheckList.Infrastructure.Persistence.pdb
+/Applications/Ruwaytech/retail-check-list-service/Retail.CheckList.Infrastructure.Persistence/obj/Debug/net6.0/Retail.CheckList.Infrastructure.Persistence.GeneratedMSBuildEditorConfig.editorconfig
+/Applications/Ruwaytech/retail-check-list-service/Retail.CheckList.Infrastructure.Persistence/obj/Debug/net6.0/Retail.CheckList.Infrastructure.Persistence.AssemblyInfoInputs.cache
+/Applications/Ruwaytech/retail-check-list-service/Retail.CheckList.Infrastructure.Persistence/obj/Debug/net6.0/Retail.CheckList.Infrastructure.Persistence.AssemblyInfo.cs
+/Applications/Ruwaytech/retail-check-list-service/Retail.CheckList.Infrastructure.Persistence/obj/Debug/net6.0/Retail.CheckList.Infrastructure.Persistence.csproj.CoreCompileInputs.cache
+/Applications/Ruwaytech/retail-check-list-service/Retail.CheckList.Infrastructure.Persistence/obj/Debug/net6.0/Retail.CheckList.Infrastructure.Persistence.sourcelink.json
+/Applications/Ruwaytech/retail-check-list-service/Retail.CheckList.Infrastructure.Persistence/obj/Debug/net6.0/Retail.CheckList.Infrastructure.Persistence.dll
+/Applications/Ruwaytech/retail-check-list-service/Retail.CheckList.Infrastructure.Persistence/obj/Debug/net6.0/refint/Retail.CheckList.Infrastructure.Persistence.dll
+/Applications/Ruwaytech/retail-check-list-service/Retail.CheckList.Infrastructure.Persistence/obj/Debug/net6.0/Retail.CheckList.Infrastructure.Persistence.pdb
+/Applications/Ruwaytech/retail-check-list-service/Retail.CheckList.Infrastructure.Persistence/obj/Debug/net6.0/ref/Retail.CheckList.Infrastructure.Persistence.dll

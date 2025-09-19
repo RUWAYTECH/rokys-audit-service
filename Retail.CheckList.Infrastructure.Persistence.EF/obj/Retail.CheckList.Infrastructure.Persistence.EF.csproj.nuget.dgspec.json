@@ -1,0 +1,414 @@
+{
+  "format": 1,
+  "restore": {
+    "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Infrastructure.Persistence.EF/Retail.CheckList.Infrastructure.Persistence.EF.csproj": {}
+  },
+  "projects": {
+    "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Common/Retail.CheckList.Common.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Common/Retail.CheckList.Common.csproj",
+        "projectName": "Retail.CheckList.Common",
+        "projectPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Common/Retail.CheckList.Common.csproj",
+        "packagesPath": "/Users/cristianvillegas/.nuget/packages/",
+        "outputPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Common/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/cristianvillegas/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0"
+        ],
+        "sources": {
+          "/usr/local/share/dotnet/library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0": {
+            "targetAlias": "net9.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net9.0": {
+          "targetAlias": "net9.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.303/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.DTOs/Retail.CheckList.DTOs.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.DTOs/Retail.CheckList.DTOs.csproj",
+        "projectName": "Retail.CheckList.DTOs",
+        "projectPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.DTOs/Retail.CheckList.DTOs.csproj",
+        "packagesPath": "/Users/cristianvillegas/.nuget/packages/",
+        "outputPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.DTOs/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/cristianvillegas/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0"
+        ],
+        "sources": {
+          "/usr/local/share/dotnet/library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0": {
+            "targetAlias": "net9.0",
+            "projectReferences": {
+              "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Common/Retail.CheckList.Common.csproj": {
+                "projectPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Common/Retail.CheckList.Common.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net9.0": {
+          "targetAlias": "net9.0",
+          "dependencies": {
+            "Microsoft.AspNetCore.Http.Features": {
+              "target": "Package",
+              "version": "[5.0.17, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.303/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Infrastructure.Persistence.EF/Retail.CheckList.Infrastructure.Persistence.EF.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Infrastructure.Persistence.EF/Retail.CheckList.Infrastructure.Persistence.EF.csproj",
+        "projectName": "Retail.CheckList.Infrastructure.Persistence.EF",
+        "projectPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Infrastructure.Persistence.EF/Retail.CheckList.Infrastructure.Persistence.EF.csproj",
+        "packagesPath": "/Users/cristianvillegas/.nuget/packages/",
+        "outputPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Infrastructure.Persistence.EF/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/cristianvillegas/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0"
+        ],
+        "sources": {
+          "/usr/local/share/dotnet/library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0": {
+            "targetAlias": "net9.0",
+            "projectReferences": {
+              "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Infrastructure.Persistence/Retail.CheckList.Infrastructure.Persistence.csproj": {
+                "projectPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Infrastructure.Persistence/Retail.CheckList.Infrastructure.Persistence.csproj"
+              },
+              "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Infrastructure/Retail.CheckList.Infrastructure.csproj": {
+                "projectPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Infrastructure/Retail.CheckList.Infrastructure.csproj"
+              },
+              "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Model/Retail.CheckList.Model.csproj": {
+                "projectPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Model/Retail.CheckList.Model.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net9.0": {
+          "targetAlias": "net9.0",
+          "dependencies": {
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[7.0.2, )"
+            },
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[7.0.2, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.303/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Infrastructure.Persistence/Retail.CheckList.Infrastructure.Persistence.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Infrastructure.Persistence/Retail.CheckList.Infrastructure.Persistence.csproj",
+        "projectName": "Retail.CheckList.Infrastructure.Persistence",
+        "projectPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Infrastructure.Persistence/Retail.CheckList.Infrastructure.Persistence.csproj",
+        "packagesPath": "/Users/cristianvillegas/.nuget/packages/",
+        "outputPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Infrastructure.Persistence/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/cristianvillegas/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0"
+        ],
+        "sources": {
+          "/usr/local/share/dotnet/library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0": {
+            "targetAlias": "net9.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net9.0": {
+          "targetAlias": "net9.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.303/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Infrastructure/Retail.CheckList.Infrastructure.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Infrastructure/Retail.CheckList.Infrastructure.csproj",
+        "projectName": "Retail.CheckList.Infrastructure",
+        "projectPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Infrastructure/Retail.CheckList.Infrastructure.csproj",
+        "packagesPath": "/Users/cristianvillegas/.nuget/packages/",
+        "outputPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Infrastructure/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/cristianvillegas/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0"
+        ],
+        "sources": {
+          "/usr/local/share/dotnet/library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0": {
+            "targetAlias": "net9.0",
+            "projectReferences": {
+              "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.DTOs/Retail.CheckList.DTOs.csproj": {
+                "projectPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.DTOs/Retail.CheckList.DTOs.csproj"
+              },
+              "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Infrastructure.Persistence/Retail.CheckList.Infrastructure.Persistence.csproj": {
+                "projectPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Infrastructure.Persistence/Retail.CheckList.Infrastructure.Persistence.csproj"
+              },
+              "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Model/Retail.CheckList.Model.csproj": {
+                "projectPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Model/Retail.CheckList.Model.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net9.0": {
+          "targetAlias": "net9.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.303/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Model/Retail.CheckList.Model.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Model/Retail.CheckList.Model.csproj",
+        "projectName": "Retail.CheckList.Model",
+        "projectPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Model/Retail.CheckList.Model.csproj",
+        "packagesPath": "/Users/cristianvillegas/.nuget/packages/",
+        "outputPath": "/Applications/Ruwaytech/template-sharp-service/Retail.CheckList.Model/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/cristianvillegas/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0"
+        ],
+        "sources": {
+          "/usr/local/share/dotnet/library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0": {
+            "targetAlias": "net9.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net9.0": {
+          "targetAlias": "net9.0",
+          "dependencies": {
+            "System.Runtime": {
+              "target": "Package",
+              "version": "[4.3.1, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.303/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="../buildMultiTargeting/Retail.CheckList.WebAPI.props" />
+</Project>

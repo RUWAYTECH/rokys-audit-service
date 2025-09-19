@@ -1,0 +1,14 @@
+/Applications/Ruwaytech/retail-check-list-service/Retail.CheckList.Globalization/bin/Release/net6.0/Retail.CheckList.Globalization.deps.json
+/Applications/Ruwaytech/retail-check-list-service/Retail.CheckList.Globalization/bin/Release/net6.0/Retail.CheckList.Globalization.dll
+/Applications/Ruwaytech/retail-check-list-service/Retail.CheckList.Globalization/bin/Release/net6.0/Retail.CheckList.Globalization.pdb
+/Applications/Ruwaytech/retail-check-list-service/Retail.CheckList.Globalization/obj/Release/net6.0/Retail.CheckList.Globalization.ValidationMessage.resources
+/Applications/Ruwaytech/retail-check-list-service/Retail.CheckList.Globalization/obj/Release/net6.0/Retail.CheckList.Globalization.csproj.GenerateResource.cache
+/Applications/Ruwaytech/retail-check-list-service/Retail.CheckList.Globalization/obj/Release/net6.0/Retail.CheckList.Globalization.GeneratedMSBuildEditorConfig.editorconfig
+/Applications/Ruwaytech/retail-check-list-service/Retail.CheckList.Globalization/obj/Release/net6.0/Retail.CheckList.Globalization.AssemblyInfoInputs.cache
+/Applications/Ruwaytech/retail-check-list-service/Retail.CheckList.Globalization/obj/Release/net6.0/Retail.CheckList.Globalization.AssemblyInfo.cs
+/Applications/Ruwaytech/retail-check-list-service/Retail.CheckList.Globalization/obj/Release/net6.0/Retail.CheckList.Globalization.csproj.CoreCompileInputs.cache
+/Applications/Ruwaytech/retail-check-list-service/Retail.CheckList.Globalization/obj/Release/net6.0/Retail.CheckList.Globalization.sourcelink.json
+/Applications/Ruwaytech/retail-check-list-service/Retail.CheckList.Globalization/obj/Release/net6.0/Retail.CheckList.Globalization.dll
+/Applications/Ruwaytech/retail-check-list-service/Retail.CheckList.Globalization/obj/Release/net6.0/refint/Retail.CheckList.Globalization.dll
+/Applications/Ruwaytech/retail-check-list-service/Retail.CheckList.Globalization/obj/Release/net6.0/Retail.CheckList.Globalization.pdb
+/Applications/Ruwaytech/retail-check-list-service/Retail.CheckList.Globalization/obj/Release/net6.0/ref/Retail.CheckList.Globalization.dll

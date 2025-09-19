@@ -1,0 +1,68 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+  <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Filters\" />
+    <None Remove="LogError\" />
+    <None Remove="Retrofit.Net" />
+    <None Remove="NeuroSpeech.RetroCoreFit" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\.editorconfig" Link=".editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Autofac" Version="6.5.0" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="AutoMapper" Version="12.0.1" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
+    <PackageReference Include="Dapper" Version="2.1.35" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.4.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.13" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.2" />
+    <PackageReference Include="Serilog" Version="2.12.0" />
+    <PackageReference Include="Serilog.Extensions.Logging.File" Version="3.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+    <PackageReference Include="NeuroSpeech.RetroCoreFit" Version="2.1.19" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Retail.CheckList.DTOs\Retail.CheckList.DTOs.csproj" />
+    <ProjectReference Include="..\Retail.CheckList.Infrastructure.Mapping.AM\Retail.CheckList.Infrastructure.Mapping.AM.csproj" />
+    <ProjectReference Include="..\Retail.CheckList.Infrastructure.Persistence.Dp\Retail.CheckList.Infrastructure.Persistence.Dp.csproj" />
+    <ProjectReference Include="..\Retail.CheckList.Infrastructure.Persistence.EF\Retail.CheckList.Infrastructure.Persistence.EF.csproj" />
+    <ProjectReference Include="..\Retail.CheckList.Infrastructure\Retail.CheckList.Infrastructure.csproj" />
+    <ProjectReference Include="..\Retail.CheckList.Services.Interfaces\Retail.CheckList.Services.Interfaces.csproj" />
+    <ProjectReference Include="..\Retail.CheckList.Services\Retail.CheckList.Services.csproj" />
+    <ProjectReference Include="..\Retail.CheckList.External.Services.Interfaces\Retail.CheckList.External.Services.Interfaces.csproj">
+      <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
+    </ProjectReference>
+    <ProjectReference Include="..\Retail.CheckList.External.Services\Retail.CheckList.External.Services.csproj">
+      <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
+    </ProjectReference>
+    <ProjectReference Include="..\Retail.CheckList.Globalization\Retail.CheckList.Globalization.csproj">
+      <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Filters\" />
+    <Folder Include="LogError\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Template\Mail\Operaciones.Confirmacion.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
+
+</Project>
