@@ -1,5 +1,0 @@
-/Applications/Ruwaytech/retail-check-list-service/Retail.CheckList.DataBase/obj/Debug/net6.0/Retail.CheckList.DataBase.GeneratedMSBuildEditorConfig.editorconfig
-/Applications/Ruwaytech/retail-check-list-service/Retail.CheckList.DataBase/obj/Debug/net6.0/Retail.CheckList.DataBase.AssemblyInfoInputs.cache
-/Applications/Ruwaytech/retail-check-list-service/Retail.CheckList.DataBase/obj/Debug/net6.0/Retail.CheckList.DataBase.AssemblyInfo.cs
-/Applications/Ruwaytech/retail-check-list-service/Retail.CheckList.DataBase/obj/Debug/net6.0/Retail.CheckList.DataBase.csproj.CoreCompileInputs.cache
-/Applications/Ruwaytech/retail-check-list-service/Retail.CheckList.DataBase/obj/Debug/net6.0/Retail.CheckList.DataBase.sourcelink.json
