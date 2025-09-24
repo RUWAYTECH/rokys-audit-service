@@ -7,6 +7,7 @@ using Rokys.Audit.Infrastructure.Persistence.EF.Storage;
 using Rokys.Audit.WebAPI.Configuration;
 using Rokys.Audit.WebAPI.DependencyInjection;
 using Rokys.Audit.WebAPI.Filters;
+using Rokys.Audit.WebAPI.Middleware;
 using System.Data;
 
 namespace Rokys.Audit.WebAPI
@@ -68,6 +69,14 @@ namespace Rokys.Audit.WebAPI
             {
                 return new SqlConnection(connectionString);
             });
+
+            // Add HttpClient factory
+            services.AddHttpClient();
+
+            // Add IdentityServer service
+            services.AddHttpClient<Services.IIdentityServerService, Services.IdentityServerService>();
+            services.AddScoped<Services.IIdentityServerService, Services.IdentityServerService>();
+
             ContextDp.Config();
             this.AddSecurity();
             return DependencyConfig.Configure(Services, Configuration);
@@ -103,6 +112,8 @@ namespace Rokys.Audit.WebAPI
 
             app.UseRouting();
             app.UseAuthentication();
+            app.UseMiddleware<CustomJwtValidationMiddleware>(); // Add custom JWT validation middleware
+            app.UseIdentityServerAuthorization(); // Add custom middleware after authentication
             app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {

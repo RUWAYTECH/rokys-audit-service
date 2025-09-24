@@ -11,29 +11,28 @@ namespace Reatil.Services.Services
             var userName = httpContextAccessor?.HttpContext?.User?.FindFirst(Constants.ClaimNames.NameId)?.Value;
             var response = new UserCurrentResponseDto { UserName = userName };
 
-            var nombreCompleto = httpContextAccessor?.HttpContext?.User?.FindFirst(Constants.ClaimNames.NombreCompleto)?.Value;
-            response.NombreCompleto = nombreCompleto; 
-            
-            var applicationIdString = httpContextAccessor?.HttpContext?.User?.FindFirst(Constants.ClaimNames.ApplicationId)?.Value;
-            int.TryParse(applicationIdString ?? "0", out int applicationId);
-            response.ApplicationId = applicationId;
+            var first_name = httpContextAccessor?.HttpContext?.User?.FindFirst(Constants.ClaimNames.FirstName)?.Value;
+            var last_name = httpContextAccessor?.HttpContext?.User?.FindFirst(Constants.ClaimNames.LastName)?.Value;
+
+            response.FullName = $"{first_name} {last_name}";
+
+
 
             var email = httpContextAccessor?.HttpContext?.User?.FindFirst(Constants.ClaimNames.Email)?.Value;
             response.Email = email;
 
-            var profileIdString = httpContextAccessor?.HttpContext?.User?.FindFirst(Constants.ClaimNames.ProfileId)?.Value;
-            int.TryParse(profileIdString ?? "0", out int profileId);
-            response.ProfileId = profileId;
-
-            var profileName = httpContextAccessor?.HttpContext?.User?.FindFirst(Constants.ClaimNames.ProfileName)?.Value;
-            response.ProfileName = profileName;
 
 
             var employeeId = httpContextAccessor?.HttpContext?.User?.FindFirst(Constants.ClaimNames.EmployeeId)?.Value;
-            int.TryParse(employeeId, out int outEmployeeId);
+            Guid.TryParse(employeeId, out Guid outEmployeeId);
             response.EmployeeId = outEmployeeId;
 
-          
+
+            var userId = httpContextAccessor?.HttpContext?.User?.FindFirst(Constants.ClaimNames.UserId)?.Value;
+            Guid.TryParse(userId, out Guid outUserId);
+            response.UserId = outUserId;
+
+
 
 
             return response;

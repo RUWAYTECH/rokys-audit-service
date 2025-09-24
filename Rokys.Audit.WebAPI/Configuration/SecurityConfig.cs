@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
+using Rokys.Audit.WebAPI.Services;
 
 namespace Rokys.Audit.WebAPI.Configuration
 {
@@ -13,6 +13,10 @@ namespace Rokys.Audit.WebAPI.Configuration
 
             if (Convert.ToBoolean(section["Enabled"]))
             {
+                // Registrar servicios personalizados para JWT
+                startup.Services.AddHttpClient<CustomJwtSecurityTokenHandler>();
+                startup.Services.AddScoped<CustomJwtSecurityTokenHandler>();
+
                 startup.Services.AddAuthorization();
 
                 startup.Services.AddAuthentication(options =>
@@ -22,20 +26,38 @@ namespace Rokys.Audit.WebAPI.Configuration
                     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
                 }).AddJwtBearer(cfg =>
                 {
-                    cfg.RequireHttpsMetadata = false;
+                    cfg.RequireHttpsMetadata = Convert.ToBoolean(startup.Configuration["IdentityServer:RequireHttpsMetadata"]);
                     cfg.SaveToken = true;
+
+                    // Configuración básica - usaremos nuestro middleware personalizado para la validación real
                     cfg.TokenValidationParameters = new TokenValidationParameters
                     {
-                        ValidIssuer = startup.Configuration["JwtSettings:Issuer"],
-                        ValidAudience = startup.Configuration["JwtSettings:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(startup.Configuration["JwtSettings:Key"])),
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
+                        ValidateIssuer = false, // Nuestro middleware lo validará
+                        ValidateAudience = false,
                         ValidateLifetime = false,
-                        ValidateIssuerSigningKey = true
+                        ValidateIssuerSigningKey = false,
+                        RequireSignedTokens = false
+                    };
+
+                    cfg.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Startup>>();
+                            logger.LogDebug("JWT token received from request");
+                            return Task.CompletedTask;
+                        },
+                        OnAuthenticationFailed = context =>
+                        {
+                            var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Startup>>();
+                            logger.LogDebug("Default JWT authentication failed, will use custom middleware");
+                            // No marcamos como fallido, nuestro middleware se encargará
+                            context.NoResult();
+                            return Task.CompletedTask;
+                        }
                     };
                 });
-               
+
             }
 
             return startup;
