@@ -7,14 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Procedure/Checklist_sp_ListarAccion.sql" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="Procedure/Checklist_sp_ListarAccion.sql" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Folder Include="Index\" />
     <Folder Include="Init\" />
     <Folder Include="Inserts\" />
