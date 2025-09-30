@@ -5,119 +5,118 @@
 -- Tabla: Escala por Empresa
 CREATE TABLE [Group]
 (
-    GroupId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    EnterpriseId UNIQUEIDENTIFIER NOT NULL, 
+    GroupId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(), -- ID del Grupo
+    EnterpriseId UNIQUEIDENTIFIER NOT NULL, -- ID de la Empresa
 
-    Description NVARCHAR(200) NOT NULL,
+    Description NVARCHAR(200) NOT NULL, -- Descripción
 
     -- Objetivo general para el grupo
-    ObjectiveValue DECIMAL(10,2) NULL,
+    ObjectiveValue DECIMAL(10,2) NULL, -- Valor Objetivo
 
     -- Umbrales para el grupo
-    RiskLow DECIMAL(10,2) NULL,
-    RiskModerate DECIMAL(10,2) NULL,
-    RiskHigh DECIMAL(10,2) NULL,
+    RiskLow DECIMAL(10,2) NULL, -- Riesgo Bajo
+    RiskModerate DECIMAL(10,2) NULL, -- Riesgo Moderado
+    RiskHigh DECIMAL(10,2) NULL, -- Riesgo Alto
 
     -- Riesgo crítico = mayor a RiesgoElevado
 
     -- Ponderación del grupo
-    GroupWeight DECIMAL(5,2) NULL,
+    GroupWeight DECIMAL(5,2) NULL, -- Peso del Grupo
 
     -- Auditoría
-    IsActive BIT DEFAULT 1,
-    CreatedBy VARCHAR(120) NULL,
-    CreationDate DATETIME2 DEFAULT GETDATE(),
-    UpdatedBy VARCHAR(120) NULL,
-    UpdateDate DATETIME2 NULL
+    IsActive BIT DEFAULT 1, -- Está Activo
+    CreatedBy VARCHAR(120) NULL, -- Creado Por
+    CreationDate DATETIME2 DEFAULT GETDATE(), -- Fecha de Creación
+    UpdatedBy VARCHAR(120) NULL, -- Actualizado Por
+    UpdateDate DATETIME2 NULL -- Fecha de Actualización
 );
 
 CREATE TABLE ScaleGroup
 (
-    ScaleGroupId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    GroupId UNIQUEIDENTIFIER NOT NULL
+    ScaleGroupId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(), -- ID del Grupo de Escala
+    GroupId UNIQUEIDENTIFIER NOT NULL -- ID del Grupo
         FOREIGN KEY REFERENCES [Group](GroupId),
-    Description NVARCHAR(200) NOT NULL,
+    Description NVARCHAR(200) NOT NULL, -- Descripción
 
     -- General objective for the group
-    ObjectiveValue DECIMAL(10,2) NULL,
+    ObjectiveValue DECIMAL(10,2) NULL, -- Valor Objetivo
 
     -- Thresholds for the group
-    LowRisk DECIMAL(10,2) NULL,
-    ModerateRisk DECIMAL(10,2) NULL,
-    HighRisk DECIMAL(10,2) NULL,
+    LowRisk DECIMAL(10,2) NULL, -- Riesgo Bajo
+    ModerateRisk DECIMAL(10,2) NULL, -- Riesgo Moderado
+    HighRisk DECIMAL(10,2) NULL, -- Riesgo Alto
     
     -- Critical risk = greater than HighRisk
 
     -- Group weighting
-    Weighting DECIMAL(5,2) NULL,
-
+    Weighting DECIMAL(5,2) NULL, -- Ponderación
 
     -- Audit fields
-    IsActive BIT DEFAULT 1,
-    CreatedBy VARCHAR(120) NULL,
-    CreationDate DATETIME2 DEFAULT GETDATE(),
-    UpdatedBy VARCHAR(120) NULL,
-    UpdateDate DATETIME2 NULL
+    IsActive BIT DEFAULT 1, -- Está Activo
+    CreatedBy VARCHAR(120) NULL, -- Creado Por
+    CreationDate DATETIME2 DEFAULT GETDATE(), -- Fecha de Creación
+    UpdatedBy VARCHAR(120) NULL, -- Actualizado Por
+    UpdateDate DATETIME2 NULL -- Fecha de Actualización
 );
 
 -- Table: Risk Scale Group
 CREATE TABLE RiskScaleGroup
 (
-    RiskScaleGroupId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    ScaleGroupId UNIQUEIDENTIFIER NOT NULL
+    RiskScaleGroupId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(), -- ID del Grupo de Escala de Riesgo
+    ScaleGroupId UNIQUEIDENTIFIER NOT NULL -- ID del Grupo de Escala
         FOREIGN KEY REFERENCES [ScaleGroup](ScaleGroupId),
-    Description NVARCHAR(200) NOT NULL,
+    Description NVARCHAR(200) NOT NULL, -- Descripción
 
     -- General objective for the group
-    ObjectiveValue DECIMAL(10,2) NULL,
+    ObjectiveValue DECIMAL(10,2) NULL, -- Valor Objetivo
 
     -- Thresholds for the group
-    LowRisk DECIMAL(10,2) NULL,
-    ModerateRisk DECIMAL(10,2) NULL,
-    HighRisk DECIMAL(10,2) NULL,
+    LowRisk DECIMAL(10,2) NULL, -- Riesgo Bajo
+    ModerateRisk DECIMAL(10,2) NULL, -- Riesgo Moderado
+    HighRisk DECIMAL(10,2) NULL, -- Riesgo Alto
     
     -- Critical risk = greater than HighRisk
 
     -- Group weighting
-    Weighting DECIMAL(5,2) NULL,
+    Weighting DECIMAL(5,2) NULL, -- Ponderación
 
     -- Audit fields
-    IsActive BIT DEFAULT 1,
-    CreatedBy VARCHAR(120) NULL,
-    CreationDate DATETIME2 DEFAULT GETDATE(),
-    UpdatedBy VARCHAR(120) NULL,
-    UpdateDate DATETIME2 NULL
+    IsActive BIT DEFAULT 1, -- Está Activo
+    CreatedBy VARCHAR(120) NULL, -- Creado Por
+    CreationDate DATETIME2 DEFAULT GETDATE(), -- Fecha de Creación
+    UpdatedBy VARCHAR(120) NULL, -- Actualizado Por
+    UpdateDate DATETIME2 NULL -- Fecha de Actualización
 );
 
 -- Table: Risk Scale (Detail)
 CREATE TABLE RiskScale
 (
-    RiskScaleId INT IDENTITY(1,1) PRIMARY KEY,
+    RiskScaleId INT IDENTITY(1,1) PRIMARY KEY, -- ID de Escala de Riesgo
 
     -- Relationship with the group
-    RiskScaleGroupId UNIQUEIDENTIFIER NOT NULL
+    RiskScaleGroupId UNIQUEIDENTIFIER NOT NULL -- ID del Grupo de Escala de Riesgo
         FOREIGN KEY REFERENCES RiskScaleGroup(RiskScaleGroupId),
 
-    Code NVARCHAR(50) NOT NULL,
-    Description NVARCHAR(500) NOT NULL,
-    ShortDescription NVARCHAR(100) NULL,
+    Code NVARCHAR(50) NOT NULL, -- Código
+    Description NVARCHAR(500) NOT NULL, -- Descripción
+    ShortDescription NVARCHAR(100) NULL, -- Descripción Corta
 
-    ObjectiveValue DECIMAL(10,2) NULL,
+    ObjectiveValue DECIMAL(10,2) NULL, -- Valor Objetivo
 
     -- Thresholds per auditable point
-    LowRisk DECIMAL(10,2) NULL,
-    ModerateRisk DECIMAL(10,2) NULL,
-    HighRisk DECIMAL(10,2) NULL,
+    LowRisk DECIMAL(10,2) NULL, -- Riesgo Bajo
+    ModerateRisk DECIMAL(10,2) NULL, -- Riesgo Moderado
+    HighRisk DECIMAL(10,2) NULL, -- Riesgo Alto
 
-    Weighting DECIMAL(5,2) NULL,
-    NonToleratedRisk BIT NOT NULL DEFAULT 0,
+    Weighting DECIMAL(5,2) NULL, -- Ponderación
+    NonToleratedRisk BIT NOT NULL DEFAULT 0, -- Riesgo No Tolerado
 
     -- Audit fields
-    IsActive BIT DEFAULT 1,
-    CreatedBy VARCHAR(120) NULL,
-    CreationDate DATETIME2 DEFAULT GETDATE(),
-    UpdatedBy VARCHAR(120) NULL,
-    UpdateDate DATETIME2 NULL
+    IsActive BIT DEFAULT 1, -- Está Activo
+    CreatedBy VARCHAR(120) NULL, -- Creado Por
+    CreationDate DATETIME2 DEFAULT GETDATE(), -- Fecha de Creación
+    UpdatedBy VARCHAR(120) NULL, -- Actualizado Por
+    UpdateDate DATETIME2 NULL -- Fecha de Actualización
 );
 
 -- =============================================
@@ -125,93 +124,93 @@ CREATE TABLE RiskScale
 -- =============================================
 
 -- Table: Monthly Audit (Header)
-CREATE TABLE Audit
+CREATE TABLE [Audit]
 (
-    AuditId INT IDENTITY(1,1) PRIMARY KEY,
+    AuditId INT IDENTITY(1,1) PRIMARY KEY, -- ID de Auditoría
 
     -- Store / audit identification
-    StoreId INT NULL,
-    StoreName NVARCHAR(150) NOT NULL,
+    StoreId INT NULL, -- ID de Tienda
+    StoreName NVARCHAR(150) NOT NULL, -- Nombre de Tienda
 
     -- Participants
-    Administrator NVARCHAR(150) NULL,
-    Assistant NVARCHAR(150) NULL,
-    OperationManagers NVARCHAR(200) NULL,
-    FloatingAdministrator NVARCHAR(150) NULL,
-    ResponsibleAuditor NVARCHAR(150) NULL,
+    Administrator NVARCHAR(150) NULL, -- Administrador
+    Assistant NVARCHAR(150) NULL, -- Asistente
+    OperationManagers NVARCHAR(200) NULL, -- Gerentes de Operación
+    FloatingAdministrator NVARCHAR(150) NULL, -- Administrador Flotante
+    ResponsibleAuditor NVARCHAR(150) NULL, -- Auditor Responsable
 
     -- Dates
-    StartDate DATE NOT NULL,
-    EndDate DATE NOT NULL,
-    ReportDate DATE NULL,
+    StartDate DATE NOT NULL, -- Fecha de Inicio
+    EndDate DATE NOT NULL, -- Fecha de Fin
+    ReportDate DATE NULL, -- Fecha de Reporte
 
     -- Additional information
-    AuditedDays INT NULL,
-    GlobalObservations NVARCHAR(MAX) NULL,
-    TotalWeighting DECIMAL(5,2) NULL,
+    AuditedDays INT NULL, -- Días Auditados
+    GlobalObservations NVARCHAR(MAX) NULL, -- Observaciones Globales
+    TotalWeighting DECIMAL(5,2) NULL, -- Ponderación Total
 
     -- Record audit
-    IsActive BIT DEFAULT 1,
-    CreatedBy VARCHAR(120) NULL,
-    CreationDate DATETIME2 DEFAULT GETDATE(),
-    UpdatedBy VARCHAR(120) NULL,
-    UpdateDate DATETIME2 NULL
+    IsActive BIT DEFAULT 1, -- Está Activo
+    CreatedBy VARCHAR(120) NULL, -- Creado Por
+    CreationDate DATETIME2 DEFAULT GETDATE(), -- Fecha de Creación
+    UpdatedBy VARCHAR(120) NULL, -- Actualizado Por
+    UpdateDate DATETIME2 NULL -- Fecha de Actualización
 );
 
 -- Table: Result per Auditable Point
 CREATE TABLE AuditResult
 (
-    AuditResultId INT IDENTITY(1,1) PRIMARY KEY,
-    AuditId INT NOT NULL
+    AuditResultId INT IDENTITY(1,1) PRIMARY KEY, -- ID de Resultado de Auditoría
+    AuditId INT NOT NULL -- ID de Auditoría
         FOREIGN KEY REFERENCES Audit(AuditId),
-    RiskScaleId INT NOT NULL
+    RiskScaleId INT NOT NULL -- ID de Escala de Riesgo
         FOREIGN KEY REFERENCES RiskScale(RiskScaleId),
 
     -- Calculation data at the time of audit
-    ObtainedValue DECIMAL(10,2) NOT NULL,
-    RiskLevel NVARCHAR(20) NULL,
+    ObtainedValue DECIMAL(10,2) NOT NULL, -- Valor Obtenido
+    RiskLevel NVARCHAR(20) NULL, -- Nivel de Riesgo
 
     -- Historical weighting and thresholds
-    AppliedWeighting DECIMAL(5,2) NULL,
-    AppliedLowThreshold DECIMAL(10,2) NULL,
-    AppliedModerateThreshold DECIMAL(10,2) NULL,
-    AppliedHighThreshold DECIMAL(10,2) NULL,
+    AppliedWeighting DECIMAL(5,2) NULL, -- Ponderación Aplicada
+    AppliedLowThreshold DECIMAL(10,2) NULL, -- Umbral Bajo Aplicado
+    AppliedModerateThreshold DECIMAL(10,2) NULL, -- Umbral Moderado Aplicado
+    AppliedHighThreshold DECIMAL(10,2) NULL, -- Umbral Alto Aplicado
 
-    Observations NVARCHAR(MAX) NULL,
+    Observations NVARCHAR(MAX) NULL, -- Observaciones
 
     -- Record audit
-    IsActive BIT DEFAULT 1,
-    CreatedBy VARCHAR(120) NULL,
-    CreationDate DATETIME2 DEFAULT GETDATE(),
-    UpdatedBy VARCHAR(120) NULL,
-    UpdateDate DATETIME2 NULL
+    IsActive BIT DEFAULT 1, -- Está Activo
+    CreatedBy VARCHAR(120) NULL, -- Creado Por
+    CreationDate DATETIME2 DEFAULT GETDATE(), -- Fecha de Creación
+    UpdatedBy VARCHAR(120) NULL, -- Actualizado Por
+    UpdateDate DATETIME2 NULL -- Fecha de Actualización
 );
 
 -- Table: Aggregated Result by Risk Group
 CREATE TABLE AuditResultGroup
 (
-    AuditResultGroupId INT IDENTITY(1,1) PRIMARY KEY,
-    MonthlyAuditId INT NOT NULL
-        FOREIGN KEY REFERENCES MonthlyAudit(MonthlyAuditId),
-    RiskScaleGroupId UNIQUEIDENTIFIER NOT NULL
+    AuditResultGroupId INT IDENTITY(1,1) PRIMARY KEY, -- ID de Resultado de Grupo de Auditoría
+    AuditId INT NOT NULL -- ID de Auditoría
+        FOREIGN KEY REFERENCES [Audit](AuditId),
+    RiskScaleGroupId UNIQUEIDENTIFIER NOT NULL -- ID del Grupo de Escala de Riesgo
         FOREIGN KEY REFERENCES RiskScaleGroup(RiskScaleGroupId),
 
     -- Calculation data at the time of audit
-    TotalValue DECIMAL(10,2) NULL,
-    RiskLevel NVARCHAR(20) NULL,
+    TotalValue DECIMAL(10,2) NULL, -- Valor Total
+    RiskLevel NVARCHAR(20) NULL, -- Nivel de Riesgo
 
     -- Historical weighting and thresholds
-    AppliedWeighting DECIMAL(5,2) NULL,
-    AppliedLowThreshold DECIMAL(10,2) NULL,
-    AppliedModerateThreshold DECIMAL(10,2) NULL,
-    AppliedHighThreshold DECIMAL(10,2) NULL,
+    AppliedWeighting DECIMAL(5,2) NULL, -- Ponderación Aplicada
+    AppliedLowThreshold DECIMAL(10,2) NULL, -- Umbral Bajo Aplicado
+    AppliedModerateThreshold DECIMAL(10,2) NULL, -- Umbral Moderado Aplicado
+    AppliedHighThreshold DECIMAL(10,2) NULL, -- Umbral Alto Aplicado
 
-    Observations NVARCHAR(MAX) NULL,
+    Observations NVARCHAR(MAX) NULL, -- Observaciones
 
     -- Record audit
-    IsActive BIT DEFAULT 1,
-    CreatedBy VARCHAR(120) NULL,
-    CreationDate DATETIME2 DEFAULT GETDATE(),
-    UpdatedBy VARCHAR(120) NULL,
-    UpdateDate DATETIME2 NULL
+    IsActive BIT DEFAULT 1, -- Está Activo
+    CreatedBy VARCHAR(120) NULL, -- Creado Por
+    CreationDate DATETIME2 DEFAULT GETDATE(), -- Fecha de Creación
+    UpdatedBy VARCHAR(120) NULL, -- Actualizado Por
+    UpdateDate DATETIME2 NULL -- Fecha de Actualización
 );
