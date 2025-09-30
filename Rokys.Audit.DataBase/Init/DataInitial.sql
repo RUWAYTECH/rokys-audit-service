@@ -11,17 +11,17 @@ CREATE TABLE [Group]
     Description NVARCHAR(200) NOT NULL, -- Descripción
 
     -- Objetivo general para el grupo
-    ObjectiveValue DECIMAL(10,2) NULL, -- Valor Objetivo
+    ObjectiveValue DECIMAL(10,2) NOT NULL, -- Valor Objetivo
 
     -- Umbrales para el grupo
-    RiskLow DECIMAL(10,2) NULL, -- Riesgo Bajo
-    RiskModerate DECIMAL(10,2) NULL, -- Riesgo Moderado
-    RiskHigh DECIMAL(10,2) NULL, -- Riesgo Alto
+    RiskLow DECIMAL(10,2) NOT NULL, -- Riesgo Bajo
+    RiskModerate DECIMAL(10,2) NOT NULL, -- Riesgo Moderado
+    RiskHigh DECIMAL(10,2) NOT NULL, -- Riesgo Alto
 
     -- Riesgo crítico = mayor a RiesgoElevado
 
     -- Ponderación del grupo
-    GroupWeight DECIMAL(5,2) NULL, -- Peso del Grupo
+    Weighting DECIMAL(5,2) NOT NULL, -- Peso del Grupo
 
     -- Auditoría
     IsActive BIT DEFAULT 1, -- Está Activo
@@ -39,17 +39,17 @@ CREATE TABLE ScaleGroup
     Description NVARCHAR(200) NOT NULL, -- Descripción
 
     -- General objective for the group
-    ObjectiveValue DECIMAL(10,2) NULL, -- Valor Objetivo
+    ObjectiveValue DECIMAL(10,2) NOT NULL, -- Valor Objetivo
 
     -- Thresholds for the group
-    LowRisk DECIMAL(10,2) NULL, -- Riesgo Bajo
-    ModerateRisk DECIMAL(10,2) NULL, -- Riesgo Moderado
-    HighRisk DECIMAL(10,2) NULL, -- Riesgo Alto
+    LowRisk DECIMAL(10,2) NOT NULL, -- Riesgo Bajo
+    ModerateRisk DECIMAL(10,2) NOT NULL, -- Riesgo Moderado
+    HighRisk DECIMAL(10,2) NOT NULL, -- Riesgo Alto
     
     -- Critical risk = greater than HighRisk
 
     -- Group weighting
-    Weighting DECIMAL(5,2) NULL, -- Ponderación
+    Weighting DECIMAL(5,2) NOT NULL, -- Ponderación
 
     -- Audit fields
     IsActive BIT DEFAULT 1, -- Está Activo
@@ -68,17 +68,17 @@ CREATE TABLE RiskScaleGroup
     Description NVARCHAR(200) NOT NULL, -- Descripción
 
     -- General objective for the group
-    ObjectiveValue DECIMAL(10,2) NULL, -- Valor Objetivo
+    ObjectiveValue DECIMAL(10,2) NOT NULL, -- Valor Objetivo
 
     -- Thresholds for the group
-    LowRisk DECIMAL(10,2) NULL, -- Riesgo Bajo
-    ModerateRisk DECIMAL(10,2) NULL, -- Riesgo Moderado
-    HighRisk DECIMAL(10,2) NULL, -- Riesgo Alto
+    LowRisk DECIMAL(10,2) NOT NULL, -- Riesgo Bajo
+    ModerateRisk DECIMAL(10,2) NOT NULL, -- Riesgo Moderado
+    HighRisk DECIMAL(10,2) NOT NULL, -- Riesgo Alto
     
     -- Critical risk = greater than HighRisk
 
     -- Group weighting
-    Weighting DECIMAL(5,2) NULL, -- Ponderación
+    Weighting DECIMAL(5,2) NOT NULL, -- Ponderación
 
     -- Audit fields
     IsActive BIT DEFAULT 1, -- Está Activo
@@ -101,14 +101,14 @@ CREATE TABLE RiskScale
     Description NVARCHAR(500) NOT NULL, -- Descripción
     ShortDescription NVARCHAR(100) NULL, -- Descripción Corta
 
-    ObjectiveValue DECIMAL(10,2) NULL, -- Valor Objetivo
+    ObjectiveValue DECIMAL(10,2) NOT NULL, -- Valor Objetivo
 
     -- Thresholds per auditable point
-    LowRisk DECIMAL(10,2) NULL, -- Riesgo Bajo
-    ModerateRisk DECIMAL(10,2) NULL, -- Riesgo Moderado
-    HighRisk DECIMAL(10,2) NULL, -- Riesgo Alto
+    LowRisk DECIMAL(10,2) NOT NULL, -- Riesgo Bajo
+    ModerateRisk DECIMAL(10,2) NOT NULL, -- Riesgo Moderado
+    HighRisk DECIMAL(10,2) NOT NULL, -- Riesgo Alto
 
-    Weighting DECIMAL(5,2) NULL, -- Ponderación
+    Weighting DECIMAL(5,2) NOT NULL, -- Ponderación
     NonToleratedRisk BIT NOT NULL DEFAULT 0, -- Riesgo No Tolerado
 
     -- Audit fields
@@ -146,8 +146,8 @@ CREATE TABLE [Audit]
 
     -- Additional information
     AuditedDays INT NULL, -- Días Auditados
-    GlobalObservations NVARCHAR(MAX) NULL, -- Observaciones Globales
-    TotalWeighting DECIMAL(5,2) NULL, -- Ponderación Total
+    GlobalObservations NVARCHAR(MAX) NOT NULL, -- Observaciones Globales
+    TotalWeighting DECIMAL(5,2) NOT NULL, -- Ponderación Total
 
     -- Record audit
     IsActive BIT DEFAULT 1, -- Está Activo
@@ -171,10 +171,10 @@ CREATE TABLE AuditResult
     RiskLevel NVARCHAR(20) NULL, -- Nivel de Riesgo
 
     -- Historical weighting and thresholds
-    AppliedWeighting DECIMAL(5,2) NULL, -- Ponderación Aplicada
-    AppliedLowThreshold DECIMAL(10,2) NULL, -- Umbral Bajo Aplicado
-    AppliedModerateThreshold DECIMAL(10,2) NULL, -- Umbral Moderado Aplicado
-    AppliedHighThreshold DECIMAL(10,2) NULL, -- Umbral Alto Aplicado
+    AppliedWeighting DECIMAL(5,2) NOT NULL, -- Ponderación Aplicada
+    AppliedLowThreshold DECIMAL(10,2) NOT NULL, -- Umbral Bajo Aplicado
+    AppliedModerateThreshold DECIMAL(10,2) NOT NULL, -- Umbral Moderado Aplicado
+    AppliedHighThreshold DECIMAL(10,2) NOT NULL, -- Umbral Alto Aplicado
 
     Observations NVARCHAR(MAX) NULL, -- Observaciones
 
@@ -196,14 +196,14 @@ CREATE TABLE AuditResultGroup
         FOREIGN KEY REFERENCES RiskScaleGroup(RiskScaleGroupId),
 
     -- Calculation data at the time of audit
-    TotalValue DECIMAL(10,2) NULL, -- Valor Total
+    TotalValue DECIMAL(10,2) NOT NULL, -- Valor Total
     RiskLevel NVARCHAR(20) NULL, -- Nivel de Riesgo
 
     -- Historical weighting and thresholds
-    AppliedWeighting DECIMAL(5,2) NULL, -- Ponderación Aplicada
-    AppliedLowThreshold DECIMAL(10,2) NULL, -- Umbral Bajo Aplicado
-    AppliedModerateThreshold DECIMAL(10,2) NULL, -- Umbral Moderado Aplicado
-    AppliedHighThreshold DECIMAL(10,2) NULL, -- Umbral Alto Aplicado
+    AppliedWeighting DECIMAL(5,2) NOT NULL, -- Ponderación Aplicada
+    AppliedLowThreshold DECIMAL(10,2) NOT NULL, -- Umbral Bajo Aplicado
+    AppliedModerateThreshold DECIMAL(10,2) NOT NULL, -- Umbral Moderado Aplicado
+    AppliedHighThreshold DECIMAL(10,2) NOT NULL, -- Umbral Alto Aplicado
 
     Observations NVARCHAR(MAX) NULL, -- Observaciones
 
