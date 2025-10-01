@@ -4,7 +4,7 @@ namespace Rokys.Audit.Model.Tables
     {
         public Guid GroupId { get; set; } = Guid.NewGuid();
         public Guid EnterpriseId { get; set; }
-        public string Description { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
 
         public bool IsActive { get; set; } = true;
 

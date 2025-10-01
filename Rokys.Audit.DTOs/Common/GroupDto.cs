@@ -3,7 +3,7 @@ namespace Rokys.Audit.DTOs.Common
     public class GroupDto
     {
         public Guid EnterpriseId { get; set; }
-        public string Description { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
         public decimal? ObjectiveValue { get; set; }
         public decimal? RiskLow { get; set; }
         public decimal? RiskModerate { get; set; }

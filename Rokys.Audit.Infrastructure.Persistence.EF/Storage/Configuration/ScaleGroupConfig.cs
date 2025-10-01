@@ -24,13 +24,13 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.Property(a => a.ObjectiveValue)
                 .HasColumnType("decimal(10,2)");
                 
-            builder.Property(a => a.LowRisk)
+            builder.Property(a => a.RiskLow)
                 .HasColumnType("decimal(10,2)");
                 
-            builder.Property(a => a.ModerateRisk)
+            builder.Property(a => a.RiskModerate)
                 .HasColumnType("decimal(10,2)");
                 
-            builder.Property(a => a.HighRisk)
+            builder.Property(a => a.RiskHigh)
                 .HasColumnType("decimal(10,2)");
                 
             builder.Property(a => a.Weighting)

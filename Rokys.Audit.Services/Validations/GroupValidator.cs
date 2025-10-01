@@ -10,7 +10,7 @@ namespace Rokys.Audit.Services.Validations
             RuleFor(x => x.EnterpriseId).NotEmpty().WithMessage("La empresa es requerida.")
                 .NotNull().WithMessage("La empresa es requerida.");
             
-            RuleFor(x => x.Description)
+            RuleFor(x => x.Name)
                 .MaximumLength(200).WithMessage("La descripción solo acepta como máximo 200 caracteres.")
                 .NotNull().WithMessage("La descripción es requerida")
                 .NotEmpty().WithMessage("La descripción es requerida");

@@ -11,11 +11,11 @@ namespace Rokys.Audit.Model.Tables
 
         public decimal ObjectiveValue { get; set; }
      
-        public decimal LowRisk { get; set; }
+        public decimal RiskLow { get; set; }
 
-        public decimal ModerateRisk { get; set; }
+        public decimal RiskModerate { get; set; }
 
-        public decimal HighRisk { get; set; }
+        public decimal RiskHigh { get; set; }
         public decimal Weighting { get; set; }
     }
 }

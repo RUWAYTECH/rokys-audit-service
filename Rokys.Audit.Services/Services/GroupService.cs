@@ -96,7 +96,7 @@ namespace Rokys.Audit.Services.Services
             {
                 Expression<Func<Group, bool>> filter = x => x.IsActive;
                 if (!string.IsNullOrEmpty(paginationRequestDto.Filter))
-                    filter = x => x.Description.Contains(paginationRequestDto.Filter) && x.IsActive;
+                    filter = x => x.Name.Contains(paginationRequestDto.Filter) && x.IsActive;
 
                 Func<IQueryable<Group>, IOrderedQueryable<Group>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 
