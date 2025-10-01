@@ -8,7 +8,7 @@ namespace Rokys.Audit.WebAPI.DependencyInjection.Modules
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterAssemblyTypes(typeof(ProveedorService).GetTypeInfo().Assembly).AsImplementedInterfaces();          
+            builder.RegisterAssemblyTypes(typeof(ScaleCompanyService).GetTypeInfo().Assembly).AsImplementedInterfaces();          
         }
     }
 }

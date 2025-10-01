@@ -6,7 +6,7 @@ using Rokys.Audit.Services.Interfaces;
 namespace Rokys.Audit.WebAPI.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/scale-companies")]
     public class ScaleCompanyController : ControllerBase
     {
         private readonly IScaleCompanyService _scaleCompanyService;

@@ -3,7 +3,7 @@
     public class ScaleCompany : AuditEntity
     {
         public Guid ScaleCompanyId { get; set; } = Guid.NewGuid();
-        public string EnterpriseId { get; set; }
+        public Guid EnterpriseId { get; set; }
         public string Description { get; set; } = string.Empty;
         public decimal ObjectiveValue { get; set; }
         public decimal RiskLow { get; set; }

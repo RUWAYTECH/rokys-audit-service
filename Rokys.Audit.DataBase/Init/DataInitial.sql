@@ -8,7 +8,7 @@
 
 CREATE TABLE [ScaleCompany](
     ScaleCompanyId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(), -- ID de la Escala por Empresa
-    EnterpriseId NVARCHAR(200) NOT NULL, -- Nombre de la Empresa
+    EnterpriseId UNIQUEIDENTIFIER NOT NULL, -- Nombre de la Empresa
 
     Description NVARCHAR(200) NOT NULL, -- Descripción
 

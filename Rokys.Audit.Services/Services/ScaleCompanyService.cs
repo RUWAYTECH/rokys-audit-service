@@ -66,7 +66,7 @@ namespace Rokys.Audit.Services.Services
             return response;
         }
 
-        public async Task<ResponseDto> Delete(object id)
+        public async Task<ResponseDto> Delete(Guid id)
         {
             var response = ResponseDto.Create();
             try
@@ -126,7 +126,7 @@ namespace Rokys.Audit.Services.Services
             return response;
         }
 
-        public async Task<ResponseDto<ScaleCompanyResponseDto>> GetById(object id)
+        public async Task<ResponseDto<ScaleCompanyResponseDto>> GetById(Guid id)
         {
             var response = ResponseDto.Create<ScaleCompanyResponseDto>();
             try
@@ -147,7 +147,7 @@ namespace Rokys.Audit.Services.Services
             return response;
         }
 
-        public async Task<ResponseDto<ScaleCompanyResponseDto>> Update(object id, ScaleCompanyRequestDto requestDto)
+        public async Task<ResponseDto<ScaleCompanyResponseDto>> Update(Guid id, ScaleCompanyRequestDto requestDto)
         {
             var response = ResponseDto.Create<ScaleCompanyResponseDto>();
             try
@@ -179,9 +179,6 @@ namespace Rokys.Audit.Services.Services
             return response;
         }
 
-        public Task<ResponseDto<IEnumerable<ScaleCompanyResponseDto>>> Get(object filter)
-        {
-            throw new NotImplementedException();
-        }
+
     }
 }
