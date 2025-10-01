@@ -71,13 +71,14 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create();
             try
             {
-                var entity = await _scaleCompanyRepository.GetByKeyAsync(id);
+                var entity = await _scaleCompanyRepository.GetFirstOrDefaultAsync(filter: x=>x.ScaleCompanyId == id && x.IsActive);
                 if (entity == null)
                 {
                     response = ResponseDto.Error("No se encontro la escala.");
                     return response;
                 }
-                _scaleCompanyRepository.Delete(entity);
+                entity.IsActive = false;
+                _scaleCompanyRepository.Update(entity);
                 await _unitOfWork.CommitAsync();
             }
             catch (Exception ex)
@@ -94,7 +95,7 @@ namespace Rokys.Audit.Services.Services
             try
             {
                 int totalRows;
-                Expression<Func<ScaleCompany, bool>> filter = null;
+                Expression<Func<ScaleCompany, bool>> filter = x => x.IsActive;
                 if (!string.IsNullOrEmpty(paginationRequestDto.Filter))
                     filter = x => x.Description.Contains(paginationRequestDto.Filter);
 
@@ -131,7 +132,7 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<ScaleCompanyResponseDto>();
             try
             {
-                var entity = _scaleCompanyRepository.GetByKey(id);
+                var entity = await _scaleCompanyRepository.GetFirstOrDefaultAsync(filter: x => x.ScaleCompanyId == id && x.IsActive);
                 if (entity == null)
                 {
                     response = ResponseDto.Error<ScaleCompanyResponseDto>("No se encontro la escala.");
@@ -158,7 +159,7 @@ namespace Rokys.Audit.Services.Services
                     response.Messages.AddRange(validate.Errors.Select(e => new ApplicationMessage { Message = e.ErrorMessage, MessageType = ApplicationMessageType.Error }));
                     return response;
                 }
-                var entity = _scaleCompanyRepository.GetByKey(id);
+                var entity = await _scaleCompanyRepository.GetFirstOrDefaultAsync(filter: x =>x .ScaleCompanyId == id && x.IsActive);
                 if (entity == null)
                 {
                     response = ResponseDto.Error<ScaleCompanyResponseDto>("No se encontro la escala.");
