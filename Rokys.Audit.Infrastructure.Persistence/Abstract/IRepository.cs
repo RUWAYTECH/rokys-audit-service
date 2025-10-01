@@ -33,5 +33,12 @@ namespace Rokys.Audit.Infrastructure.Persistence.Abstract
 
         void Delete(params object[] keyValues);
         void Delete(TEntity entityToDelete);
+
+        public Task<(List<TEntity> Items, int TotalRows)> GetPagedAsync(
+                 Expression<Func<TEntity, bool>> filter = null,
+                 Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
+                 int pageNumber = 0,
+                 int pageSize = 0,
+                 params Expression<Func<TEntity, object>>[] includeProperties);
     }
 }

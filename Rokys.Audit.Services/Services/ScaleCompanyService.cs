@@ -1,0 +1,187 @@
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using Reatil.Services.Services;
+using Rokys.Audit.DTOs.Common;
+using Rokys.Audit.DTOs.Requests.ScaleCompany;
+using Rokys.Audit.DTOs.Responses.Common;
+using Rokys.Audit.DTOs.Responses.ScaleCompany;
+using Rokys.Audit.Infrastructure.IMapping;
+using Rokys.Audit.Infrastructure.Persistence.Abstract;
+using Rokys.Audit.Infrastructure.Repositories;
+using Rokys.Audit.Model.Tables;
+using Rokys.Audit.Services.Interfaces;
+using System.Linq.Expressions;
+
+namespace Rokys.Audit.Services.Services
+{
+    public class ScaleCompanyService : IScaleCompanyService
+    {
+        private readonly IScaleCompanyRepository _scaleCompanyRepository;
+        private readonly IValidator<ScaleCompanyRequestDto> _fluentValidator;
+        private readonly ILogger<ScaleCompanyService> _logger;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IAMapper _mapper;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public ScaleCompanyService(
+            IScaleCompanyRepository scaleCompanyRepository,
+            IValidator<ScaleCompanyRequestDto> fluentValidator,
+            ILogger<ScaleCompanyService> logger,
+            IUnitOfWork unitOfWork,
+            IAMapper mapper,
+            IHttpContextAccessor httpContextAccessor)
+        {
+            _scaleCompanyRepository = scaleCompanyRepository;
+            _fluentValidator = fluentValidator;
+            _logger = logger;
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
+            _httpContextAccessor = httpContextAccessor;
+        }
+
+        public async Task<ResponseDto<ScaleCompanyResponseDto>> Create(ScaleCompanyRequestDto requestDto)
+        {
+            var response = ResponseDto.Create<ScaleCompanyResponseDto>();
+            try
+            {
+                var validate = _fluentValidator.Validate(requestDto);
+                if (!validate.IsValid)
+                {
+                    response.Messages.AddRange(validate.Errors.Select(e => new ApplicationMessage { Message = e.ErrorMessage, MessageType = ApplicationMessageType.Error }));
+                    return response;
+                }
+                var currentUser = _httpContextAccessor.CurrentUser();
+                var entity = _mapper.Map<ScaleCompany>(requestDto);
+                entity.CreateAudit(currentUser.UserName);
+                _scaleCompanyRepository.Insert(entity);
+                await _unitOfWork.CommitAsync();
+                response.Data = _mapper.Map<ScaleCompanyResponseDto>(entity);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response = ResponseDto.Error<ScaleCompanyResponseDto>(ex.Message);
+            }
+            return response;
+        }
+
+        public async Task<ResponseDto> Delete(object id)
+        {
+            var response = ResponseDto.Create();
+            try
+            {
+                var entity = await _scaleCompanyRepository.GetByKeyAsync(id);
+                if (entity == null)
+                {
+                    response = ResponseDto.Error("No se encontro la escala.");
+                    return response;
+                }
+                _scaleCompanyRepository.Delete(entity);
+                await _unitOfWork.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response = ResponseDto.Error(ex.Message);
+            }
+            return response;
+        }
+
+        public async Task<ResponseDto<PaginationResponseDto<ScaleCompanyResponseDto>>> GetPaged(PaginationRequestDto paginationRequestDto)
+        {
+            var response = ResponseDto.Create<PaginationResponseDto<ScaleCompanyResponseDto>>();
+            try
+            {
+                int totalRows;
+                Expression<Func<ScaleCompany, bool>> filter = null;
+                if (!string.IsNullOrEmpty(paginationRequestDto.Filter))
+                    filter = x => x.Description.Contains(paginationRequestDto.Filter);
+
+                Func<IQueryable<ScaleCompany>, IOrderedQueryable<ScaleCompany>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
+
+                var entities = await _scaleCompanyRepository.GetPagedAsync(
+                    filter: filter,
+                    orderBy: orderBy,
+                    pageNumber: paginationRequestDto.PageNumber,
+                    pageSize: paginationRequestDto.PageSize
+                );
+
+                var pagedResult = new PaginationResponseDto<ScaleCompanyResponseDto>
+                {
+                    Items = _mapper.Map<IEnumerable<ScaleCompanyResponseDto>>(entities.Items),
+                    TotalCount = entities.TotalRows,
+                    PageNumber = paginationRequestDto.PageNumber,
+                    PageSize = paginationRequestDto.PageSize
+                };
+
+                response.Data = pagedResult;
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response = ResponseDto.Error<PaginationResponseDto<ScaleCompanyResponseDto>>(ex.Message);
+            }
+            return response;
+        }
+
+        public async Task<ResponseDto<ScaleCompanyResponseDto>> GetById(object id)
+        {
+            var response = ResponseDto.Create<ScaleCompanyResponseDto>();
+            try
+            {
+                var entity = _scaleCompanyRepository.GetByKey(id);
+                if (entity == null)
+                {
+                    response = ResponseDto.Error<ScaleCompanyResponseDto>("No se encontro la escala.");
+                    return response;
+                }
+                response.Data = _mapper.Map<ScaleCompanyResponseDto>(entity);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response = ResponseDto.Error<ScaleCompanyResponseDto>(ex.Message);
+            }
+            return response;
+        }
+
+        public async Task<ResponseDto<ScaleCompanyResponseDto>> Update(object id, ScaleCompanyRequestDto requestDto)
+        {
+            var response = ResponseDto.Create<ScaleCompanyResponseDto>();
+            try
+            {
+                var validate = _fluentValidator.Validate(requestDto);
+                if (!validate.IsValid)
+                {
+                    response.Messages.AddRange(validate.Errors.Select(e => new ApplicationMessage { Message = e.ErrorMessage, MessageType = ApplicationMessageType.Error }));
+                    return response;
+                }
+                var entity = _scaleCompanyRepository.GetByKey(id);
+                if (entity == null)
+                {
+                    response = ResponseDto.Error<ScaleCompanyResponseDto>("No se encontro la escala.");
+                    return response;
+                }
+                var currentUser = _httpContextAccessor.CurrentUser();
+                entity = _mapper.Map(requestDto, entity);
+                entity.UpdateAudit(currentUser.UserName);
+                _scaleCompanyRepository.Update(entity);
+                await _unitOfWork.CommitAsync();
+                response.Data = _mapper.Map<ScaleCompanyResponseDto>(entity);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response = ResponseDto.Error<ScaleCompanyResponseDto>(ex.Message);
+            }
+            return response;
+        }
+
+        public Task<ResponseDto<IEnumerable<ScaleCompanyResponseDto>>> Get(object filter)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}

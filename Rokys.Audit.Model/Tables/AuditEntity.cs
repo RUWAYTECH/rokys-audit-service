@@ -10,8 +10,8 @@ namespace Rokys.Audit.Model.Tables
     {
         public string CreatedBy { get; set; }
         public DateTime CreationDate { get; set; }
-        public string UpdatedBy { get; set; }
-        public DateTime UpdateDate { get; set; }
+        public string? UpdatedBy { get; set; }
+        public DateTime? UpdateDate { get; set; }
 
         public void CreateAudit(string? userName)
         {

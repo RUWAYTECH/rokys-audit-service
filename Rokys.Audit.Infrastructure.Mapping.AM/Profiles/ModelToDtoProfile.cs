@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using Rokys.Audit.DTOs.Responses.Action;
 using Rokys.Audit.DTOs.Responses.Proveedor;
+using Rokys.Audit.DTOs.Responses.ScaleCompany;
 using Rokys.Audit.Model.Tables;
 
 namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
@@ -10,6 +10,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
         public ModelToDtoProfile()
         {
             CreateMap<Proveedor, ProveedorResponseDto>();
+            CreateMap<ScaleCompany, ScaleCompanyResponseDto>();
         }
     }
 }
