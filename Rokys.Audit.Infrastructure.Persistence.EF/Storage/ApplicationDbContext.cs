@@ -7,6 +7,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
     public class ApplicationDbContext : DbContext
     {
         public DbSet<ScaleCompany> ScaleCompanies { get; set; }
+        public DbSet<AuditScaleTemplate> AuditScaleTemplates { get; set; }
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
@@ -16,6 +17,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
             base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfiguration(new ScaleCompanyConfig());
             modelBuilder.ApplyConfiguration(new GroupConfig());
+            modelBuilder.ApplyConfiguration(new AuditScaleTemplateConfig());
         }
     }
 }
