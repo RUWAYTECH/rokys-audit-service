@@ -45,7 +45,7 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<AuditScaleTemplateResponseDto>();
             try
             {
-                var validate = _fluentValidator.Validate(requestDto);
+                var validate = await _fluentValidator.ValidateAsync(requestDto);
                 if (!validate.IsValid)
                 {
                     response.Messages.AddRange(validate.Errors.Select(e => new ApplicationMessage { Message = e.ErrorMessage, MessageType = ApplicationMessageType.Error }));
@@ -152,7 +152,7 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<AuditScaleTemplateResponseDto>();
             try
             {
-                var validate = _fluentValidator.Validate(requestDto);
+                var validate = await _fluentValidator.ValidateAsync(requestDto);
                 if (!validate.IsValid)
                 {
                     response.Messages.AddRange(validate.Errors.Select(e => new ApplicationMessage { Message = e.ErrorMessage, MessageType = ApplicationMessageType.Error }));

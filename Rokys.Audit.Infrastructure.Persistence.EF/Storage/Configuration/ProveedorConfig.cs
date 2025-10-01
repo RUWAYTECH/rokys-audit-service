@@ -9,9 +9,8 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
     {
         public void Configure(EntityTypeBuilder<Proveedor> builder)
         {
-            builder.ToTable("Proveedor");
+            builder.ToView("Proveedor");
             builder.HasKey(r => r.IdProveedor);
-            builder.Property(a => a.IdProveedor);
             builder.Property(a => a.RUC);
             builder.Property(a => a.RazonSocial);
         }

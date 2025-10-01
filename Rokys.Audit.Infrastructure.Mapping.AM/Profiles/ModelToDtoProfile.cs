@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Rokys.Audit.DTOs.Responses.AuditScaleTemplate;
 using Rokys.Audit.DTOs.Responses.Group;
 using Rokys.Audit.DTOs.Responses.Proveedor;
 using Rokys.Audit.DTOs.Responses.ScaleCompany;
@@ -13,6 +14,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
             CreateMap<Proveedor, ProveedorResponseDto>();
             CreateMap<ScaleCompany, ScaleCompanyResponseDto>();
             CreateMap<Group, GroupResponseDto>();
+            CreateMap<AuditScaleTemplate, AuditScaleTemplateResponseDto>();
         }
     }
 }
