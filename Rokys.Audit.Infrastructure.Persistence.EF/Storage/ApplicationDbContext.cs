@@ -6,8 +6,21 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
 {
     public class ApplicationDbContext : DbContext
     {
+        // Existing entities
         public DbSet<ScaleCompany> ScaleCompanies { get; set; }
+        public DbSet<Group> Groups { get; set; }
+        public DbSet<ScaleGroup> ScaleGroups { get; set; }
+        public DbSet<Proveedor> Proveedores { get; set; }
+        
+        // New audit entities
         public DbSet<AuditScaleTemplate> AuditScaleTemplates { get; set; }
+        public DbSet<AuditTemplateFields> AuditTemplateFields { get; set; }
+        public DbSet<ScoringCriteria> ScoringCriteria { get; set; }
+        public DbSet<PeriodAudit> PeriodAudits { get; set; }
+        public DbSet<PeriodAuditResult> PeriodAuditResults { get; set; }
+        public DbSet<PeriodAuditScaleResult> PeriodAuditScaleResults { get; set; }
+        public DbSet<PeriodAuditFieldValues> PeriodAuditFieldValues { get; set; }
+        
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
@@ -15,9 +28,21 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            
+            // Existing configurations
             modelBuilder.ApplyConfiguration(new ScaleCompanyConfig());
             modelBuilder.ApplyConfiguration(new GroupConfig());
+            modelBuilder.ApplyConfiguration(new ScaleGroupConfig());
+            modelBuilder.ApplyConfiguration(new ProveedorConfig());
+            
+            // New audit configurations
             modelBuilder.ApplyConfiguration(new AuditScaleTemplateConfig());
+            modelBuilder.ApplyConfiguration(new AuditTemplateFieldsConfig());
+            modelBuilder.ApplyConfiguration(new ScoringCriteriaConfig());
+            modelBuilder.ApplyConfiguration(new PeriodAuditConfig());
+            modelBuilder.ApplyConfiguration(new PeriodAuditResultConfig());
+            modelBuilder.ApplyConfiguration(new PeriodAuditScaleResultConfig());
+            modelBuilder.ApplyConfiguration(new PeriodAuditFieldValuesConfig());
         }
     }
 }
