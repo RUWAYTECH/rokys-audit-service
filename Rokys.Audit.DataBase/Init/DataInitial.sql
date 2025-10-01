@@ -223,6 +223,40 @@ CREATE TABLE ScoringCriteria (
     INDEX IX_ScoringCriteria_FieldCode (EvaluatedFieldCode),
     INDEX IX_ScoringCriteria_TemplateFieldId (AuditTemplateFieldId)
 );
+
+CREATE TABLE CriteriaSubResult (
+    CriteriaSubResultId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    ScaleGroupId UNIQUEIDENTIFIER NOT NULL 
+        FOREIGN KEY REFERENCES ScaleGroup(ScaleGroupId),
+    AuditTemplateFieldId UNIQUEIDENTIFIER NULL 
+        FOREIGN KEY REFERENCES AuditTemplateFields(AuditTemplateFieldId),
+    
+    -- Identificación del Criterio
+    CriteriaName NVARCHAR(255) NOT NULL, -- Nombre del Criterio
+    CriteriaCode NVARCHAR(10), -- Código único del criterio (opcional)
+    -- Fórmula y Evaluación
+    ResultFormula NVARCHAR(500), -- Fórmula para calcular resultado del campo
+    ColorCode NVARCHAR(20) NOT NULL, -- Código de color para la evaluación
+
+  
+    -- Puntuación
+    Score DECIMAL(10,2) NULL, -- Puntaje otorgado si cumple
+  
+   
+    
+    -- Auditoría
+    IsActive BIT DEFAULT 1,
+    CreatedBy VARCHAR(120) NULL,
+    CreationDate DATETIME2 DEFAULT GETDATE(),
+    UpdatedBy VARCHAR(120) NULL,
+    UpdateDate DATETIME2 NULL,
+    
+    -- Índices
+    INDEX IX_ScoringCriteria_ScaleGroupId (ScaleGroupId),
+    INDEX IX_ScoringCriteria_TemplateFieldId (AuditTemplateFieldId)
+);
+
+
 -- =============================================
 -- AUDIT PROCESS TABLES
 -- =============================================
