@@ -57,7 +57,7 @@ CREATE TABLE [Group]
     GroupId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(), -- ID del Grupo
     EnterpriseId UNIQUEIDENTIFIER NOT NULL, -- ID de la Empresa
 
-    Description NVARCHAR(200) NOT NULL, -- Descripción
+    Name NVARCHAR(200) NOT NULL, -- Nombre
 
     -- Objetivo general para el grupo
     ObjectiveValue DECIMAL(10,2) NOT NULL, -- Valor Objetivo
@@ -85,7 +85,8 @@ CREATE TABLE ScaleGroup
     ScaleGroupId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(), -- ID del Grupo de Escala
     GroupId UNIQUEIDENTIFIER NOT NULL -- ID del Grupo
         FOREIGN KEY REFERENCES [Group](GroupId),
-    Description NVARCHAR(200) NOT NULL, -- Descripción
+    Code NVARCHAR(10)  NOT NULL, -- Código del Grupo
+    Name NVARCHAR(200) NOT NULL, -- Nombre
 
     -- General objective for the group
     ObjectiveValue DECIMAL(10,2) NOT NULL, -- Valor Objetivo
@@ -228,16 +229,15 @@ CREATE TABLE [PeriodAudit]
     UpdateDate DATETIME2 NULL -- Fecha de Actualización
 );
 
---TODO
 
--- Table: Result per Auditable Point
+-- Table: Result
 CREATE TABLE PeriodAuditResult
 (
-    PeriodAuditResultId INT IDENTITY(1,1) PRIMARY KEY, -- ID de Resultado de Auditoría
-    PeriodAuditId INT NOT NULL -- ID de Auditoría
+    PeriodAuditResultId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),-- ID de Resultado de Auditoría
+    PeriodAuditId UNIQUEIDENTIFIER NOT NULL -- ID de Auditoría
         FOREIGN KEY REFERENCES PeriodAudit(PeriodAuditId),
-    RiskScaleId INT NOT NULL -- ID de Escala de Riesgo
-        FOREIGN KEY REFERENCES RiskScale(RiskScaleId),
+    GroupId UNIQUEIDENTIFIER NOT NULL -- ID de Escala de Riesgo
+        FOREIGN KEY REFERENCES [Group](GroupId),
 
     -- Calculation data at the time of audit
     ObtainedValue DECIMAL(10,2) NOT NULL, -- Valor Obtenido
@@ -259,12 +259,12 @@ CREATE TABLE PeriodAuditResult
     UpdateDate DATETIME2 NULL -- Fecha de Actualización
 );
 
--- Table: Aggregated Result by Risk Group
-CREATE TABLE PeriodAuditResultGroup
+-- Table: PeriodAuditScaleResult
+CREATE TABLE PeriodAuditScaleResult
 (
-    PeriodAuditResultGroupId INT IDENTITY(1,1) PRIMARY KEY, -- ID de Resultado de Grupo de Auditoría
-    PeriodAuditId INT NOT NULL -- ID de Auditoría
-        FOREIGN KEY REFERENCES [PeriodAudit](PeriodAuditId),
+    PeriodAuditScaleResultId  UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(), -- ID de Resultado de Grupo de Auditoría
+    PeriodAuditResultId UNIQUEIDENTIFIER NOT NULL -- ID de Auditoría
+        FOREIGN KEY REFERENCES PeriodAuditResult(PeriodAuditResultId),
     RiskScaleGroupId UNIQUEIDENTIFIER NOT NULL -- ID del Grupo de Escala de Riesgo
         FOREIGN KEY REFERENCES RiskScaleGroup(RiskScaleGroupId),
 
