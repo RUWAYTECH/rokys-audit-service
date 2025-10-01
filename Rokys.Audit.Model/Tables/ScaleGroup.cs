@@ -9,6 +9,5 @@ namespace Rokys.Audit.Model.Tables
 
         // Navigation properties
         public virtual Group Group { get; set; } = null!;
-        public virtual ICollection<RiskScaleGroup> RiskScaleGroups { get; set; } = new List<RiskScaleGroup>();
     }
 }

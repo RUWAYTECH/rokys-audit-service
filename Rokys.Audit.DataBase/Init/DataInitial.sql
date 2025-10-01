@@ -33,6 +33,24 @@ CREATE TABLE [ScaleCompany](
     UpdateDate DATETIME2 NULL -- Fecha de Actualización
 )
 
+
+CREATE TABLE AuditScaleTemplate (
+    AuditScaleTemplateId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    Code NVARCHAR(50) UNIQUE NOT NULL,
+    Name NVARCHAR(255) NOT NULL,
+    Description NVARCHAR(MAX),
+    TemplateData NVARCHAR(MAX) NOT NULL, -- JSON almacenado como texto
+    IsActive BIT DEFAULT 1, -- Está Activo
+    CreatedBy VARCHAR(120) NULL, -- Creado Por
+    CreationDate DATETIME2 DEFAULT GETDATE(), -- Fecha de Creación
+    UpdatedBy VARCHAR(120) NULL, -- Actualizado Por
+    UpdateDate DATETIME2 NULL -- Fecha de Actualización
+    -- Constraint para validar que sea JSON válido
+    CONSTRAINT CK_TemplateData_IsJson CHECK (ISJSON(TemplateData) = 1)
+);
+
+
+
 -- Tabla: Escala por Empresa
 CREATE TABLE [Group]
 (
@@ -91,10 +109,87 @@ CREATE TABLE ScaleGroup
 );
 
 
---TODO
+CREATE TABLE AuditTemplateFields (
+    AuditTemplateFieldId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    ScaleGroupId UNIQUEIDENTIFIER NOT NULL FOREIGN KEY REFERENCES ScaleGroup(ScaleGroupId),
+    AuditScaleTemplateId UNIQUEIDENTIFIER NOT NULL FOREIGN KEY REFERENCES AuditScaleTemplate(AuditScaleTemplateId),
+    -- Información del Grupo
+    GroupCode NVARCHAR(100) NOT NULL,
+    GroupName NVARCHAR(255) NOT NULL,
+    
+    -- Información del Campo
+    FieldCode NVARCHAR(100) NOT NULL,
+    FieldName NVARCHAR(255) NOT NULL,
+    FieldType NVARCHAR(50) NOT NULL, -- numeric, text, date, boolean, select, image
+    --FieldSortOrder INT DEFAULT 0,
+    
+    -- Valores (usa el apropiado según FieldType)
+    --TextValue NVARCHAR(MAX),
+    --NumericValue DECIMAL(18,4),
+    --DateValue DATETIME2,
+    --BooleanValue BIT,
+    
+    -- Metadatos
+    --IsRequired BIT DEFAULT 0,
+    DefaultValue NVARCHAR(MAX),
 
+    -- Auditoría    
+    IsActive BIT DEFAULT 1, -- Está Activo
+    CreatedBy VARCHAR(120) NULL, -- Creado Por
+    CreationDate DATETIME2 DEFAULT GETDATE(), -- Fecha de Creación
+    UpdatedBy VARCHAR(120) NULL, -- Actualizado Por
+    UpdateDate DATETIME2 NULL -- Fecha de Actualización
+    -- Índices para optimización de consultas
+    INDEX IX_AuditFieldValues_FieldCode (FieldCode)
+);
 
-
+-- =============================================
+-- CRITERIOS DE PUNTUACIÓN
+-- =============================================
+CREATE TABLE ScoringCriteria (
+    ScoringCriteriaId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    ScaleGroupId UNIQUEIDENTIFIER NOT NULL 
+        FOREIGN KEY REFERENCES ScaleGroup(ScaleGroupId),
+    AuditTemplateFieldId UNIQUEIDENTIFIER NULL 
+        FOREIGN KEY REFERENCES AuditTemplateFields(AuditTemplateFieldId),
+    
+    -- Identificación del Criterio
+    CriteriaName NVARCHAR(255) NOT NULL, -- Nombre del Criterio
+    CriteriaCode NVARCHAR(100), -- Código único del criterio (opcional)
+    Description NVARCHAR(500), -- Descripción del criterio
+    
+    -- Campo a Evaluar (referencia lógica)
+    EvaluatedFieldCode NVARCHAR(100) NOT NULL, -- Código del campo a evaluar
+    EvaluatedFieldName NVARCHAR(255), -- Nombre del campo (desnormalizado)
+    EvaluatedFieldType NVARCHAR(50), -- Tipo del campo (numeric, text, date, boolean)
+    
+    -- Fórmula y Evaluación
+    ResultFormula NVARCHAR(500), -- Fórmula para calcular resultado del campo
+    ComparisonOperator NVARCHAR(20) NOT NULL, -- Operador: '=', '!=', '>', '<', '>=', '<=', 'BETWEEN', 'IN', 'CONTAINS'
+    ExpectedValue NVARCHAR(255) NOT NULL, -- Valor esperado
+    
+    -- Puntuación
+    Score DECIMAL(10,2) NOT NULL, -- Puntaje otorgado si cumple
+    ScoreWeight DECIMAL(5,2) DEFAULT 1.00, -- Peso del criterio en el grupo
+    
+    -- Configuración adicional
+    IsRequired BIT DEFAULT 1, -- Si es obligatorio evaluar
+    SortOrder INT DEFAULT 0, -- Orden de evaluación
+    ErrorMessage NVARCHAR(500), -- Mensaje si no cumple
+    SuccessMessage NVARCHAR(500), -- Mensaje si cumple
+    
+    -- Auditoría
+    IsActive BIT DEFAULT 1,
+    CreatedBy VARCHAR(120) NULL,
+    CreationDate DATETIME2 DEFAULT GETDATE(),
+    UpdatedBy VARCHAR(120) NULL,
+    UpdateDate DATETIME2 NULL,
+    
+    -- Índices
+    INDEX IX_ScoringCriteria_ScaleGroupId (ScaleGroupId),
+    INDEX IX_ScoringCriteria_FieldCode (EvaluatedFieldCode),
+    INDEX IX_ScoringCriteria_TemplateFieldId (AuditTemplateFieldId)
+);
 -- =============================================
 -- AUDIT PROCESS TABLES
 -- =============================================
