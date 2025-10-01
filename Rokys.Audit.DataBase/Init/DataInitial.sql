@@ -44,7 +44,7 @@ CREATE TABLE AuditScaleTemplate (
     CreatedBy VARCHAR(120) NULL, -- Creado Por
     CreationDate DATETIME2 DEFAULT GETDATE(), -- Fecha de Creación
     UpdatedBy VARCHAR(120) NULL, -- Actualizado Por
-    UpdateDate DATETIME2 NULL -- Fecha de Actualización
+    UpdateDate DATETIME2 NULL, -- Fecha de Actualización
     -- Constraint para validar que sea JSON válido
     CONSTRAINT CK_TemplateData_IsJson CHECK (ISJSON(TemplateData) = 1)
 );
@@ -265,8 +265,8 @@ CREATE TABLE PeriodAuditScaleResult
     PeriodAuditScaleResultId  UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(), -- ID de Resultado de Grupo de Auditoría
     PeriodAuditResultId UNIQUEIDENTIFIER NOT NULL -- ID de Auditoría
         FOREIGN KEY REFERENCES PeriodAuditResult(PeriodAuditResultId),
-    RiskScaleGroupId UNIQUEIDENTIFIER NOT NULL -- ID del Grupo de Escala de Riesgo
-        FOREIGN KEY REFERENCES RiskScaleGroup(RiskScaleGroupId),
+    ScaleGroupId UNIQUEIDENTIFIER NOT NULL -- ID del Grupo de Escala de Riesgo
+        FOREIGN KEY REFERENCES ScaleGroup(ScaleGroupId),
 
     -- Calculation data at the time of audit
     TotalValue DECIMAL(10,2) NOT NULL, -- Valor Total
