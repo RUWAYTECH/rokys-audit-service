@@ -396,3 +396,48 @@ CREATE TABLE PeriodAuditFieldValues (
     INDEX IX_PeriodAuditFieldValues_ScaleGroupId (ScaleGroupId),
     INDEX IX_PeriodAuditFieldValues_NumericValue (NumericValue) WHERE NumericValue IS NOT NULL
 );
+
+-- =============================================
+-- RESULTADOS DE EVALUACIÓN DE SUB-CRITERIOS
+-- =============================================
+CREATE TABLE PeriodAuditScaleSubResult (
+    PeriodAuditScaleSubResultId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    PeriodAuditScaleResultId UNIQUEIDENTIFIER NOT NULL 
+        FOREIGN KEY REFERENCES PeriodAuditScaleResult(PeriodAuditScaleResultId) ON DELETE CASCADE,
+    CriteriaSubResultId UNIQUEIDENTIFIER NOT NULL 
+        FOREIGN KEY REFERENCES CriteriaSubResult(CriteriaSubResultId),
+    ScaleGroupId UNIQUEIDENTIFIER NOT NULL 
+        FOREIGN KEY REFERENCES ScaleGroup(ScaleGroupId),
+    AuditTemplateFieldId UNIQUEIDENTIFIER NULL 
+        FOREIGN KEY REFERENCES AuditTemplateFields(AuditTemplateFieldId),
+    
+    -- Identificación del Criterio (desnormalizado)
+    CriteriaCode NVARCHAR(10),
+    CriteriaName NVARCHAR(255) NOT NULL,
+    
+    -- Valores evaluados
+    EvaluatedValue NVARCHAR(255), -- Valor que se evaluó
+    CalculatedResult NVARCHAR(255), -- Resultado de aplicar la fórmula
+    AppliedFormula NVARCHAR(500), -- Fórmula que se aplicó (histórico)
+    
+    -- Resultado de la evaluación
+    ScoreObtained DECIMAL(10,2) NULL, -- Puntaje obtenido
+    ColorCode NVARCHAR(20), -- Código de color del resultado
+    
+    -- Detalles
+    EvaluationNotes NVARCHAR(MAX), -- Notas de la evaluación
+    ResultMessage NVARCHAR(500), -- Mensaje del resultado
+    
+    -- Auditoría
+    IsActive BIT DEFAULT 1,
+    CreatedBy VARCHAR(120) NULL,
+    CreationDate DATETIME2 DEFAULT GETDATE(),
+    UpdatedBy VARCHAR(120) NULL,
+    UpdateDate DATETIME2 NULL,
+    
+    -- Índices
+    INDEX IX_PeriodAuditScaleSubResult_ScaleResultId (PeriodAuditScaleResultId),
+    INDEX IX_PeriodAuditScaleSubResult_CriteriaId (CriteriaSubResultId),
+    INDEX IX_PeriodAuditScaleSubResult_ScaleGroupId (ScaleGroupId),
+    UNIQUE (PeriodAuditScaleResultId, CriteriaSubResultId) -- Un sub-resultado por criterio por resultado de escala
+);
