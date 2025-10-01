@@ -117,6 +117,7 @@ CREATE TABLE AuditTemplateFields (
     -- Información del Grupo
     GroupCode NVARCHAR(100) NOT NULL,
     GroupName NVARCHAR(255) NOT NULL,
+    Orientation VARCHAR(2) NOT NULL,
     
     -- Información del Campo
     FieldCode NVARCHAR(100) NOT NULL,
@@ -286,4 +287,51 @@ CREATE TABLE PeriodAuditScaleResult
     CreationDate DATETIME2 DEFAULT GETDATE(), -- Fecha de Creación
     UpdatedBy VARCHAR(120) NULL, -- Actualizado Por
     UpdateDate DATETIME2 NULL -- Fecha de Actualización
+);
+
+CREATE TABLE PeriodAuditFieldValues (
+    PeriodAuditFieldValueId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    PeriodAuditId INT NOT NULL 
+        FOREIGN KEY REFERENCES PeriodAudit(PeriodAuditId) ON DELETE CASCADE,
+    AuditTemplateFieldId UNIQUEIDENTIFIER NULL 
+        FOREIGN KEY REFERENCES AuditTemplateFields(AuditTemplateFieldId),
+    ScaleGroupId UNIQUEIDENTIFIER NOT NULL 
+        FOREIGN KEY REFERENCES ScaleGroup(ScaleGroupId),
+    PeriodAuditScaleResultId UNIQUEIDENTIFIER NULL
+        FOREIGN KEY REFERENCES PeriodAuditScaleResult(PeriodAuditScaleResultId) ON DELETE CASCADE,
+    
+    -- Información del Grupo (desnormalizado para performance)
+    GroupCode NVARCHAR(100) NOT NULL,
+    GroupName NVARCHAR(255) NOT NULL,
+    Orientation NVARCHAR(1) NULL, -- horizontal, vertical
+    
+    -- Información del Campo (desnormalizado)
+    FieldCode NVARCHAR(100) NOT NULL,
+    FieldName NVARCHAR(255) NOT NULL,
+    FieldType NVARCHAR(50) NOT NULL,
+    
+    -- ⚠️ VALORES CAPTURADOS - Descomenta estas líneas
+    TextValue NVARCHAR(MAX),
+    NumericValue DECIMAL(18,4),
+    DateValue DATETIME2,
+    BooleanValue BIT,
+    ImageUrl NVARCHAR(500), -- Para almacenar URL o path de imagen
+    
+    -- Metadatos del valor capturado
+    IsRequired BIT DEFAULT 0,
+    ValidationStatus NVARCHAR(50), -- 'valid', 'invalid', 'pending', 'warning'
+    ValidationMessage NVARCHAR(500),
+    
+    -- Auditoría
+    IsActive BIT DEFAULT 1,
+    CreatedBy VARCHAR(120) NULL,
+    CreationDate DATETIME2 DEFAULT GETDATE(),
+    UpdatedBy VARCHAR(120) NULL,
+    UpdateDate DATETIME2 NULL,
+    
+    -- Índices para optimización
+    INDEX IX_PeriodAuditFieldValues_PeriodAuditId (PeriodAuditId),
+    INDEX IX_PeriodAuditFieldValues_Composite (PeriodAuditId, GroupCode, FieldCode),
+    INDEX IX_PeriodAuditFieldValues_ScaleGroupId (ScaleGroupId),
+    INDEX IX_PeriodAuditFieldValues_NumericValue (NumericValue) WHERE NumericValue IS NOT NULL
 );
