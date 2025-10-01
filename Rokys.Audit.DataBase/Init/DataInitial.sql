@@ -197,18 +197,18 @@ CREATE TABLE ScoringCriteria (
 -- Table: PeriodAudit Audit (Header)
 CREATE TABLE [PeriodAudit]
 (
-    PeriodAuditId INT IDENTITY(1,1) PRIMARY KEY, -- ID de Auditoría
+    PeriodAuditId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(), -- ID de Auditoría
 
     -- Store / audit identification
-    StoreId INT NULL, -- ID de Tienda
+    StoreId UNIQUEIDENTIFIER NULL, -- ID de Tienda
     StoreName NVARCHAR(150) NOT NULL, -- Nombre de Tienda
 
     -- Participants
-    Administrator NVARCHAR(150) NULL, -- Administrador
-    Assistant NVARCHAR(150) NULL, -- Asistente
-    OperationManagers NVARCHAR(200) NULL, -- Gerentes de Operación
-    FloatingAdministrator NVARCHAR(150) NULL, -- Administrador Flotante
-    ResponsibleAuditor NVARCHAR(150) NULL, -- Auditor Responsable
+    AdministratorId UNIQUEIDENTIFIER NULL, -- Administrador
+    AssistantId UNIQUEIDENTIFIER NULL, -- Asistente
+    OperationManagersId UNIQUEIDENTIFIER NULL, -- Gerentes de Operación
+    FloatingAdministratorId UNIQUEIDENTIFIER NULL, -- Administrador Flotante
+    ResponsibleAuditorId UNIQUEIDENTIFIER NULL, -- Auditor Responsable
 
     -- Dates
     StartDate DATE NOT NULL, -- Fecha de Inicio
@@ -227,6 +227,8 @@ CREATE TABLE [PeriodAudit]
     UpdatedBy VARCHAR(120) NULL, -- Actualizado Por
     UpdateDate DATETIME2 NULL -- Fecha de Actualización
 );
+
+--TODO
 
 -- Table: Result per Auditable Point
 CREATE TABLE PeriodAuditResult

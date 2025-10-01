@@ -259,3 +259,7 @@ paket-files/
 __pycache__/
 *.pyc
 *.txt
+*publish/
+*Uploads/
+*salida.sql
+*liquibase.properties
