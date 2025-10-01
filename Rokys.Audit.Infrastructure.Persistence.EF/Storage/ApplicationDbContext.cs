@@ -14,7 +14,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
         public DbSet<ScaleCompany> ScaleCompanies { get; set; }
         public DbSet<Group> Groups { get; set; }
         public DbSet<ScaleGroup> ScaleGroups { get; set; }
-        public DbSet<Proveedor> Proveedores { get; set; }
+        //public DbSet<Proveedor> Proveedores { get; set; }
         
         // New audit entities
         public DbSet<AuditScaleTemplate> AuditScaleTemplates { get; set; }
