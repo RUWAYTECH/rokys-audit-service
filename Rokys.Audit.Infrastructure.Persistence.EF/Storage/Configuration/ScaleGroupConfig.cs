@@ -17,7 +17,11 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.Property(a => a.GroupId)
                 .IsRequired();
                 
-            builder.Property(a => a.Description)
+            builder.Property(a => a.Code)
+                .IsRequired()
+                .HasMaxLength(10);
+                
+            builder.Property(a => a.Name)
                 .IsRequired()
                 .HasMaxLength(200);
                 
