@@ -205,6 +205,22 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF
             GC.SuppressFinalize(this);
         }
 
+        public virtual async Task<(List<TEntity> Items, int TotalRows)> GetPagedAsync(
+                 Expression<Func<TEntity, bool>> filter = null,
+                 Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
+                 int pageNumber = 0,
+                 int pageSize = 0,
+                 params Expression<Func<TEntity, object>>[] includeProperties)
+        {
+            var query = CreateDbSetQuery(filter, includeProperties);
+            if (orderBy != null)
+                query = orderBy(query);
+
+            int rowsCount = await query.CountAsync();
+            var items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+            return (items, rowsCount);
+        }
+
 
     }
 }
