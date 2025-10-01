@@ -29,7 +29,7 @@ namespace Rokys.Audit.WebAPI.Controllers
             _httpContextAccessor = httpContextAccessor;
         }
 
-        [HttpPost("login")]
+       /* [HttpPost("login")]
         [ProducesResponseType(typeof(StatusCodeResult), 200), ProducesResponseType(typeof(ResponseDto<UserResponseDto>), 402)]
         public async Task<IActionResult> Login(LoginRequestDto loginRequest)
         {
@@ -88,10 +88,10 @@ namespace Rokys.Audit.WebAPI.Controllers
 
                
             return BadRequest(response);
-        }
+        } */
 
 
-        [Authorize]
+       /* [Authorize]
         [HttpGet("permissions")]
         [ProducesResponseType(typeof(StatusCodeResult), 200), ProducesResponseType(typeof(ResponseDto), 402)]
         public IActionResult Permissions()
@@ -101,7 +101,7 @@ namespace Rokys.Audit.WebAPI.Controllers
             if (response.IsValid)
                 return Ok(response);
             return BadRequest(response);
-        }
+        } */
 
     }
 }
