@@ -27,6 +27,7 @@ namespace Rokys.Audit.Model.Tables
         public bool IsActive { get; set; } = true;
 
         // Navigation properties
+        public virtual Stores? Store { get; set; }
         public virtual ICollection<PeriodAuditResult> PeriodAuditResults { get; set; } = new List<PeriodAuditResult>();
         public virtual ICollection<PeriodAuditFieldValues> PeriodAuditFieldValues { get; set; } = new List<PeriodAuditFieldValues>();
     }

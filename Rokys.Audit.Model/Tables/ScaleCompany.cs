@@ -11,5 +11,8 @@
         public decimal RiskHigh { get; set; }
         public decimal Weighting { get; set; }
         public bool IsActive { get; set; } = true;
+
+        // Navigation properties
+        public virtual Enterprise? Enterprise { get; set; }
     }
 }

@@ -47,6 +47,25 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 
             builder.Property(a => a.UpdatedBy)
                 .HasMaxLength(120);
+
+            // Navigation properties
+            builder.HasOne(g => g.Enterprise)
+                .WithMany(e => e.Groups)
+                .HasForeignKey(g => g.EnterpriseId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(g => g.ScaleGroups)
+                .WithOne(sg => sg.Group)
+                .HasForeignKey(sg => sg.GroupId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(g => g.PeriodAuditResults)
+                .WithOne(par => par.Group)
+                .HasForeignKey(par => par.GroupId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Indexes
+            builder.HasIndex(g => g.EnterpriseId);
         }
     }
 }

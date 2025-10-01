@@ -6,6 +6,10 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
 {
     public class ApplicationDbContext : DbContext
     {
+        // Core business entities
+        public DbSet<Enterprise> Enterprises { get; set; }
+        public DbSet<Stores> Stores { get; set; }
+        
         // Existing entities
         public DbSet<ScaleCompany> ScaleCompanies { get; set; }
         public DbSet<Group> Groups { get; set; }
@@ -29,11 +33,15 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
         {
             base.OnModelCreating(modelBuilder);
             
+            // Core business configurations
+            modelBuilder.ApplyConfiguration(new EnterpriseConfig());
+            modelBuilder.ApplyConfiguration(new StoresConfig());
+            
             // Existing configurations
             modelBuilder.ApplyConfiguration(new ScaleCompanyConfig());
             modelBuilder.ApplyConfiguration(new GroupConfig());
             modelBuilder.ApplyConfiguration(new ScaleGroupConfig());
-            modelBuilder.ApplyConfiguration(new ProveedorConfig());
+            //modelBuilder.ApplyConfiguration(new ProveedorConfig());
             
             // New audit configurations
             modelBuilder.ApplyConfiguration(new AuditScaleTemplateConfig());

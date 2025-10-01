@@ -22,6 +22,15 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.Property(x => x.CreatedBy).HasMaxLength(100);
             builder.Property(x => x.UpdatedBy).HasMaxLength(100);
             builder.Property(x => x.UpdateDate);
+
+            // Navigation properties
+            builder.HasOne(sc => sc.Enterprise)
+                .WithMany(e => e.ScaleCompanies)
+                .HasForeignKey(sc => sc.EnterpriseId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Indexes
+            builder.HasIndex(sc => sc.EnterpriseId);
         }
     }
 }

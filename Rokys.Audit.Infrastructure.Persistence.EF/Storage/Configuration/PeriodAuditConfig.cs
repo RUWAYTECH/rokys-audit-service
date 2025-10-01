@@ -103,6 +103,11 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .IsRequired(false);
 
             // Navigation properties
+            builder.HasOne(x => x.Store)
+                .WithMany(s => s.PeriodAudits)
+                .HasForeignKey(x => x.StoreId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             builder.HasMany(x => x.PeriodAuditResults)
                 .WithOne(x => x.PeriodAudit)
                 .HasForeignKey(x => x.PeriodAuditId)

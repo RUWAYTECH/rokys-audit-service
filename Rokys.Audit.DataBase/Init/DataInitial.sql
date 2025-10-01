@@ -5,10 +5,41 @@
 --Company
 --Store
 
+CREATE TABLE Enterprise (
+    EnterpriseId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    Name NVARCHAR(255) NOT NULL,
+    Code NVARCHAR(50) UNIQUE NOT NULL,
+    Address NVARCHAR(500) NULL,
+    IsActive BIT DEFAULT 1,
+    CreatedBy VARCHAR(120) NULL,
+    CreationDate DATETIME2 DEFAULT GETDATE(),
+    UpdatedBy VARCHAR(120) NULL,
+    UpdateDate DATETIME2 NULL
+);
+
+
+
+-- Stores table
+CREATE TABLE Stores (
+    StoreId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    Name NVARCHAR(255) NOT NULL,
+    Code NVARCHAR(50) UNIQUE NOT NULL,
+    Address NVARCHAR(500) NULL,
+    EnterpriseId UNIQUEIDENTIFIER NOT NULL,
+    IsActive BIT DEFAULT 1,
+    CreatedBy VARCHAR(120) NULL,
+    CreationDate DATETIME2 DEFAULT GETDATE(),
+    UpdatedBy VARCHAR(120) NULL,
+    UpdateDate DATETIME2 NULL,
+    CONSTRAINT FK_Stores_Enterprise 
+        FOREIGN KEY (EnterpriseId) REFERENCES Enterprise(EnterpriseId)
+);
+
+
 
 CREATE TABLE [ScaleCompany](
     ScaleCompanyId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(), -- ID de la Escala por Empresa
-    EnterpriseId UNIQUEIDENTIFIER NOT NULL, -- Nombre de la Empresa
+    EnterpriseId UNIQUEIDENTIFIER NOT NULL REFERENCES Enterprise(EnterpriseId), -- Nombre de la Empresa
 
     Description NVARCHAR(200) NOT NULL, -- Descripción
 
@@ -202,8 +233,7 @@ CREATE TABLE [PeriodAudit]
     PeriodAuditId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(), -- ID de Auditoría
 
     -- Store / audit identification
-    StoreId UNIQUEIDENTIFIER NULL, -- ID de Tienda
-    StoreName NVARCHAR(150) NOT NULL, -- Nombre de Tienda
+    StoreId UNIQUEIDENTIFIER REFERENCES Stores(StoreId), -- ID de Tienda
 
     -- Participants
     AdministratorId UNIQUEIDENTIFIER NULL, -- Administrador
