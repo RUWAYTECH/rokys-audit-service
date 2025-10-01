@@ -15,7 +15,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfiguration(new ScaleCompanyConfig());
-            modelBuilder.ApplyConfiguration(new ProveedorConfig());
+            modelBuilder.ApplyConfiguration(new GroupConfig());
         }
     }
 }
