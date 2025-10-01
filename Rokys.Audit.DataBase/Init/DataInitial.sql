@@ -291,8 +291,6 @@ CREATE TABLE PeriodAuditScaleResult
 
 CREATE TABLE PeriodAuditFieldValues (
     PeriodAuditFieldValueId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    PeriodAuditId INT NOT NULL 
-        FOREIGN KEY REFERENCES PeriodAudit(PeriodAuditId) ON DELETE CASCADE,
     AuditTemplateFieldId UNIQUEIDENTIFIER NULL 
         FOREIGN KEY REFERENCES AuditTemplateFields(AuditTemplateFieldId),
     ScaleGroupId UNIQUEIDENTIFIER NOT NULL 
@@ -330,8 +328,7 @@ CREATE TABLE PeriodAuditFieldValues (
     UpdateDate DATETIME2 NULL,
     
     -- Índices para optimización
-    INDEX IX_PeriodAuditFieldValues_PeriodAuditId (PeriodAuditId),
-    INDEX IX_PeriodAuditFieldValues_Composite (PeriodAuditId, GroupCode, FieldCode),
+    INDEX IX_PeriodAuditFieldValues_Composite (GroupCode, FieldCode),
     INDEX IX_PeriodAuditFieldValues_ScaleGroupId (ScaleGroupId),
     INDEX IX_PeriodAuditFieldValues_NumericValue (NumericValue) WHERE NumericValue IS NOT NULL
 );

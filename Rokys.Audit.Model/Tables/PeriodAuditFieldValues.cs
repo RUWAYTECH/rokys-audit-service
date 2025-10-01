@@ -3,7 +3,6 @@ namespace Rokys.Audit.Model.Tables
     public class PeriodAuditFieldValues : AuditEntity
     {
         public Guid PeriodAuditFieldValueId { get; set; } = Guid.NewGuid();
-        public Guid PeriodAuditId { get; set; }
         public Guid? AuditTemplateFieldId { get; set; }
         public Guid ScaleGroupId { get; set; }
         public Guid? PeriodAuditScaleResultId { get; set; }
@@ -31,8 +30,6 @@ namespace Rokys.Audit.Model.Tables
         public string? ValidationMessage { get; set; }
         public bool IsActive { get; set; } = true;
 
-        // Navigation properties
-        public virtual PeriodAudit PeriodAudit { get; set; } = null!;
         public virtual AuditTemplateFields? AuditTemplateField { get; set; }
         public virtual ScaleGroup ScaleGroup { get; set; } = null!;
         public virtual PeriodAuditScaleResult? PeriodAuditScaleResult { get; set; }
