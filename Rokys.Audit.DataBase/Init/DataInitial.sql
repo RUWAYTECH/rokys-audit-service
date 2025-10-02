@@ -52,6 +52,7 @@ CREATE TABLE [ScaleCompany](
     RiskHigh DECIMAL(10,2) NOT NULL, -- Riesgo Alto
 
     -- Riesgo crítico = mayor a RiesgoElevado
+    RiskCritical DECIMAL(10,2) NOT NULL,
 
     -- Ponderación de la empresa
     Weighting DECIMAL(5,2) NOT NULL, -- Peso de la Empresa
@@ -63,23 +64,6 @@ CREATE TABLE [ScaleCompany](
     UpdatedBy VARCHAR(120) NULL, -- Actualizado Por
     UpdateDate DATETIME2 NULL -- Fecha de Actualización
 )
-
-
-CREATE TABLE AuditScaleTemplate (
-    AuditScaleTemplateId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    Code NVARCHAR(50) UNIQUE NOT NULL,
-    Name NVARCHAR(255) NOT NULL,
-    Description NVARCHAR(MAX),
-    TemplateData NVARCHAR(MAX) NOT NULL, -- JSON almacenado como texto
-    IsActive BIT DEFAULT 1, -- Está Activo
-    CreatedBy VARCHAR(120) NULL, -- Creado Por
-    CreationDate DATETIME2 DEFAULT GETDATE(), -- Fecha de Creación
-    UpdatedBy VARCHAR(120) NULL, -- Actualizado Por
-    UpdateDate DATETIME2 NULL, -- Fecha de Actualización
-    -- Constraint para validar que sea JSON válido
-    CONSTRAINT CK_TemplateData_IsJson CHECK (ISJSON(TemplateData) = 1)
-);
-
 
 
 -- Tabla: Escala por Empresa
@@ -99,7 +83,7 @@ CREATE TABLE [Group]
     RiskHigh DECIMAL(10,2) NOT NULL, -- Riesgo Alto
 
     -- Riesgo crítico = mayor a RiesgoElevado
-
+    RiskCritical DECIMAL(10,2) NOT NULL,
     -- Ponderación del grupo
     Weighting DECIMAL(5,2) NOT NULL, -- Peso del Grupo
 
@@ -128,6 +112,7 @@ CREATE TABLE ScaleGroup
     HighRisk DECIMAL(10,2) NOT NULL, -- Riesgo Alto
     
     -- Critical risk = greater than HighRisk
+    RiskCritical DECIMAL(10,2) NOT NULL,
 
     -- Group weighting
     Weighting DECIMAL(5,2) NOT NULL, -- Ponderación
@@ -141,19 +126,41 @@ CREATE TABLE ScaleGroup
 );
 
 
+
+CREATE TABLE TableScaleTemplate (
+    TableScaleTemplateId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    ScaleGroupId UNIQUEIDENTIFIER NOT NULL -- ID del Grupo
+        FOREIGN KEY REFERENCES ScaleGroup(ScaleGroupId),
+    Code NVARCHAR(50) UNIQUE NOT NULL,
+    Name NVARCHAR(255) NOT NULL,
+    Title NVARCHAR(255),
+    TemplateData NVARCHAR(MAX) NULL, -- JSON almacenado como texto
+    IsActive BIT DEFAULT 1, -- Está Activo
+    CreatedBy VARCHAR(120) NULL, -- Creado Por
+    CreationDate DATETIME2 DEFAULT GETDATE(), -- Fecha de Creación
+    UpdatedBy VARCHAR(120) NULL, -- Actualizado Por
+    UpdateDate DATETIME2 NULL, -- Fecha de Actualización
+    -- Constraint para validar que sea JSON válido
+    CONSTRAINT CK_TemplateData_IsJson CHECK (ISJSON(TemplateData) = 1)
+);
+
+
+
+
 CREATE TABLE AuditTemplateFields (
     AuditTemplateFieldId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    ScaleGroupId UNIQUEIDENTIFIER NOT NULL FOREIGN KEY REFERENCES ScaleGroup(ScaleGroupId),
-    AuditScaleTemplateId UNIQUEIDENTIFIER NOT NULL FOREIGN KEY REFERENCES AuditScaleTemplate(AuditScaleTemplateId),
-    -- Información del Grupo
-    GroupCode NVARCHAR(100) NOT NULL,
-    GroupName NVARCHAR(255) NOT NULL,
-    Orientation VARCHAR(2) NOT NULL,
-    
+    TableScaleTemplateId UNIQUEIDENTIFIER NOT NULL FOREIGN KEY REFERENCES TableScaleTemplate(TableScaleTemplateId),
+
     -- Información del Campo
     FieldCode NVARCHAR(100) NOT NULL,
     FieldName NVARCHAR(255) NOT NULL,
     FieldType NVARCHAR(50) NOT NULL, -- numeric, text, date, boolean, select, image
+    IsCalculated BIT DEFAULT 0, -- Si es un campo calculado
+    CalculationFormula NVARCHAR(500), -- Fórmula para calcular el valor (si es calculado)
+    AcumulationType NVARCHAR(50) NULL, -- Tipo de Acumulación: 'NA', 'SUM', 'AVERAGE', 'MAX', 'MIN', 'COUNT'
+    CONSTRAINT CK_AuditTemplateFields_AcumulationType 
+    CHECK (AcumulationType IN ('SUM', 'COUNT') OR AcumulationType IS NULL), -- Tipo de Acumulación: 'sum', 'average', 'max', 'min', 'count'
+    FieldOptions NVARCHAR(MAX), -- Opciones para campos tipo 'select' (JSON
     --FieldSortOrder INT DEFAULT 0,
     
     -- Valores (usa el apropiado según FieldType)
@@ -183,18 +190,11 @@ CREATE TABLE ScoringCriteria (
     ScoringCriteriaId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     ScaleGroupId UNIQUEIDENTIFIER NOT NULL 
         FOREIGN KEY REFERENCES ScaleGroup(ScaleGroupId),
-    AuditTemplateFieldId UNIQUEIDENTIFIER NULL 
-        FOREIGN KEY REFERENCES AuditTemplateFields(AuditTemplateFieldId),
     
     -- Identificación del Criterio
     CriteriaName NVARCHAR(255) NOT NULL, -- Nombre del Criterio
-    CriteriaCode NVARCHAR(100), -- Código único del criterio (opcional)
-    Description NVARCHAR(500), -- Descripción del criterio
+    CriteriaCode NVARCHAR(10), -- Código único del criterio (opcional)
     
-    -- Campo a Evaluar (referencia lógica)
-    EvaluatedFieldCode NVARCHAR(100) NOT NULL, -- Código del campo a evaluar
-    EvaluatedFieldName NVARCHAR(255), -- Nombre del campo (desnormalizado)
-    EvaluatedFieldType NVARCHAR(50), -- Tipo del campo (numeric, text, date, boolean)
     
     -- Fórmula y Evaluación
     ResultFormula NVARCHAR(500), -- Fórmula para calcular resultado del campo
@@ -203,11 +203,9 @@ CREATE TABLE ScoringCriteria (
     
     -- Puntuación
     Score DECIMAL(10,2) NOT NULL, -- Puntaje otorgado si cumple
-    ScoreWeight DECIMAL(5,2) DEFAULT 1.00, -- Peso del criterio en el grupo
-    
-    -- Configuración adicional
-    IsRequired BIT DEFAULT 1, -- Si es obligatorio evaluar
     SortOrder INT DEFAULT 0, -- Orden de evaluación
+
+   
     ErrorMessage NVARCHAR(500), -- Mensaje si no cumple
     SuccessMessage NVARCHAR(500), -- Mensaje si cumple
     
@@ -220,17 +218,13 @@ CREATE TABLE ScoringCriteria (
     
     -- Índices
     INDEX IX_ScoringCriteria_ScaleGroupId (ScaleGroupId),
-    INDEX IX_ScoringCriteria_FieldCode (EvaluatedFieldCode),
-    INDEX IX_ScoringCriteria_TemplateFieldId (AuditTemplateFieldId)
 );
 
 CREATE TABLE CriteriaSubResult (
     CriteriaSubResultId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     ScaleGroupId UNIQUEIDENTIFIER NOT NULL 
         FOREIGN KEY REFERENCES ScaleGroup(ScaleGroupId),
-    AuditTemplateFieldId UNIQUEIDENTIFIER NULL 
-        FOREIGN KEY REFERENCES AuditTemplateFields(AuditTemplateFieldId),
-    
+  
     -- Identificación del Criterio
     CriteriaName NVARCHAR(255) NOT NULL, -- Nombre del Criterio
     CriteriaCode NVARCHAR(10), -- Código único del criterio (opcional)
@@ -252,8 +246,20 @@ CREATE TABLE CriteriaSubResult (
     UpdateDate DATETIME2 NULL,
     
     -- Índices
-    INDEX IX_ScoringCriteria_ScaleGroupId (ScaleGroupId),
-    INDEX IX_ScoringCriteria_TemplateFieldId (AuditTemplateFieldId)
+    INDEX IX_ScoringCriteria_ScaleGroupId (ScaleGroupId)
+);
+
+
+CREATE TABLE AuditStatus (
+    AuditStatusId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    Name NVARCHAR(255) NOT NULL,
+    Code NVARCHAR(10) UNIQUE NOT NULL,
+    ColorCode NVARCHAR(10) NULL,
+    IsActive BIT DEFAULT 1,
+    CreatedBy VARCHAR(120) NULL,
+    CreationDate DATETIME2 DEFAULT GETDATE(),
+    UpdatedBy VARCHAR(120) NULL,
+    UpdateDate DATETIME2 NULL
 );
 
 
@@ -273,7 +279,7 @@ CREATE TABLE [PeriodAudit]
     AdministratorId UNIQUEIDENTIFIER NULL, -- Administrador
     AssistantId UNIQUEIDENTIFIER NULL, -- Asistente
     OperationManagersId UNIQUEIDENTIFIER NULL, -- Gerentes de Operación
-    FloatingAdministratorId UNIQUEIDENTIFIER NULL, -- Administrador Flotante
+    FloatingAdministratorId UNIQUEIDENTIFIER NULL, -- Administrador Suplente
     ResponsibleAuditorId UNIQUEIDENTIFIER NULL, -- Auditor Responsable
 
     -- Dates
@@ -285,6 +291,22 @@ CREATE TABLE [PeriodAudit]
     AuditedDays INT NULL, -- Días Auditados
     GlobalObservations NVARCHAR(MAX) NOT NULL, -- Observaciones Globales
     TotalWeighting DECIMAL(5,2) NOT NULL, -- Ponderación Total
+
+    StatusId UNIQUEIDENTIFIER NOT NULL -- ID de Estado
+        FOREIGN KEY REFERENCES AuditStatus(AuditStatusId),
+
+    
+    -- Objetivo general para la empresa
+    ObjectiveValue DECIMAL(10,2) NOT NULL, -- Valor Objetivo
+
+    -- Umbrales para la empresa
+    RiskLow DECIMAL(10,2) NOT NULL, -- Riesgo Bajo
+    RiskModerate DECIMAL(10,2) NOT NULL, -- Riesgo Moderado
+    RiskHigh DECIMAL(10,2) NOT NULL, -- Riesgo Alto
+
+    -- Riesgo crítico = mayor a RiesgoElevado
+    RiskCritical DECIMAL(10,2) NOT NULL,
+
 
     -- Record audit
     IsActive BIT DEFAULT 1, -- Está Activo
@@ -306,15 +328,15 @@ CREATE TABLE PeriodAuditResult
 
     -- Calculation data at the time of audit
     ObtainedValue DECIMAL(10,2) NOT NULL, -- Valor Obtenido
-    RiskLevel NVARCHAR(20) NULL, -- Nivel de Riesgo
 
     -- Historical weighting and thresholds
-    AppliedWeighting DECIMAL(5,2) NOT NULL, -- Ponderación Aplicada
-    AppliedLowThreshold DECIMAL(10,2) NOT NULL, -- Umbral Bajo Aplicado
-    AppliedModerateThreshold DECIMAL(10,2) NOT NULL, -- Umbral Moderado Aplicado
-    AppliedHighThreshold DECIMAL(10,2) NOT NULL, -- Umbral Alto Aplicado
+    AppliedRiskLow DECIMAL(10,2) NOT NULL, -- Riesgo Bajo
+    AppliedRiskModerate DECIMAL(10,2) NOT NULL, -- Riesgo Moderado
+    AppliedRiskHigh DECIMAL(10,2) NOT NULL, -- Riesgo Alto
+    AppliedRiskCritical DECIMAL(10,2) NOT NULL, -- Ponderación del grupo
+    AppliedWeighting DECIMAL(5,2) NOT NULL, -- Peso del Grupo
 
-    Observations NVARCHAR(MAX) NULL, -- Observaciones
+    Observations NVARCHAR(150) NULL, -- Observaciones
 
     -- Record audit
     IsActive BIT DEFAULT 1, -- Está Activo
@@ -322,6 +344,24 @@ CREATE TABLE PeriodAuditResult
     CreationDate DATETIME2 DEFAULT GETDATE(), -- Fecha de Creación
     UpdatedBy VARCHAR(120) NULL, -- Actualizado Por
     UpdateDate DATETIME2 NULL -- Fecha de Actualización
+);
+
+
+CREATE TABLE EvidenceFiles (
+    EvidenceFileId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    PeriodAuditResultId UNIQUEIDENTIFIER NOT NULL 
+        FOREIGN KEY REFERENCES PeriodAuditResult(PeriodAuditResultId) ON DELETE CASCADE,
+    OriginalName NVARCHAR(255) NOT NULL, -- Nombre original del archivo
+    FileName NVARCHAR(255) NOT NULL,
+    FileUrl NVARCHAR(500) NOT NULL, -- URL o path del archivo
+    FileType NVARCHAR(50) NULL, -- Tipo de archivo (opcional)
+    UploadedBy VARCHAR(120) NULL,
+    UploadDate DATETIME2 DEFAULT GETDATE(),
+    IsActive BIT DEFAULT 1,
+    CreatedBy VARCHAR(120) NULL,
+    CreationDate DATETIME2 DEFAULT GETDATE(),
+    UpdatedBy VARCHAR(120) NULL,
+    UpdateDate DATETIME2 NULL
 );
 
 -- Table: PeriodAuditScaleResult
@@ -335,13 +375,15 @@ CREATE TABLE PeriodAuditScaleResult
 
     -- Calculation data at the time of audit
     TotalValue DECIMAL(10,2) NOT NULL, -- Valor Total
-    RiskLevel NVARCHAR(20) NULL, -- Nivel de Riesgo
+
 
     -- Historical weighting and thresholds
-    AppliedWeighting DECIMAL(5,2) NOT NULL, -- Ponderación Aplicada
-    AppliedLowThreshold DECIMAL(10,2) NOT NULL, -- Umbral Bajo Aplicado
-    AppliedModerateThreshold DECIMAL(10,2) NOT NULL, -- Umbral Moderado Aplicado
-    AppliedHighThreshold DECIMAL(10,2) NOT NULL, -- Umbral Alto Aplicado
+    AppliedLowRisk DECIMAL(10,2) NOT NULL, -- Riesgo Bajo
+    AppliedModerateRisk DECIMAL(10,2) NOT NULL, -- Riesgo Moderado
+    AppliedHighRisk DECIMAL(10,2) NOT NULL, -- Riesgo Alto
+    AppliedRiskCritical DECIMAL(10,2) NOT NULL,
+    AppliedWeighting DECIMAL(5,2) NOT NULL, -- Ponderación
+
 
     Observations NVARCHAR(MAX) NULL, -- Observaciones
 
@@ -353,24 +395,42 @@ CREATE TABLE PeriodAuditScaleResult
     UpdateDate DATETIME2 NULL -- Fecha de Actualización
 );
 
+CREATE TABLE PeriodAuditTableScaleTemplateResult (
+    PeriodAuditTableScaleTemplateResultId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    PeriodAuditScaleResultId UNIQUEIDENTIFIER NOT NULL 
+        FOREIGN KEY REFERENCES PeriodAuditScaleResult(PeriodAuditScaleResultId) ON DELETE CASCADE,
+    TableScaleTemplateId UNIQUEIDENTIFIER NOT NULL 
+        FOREIGN KEY REFERENCES TableScaleTemplate(TableScaleTemplateId),
+    TemplateData NVARCHAR(MAX) NULL, -- JSON almacenado como texto
+    IsActive BIT DEFAULT 1, -- Está Activo
+    CreatedBy VARCHAR(120) NULL, -- Creado Por
+    CreationDate DATETIME2 DEFAULT GETDATE(), -- Fecha de Creación
+    UpdatedBy VARCHAR(120) NULL, -- Actualizado Por
+    UpdateDate DATETIME2 NULL, -- Fecha de Actualización
+    -- Constraint para validar que sea JSON válido
+    CONSTRAINT CK_PeriodAuditTableScaleTemplate_TemplateData_IsJson CHECK (ISJSON(TemplateData) = 1)
+);
+
 CREATE TABLE PeriodAuditFieldValues (
     PeriodAuditFieldValueId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     AuditTemplateFieldId UNIQUEIDENTIFIER NULL 
         FOREIGN KEY REFERENCES AuditTemplateFields(AuditTemplateFieldId),
-    ScaleGroupId UNIQUEIDENTIFIER NOT NULL 
-        FOREIGN KEY REFERENCES ScaleGroup(ScaleGroupId),
-    PeriodAuditScaleResultId UNIQUEIDENTIFIER NULL
-        FOREIGN KEY REFERENCES PeriodAuditScaleResult(PeriodAuditScaleResultId) ON DELETE CASCADE,
-    
-    -- Información del Grupo (desnormalizado para performance)
-    GroupCode NVARCHAR(100) NOT NULL,
-    GroupName NVARCHAR(255) NOT NULL,
-    Orientation NVARCHAR(1) NULL, -- horizontal, vertical
-    
+
+    PeriodAuditTableScaleTemplateResultId UNIQUEIDENTIFIER NULL
+        FOREIGN KEY REFERENCES PeriodAuditTableScaleTemplateResult(PeriodAuditTableScaleTemplateResultId) ON DELETE CASCADE,
+
     -- Información del Campo (desnormalizado)
     FieldCode NVARCHAR(100) NOT NULL,
     FieldName NVARCHAR(255) NOT NULL,
-    FieldType NVARCHAR(50) NOT NULL,
+    FieldType NVARCHAR(50) NOT NULL, -- numeric, text, date, boolean, select, image
+    IsCalculated BIT DEFAULT 0, -- Si es un campo calculado
+    CalculationFormula NVARCHAR(500), -- Fórmula para calcular el valor (si es calculado)
+    AcumulationType NVARCHAR(50) NULL, -- Tipo de Acumulación: 'NA', 'SUM', 'AVERAGE', 'MAX', 'MIN', 'COUNT'
+    CONSTRAINT CK_AuditTemplateFields_AcumulationTypeResult 
+    CHECK (AcumulationType IN ('SUM', 'COUNT') OR AcumulationType IS NULL), -- Tipo de Acumulación: 'sum', 'average', 'max', 'min', 'count'
+    FieldOptions NVARCHAR(MAX), -- Opciones para campos tipo 'select' (JSON
+
+
     
     -- ⚠️ VALORES CAPTURADOS - Descomenta estas líneas
     TextValue NVARCHAR(MAX),
@@ -378,9 +438,9 @@ CREATE TABLE PeriodAuditFieldValues (
     DateValue DATETIME2,
     BooleanValue BIT,
     ImageUrl NVARCHAR(500), -- Para almacenar URL o path de imagen
+    FieldOptionsValue NVARCHAR(255), -- Valor seleccionado para campos tipo 'select'
     
-    -- Metadatos del valor capturado
-    IsRequired BIT DEFAULT 0,
+
     ValidationStatus NVARCHAR(50), -- 'valid', 'invalid', 'pending', 'warning'
     ValidationMessage NVARCHAR(500),
     
@@ -392,11 +452,42 @@ CREATE TABLE PeriodAuditFieldValues (
     UpdateDate DATETIME2 NULL,
     
     -- Índices para optimización
-    INDEX IX_PeriodAuditFieldValues_Composite (GroupCode, FieldCode),
-    INDEX IX_PeriodAuditFieldValues_ScaleGroupId (ScaleGroupId),
+    INDEX IX_PeriodAuditFieldValues_FieldCode (FieldCode),
     INDEX IX_PeriodAuditFieldValues_NumericValue (NumericValue) WHERE NumericValue IS NOT NULL
 );
 
+
+CREATE TABLE PeriodAuditScoringCriteriaResult (
+    PeriodAuditScoringCriteriaResultId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    PeriodAuditScaleResultId UNIQUEIDENTIFIER NOT NULL 
+        FOREIGN KEY REFERENCES PeriodAuditScaleResult(PeriodAuditScaleResultId) ON DELETE CASCADE,
+
+   -- Identificación del Criterio
+    CriteriaName NVARCHAR(255) NOT NULL, -- Nombre del Criterio
+    CriteriaCode NVARCHAR(10), -- Código único del criterio (opcional)
+    
+    
+    -- Fórmula y Evaluación
+    ResultFormula NVARCHAR(500), -- Fórmula para calcular resultado del campo
+    ComparisonOperator NVARCHAR(20) NOT NULL, -- Operador: '=', '!=', '>', '<', '>=', '<=', 'BETWEEN', 'IN', 'CONTAINS'
+    ExpectedValue NVARCHAR(255) NOT NULL, -- Valor esperado
+    
+    -- Puntuación
+    Score DECIMAL(10,2) NOT NULL, -- Puntaje otorgado si cumple
+    SortOrder INT DEFAULT 0, -- Orden de evaluación
+
+   
+    ErrorMessage NVARCHAR(500), -- Mensaje si no cumple
+    SuccessMessage NVARCHAR(500), -- Mensaje si cumple
+
+    ResultObtained DECIMAL(10,2) NULL, -- Puntaje obtenido
+
+    IsActive BIT DEFAULT 1,
+    CreatedBy VARCHAR(120) NULL,
+    CreationDate DATETIME2 DEFAULT GETDATE(),
+    UpdatedBy VARCHAR(120) NULL,
+    UpdateDate DATETIME2 NULL
+);
 -- =============================================
 -- RESULTADOS DE EVALUACIÓN DE SUB-CRITERIOS
 -- =============================================
@@ -406,10 +497,6 @@ CREATE TABLE PeriodAuditScaleSubResult (
         FOREIGN KEY REFERENCES PeriodAuditScaleResult(PeriodAuditScaleResultId) ON DELETE CASCADE,
     CriteriaSubResultId UNIQUEIDENTIFIER NOT NULL 
         FOREIGN KEY REFERENCES CriteriaSubResult(CriteriaSubResultId),
-    ScaleGroupId UNIQUEIDENTIFIER NOT NULL 
-        FOREIGN KEY REFERENCES ScaleGroup(ScaleGroupId),
-    AuditTemplateFieldId UNIQUEIDENTIFIER NULL 
-        FOREIGN KEY REFERENCES AuditTemplateFields(AuditTemplateFieldId),
     
     -- Identificación del Criterio (desnormalizado)
     CriteriaCode NVARCHAR(10),
@@ -424,9 +511,7 @@ CREATE TABLE PeriodAuditScaleSubResult (
     ScoreObtained DECIMAL(10,2) NULL, -- Puntaje obtenido
     ColorCode NVARCHAR(20), -- Código de color del resultado
     
-    -- Detalles
-    EvaluationNotes NVARCHAR(MAX), -- Notas de la evaluación
-    ResultMessage NVARCHAR(500), -- Mensaje del resultado
+
     
     -- Auditoría
     IsActive BIT DEFAULT 1,
@@ -438,6 +523,5 @@ CREATE TABLE PeriodAuditScaleSubResult (
     -- Índices
     INDEX IX_PeriodAuditScaleSubResult_ScaleResultId (PeriodAuditScaleResultId),
     INDEX IX_PeriodAuditScaleSubResult_CriteriaId (CriteriaSubResultId),
-    INDEX IX_PeriodAuditScaleSubResult_ScaleGroupId (ScaleGroupId),
     UNIQUE (PeriodAuditScaleResultId, CriteriaSubResultId) -- Un sub-resultado por criterio por resultado de escala
 );
