@@ -8,6 +8,7 @@
         public decimal RiskLow { get; set; }
         public decimal RiskModerate { get; set; }
         public decimal RiskHigh { get; set; }
+        public decimal RiskCritical { get; set; }
         public decimal Weighting { get; set; }
     }
 }
