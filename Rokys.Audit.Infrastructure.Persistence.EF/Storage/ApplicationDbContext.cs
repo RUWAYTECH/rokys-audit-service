@@ -17,6 +17,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
         //public DbSet<Proveedor> Proveedores { get; set; }
         
         // New audit entities
+        public DbSet<TableScaleTemplate> TableScaleTemplates { get; set; }
         public DbSet<AuditTemplateFields> AuditTemplateFields { get; set; }
         public DbSet<ScoringCriteria> ScoringCriteria { get; set; }
         public DbSet<CriteriaSubResult> CriteriaSubResults { get; set; }
@@ -45,6 +46,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
             //modelBuilder.ApplyConfiguration(new ProveedorConfig());
             
             // New audit configurations
+            modelBuilder.ApplyConfiguration(new TableScaleTemplateConfig());
             modelBuilder.ApplyConfiguration(new ScoringCriteriaConfig());
             modelBuilder.ApplyConfiguration(new CriteriaSubResultConfig());
             modelBuilder.ApplyConfiguration(new PeriodAuditConfig());

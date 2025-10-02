@@ -5,6 +5,8 @@ namespace Rokys.Audit.Infrastructure.Repositories
 {
     public interface ITableScaleTemplateRepository : IRepository<TableScaleTemplate>
     {
-        Task<bool> ExistsByCodeAsync(string code, Guid? excludeId = null);
+        Task<bool> ExistsByCodeAsync(string code);
+        Task<bool> ExistsByCodeAsync(string code, Guid? excludeId);
+        Task<IEnumerable<TableScaleTemplate>> GetByScaleGroupIdAsync(Guid scaleGroupId);
     }
 }
