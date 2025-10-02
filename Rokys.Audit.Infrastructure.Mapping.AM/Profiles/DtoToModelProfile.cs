@@ -4,6 +4,7 @@ using Rokys.Audit.DTOs.Requests.Enterprise;
 using Rokys.Audit.DTOs.Requests.Group;
 using Rokys.Audit.DTOs.Requests.Proveedor;
 using Rokys.Audit.DTOs.Requests.ScaleCompany;
+using Rokys.Audit.DTOs.Requests.ScaleGroup;
 using Rokys.Audit.DTOs.Requests.Store;
 using Rokys.Audit.Model.Tables;
 
@@ -15,6 +16,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
         {
            CreateMap<ProveedorRequestDto, Proveedor>();
            CreateMap<ScaleCompanyRequestDto, ScaleCompany>();
+           CreateMap<ScaleGroupRequestDto, ScaleGroup>();
            CreateMap<GroupRequestDto, Group>();
            //CreateMap<AuditScaleTemplateRequestDto, AuditScaleTemplate>();
            CreateMap<EnterpriseRequestDto, Enterprise>();
