@@ -8,13 +8,13 @@ namespace Rokys.Audit.Model.Tables
 
         // Calculation data at the time of audit
         public decimal ObtainedValue { get; set; }
-        public string? RiskLevel { get; set; }
 
         // Historical weighting and thresholds
+        public decimal AppliedRiskLow { get; set; }
+        public decimal AppliedRiskModerate { get; set; }
+        public decimal AppliedRiskHigh { get; set; }
+        public decimal AppliedRiskCritical { get; set; }
         public decimal AppliedWeighting { get; set; }
-        public decimal AppliedLowThreshold { get; set; }
-        public decimal AppliedModerateThreshold { get; set; }
-        public decimal AppliedHighThreshold { get; set; }
 
         public string? Observations { get; set; }
         public bool IsActive { get; set; } = true;
@@ -23,5 +23,6 @@ namespace Rokys.Audit.Model.Tables
         public virtual PeriodAudit PeriodAudit { get; set; } = null!;
         public virtual Group Group { get; set; } = null!;
         public virtual ICollection<PeriodAuditScaleResult> PeriodAuditScaleResults { get; set; } = new List<PeriodAuditScaleResult>();
+        public virtual ICollection<EvidenceFiles> EvidenceFiles { get; set; } = new List<EvidenceFiles>();
     }
 }

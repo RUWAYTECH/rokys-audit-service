@@ -3,7 +3,7 @@ using Rokys.Audit.Model.Tables;
 
 namespace Rokys.Audit.Infrastructure.Repositories
 {
-    public interface IAuditScaleTemplateRepository : IRepository<AuditScaleTemplate>
+    public interface ITableScaleTemplateRepository : IRepository<TableScaleTemplate>
     {
         Task<bool> ExistsByCodeAsync(string code, Guid? excludeId = null);
     }

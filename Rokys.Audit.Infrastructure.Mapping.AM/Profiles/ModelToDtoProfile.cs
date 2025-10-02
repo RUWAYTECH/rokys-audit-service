@@ -16,7 +16,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
             CreateMap<Proveedor, ProveedorResponseDto>();
             CreateMap<ScaleCompany, ScaleCompanyResponseDto>();
             CreateMap<Group, GroupResponseDto>();
-            CreateMap<AuditScaleTemplate, AuditScaleTemplateResponseDto>();
+            //CreateMap<AuditScaleTemplate, AuditScaleTemplateResponseDto>();
             CreateMap<Enterprise, EnterpriseResponseDto>();
             CreateMap<Stores, StoreResponseDto>();
         }

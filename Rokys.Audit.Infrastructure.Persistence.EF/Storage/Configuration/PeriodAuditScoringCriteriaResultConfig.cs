@@ -4,19 +4,20 @@ using Rokys.Audit.Model.Tables;
 
 namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
 {
-    public class CriteriaSubResultConfig : IEntityTypeConfiguration<CriteriaSubResult>
+    public class PeriodAuditScoringCriteriaResultConfig : IEntityTypeConfiguration<PeriodAuditScoringCriteriaResult>
     {
-        public void Configure(EntityTypeBuilder<CriteriaSubResult> builder)
+        public void Configure(EntityTypeBuilder<PeriodAuditScoringCriteriaResult> builder)
         {
-            builder.ToTable("CriteriaSubResult");
+            builder.ToTable("PeriodAuditScoringCriteriaResult");
 
-            builder.HasKey(x => x.CriteriaSubResultId);
+            builder.HasKey(x => x.PeriodAuditScoringCriteriaResultId);
 
-            builder.Property(x => x.CriteriaSubResultId)
+            builder.Property(x => x.PeriodAuditScoringCriteriaResultId)
                 .IsRequired()
-                .ValueGeneratedOnAdd();
+                .ValueGeneratedOnAdd()
+                .HasDefaultValueSql("NEWID()");
 
-            builder.Property(x => x.ScaleGroupId)
+            builder.Property(x => x.PeriodAuditScaleResultId)
                 .IsRequired();
 
             // Identificación del Criterio
@@ -31,12 +32,29 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.Property(x => x.ResultFormula)
                 .HasMaxLength(500);
 
-            builder.Property(x => x.ColorCode)
+            builder.Property(x => x.ComparisonOperator)
                 .IsRequired()
                 .HasMaxLength(20);
 
+            builder.Property(x => x.ExpectedValue)
+                .IsRequired()
+                .HasMaxLength(255);
+
             // Puntuación
             builder.Property(x => x.Score)
+                .IsRequired()
+                .HasColumnType("decimal(10,2)");
+
+            builder.Property(x => x.SortOrder)
+                .HasDefaultValue(0);
+
+            builder.Property(x => x.ErrorMessage)
+                .HasMaxLength(500);
+
+            builder.Property(x => x.SuccessMessage)
+                .HasMaxLength(500);
+
+            builder.Property(x => x.ResultObtained)
                 .HasColumnType("decimal(10,2)");
 
             builder.Property(x => x.IsActive)
@@ -58,14 +76,10 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .HasColumnType("datetime2");
 
             // Navigation properties
-            builder.HasOne(x => x.ScaleGroup)
-                .WithMany(sg => sg.CriteriaSubResults)
-                .HasForeignKey(x => x.ScaleGroupId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Indexes
-            builder.HasIndex(x => x.ScaleGroupId)
-                .HasDatabaseName("IX_ScoringCriteria_ScaleGroupId");
+            builder.HasOne(x => x.PeriodAuditScaleResult)
+                .WithMany(pasr => pasr.PeriodAuditScoringCriteriaResults)
+                .HasForeignKey(x => x.PeriodAuditScaleResultId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

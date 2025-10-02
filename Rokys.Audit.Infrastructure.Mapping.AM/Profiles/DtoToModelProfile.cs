@@ -16,7 +16,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
            CreateMap<ProveedorRequestDto, Proveedor>();
            CreateMap<ScaleCompanyRequestDto, ScaleCompany>();
            CreateMap<GroupRequestDto, Group>();
-           CreateMap<AuditScaleTemplateRequestDto, AuditScaleTemplate>();
+           //CreateMap<AuditScaleTemplateRequestDto, AuditScaleTemplate>();
            CreateMap<EnterpriseRequestDto, Enterprise>();
            CreateMap<StoreRequestDto, Stores>();
         }

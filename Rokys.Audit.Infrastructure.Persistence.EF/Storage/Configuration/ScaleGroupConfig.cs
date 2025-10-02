@@ -25,19 +25,32 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .IsRequired()
                 .HasMaxLength(200);
                 
+            // General objective for the group
             builder.Property(a => a.ObjectiveValue)
+                .IsRequired()
                 .HasColumnType("decimal(10,2)");
                 
-            builder.Property(a => a.RiskLow)
+            // Thresholds for the group
+            builder.Property(a => a.LowRisk)
+                .IsRequired()
                 .HasColumnType("decimal(10,2)");
                 
-            builder.Property(a => a.RiskModerate)
+            builder.Property(a => a.ModerateRisk)
+                .IsRequired()
                 .HasColumnType("decimal(10,2)");
                 
-            builder.Property(a => a.RiskHigh)
+            builder.Property(a => a.HighRisk)
+                .IsRequired()
                 .HasColumnType("decimal(10,2)");
                 
+            // Critical risk = greater than HighRisk
+            builder.Property(a => a.RiskCritical)
+                .IsRequired()
+                .HasColumnType("decimal(10,2)");
+                
+            // Group weighting
             builder.Property(a => a.Weighting)
+                .IsRequired()
                 .HasColumnType("decimal(5,2)");
                 
             builder.Property(a => a.IsActive)

@@ -18,13 +18,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .ValueGeneratedOnAdd();
 
             builder.Property(x => x.StoreId)
-                .HasColumnName("StoreId")
                 .IsRequired(false);
-
-            builder.Property(x => x.StoreName)
-                .HasColumnName("StoreName")
-                .HasMaxLength(200)
-                .IsRequired();
 
             builder.Property(x => x.AdministratorId)
                 .HasColumnName("AdministratorId")
@@ -71,12 +65,36 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .IsRequired();
 
             builder.Property(x => x.TotalWeighting)
-                .HasColumnName("TotalWeighting")
-                .HasColumnType("decimal(10,2)")
+                .IsRequired()
+                .HasColumnType("decimal(5,2)");
+
+            builder.Property(x => x.StatusId)
                 .IsRequired();
 
+            // Objetivo general para la empresa
+            builder.Property(x => x.ObjectiveValue)
+                .IsRequired()
+                .HasColumnType("decimal(10,2)");
+
+            // Umbrales para la empresa
+            builder.Property(x => x.RiskLow)
+                .IsRequired()
+                .HasColumnType("decimal(10,2)");
+
+            builder.Property(x => x.RiskModerate)
+                .IsRequired()
+                .HasColumnType("decimal(10,2)");
+
+            builder.Property(x => x.RiskHigh)
+                .IsRequired()
+                .HasColumnType("decimal(10,2)");
+
+            // Riesgo crítico = mayor a RiesgoElevado
+            builder.Property(x => x.RiskCritical)
+                .IsRequired()
+                .HasColumnType("decimal(10,2)");
+
             builder.Property(x => x.IsActive)
-                .HasColumnName("IsActive")
                 .HasDefaultValue(true)
                 .IsRequired();
 
@@ -108,9 +126,14 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .HasForeignKey(x => x.StoreId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            builder.HasOne(x => x.AuditStatus)
+                .WithMany(ast => ast.PeriodAudits)
+                .HasForeignKey(x => x.StatusId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             builder.HasMany(x => x.PeriodAuditResults)
-                .WithOne(x => x.PeriodAudit)
-                .HasForeignKey(x => x.PeriodAuditId)
+                .WithOne(par => par.PeriodAudit)
+                .HasForeignKey(par => par.PeriodAuditId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Indexes

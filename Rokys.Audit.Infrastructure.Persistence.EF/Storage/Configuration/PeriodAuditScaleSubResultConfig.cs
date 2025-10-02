@@ -22,12 +22,6 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.Property(x => x.CriteriaSubResultId)
                 .IsRequired();
 
-            builder.Property(x => x.ScaleGroupId)
-                .IsRequired();
-
-            builder.Property(x => x.AuditTemplateFieldId)
-                .IsRequired(false);
-
             // Identificación del Criterio (desnormalizado)
             builder.Property(x => x.CriteriaCode)
                 .HasMaxLength(10);
@@ -53,13 +47,6 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.Property(x => x.ColorCode)
                 .HasMaxLength(20);
 
-            // Detalles
-            builder.Property(x => x.EvaluationNotes)
-                .HasColumnType("NVARCHAR(MAX)");
-
-            builder.Property(x => x.ResultMessage)
-                .HasMaxLength(500);
-
             builder.Property(x => x.IsActive)
                 .IsRequired()
                 .HasDefaultValue(true);
@@ -80,24 +67,14 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
 
             // Navigation properties
             builder.HasOne(x => x.PeriodAuditScaleResult)
-                .WithMany()
+                .WithMany(pasr => pasr.PeriodAuditScaleSubResults)
                 .HasForeignKey(x => x.PeriodAuditScaleResultId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(x => x.CriteriaSubResult)
-                .WithMany()
+                .WithMany(csr => csr.PeriodAuditScaleSubResults)
                 .HasForeignKey(x => x.CriteriaSubResultId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            builder.HasOne(x => x.ScaleGroup)
-                .WithMany()
-                .HasForeignKey(x => x.ScaleGroupId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.HasOne(x => x.AuditTemplateField)
-                .WithMany()
-                .HasForeignKey(x => x.AuditTemplateFieldId)
-                .OnDelete(DeleteBehavior.SetNull);
 
             // Indexes
             builder.HasIndex(x => x.PeriodAuditScaleResultId)
@@ -105,9 +82,6 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
 
             builder.HasIndex(x => x.CriteriaSubResultId)
                 .HasDatabaseName("IX_PeriodAuditScaleSubResult_CriteriaId");
-
-            builder.HasIndex(x => x.ScaleGroupId)
-                .HasDatabaseName("IX_PeriodAuditScaleSubResult_ScaleGroupId");
 
             // Unique constraint: Un sub-resultado por criterio por resultado de escala
             builder.HasIndex(x => new { x.PeriodAuditScaleResultId, x.CriteriaSubResultId })

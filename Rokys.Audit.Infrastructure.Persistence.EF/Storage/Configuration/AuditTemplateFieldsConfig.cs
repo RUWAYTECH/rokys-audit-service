@@ -13,108 +13,80 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.HasKey(x => x.AuditTemplateFieldId);
 
             builder.Property(x => x.AuditTemplateFieldId)
-                .HasColumnName("AuditTemplateFieldId")
                 .IsRequired()
-                .ValueGeneratedOnAdd();
+                .ValueGeneratedOnAdd()
+                .HasDefaultValueSql("NEWID()");
 
-            builder.Property(x => x.ScaleGroupId)
-                .HasColumnName("ScaleGroupId")
+            builder.Property(x => x.TableScaleTemplateId)
                 .IsRequired();
 
-            builder.Property(x => x.AuditScaleTemplateId)
-                .HasColumnName("AuditScaleTemplateId")
-                .IsRequired();
-
-            builder.Property(x => x.GroupCode)
-                .HasColumnName("GroupCode")
-                .HasMaxLength(50)
-                .IsRequired();
-
-            builder.Property(x => x.GroupName)
-                .HasColumnName("GroupName")
-                .HasMaxLength(200)
-                .IsRequired();
-
-            builder.Property(x => x.Orientation)
-                .HasColumnName("Orientation")
-                .HasMaxLength(2)
-                .IsRequired();
-
+            // Información del Campo
             builder.Property(x => x.FieldCode)
-                .HasColumnName("FieldCode")
-                .HasMaxLength(50)
-                .IsRequired();
+                .IsRequired()
+                .HasMaxLength(100);
 
             builder.Property(x => x.FieldName)
-                .HasColumnName("FieldName")
-                .HasMaxLength(200)
-                .IsRequired();
+                .IsRequired()
+                .HasMaxLength(255);
 
             builder.Property(x => x.FieldType)
-                .HasColumnName("FieldType")
-                .HasMaxLength(50)
-                .IsRequired();
+                .IsRequired()
+                .HasMaxLength(50);
 
+            builder.Property(x => x.IsCalculated)
+                .HasDefaultValue(false);
+
+            builder.Property(x => x.CalculationFormula)
+                .HasMaxLength(500);
+
+            builder.Property(x => x.AcumulationType)
+                .HasMaxLength(50);
+
+            builder.Property(x => x.FieldOptions)
+                .HasColumnType("nvarchar(max)");
+
+            // Metadatos
             builder.Property(x => x.DefaultValue)
-                .HasColumnName("DefaultValue")
-                .HasMaxLength(500)
-                .IsRequired(false);
+                .HasColumnType("nvarchar(max)");
 
             builder.Property(x => x.IsActive)
-                .HasColumnName("IsActive")
-                .HasDefaultValue(true)
-                .IsRequired();
+                .IsRequired()
+                .HasDefaultValue(true);
 
             // Audit properties
             builder.Property(x => x.CreatedBy)
-                .HasColumnName("CreatedBy")
-                .HasMaxLength(100)
-                .IsRequired();
+                .HasMaxLength(120);
 
             builder.Property(x => x.CreationDate)
-                .HasColumnName("CreationDate")
-                .HasColumnType("datetime2(7)")
-                .HasDefaultValueSql("GETUTCDATE()")
-                .IsRequired();
+                .IsRequired()
+                .HasDefaultValueSql("GETDATE()");
 
             builder.Property(x => x.UpdatedBy)
-                .HasColumnName("UpdatedBy")
-                .HasMaxLength(100)
-                .IsRequired(false);
+                .HasMaxLength(120);
 
             builder.Property(x => x.UpdateDate)
-                .HasColumnName("UpdateDate")
-                .HasColumnType("datetime2(7)")
-                .IsRequired(false);
-
-            // Foreign key relationships
-            builder.HasOne(x => x.ScaleGroup)
-                .WithMany(x => x.AuditTemplateFields)
-                .HasForeignKey(x => x.ScaleGroupId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.HasOne(x => x.AuditScaleTemplate)
-                .WithMany(x => x.AuditTemplateFields)
-                .HasForeignKey(x => x.AuditScaleTemplateId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .HasColumnType("datetime2");
 
             // Navigation properties
-            builder.HasMany(x => x.ScoringCriteria)
-                .WithOne(x => x.AuditTemplateField)
-                .HasForeignKey(x => x.AuditTemplateFieldId)
-                .OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne(x => x.TableScaleTemplate)
+                .WithMany(tst => tst.AuditTemplateFields)
+                .HasForeignKey(x => x.TableScaleTemplateId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasMany(x => x.PeriodAuditFieldValues)
-                .WithOne(x => x.AuditTemplateField)
-                .HasForeignKey(x => x.AuditTemplateFieldId)
+                .WithOne(pafv => pafv.AuditTemplateField)
+                .HasForeignKey(pafv => pafv.AuditTemplateFieldId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Indexes
-            builder.HasIndex(x => new { x.ScaleGroupId, x.AuditScaleTemplateId })
-                .HasDatabaseName("IX_AuditTemplateFields_ScaleGroup_Template");
-
             builder.HasIndex(x => x.FieldCode)
                 .HasDatabaseName("IX_AuditTemplateFields_FieldCode");
+
+            builder.HasIndex(x => x.TableScaleTemplateId)
+                .HasDatabaseName("IX_AuditTemplateFields_TableScaleTemplateId");
+
+            // Check constraint for AcumulationType (will be added via SQL)
+            // CONSTRAINT CK_AuditTemplateFields_AcumulationType CHECK (AcumulationType IN ('SUM', 'COUNT') OR AcumulationType IS NULL)
         }
     }
 }

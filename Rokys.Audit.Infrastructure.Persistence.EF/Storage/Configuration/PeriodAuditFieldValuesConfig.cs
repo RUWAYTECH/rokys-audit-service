@@ -18,85 +18,59 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .ValueGeneratedOnAdd();
 
             builder.Property(x => x.AuditTemplateFieldId)
-                .HasColumnName("AuditTemplateFieldId")
                 .IsRequired(false);
 
-            builder.Property(x => x.ScaleGroupId)
-                .HasColumnName("ScaleGroupId")
-                .IsRequired();
-
-            builder.Property(x => x.PeriodAuditScaleResultId)
-                .HasColumnName("PeriodAuditScaleResultId")
+            builder.Property(x => x.PeriodAuditTableScaleTemplateResultId)
                 .IsRequired(false);
 
-            builder.Property(x => x.GroupCode)
-                .HasColumnName("GroupCode")
-                .HasMaxLength(50)
-                .IsRequired();
-
-            builder.Property(x => x.GroupName)
-                .HasColumnName("GroupName")
-                .HasMaxLength(200)
-                .IsRequired();
-
-            builder.Property(x => x.Orientation)
-                .HasColumnName("Orientation")
-                .HasMaxLength(10)
-                .IsRequired(false);
-
+            // Información del Campo (desnormalizado)
             builder.Property(x => x.FieldCode)
-                .HasColumnName("FieldCode")
-                .HasMaxLength(50)
-                .IsRequired();
+                .IsRequired()
+                .HasMaxLength(100);
 
             builder.Property(x => x.FieldName)
-                .HasColumnName("FieldName")
-                .HasMaxLength(200)
-                .IsRequired();
+                .IsRequired()
+                .HasMaxLength(255);
 
             builder.Property(x => x.FieldType)
-                .HasColumnName("FieldType")
-                .HasMaxLength(50)
-                .IsRequired();
+                .IsRequired()
+                .HasMaxLength(50);
 
+            builder.Property(x => x.IsCalculated)
+                .HasDefaultValue(false);
+
+            builder.Property(x => x.CalculationFormula)
+                .HasMaxLength(500);
+
+            builder.Property(x => x.AcumulationType)
+                .HasMaxLength(50);
+
+            builder.Property(x => x.FieldOptions)
+                .HasColumnType("nvarchar(max)");
+
+            // VALORES CAPTURADOS
             builder.Property(x => x.TextValue)
-                .HasColumnName("TextValue")
-                .HasColumnType("NVARCHAR(MAX)")
-                .IsRequired(false);
+                .HasColumnType("nvarchar(max)");
 
             builder.Property(x => x.NumericValue)
-                .HasColumnName("NumericValue")
-                .HasColumnType("decimal(18,6)")
-                .IsRequired(false);
+                .HasColumnType("decimal(18,4)");
 
             builder.Property(x => x.DateValue)
-                .HasColumnName("DateValue")
-                .HasColumnType("datetime2(7)")
-                .IsRequired(false);
+                .HasColumnType("datetime2");
 
-            builder.Property(x => x.BooleanValue)
-                .HasColumnName("BooleanValue")
-                .IsRequired(false);
+            builder.Property(x => x.BooleanValue);
 
             builder.Property(x => x.ImageUrl)
-                .HasColumnName("ImageUrl")
-                .HasMaxLength(500)
-                .IsRequired(false);
+                .HasMaxLength(500);
 
-            builder.Property(x => x.IsRequired)
-                .HasColumnName("IsRequired")
-                .HasDefaultValue(false)
-                .IsRequired();
+            builder.Property(x => x.FieldOptionsValue)
+                .HasMaxLength(255);
 
             builder.Property(x => x.ValidationStatus)
-                .HasColumnName("ValidationStatus")
-                .HasMaxLength(20)
-                .IsRequired(false);
+                .HasMaxLength(50);
 
             builder.Property(x => x.ValidationMessage)
-                .HasColumnName("ValidationMessage")
-                .HasMaxLength(500)
-                .IsRequired(false);
+                .HasMaxLength(500);
 
             builder.Property(x => x.IsActive)
                 .HasColumnName("IsActive")
@@ -127,29 +101,25 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
 
             // Foreign key relationships
             builder.HasOne(x => x.AuditTemplateField)
-                .WithMany(x => x.PeriodAuditFieldValues)
+                .WithMany(atf => atf.PeriodAuditFieldValues)
                 .HasForeignKey(x => x.AuditTemplateFieldId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasOne(x => x.ScaleGroup)
-                .WithMany(x => x.PeriodAuditFieldValues)
-                .HasForeignKey(x => x.ScaleGroupId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.HasOne(x => x.PeriodAuditScaleResult)
-                .WithMany(x => x.PeriodAuditFieldValues)
-                .HasForeignKey(x => x.PeriodAuditScaleResultId)
-                .OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne(x => x.PeriodAuditTableScaleTemplateResult)
+                .WithMany(patstr => patstr.PeriodAuditFieldValues)
+                .HasForeignKey(x => x.PeriodAuditTableScaleTemplateResultId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Indexes
-            builder.HasIndex(x => new { x.ScaleGroupId, x.FieldCode })
-                .HasDatabaseName("IX_PeriodAuditFieldValues_Group_Field");
+            builder.HasIndex(x => x.FieldCode)
+                .HasDatabaseName("IX_PeriodAuditFieldValues_FieldCode");
 
             builder.HasIndex(x => x.AuditTemplateFieldId)
                 .HasDatabaseName("IX_PeriodAuditFieldValues_TemplateField");
 
-            builder.HasIndex(x => x.PeriodAuditScaleResultId)
-                .HasDatabaseName("IX_PeriodAuditFieldValues_ScaleResult");
+            builder.HasIndex(x => x.NumericValue)
+                .HasDatabaseName("IX_PeriodAuditFieldValues_NumericValue")
+                .HasFilter("NumericValue IS NOT NULL");
         }
     }
 }

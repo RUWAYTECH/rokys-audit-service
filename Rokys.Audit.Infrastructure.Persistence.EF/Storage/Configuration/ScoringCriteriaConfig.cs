@@ -18,88 +18,41 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .ValueGeneratedOnAdd();
 
             builder.Property(x => x.ScaleGroupId)
-                .HasColumnName("ScaleGroupId")
                 .IsRequired();
 
-            builder.Property(x => x.AuditTemplateFieldId)
-                .HasColumnName("AuditTemplateFieldId")
-                .IsRequired(false);
-
+            // Identificación del Criterio
             builder.Property(x => x.CriteriaName)
-                .HasColumnName("CriteriaName")
-                .HasMaxLength(200)
-                .IsRequired();
+                .IsRequired()
+                .HasMaxLength(255);
 
             builder.Property(x => x.CriteriaCode)
-                .HasColumnName("CriteriaCode")
-                .HasMaxLength(50)
-                .IsRequired(false);
+                .HasMaxLength(10);
 
-            builder.Property(x => x.Description)
-                .HasColumnName("Description")
-                .HasMaxLength(500)
-                .IsRequired(false);
-
-            builder.Property(x => x.EvaluatedFieldCode)
-                .HasColumnName("EvaluatedFieldCode")
-                .HasMaxLength(50)
-                .IsRequired();
-
-            builder.Property(x => x.EvaluatedFieldName)
-                .HasColumnName("EvaluatedFieldName")
-                .HasMaxLength(200)
-                .IsRequired(false);
-
-            builder.Property(x => x.EvaluatedFieldType)
-                .HasColumnName("EvaluatedFieldType")
-                .HasMaxLength(50)
-                .IsRequired(false);
-
+            // Fórmula y Evaluación
             builder.Property(x => x.ResultFormula)
-                .HasColumnName("ResultFormula")
-                .HasColumnType("NVARCHAR(MAX)")
-                .IsRequired(false);
+                .HasMaxLength(500);
 
             builder.Property(x => x.ComparisonOperator)
-                .HasColumnName("ComparisonOperator")
-                .HasMaxLength(20)
-                .IsRequired();
+                .IsRequired()
+                .HasMaxLength(20);
 
             builder.Property(x => x.ExpectedValue)
-                .HasColumnName("ExpectedValue")
-                .HasColumnType("NVARCHAR(MAX)")
-                .IsRequired();
+                .IsRequired()
+                .HasMaxLength(255);
 
+            // Puntuación
             builder.Property(x => x.Score)
-                .HasColumnName("Score")
-                .HasColumnType("decimal(10,2)")
-                .IsRequired();
-
-            builder.Property(x => x.ScoreWeight)
-                .HasColumnName("ScoreWeight")
-                .HasColumnType("decimal(5,2)")
-                .HasDefaultValue(1.00m)
-                .IsRequired();
-
-            builder.Property(x => x.IsRequired)
-                .HasColumnName("IsRequired")
-                .HasDefaultValue(true)
-                .IsRequired();
+                .IsRequired()
+                .HasColumnType("decimal(10,2)");
 
             builder.Property(x => x.SortOrder)
-                .HasColumnName("SortOrder")
-                .HasDefaultValue(0)
-                .IsRequired();
+                .HasDefaultValue(0);
 
             builder.Property(x => x.ErrorMessage)
-                .HasColumnName("ErrorMessage")
-                .HasMaxLength(500)
-                .IsRequired(false);
+                .HasMaxLength(500);
 
             builder.Property(x => x.SuccessMessage)
-                .HasColumnName("SuccessMessage")
-                .HasMaxLength(500)
-                .IsRequired(false);
+                .HasMaxLength(500);
 
             builder.Property(x => x.IsActive)
                 .HasColumnName("IsActive")
@@ -130,24 +83,13 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
 
             // Foreign key relationships
             builder.HasOne(x => x.ScaleGroup)
-                .WithMany(x => x.ScoringCriteria)
+                .WithMany(sg => sg.ScoringCriteria)
                 .HasForeignKey(x => x.ScaleGroupId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.HasOne(x => x.AuditTemplateField)
-                .WithMany(x => x.ScoringCriteria)
-                .HasForeignKey(x => x.AuditTemplateFieldId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Indexes
             builder.HasIndex(x => x.ScaleGroupId)
-                .HasDatabaseName("IX_ScoringCriteria_ScaleGroup");
-
-            builder.HasIndex(x => x.EvaluatedFieldCode)
-                .HasDatabaseName("IX_ScoringCriteria_EvaluatedFieldCode");
-
-            builder.HasIndex(x => x.CriteriaCode)
-                .HasDatabaseName("IX_ScoringCriteria_CriteriaCode");
+                .HasDatabaseName("IX_ScoringCriteria_ScaleGroupId");
         }
     }
 }

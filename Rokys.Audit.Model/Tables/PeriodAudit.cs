@@ -6,7 +6,6 @@ namespace Rokys.Audit.Model.Tables
 
         // Store / audit identification
         public Guid? StoreId { get; set; }
-        public string StoreName { get; set; } = string.Empty;
 
         // Participants
         public Guid? AdministratorId { get; set; }
@@ -24,11 +23,25 @@ namespace Rokys.Audit.Model.Tables
         public int? AuditedDays { get; set; }
         public string GlobalObservations { get; set; } = string.Empty;
         public decimal TotalWeighting { get; set; }
+
+        public Guid StatusId { get; set; } // ID de Estado
+
+        // Objetivo general para la empresa
+        public decimal ObjectiveValue { get; set; }
+
+        // Umbrales para la empresa
+        public decimal RiskLow { get; set; }
+        public decimal RiskModerate { get; set; }
+        public decimal RiskHigh { get; set; }
+
+        // Riesgo crítico = mayor a RiesgoElevado
+        public decimal RiskCritical { get; set; }
+
         public bool IsActive { get; set; } = true;
 
         // Navigation properties
         public virtual Stores? Store { get; set; }
+        public virtual AuditStatus AuditStatus { get; set; } = null!;
         public virtual ICollection<PeriodAuditResult> PeriodAuditResults { get; set; } = new List<PeriodAuditResult>();
-        public virtual ICollection<PeriodAuditFieldValues> PeriodAuditFieldValues { get; set; } = new List<PeriodAuditFieldValues>();
     }
 }

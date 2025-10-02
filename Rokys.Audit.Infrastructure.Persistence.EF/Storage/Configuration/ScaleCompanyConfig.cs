@@ -12,11 +12,34 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.HasKey(x => x.ScaleCompanyId);
             builder.Property(x => x.EnterpriseId).IsRequired();
             builder.Property(x => x.Description).IsRequired().HasMaxLength(200);
-            builder.Property(x => x.ObjectiveValue);
-            builder.Property(x => x.RiskLow);
-            builder.Property(x => x.RiskModerate);
-            builder.Property(x => x.RiskHigh);
-            builder.Property(x => x.Weighting);
+            
+            // Objetivo general para la empresa
+            builder.Property(x => x.ObjectiveValue)
+                .IsRequired()
+                .HasColumnType("decimal(10,2)");
+            
+            // Umbrales para la empresa
+            builder.Property(x => x.RiskLow)
+                .IsRequired()
+                .HasColumnType("decimal(10,2)");
+            
+            builder.Property(x => x.RiskModerate)
+                .IsRequired()
+                .HasColumnType("decimal(10,2)");
+            
+            builder.Property(x => x.RiskHigh)
+                .IsRequired()
+                .HasColumnType("decimal(10,2)");
+            
+            // Riesgo crítico = mayor a RiesgoElevado
+            builder.Property(x => x.RiskCritical)
+                .IsRequired()
+                .HasColumnType("decimal(10,2)");
+            
+            // Ponderación de la empresa
+            builder.Property(x => x.Weighting)
+                .IsRequired()
+                .HasColumnType("decimal(5,2)");
             builder.Property(x => x.IsActive).HasDefaultValue(true);
             builder.Property(x => x.CreationDate).IsRequired();
             builder.Property(x => x.CreatedBy).HasMaxLength(100);

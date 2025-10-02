@@ -26,42 +26,34 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .IsRequired();
 
             builder.Property(x => x.ObtainedValue)
-                .HasColumnName("ObtainedValue")
-                .HasColumnType("decimal(10,2)")
-                .IsRequired();
+                .IsRequired()
+                .HasColumnType("decimal(10,2)");
 
-            builder.Property(x => x.RiskLevel)
-                .HasColumnName("RiskLevel")
-                .HasMaxLength(20)
-                .IsRequired(false);
+            // Historical weighting and thresholds
+            builder.Property(x => x.AppliedRiskLow)
+                .IsRequired()
+                .HasColumnType("decimal(10,2)");
+
+            builder.Property(x => x.AppliedRiskModerate)
+                .IsRequired()
+                .HasColumnType("decimal(10,2)");
+
+            builder.Property(x => x.AppliedRiskHigh)
+                .IsRequired()
+                .HasColumnType("decimal(10,2)");
+
+            builder.Property(x => x.AppliedRiskCritical)
+                .IsRequired()
+                .HasColumnType("decimal(10,2)");
 
             builder.Property(x => x.AppliedWeighting)
-                .HasColumnName("AppliedWeighting")
-                .HasColumnType("decimal(5,2)")
-                .IsRequired();
-
-            builder.Property(x => x.AppliedLowThreshold)
-                .HasColumnName("AppliedLowThreshold")
-                .HasColumnType("decimal(5,2)")
-                .IsRequired();
-
-            builder.Property(x => x.AppliedModerateThreshold)
-                .HasColumnName("AppliedModerateThreshold")
-                .HasColumnType("decimal(5,2)")
-                .IsRequired();
-
-            builder.Property(x => x.AppliedHighThreshold)
-                .HasColumnName("AppliedHighThreshold")
-                .HasColumnType("decimal(5,2)")
-                .IsRequired();
+                .IsRequired()
+                .HasColumnType("decimal(5,2)");
 
             builder.Property(x => x.Observations)
-                .HasColumnName("Observations")
-                .HasColumnType("NVARCHAR(MAX)")
-                .IsRequired(false);
+                .HasMaxLength(150);
 
             builder.Property(x => x.IsActive)
-                .HasColumnName("IsActive")
                 .HasDefaultValue(true)
                 .IsRequired();
 
@@ -100,17 +92,19 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
 
             // Navigation properties
             builder.HasMany(x => x.PeriodAuditScaleResults)
-                .WithOne(x => x.PeriodAuditResult)
-                .HasForeignKey(x => x.PeriodAuditResultId)
+                .WithOne(pasr => pasr.PeriodAuditResult)
+                .HasForeignKey(pasr => pasr.PeriodAuditResultId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(x => x.EvidenceFiles)
+                .WithOne(ef => ef.PeriodAuditResult)
+                .HasForeignKey(ef => ef.PeriodAuditResultId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Indexes
             builder.HasIndex(x => new { x.PeriodAuditId, x.GroupId })
                 .IsUnique()
                 .HasDatabaseName("IX_PeriodAuditResult_Audit_Group");
-
-            builder.HasIndex(x => x.RiskLevel)
-                .HasDatabaseName("IX_PeriodAuditResult_RiskLevel");
         }
     }
 }
