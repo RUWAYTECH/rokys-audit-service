@@ -20,8 +20,8 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
             CreateMap<ScaleGroup, ScaleGroupResponseDto>();
             CreateMap<Group, GroupResponseDto>();
             //CreateMap<AuditScaleTemplate, AuditScaleTemplateResponseDto>();
-            CreateMap<TableScaleTemplate, TableScaleTemplateResponseDto>()
-                .ForMember(dest => dest.ScaleGroupName, opt => opt.MapFrom(src => src.ScaleGroup.Name));
+            CreateMap<TableScaleTemplate, TableScaleTemplateResponseDto>().AfterMap((dest, src) =>
+                dest.ScaleGroup.Name = src.ScaleGroupName);
             CreateMap<Enterprise, EnterpriseResponseDto>();
             CreateMap<Stores, StoreResponseDto>();
         }

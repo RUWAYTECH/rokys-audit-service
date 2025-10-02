@@ -65,7 +65,9 @@ namespace Rokys.Audit.Services.Services
                 entity.CreateAudit(currentUser.UserName);
                 _tableScaleTemplateRepository.Insert(entity);
                 await _unitOfWork.CommitAsync();
-                response.Data = _mapper.Map<TableScaleTemplateResponseDto>(entity);
+                var getCreatedData = await _tableScaleTemplateRepository.GetFirstOrDefaultAsync(
+                    filter: x => x.TableScaleTemplateId == entity.TableScaleTemplateId && x.IsActive, includeProperties: [g => g.ScaleGroup]);
+                response.Data = _mapper.Map<TableScaleTemplateResponseDto>(getCreatedData);
             }
             catch (Exception ex)
             {
