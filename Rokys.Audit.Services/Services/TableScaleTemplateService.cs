@@ -191,7 +191,7 @@ namespace Rokys.Audit.Services.Services
                     return response;
                 }
 
-                var entity = await _tableScaleTemplateRepository.GetFirstOrDefaultAsync(filter: x => x.TableScaleTemplateId == id && x.IsActive);
+                var entity = await _tableScaleTemplateRepository.GetFirstOrDefaultAsync(filter: x => x.TableScaleTemplateId == id && x.IsActive, includeProperties: [x=>x.ScaleGroup]);
                 if (entity == null)
                 {
                     response = ResponseDto.Error<TableScaleTemplateResponseDto>("No se encontró la plantilla de escala.");
