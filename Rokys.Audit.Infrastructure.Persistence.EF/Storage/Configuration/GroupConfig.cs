@@ -9,76 +9,44 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
         public void Configure(EntityTypeBuilder<Group> builder)
         {
             builder.ToTable("Group");
-            builder.HasKey(r => r.GroupId);
-            
-            builder.Property(a => a.GroupId)
-                .HasDefaultValueSql("NEWID()");
-                
-            builder.Property(a => a.EnterpriseId)
+
+            builder.HasKey(g => g.GroupId);
+
+            builder.Property(g => g.GroupId)
+                .IsRequired()
+                .ValueGeneratedOnAdd();
+
+            builder.Property(g => g.EnterpriseId)
                 .IsRequired();
-                
-            builder.Property(a => a.Name)
+
+            builder.Property(g => g.Name)
                 .IsRequired()
                 .HasMaxLength(200);
-                
-            // Objetivo general para el grupo
-            builder.Property(a => a.ObjectiveValue)
-                .IsRequired()
-                .HasColumnType("decimal(10,2)");
-                
-            // Umbrales para el grupo
-            builder.Property(a => a.RiskLow)
-                .IsRequired()
-                .HasColumnType("decimal(10,2)");
-                
-            builder.Property(a => a.RiskModerate)
-                .IsRequired()
-                .HasColumnType("decimal(10,2)");
-                
-            builder.Property(a => a.RiskHigh)
-                .IsRequired()
-                .HasColumnType("decimal(10,2)");
-                
-            // Riesgo crítico = mayor a RiesgoElevado
-            builder.Property(a => a.RiskCritical)
-                .IsRequired()
-                .HasColumnType("decimal(10,2)");
-                
-            // Ponderación del grupo
-            builder.Property(a => a.Weighting)
+
+            builder.Property(g => g.Weighting)
                 .IsRequired()
                 .HasColumnType("decimal(5,2)");
-                
-            builder.Property(a => a.IsActive)
+
+            builder.Property(g => g.IsActive)
                 .HasDefaultValue(true);
-                
-            builder.Property(a => a.CreatedBy)
-                .HasMaxLength(120);
-                
-            builder.Property(a => a.CreationDate)
-                .HasDefaultValueSql("GETDATE()");
-                
-            builder.Property(a => a.UpdatedBy)
+
+            builder.Property(g => g.CreatedBy)
                 .HasMaxLength(120);
 
-            // Navigation properties
+            builder.Property(g => g.CreationDate)
+                .HasDefaultValueSql("GETDATE()");
+
+            builder.Property(g => g.UpdatedBy)
+                .HasMaxLength(120);
+
+            builder.Property(g => g.UpdateDate);
+
+            // Relaciones
             builder.HasOne(g => g.Enterprise)
                 .WithMany(e => e.Groups)
                 .HasForeignKey(g => g.EnterpriseId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            builder.HasMany(g => g.ScaleGroups)
-                .WithOne(sg => sg.Group)
-                .HasForeignKey(sg => sg.GroupId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            builder.HasMany(g => g.PeriodAuditResults)
-                .WithOne(par => par.Group)
-                .HasForeignKey(par => par.GroupId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Indexes
-            builder.HasIndex(g => g.EnterpriseId);
         }
     }
 }
+
