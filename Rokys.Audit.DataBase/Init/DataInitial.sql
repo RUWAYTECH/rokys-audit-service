@@ -62,7 +62,7 @@ CREATE TABLE [ScaleCompany](
 CREATE TABLE [Group]
 (
     GroupId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(), -- ID del Grupo
-    EnterpriseId UNIQUEIDENTIFIER NOT NULL, -- ID de la Empresa
+    EnterpriseId UNIQUEIDENTIFIER NOT NULL -- ID de la Empresa
         FOREIGN KEY REFERENCES Enterprise(EnterpriseId),
     Name NVARCHAR(200) NOT NULL, -- Nombre
 
@@ -329,7 +329,7 @@ CREATE TABLE PeriodAuditGroupResult
 
     Observations NVARCHAR(150) NULL, -- Observaciones
     TotalWeighting DECIMAL(5,2) NOT NULL, -- Ponderación Total
-    ScaleCalificationId UNIQUEIDENTIFIER NOT NULL, -- ID de la Escala de Calificación
+    ScaleCalificationId UNIQUEIDENTIFIER NOT NULL -- ID de la Escala de Calificación
         FOREIGN KEY REFERENCES MaintenanceDetailTable(MaintenanceDetailTableId),
     -- Record audit
     IsActive BIT DEFAULT 1, -- Está Activo
@@ -342,8 +342,8 @@ CREATE TABLE PeriodAuditGroupResult
 
 CREATE TABLE EvidenceFiles (
     EvidenceFileId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    PeriodAuditResultId UNIQUEIDENTIFIER NOT NULL 
-        FOREIGN KEY REFERENCES PeriodAuditResult(PeriodAuditResultId) ON DELETE CASCADE,
+    PeriodAuditGroupResultId UNIQUEIDENTIFIER NOT NULL 
+        FOREIGN KEY REFERENCES PeriodAuditGroupResult(PeriodAuditGroupResultId) ON DELETE CASCADE,
     OriginalName NVARCHAR(255) NOT NULL, -- Nombre original del archivo
     FileName NVARCHAR(255) NOT NULL,
     FileUrl NVARCHAR(500) NOT NULL, -- URL o path del archivo
@@ -388,6 +388,7 @@ CREATE TABLE PeriodAuditTableScaleTemplateResult (
         FOREIGN KEY REFERENCES PeriodAuditScaleResult(PeriodAuditScaleResultId) ON DELETE CASCADE,
     TableScaleTemplateId UNIQUEIDENTIFIER NOT NULL 
         FOREIGN KEY REFERENCES TableScaleTemplate(TableScaleTemplateId),
+	TemplateData NVARCHAR(MAX) NULL, -- JSON almacenado como texto
     IsActive BIT DEFAULT 1, -- Está Activo
     CreatedBy VARCHAR(120) NULL, -- Creado Por
     CreationDate DATETIME2 DEFAULT GETDATE(), -- Fecha de Creación
