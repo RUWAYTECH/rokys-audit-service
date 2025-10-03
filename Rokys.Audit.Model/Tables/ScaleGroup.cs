@@ -6,21 +6,7 @@ namespace Rokys.Audit.Model.Tables
         public Guid GroupId { get; set; }
         public string Code { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
-
-        // General objective for the group
-        public decimal ObjectiveValue { get; set; }
-
-        // Thresholds for the group
-        public decimal LowRisk { get; set; }
-        public decimal ModerateRisk { get; set; }
-        public decimal HighRisk { get; set; }
-
-        // Critical risk = greater than HighRisk
-        public decimal RiskCritical { get; set; }
-
-        // Group weighting
         public decimal Weighting { get; set; }
-
         public bool IsActive { get; set; } = true;
 
         // Navigation properties

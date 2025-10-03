@@ -5,11 +5,6 @@
         public Guid GroupId { get; set; }
         public string Code { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
-        public decimal ObjectiveValue { get; set; }
-        public decimal LowRisk { get; set; }
-        public decimal ModerateRisk { get; set; }
-        public decimal HighRisk { get; set; }
-        public decimal RiskCritical { get; set; }
         public decimal Weighting { get; set; }
     }
 }
