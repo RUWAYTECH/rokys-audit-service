@@ -11,35 +11,13 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.ToTable("ScaleCompany");
             builder.HasKey(x => x.ScaleCompanyId);
             builder.Property(x => x.EnterpriseId).IsRequired();
-            builder.Property(x => x.Description).IsRequired().HasMaxLength(200);
-            
-            // Objetivo general para la empresa
-            builder.Property(x => x.ObjectiveValue)
-                .IsRequired()
-                .HasColumnType("decimal(10,2)");
-            
-            // Umbrales para la empresa
-            builder.Property(x => x.RiskLow)
-                .IsRequired()
-                .HasColumnType("decimal(10,2)");
-            
-            builder.Property(x => x.RiskModerate)
-                .IsRequired()
-                .HasColumnType("decimal(10,2)");
-            
-            builder.Property(x => x.RiskHigh)
-                .IsRequired()
-                .HasColumnType("decimal(10,2)");
-            
-            // Riesgo crítico = mayor a RiesgoElevado
-            builder.Property(x => x.RiskCritical)
-                .IsRequired()
-                .HasColumnType("decimal(10,2)");
-            
-            // Ponderación de la empresa
-            builder.Property(x => x.Weighting)
-                .IsRequired()
-                .HasColumnType("decimal(5,2)");
+            builder.Property(x => x.Code).IsRequired().HasMaxLength(50);
+            builder.Property(x => x.Name).IsRequired().HasMaxLength(100);
+            builder.Property(x => x.MinValue).IsRequired().HasColumnType("decimal(10,2)");
+            builder.Property(x => x.MaxValue).IsRequired().HasColumnType("decimal(10,2)");
+            builder.Property(x => x.ColorCode).HasMaxLength(20);
+            builder.Property(x => x.Icon).HasMaxLength(100);
+            builder.Property(x => x.SortOrder).IsRequired();
             builder.Property(x => x.IsActive).HasDefaultValue(true);
             builder.Property(x => x.CreationDate).IsRequired();
             builder.Property(x => x.CreatedBy).HasMaxLength(100);

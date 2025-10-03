@@ -97,7 +97,7 @@ namespace Rokys.Audit.Services.Services
                 int totalRows;
                 Expression<Func<ScaleCompany, bool>> filter = x => x.IsActive;
                 if (!string.IsNullOrEmpty(paginationRequestDto.Filter))
-                    filter = x => x.Description.Contains(paginationRequestDto.Filter);
+                    filter = x => x.Name.Contains(paginationRequestDto.Filter);
 
                 Func<IQueryable<ScaleCompany>, IOrderedQueryable<ScaleCompany>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 

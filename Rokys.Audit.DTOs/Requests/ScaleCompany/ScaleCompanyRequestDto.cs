@@ -2,7 +2,8 @@
 
 namespace Rokys.Audit.DTOs.Requests.ScaleCompany
 {
-    public class ScaleCompanyRequestDto : ScaleCompanyDto
+    public class ScaleCompanyRequestDto: ScaleCompanyDto 
     {
+    
     }
 }

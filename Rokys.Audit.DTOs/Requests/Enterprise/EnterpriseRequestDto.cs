@@ -2,8 +2,8 @@
 
 namespace Rokys.Audit.DTOs.Requests.Enterprise
 {
-    public class EnterpriseRequestDto : EnterpriseDto
+    public class EnterpriseRequestDto: EnterpriseDto
     {
-
+       
     }
 }

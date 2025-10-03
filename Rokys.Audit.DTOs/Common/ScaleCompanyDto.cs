@@ -3,12 +3,12 @@
     public class ScaleCompanyDto
     {
         public Guid EnterpriseId { get; set; }
-        public string Description { get; set; } = string.Empty;
-        public decimal ObjectiveValue { get; set; }
-        public decimal RiskLow { get; set; }
-        public decimal RiskModerate { get; set; }
-        public decimal RiskHigh { get; set; }
-        public decimal RiskCritical { get; set; }
-        public decimal Weighting { get; set; }
+    public string Code { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+        public decimal MinValue { get; set; }
+        public decimal MaxValue { get; set; }
+        public string? ColorCode { get; set; }
+        public string? Icon { get; set; }
+        public int SortOrder { get; set; }
     }
 }
