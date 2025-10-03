@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Rokys.Audit.DTOs.Requests.AuditScaleTemplate;
+using Rokys.Audit.DTOs.Requests.AuditTemplateField;
 using Rokys.Audit.DTOs.Requests.Enterprise;
 using Rokys.Audit.DTOs.Requests.Group;
 using Rokys.Audit.DTOs.Requests.Proveedor;
@@ -23,6 +24,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
            CreateMap<TableScaleTemplateRequestDto, TableScaleTemplate>();
            CreateMap<EnterpriseRequestDto, Enterprise>();
            CreateMap<StoreRequestDto, Stores>();
+           CreateMap<AuditTemplateFieldRequestDto, AuditTemplateFields>();
         }
     }
 }

@@ -30,8 +30,12 @@ namespace Rokys.Audit.Services.Validations
                 .GreaterThanOrEqualTo(0).WithMessage("El riesgo alto debe ser mayor o igual a 0.")
                 .LessThanOrEqualTo(100).WithMessage("El riesgo alto no puede ser mayor a 100.");
 
+            RuleFor(x => x.RiskCritical)
+                .GreaterThanOrEqualTo(0).WithMessage("El riesgo crítico debe ser mayor o igual a 0.")
+                .LessThanOrEqualTo(100).WithMessage("El riesgo crítico no puede ser mayor a 100.");
+
             RuleFor(x => x)
-                .Must(x => x.LowRisk + x.ModerateRisk + x.HighRisk == 100)
+                .Must(x => x.LowRisk + x.ModerateRisk + x.HighRisk +x.RiskCritical == 100)
                 .WithMessage("La suma de todos los niveles de riesgo debe ser igual a 100.");
 
         }

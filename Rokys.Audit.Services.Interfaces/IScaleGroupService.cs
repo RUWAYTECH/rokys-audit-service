@@ -7,7 +7,7 @@ namespace Rokys.Audit.Services.Interfaces
 {
     public interface IScaleGroupService : IBaseService<ScaleGroupRequestDto, ScaleGroupResponseDto>
     {
-        Task<ResponseDto<PaginationResponseDto<ScaleGroupResponseDto>>> GetPaged(PaginationRequestDto requestDto);
+        Task<ResponseDto<PaginationResponseDto<ScaleGroupResponseDto>>> GetPaged(ScaleGroupFilterRequestDto requestDto);
         Task<ResponseDto<IEnumerable<ScaleGroupResponseDto>>> GetByGroupId(Guid groupId);
     }
 }
