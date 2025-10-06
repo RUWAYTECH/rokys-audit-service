@@ -4,6 +4,7 @@ using Rokys.Audit.DTOs.Requests.AuditTemplateField;
 using Rokys.Audit.DTOs.Requests.CriteriaSubResult;
 using Rokys.Audit.DTOs.Requests.Enterprise;
 using Rokys.Audit.DTOs.Requests.Group;
+using Rokys.Audit.DTOs.Requests.MaintenanceTable;
 using Rokys.Audit.DTOs.Requests.Proveedor;
 using Rokys.Audit.DTOs.Requests.ScaleCompany;
 using Rokys.Audit.DTOs.Requests.ScaleGroup;
@@ -20,19 +21,19 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
     {
         public DtoToModelProfile()
         {
-            CreateMap<ProveedorRequestDto, Proveedor>();
-            CreateMap<ScaleCompanyRequestDto, ScaleCompany>();
-            CreateMap<ScaleGroupRequestDto, ScaleGroup>();
-            CreateMap<GroupRequestDto, Group>();
-            CreateMap<CriteriaSubResultRequestDto, CriteriaSubResult>();
-            CreateMap<PeriodAuditFieldValuesRequestDto, PeriodAuditFieldValues>();
-            //CreateMap<AuditScaleTemplateRequestDto, AuditScaleTemplate>();
-            CreateMap<TableScaleTemplateRequestDto, TableScaleTemplate>();
-            CreateMap<EnterpriseRequestDto, Enterprise>();
-            CreateMap<StoreRequestDto, Stores>();
-            CreateMap<AuditTemplateFieldRequestDto, AuditTemplateFields>();
-            CreateMap<ScoringCriteriaRequestDto, ScoringCriteria>();
-                        CreateMap<PeriodAuditRequestDto, PeriodAudit>();
-                    }
+           CreateMap<ProveedorRequestDto, Proveedor>();
+           CreateMap<ScaleCompanyRequestDto, ScaleCompany>();
+           CreateMap<ScaleGroupRequestDto, ScaleGroup>();
+           CreateMap<GroupRequestDto, Group>();
+           CreateMap<CriteriaSubResultRequestDto, CriteriaSubResult>();
+           //CreateMap<AuditScaleTemplateRequestDto, AuditScaleTemplate>();
+           CreateMap<TableScaleTemplateRequestDto, TableScaleTemplate>();
+           CreateMap<EnterpriseRequestDto, Enterprise>();
+           CreateMap<StoreRequestDto, Stores>();
+           CreateMap<AuditTemplateFieldRequestDto, AuditTemplateFields>();
+           CreateMap<ScoringCriteriaRequestDto, ScoringCriteria>();
+            CreateMap<MaintenanceTableRequestDto, MaintenanceTable>();
+            CreateMap<PeriodAuditRequestDto, PeriodAudit>();
+        }
     }
 }

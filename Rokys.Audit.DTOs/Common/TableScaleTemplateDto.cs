@@ -10,5 +10,5 @@ public class TableScaleTemplateDto
     public string Code { get; set; } = string.Empty;
     public string Orientation { get; set; }
 
-    public string TemplateData { get; set; } = string.Empty;
+    public string? TemplateData { get; set; } = string.Empty;
 }

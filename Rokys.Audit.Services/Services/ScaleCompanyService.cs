@@ -105,7 +105,8 @@ namespace Rokys.Audit.Services.Services
                     filter: filter,
                     orderBy: orderBy,
                     pageNumber: paginationRequestDto.PageNumber,
-                    pageSize: paginationRequestDto.PageSize
+                    pageSize: paginationRequestDto.PageSize,
+                    includeProperties: [e => e.Enterprise]
                 );
 
                 var pagedResult = new PaginationResponseDto<ScaleCompanyResponseDto>
@@ -132,7 +133,7 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<ScaleCompanyResponseDto>();
             try
             {
-                var entity = await _scaleCompanyRepository.GetFirstOrDefaultAsync(filter: x => x.ScaleCompanyId == id && x.IsActive);
+                var entity = await _scaleCompanyRepository.GetFirstOrDefaultAsync(filter: x => x.ScaleCompanyId == id && x.IsActive, includeProperties: [ e => e.Enterprise]);
                 if (entity == null)
                 {
                     response = ResponseDto.Error<ScaleCompanyResponseDto>("No se encontro la escala.");

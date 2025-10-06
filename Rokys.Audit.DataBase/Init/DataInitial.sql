@@ -114,7 +114,8 @@ CREATE TABLE TableScaleTemplate (
     UpdatedBy VARCHAR(120) NULL, -- Actualizado Por
     UpdateDate DATETIME2 NULL, -- Fecha de Actualización
     -- Constraint para validar que sea JSON válido
-    CONSTRAINT CK_TemplateData_IsJson CHECK (ISJSON(TemplateData) = 1)
+    CONSTRAINT CK_TemplateData_IsJson 
+        CHECK (TemplateData IS NULL OR ISJSON(TemplateData) = 1)
 );
 
 
@@ -283,9 +284,9 @@ CREATE TABLE [PeriodAudit]
     -- Record audit
     IsActive BIT DEFAULT 1, -- Está Activo
     CreatedBy VARCHAR(120) NULL, -- Creado Por
-    CreationDate DATETIME2 DEFAULT GETDATE(), -- Fecha de Creación
+    CreationDate DATETIME DEFAULT GETDATE(), -- Fecha de Creación
     UpdatedBy VARCHAR(120) NULL, -- Actualizado Por
-    UpdateDate DATETIME2 NULL -- Fecha de Actualización
+    UpdateDate DATETIME NULL -- Fecha de Actualización
 );
 
 CREATE TABLE MaintenanceTable (
@@ -294,9 +295,9 @@ CREATE TABLE MaintenanceTable (
     Description NVARCHAR(255) NULL,
     IsSystem BIT NOT NULL DEFAULT(0),
     IsActive BIT NOT NULL DEFAULT(1),
-    CreatedAt DATETIME NOT NULL DEFAULT(GETDATE()),
+    CreationDate DATETIME NOT NULL DEFAULT(GETDATE()),
     CreatedBy NVARCHAR(100) NOT NULL,
-    UpdatedAt DATETIME NULL,
+    UpdateDate DATETIME NULL,
     UpdatedBy NVARCHAR(100) NULL
 );
 
@@ -311,9 +312,9 @@ CREATE TABLE MaintenanceDetailTable (
     OrderRow INT NULL,
     IsDefault BIT NOT NULL DEFAULT(0),
     IsActive BIT NOT NULL DEFAULT(1),
-    CreatedAt DATETIME NOT NULL DEFAULT(GETDATE()),
+    CreationDate DATETIME NOT NULL DEFAULT(GETDATE()),
     CreatedBy NVARCHAR(100) NOT NULL,
-    UpdatedAt DATETIME NULL,
+    UpdateDate DATETIME NULL,
     UpdatedBy NVARCHAR(100) NULL
 );
 

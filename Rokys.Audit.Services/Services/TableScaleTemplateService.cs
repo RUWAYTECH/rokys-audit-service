@@ -60,6 +60,11 @@ namespace Rokys.Audit.Services.Services
                     return response;
                 }
 
+                if (string.IsNullOrEmpty(requestDto.TemplateData))
+                {
+                    requestDto.TemplateData = "[]";
+                }
+
                 var currentUser = _httpContextAccessor.CurrentUser();
                 var entity = _mapper.Map<TableScaleTemplate>(requestDto);
                 entity.CreateAudit(currentUser.UserName);
