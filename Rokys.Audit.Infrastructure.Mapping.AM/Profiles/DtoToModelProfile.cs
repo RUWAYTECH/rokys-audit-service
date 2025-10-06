@@ -7,6 +7,7 @@ using Rokys.Audit.DTOs.Requests.Group;
 using Rokys.Audit.DTOs.Requests.Proveedor;
 using Rokys.Audit.DTOs.Requests.ScaleCompany;
 using Rokys.Audit.DTOs.Requests.ScaleGroup;
+using Rokys.Audit.DTOs.Requests.ScoringCriteria;
 using Rokys.Audit.DTOs.Requests.Store;
 using Rokys.Audit.DTOs.Requests.TableScaleTemplate;
 using Rokys.Audit.DTOs.Requests.PeriodAuditFieldValues;
@@ -17,18 +18,19 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
     public class DtoToModelProfile : Profile
     {
         public DtoToModelProfile()
-          {
-              CreateMap<ProveedorRequestDto, Proveedor>();
-              CreateMap<ScaleCompanyRequestDto, ScaleCompany>();
-              CreateMap<ScaleGroupRequestDto, ScaleGroup>();
-              CreateMap<GroupRequestDto, Group>();
-              CreateMap<CriteriaSubResultRequestDto, CriteriaSubResult>();
-              CreateMap<PeriodAuditFieldValuesRequestDto, PeriodAuditFieldValues>();
-              //CreateMap<AuditScaleTemplateRequestDto, AuditScaleTemplate>();
-              CreateMap<TableScaleTemplateRequestDto, TableScaleTemplate>();
-              CreateMap<EnterpriseRequestDto, Enterprise>();
-              CreateMap<StoreRequestDto, Stores>();
-              CreateMap<AuditTemplateFieldRequestDto, AuditTemplateFields>();
+        {
+            CreateMap<ProveedorRequestDto, Proveedor>();
+            CreateMap<ScaleCompanyRequestDto, ScaleCompany>();
+            CreateMap<ScaleGroupRequestDto, ScaleGroup>();
+            CreateMap<GroupRequestDto, Group>();
+            CreateMap<CriteriaSubResultRequestDto, CriteriaSubResult>();
+            CreateMap<PeriodAuditFieldValuesRequestDto, PeriodAuditFieldValues>();
+            //CreateMap<AuditScaleTemplateRequestDto, AuditScaleTemplate>();
+            CreateMap<TableScaleTemplateRequestDto, TableScaleTemplate>();
+            CreateMap<EnterpriseRequestDto, Enterprise>();
+            CreateMap<StoreRequestDto, Stores>();
+            CreateMap<AuditTemplateFieldRequestDto, AuditTemplateFields>();
+            CreateMap<ScoringCriteriaRequestDto, ScoringCriteria>();
           }
     }
 }

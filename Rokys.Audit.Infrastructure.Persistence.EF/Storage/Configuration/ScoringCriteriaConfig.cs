@@ -13,22 +13,20 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.HasKey(x => x.ScoringCriteriaId);
 
             builder.Property(x => x.ScoringCriteriaId)
-                .HasColumnName("ScoringCriteriaId")
                 .IsRequired()
                 .ValueGeneratedOnAdd();
 
             builder.Property(x => x.ScaleGroupId)
                 .IsRequired();
 
-            // Identificación del Criterio
+            builder.Property(x => x.CriteriaCode)
+                .IsRequired()
+                .HasMaxLength(10);
+
             builder.Property(x => x.CriteriaName)
                 .IsRequired()
                 .HasMaxLength(255);
 
-            builder.Property(x => x.CriteriaCode)
-                .HasMaxLength(10);
-
-            // Fórmula y Evaluación
             builder.Property(x => x.ResultFormula)
                 .HasMaxLength(500);
 
@@ -40,7 +38,6 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .IsRequired()
                 .HasMaxLength(255);
 
-            // Puntuación
             builder.Property(x => x.Score)
                 .IsRequired()
                 .HasColumnType("decimal(10,2)");
@@ -55,39 +52,26 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .HasMaxLength(500);
 
             builder.Property(x => x.IsActive)
-                .HasColumnName("IsActive")
-                .HasDefaultValue(true)
-                .IsRequired();
+                .HasDefaultValue(true);
 
-            // Audit properties
             builder.Property(x => x.CreatedBy)
-                .HasColumnName("CreatedBy")
-                .HasMaxLength(100)
-                .IsRequired();
+                .HasMaxLength(120);
 
             builder.Property(x => x.CreationDate)
-                .HasColumnName("CreationDate")
-                .HasColumnType("datetime2(7)")
-                .HasDefaultValueSql("GETUTCDATE()")
-                .IsRequired();
+                .HasColumnType("datetime2")
+                .HasDefaultValueSql("GETDATE()");
 
             builder.Property(x => x.UpdatedBy)
-                .HasColumnName("UpdatedBy")
-                .HasMaxLength(100)
-                .IsRequired(false);
+                .HasMaxLength(120);
 
             builder.Property(x => x.UpdateDate)
-                .HasColumnName("UpdateDate")
-                .HasColumnType("datetime2(7)")
-                .IsRequired(false);
+                .HasColumnType("datetime2");
 
-            // Foreign key relationships
             builder.HasOne(x => x.ScaleGroup)
                 .WithMany(sg => sg.ScoringCriteria)
                 .HasForeignKey(x => x.ScaleGroupId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Indexes
             builder.HasIndex(x => x.ScaleGroupId)
                 .HasDatabaseName("IX_ScoringCriteria_ScaleGroupId");
         }
