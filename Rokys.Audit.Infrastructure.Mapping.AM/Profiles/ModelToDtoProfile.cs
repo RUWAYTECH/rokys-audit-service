@@ -11,6 +11,7 @@ using Rokys.Audit.DTOs.Responses.ScoringCriteria;
 using Rokys.Audit.DTOs.Responses.Store;
 using Rokys.Audit.DTOs.Responses.TableScaleTemplate;
 using Rokys.Audit.DTOs.Responses.PeriodAuditFieldValues;
+using Rokys.Audit.DTOs.Responses.PeriodAudit;
 using Rokys.Audit.Model.Tables;
 
 namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
@@ -32,6 +33,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
             CreateMap<Stores, StoreResponseDto>();
             CreateMap<AuditTemplateFields, AuditTemplateFieldResponseDto>();
             CreateMap<ScoringCriteria, ScoringCriteriaResponseDto>();
+            CreateMap<PeriodAudit, PeriodAuditResponseDto>();
         }
     }
 }

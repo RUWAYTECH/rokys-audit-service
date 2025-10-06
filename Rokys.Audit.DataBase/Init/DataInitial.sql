@@ -163,6 +163,8 @@ CREATE TABLE ScoringCriteria (
     ScoringCriteriaId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     ScaleGroupId UNIQUEIDENTIFIER NOT NULL 
         FOREIGN KEY REFERENCES ScaleGroup(ScaleGroupId),
+    ScaleCalificationId UNIQUEIDENTIFIER NOT NULL -- ID de la Escala de Calificación
+        FOREIGN KEY REFERENCES MaintenanceDetailTable(MaintenanceDetailTableId),
 
     CriteriaCode NVARCHAR(10) NOT NULL, -- AUTO GENERATE PREFIX SR-{4 DIGITS}
     -- Identificación del Criterio
@@ -328,9 +330,9 @@ CREATE TABLE PeriodAuditGroupResult
     ScoreValue DECIMAL(10,2) NOT NULL, -- Valor Obtenido
 
     Observations NVARCHAR(150) NULL, -- Observaciones
+    ScaleDescription NVARCHAR(150) NULL, -- Descripción de la Escala
     TotalWeighting DECIMAL(5,2) NOT NULL, -- Ponderación Total
-    ScaleCalificationId UNIQUEIDENTIFIER NOT NULL -- ID de la Escala de Calificación
-        FOREIGN KEY REFERENCES MaintenanceDetailTable(MaintenanceDetailTableId),
+  
     -- Record audit
     IsActive BIT DEFAULT 1, -- Está Activo
     CreatedBy VARCHAR(120) NULL, -- Creado Por
@@ -386,8 +388,12 @@ CREATE TABLE PeriodAuditTableScaleTemplateResult (
     PeriodAuditTableScaleTemplateResultId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     PeriodAuditScaleResultId UNIQUEIDENTIFIER NOT NULL 
         FOREIGN KEY REFERENCES PeriodAuditScaleResult(PeriodAuditScaleResultId) ON DELETE CASCADE,
-    TableScaleTemplateId UNIQUEIDENTIFIER NOT NULL 
-        FOREIGN KEY REFERENCES TableScaleTemplate(TableScaleTemplateId),
+    TableScaleTemplateId UNIQUEIDENTIFIER NULL,
+    Code NVARCHAR(50) UNIQUE NOT NULL,
+    Name NVARCHAR(255) NOT NULL,
+    Orientation NVARCHAR(2) DEFAULT 'V', -- 'vertical' o 'horizontal'
+    CONSTRAINT CK_AuditTemplateFields_Orientation
+    CHECK (Orientation IN ('H', 'V') OR Orientation IS NULL),
 	TemplateData NVARCHAR(MAX) NULL, -- JSON almacenado como texto
     IsActive BIT DEFAULT 1, -- Está Activo
     CreatedBy VARCHAR(120) NULL, -- Creado Por
@@ -400,8 +406,7 @@ CREATE TABLE PeriodAuditTableScaleTemplateResult (
 
 CREATE TABLE PeriodAuditFieldValues (
     PeriodAuditFieldValueId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    AuditTemplateFieldId UNIQUEIDENTIFIER NULL 
-        FOREIGN KEY REFERENCES AuditTemplateFields(AuditTemplateFieldId),
+    AuditTemplateFieldId UNIQUEIDENTIFIER NULL,
 
     PeriodAuditTableScaleTemplateResultId UNIQUEIDENTIFIER NULL
         FOREIGN KEY REFERENCES PeriodAuditTableScaleTemplateResult(PeriodAuditTableScaleTemplateResultId) ON DELETE CASCADE,

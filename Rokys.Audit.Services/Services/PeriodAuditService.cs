@@ -1,0 +1,184 @@
+using FluentValidation;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using Reatil.Services.Services;
+using Rokys.Audit.DTOs.Common;
+using Rokys.Audit.DTOs.Requests.PeriodAudit;
+using Rokys.Audit.DTOs.Responses.Common;
+using Rokys.Audit.DTOs.Responses.PeriodAudit;
+using Rokys.Audit.Infrastructure.IMapping;
+using Rokys.Audit.Infrastructure.Persistence.Abstract;
+using Rokys.Audit.Model.Tables;
+using Rokys.Audit.Services.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
+
+namespace Rokys.Audit.Services.Services
+{
+    public class PeriodAuditService : IPeriodAuditService
+    {
+        private readonly IRepository<PeriodAudit> _repository;
+        private readonly IValidator<PeriodAuditRequestDto> _validator;
+        private readonly ILogger<PeriodAuditService> _logger;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IAMapper _mapper;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public PeriodAuditService(
+            IRepository<PeriodAudit> repository,
+            IValidator<PeriodAuditRequestDto> validator,
+            ILogger<PeriodAuditService> logger,
+            IUnitOfWork unitOfWork,
+            IAMapper mapper,
+            IHttpContextAccessor httpContextAccessor)
+        {
+            _repository = repository;
+            _validator = validator;
+            _logger = logger;
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
+            _httpContextAccessor = httpContextAccessor;
+        }
+
+        public async Task<ResponseDto<PeriodAuditResponseDto>> Create(PeriodAuditRequestDto requestDto)
+        {
+            var response = ResponseDto.Create<PeriodAuditResponseDto>();
+            try
+            {
+                var validate = _validator.Validate(requestDto);
+                if (!validate.IsValid)
+                {
+                    response.Messages.AddRange(validate.Errors.Select(e => new ApplicationMessage { Message = e.ErrorMessage, MessageType = ApplicationMessageType.Error }));
+                    return response;
+                }
+                var currentUser = _httpContextAccessor.CurrentUser();
+                var entity = _mapper.Map<PeriodAudit>(requestDto);
+                entity.CreateAudit(currentUser.UserName);
+                _repository.Insert(entity);
+                await _unitOfWork.CommitAsync();
+                response.Data = _mapper.Map<PeriodAuditResponseDto>(entity);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response = ResponseDto.Error<PeriodAuditResponseDto>(ex.Message);
+            }
+            return response;
+        }
+
+        public async Task<ResponseDto> Delete(Guid id)
+        {
+            var response = ResponseDto.Create();
+            try
+            {
+                var entity = await _repository.GetFirstOrDefaultAsync(filter: x => x.PeriodAuditId == id && x.IsActive);
+                if (entity == null)
+                {
+                    response = ResponseDto.Error("No se encontró el registro.");
+                    return response;
+                }
+                entity.IsActive = false;
+                _repository.Update(entity);
+                await _unitOfWork.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response = ResponseDto.Error(ex.Message);
+            }
+            return response;
+        }
+
+        public async Task<ResponseDto<PeriodAuditResponseDto>> GetById(Guid id)
+        {
+            var response = ResponseDto.Create<PeriodAuditResponseDto>();
+            try
+            {
+                var entity = await _repository.GetFirstOrDefaultAsync(filter: x => x.PeriodAuditId == id && x.IsActive);
+                if (entity == null)
+                {
+                    response = ResponseDto.Error<PeriodAuditResponseDto>("No se encontró el registro.");
+                    return response;
+                }
+                response.Data = _mapper.Map<PeriodAuditResponseDto>(entity);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response = ResponseDto.Error<PeriodAuditResponseDto>(ex.Message);
+            }
+            return response;
+        }
+
+        public async Task<ResponseDto<PeriodAuditResponseDto>> Update(Guid id, PeriodAuditRequestDto requestDto)
+        {
+            var response = ResponseDto.Create<PeriodAuditResponseDto>();
+            try
+            {
+                var validate = _validator.Validate(requestDto);
+                if (!validate.IsValid)
+                {
+                    response.Messages.AddRange(validate.Errors.Select(e => new ApplicationMessage { Message = e.ErrorMessage, MessageType = ApplicationMessageType.Error }));
+                    return response;
+                }
+                var entity = await _repository.GetFirstOrDefaultAsync(filter: x => x.PeriodAuditId == id && x.IsActive);
+                if (entity == null)
+                {
+                    response = ResponseDto.Error<PeriodAuditResponseDto>("No se encontró el registro.");
+                    return response;
+                }
+                var currentUser = _httpContextAccessor.CurrentUser();
+                entity = _mapper.Map(requestDto, entity);
+                entity.UpdateAudit(currentUser.UserName);
+                _repository.Update(entity);
+                await _unitOfWork.CommitAsync();
+                response.Data = _mapper.Map<PeriodAuditResponseDto>(entity);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response = ResponseDto.Error<PeriodAuditResponseDto>(ex.Message);
+            }
+            return response;
+        }
+
+        public async Task<ResponseDto<PaginationResponseDto<PeriodAuditResponseDto>>> GetPaged(PaginationRequestDto paginationRequestDto)
+        {
+            var response = ResponseDto.Create<PaginationResponseDto<PeriodAuditResponseDto>>();
+            try
+            {
+                Expression<Func<PeriodAudit, bool>> filter = x => x.IsActive;
+                if (!string.IsNullOrEmpty(paginationRequestDto.Filter))
+                    filter = x => x.GlobalObservations.Contains(paginationRequestDto.Filter) && x.IsActive;
+
+                Func<IQueryable<PeriodAudit>, IOrderedQueryable<PeriodAudit>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
+
+                var entities = await _repository.GetPagedAsync(
+                    filter: filter,
+                    orderBy: orderBy,
+                    pageNumber: paginationRequestDto.PageNumber,
+                    pageSize: paginationRequestDto.PageSize
+                );
+
+                var pagedResult = new PaginationResponseDto<PeriodAuditResponseDto>
+                {
+                    Items = _mapper.Map<IEnumerable<PeriodAuditResponseDto>>(entities.Items),
+                    TotalCount = entities.TotalRows,
+                    PageNumber = paginationRequestDto.PageNumber,
+                    PageSize = paginationRequestDto.PageSize
+                };
+
+                response.Data = pagedResult;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response = ResponseDto.Error<PaginationResponseDto<PeriodAuditResponseDto>>(ex.Message);
+            }
+            return response;
+        }
+    }
+}
