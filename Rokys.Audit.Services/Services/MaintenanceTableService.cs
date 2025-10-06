@@ -53,8 +53,7 @@ namespace Rokys.Audit.Services.Services
                 }
                 var currentUser = _httpContextAccessor.CurrentUser();
                 var entity = _mapper.Map<MaintenanceTable>(requestDto);
-                entity.CreatedBy = currentUser.UserName;
-                entity.CreationDate = DateTime.UtcNow;
+                entity.CreateAudit(currentUser.UserName);
                 entity.IsActive = true;
                 _maintenanceTableRepository.Insert(entity);
                 await _unitOfWork.CommitAsync();
@@ -172,8 +171,7 @@ namespace Rokys.Audit.Services.Services
                 }
                 var currentUser = _httpContextAccessor.CurrentUser();
                 entity = _mapper.Map(requestDto, entity);
-                entity.UpdatedBy = currentUser.UserName;
-                entity.UpdateDate = DateTime.UtcNow;
+                entity.UpdateAudit(currentUser.UserName);
                 _maintenanceTableRepository.Update(entity);
                 await _unitOfWork.CommitAsync();
                 response.Data = _mapper.Map<MaintenanceTableResponseDto>(entity);
