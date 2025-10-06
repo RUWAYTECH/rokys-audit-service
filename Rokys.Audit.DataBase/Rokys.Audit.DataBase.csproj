@@ -9,7 +9,6 @@
   <ItemGroup>
     <Folder Include="Index\" />
     <Folder Include="Init\" />
-    <Folder Include="Inserts\" />
     <Folder Include="Table\" />
     <Folder Include="Procedure\" />
   </ItemGroup>

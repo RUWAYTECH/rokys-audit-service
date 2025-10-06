@@ -1,9 +1,10 @@
 ﻿using FluentValidation;
+using Rokys.Audit.DTOs.Requests.MaintenanceTable;
 using Rokys.Audit.Model.Tables;
 
 namespace Rokys.Audit.Services.Validations
 {
-    public class MaintenanceTableValidator : AbstractValidator<MaintenanceTable>
+    public class MaintenanceTableValidator : AbstractValidator<MaintenanceTableRequestDto>
     {
         public MaintenanceTableValidator()
         {
