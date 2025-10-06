@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Reatil.Services.Services;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.MaintenanceTable;
 using Rokys.Audit.DTOs.Responses.Common;
@@ -17,27 +18,78 @@ namespace Rokys.Audit.Services.Services
     public class MaintenanceTableService : IMaintenanceTableService
     {
         private readonly IMaintenanceTableRepository _maintenanceTableRepository;
+        private readonly IValidator<MaintenanceTableRequestDto> _validator;
         private readonly ILogger<MaintenanceTableService> _logger;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IAMapper _mapper;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public MaintenanceTableService(
             IMaintenanceTableRepository maintenanceTableRepository,
+            IValidator<MaintenanceTableRequestDto> validator,
             ILogger<MaintenanceTableService> logger,
-            IAMapper mapper)
+            IUnitOfWork unitOfWork,
+            IAMapper mapper,
+            IHttpContextAccessor httpContextAccessor)
         {
             _maintenanceTableRepository = maintenanceTableRepository;
+            _validator = validator;
             _logger = logger;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _httpContextAccessor = httpContextAccessor;
         }
 
-        public Task<ResponseDto<MaintenanceTableResponseDto>> Create(MaintenanceTableRequestDto requestDto)
+        public async Task<ResponseDto<MaintenanceTableResponseDto>> Create(MaintenanceTableRequestDto requestDto)
         {
-            throw new NotImplementedException();
+            var response = ResponseDto.Create<MaintenanceTableResponseDto>();
+            try
+            {
+                var validate = _validator.Validate(requestDto);
+                if (!validate.IsValid)
+                {
+                    response.Messages.AddRange(validate.Errors.Select(e => new ApplicationMessage { Message = e.ErrorMessage, MessageType = ApplicationMessageType.Error }));
+                    return response;
+                }
+                var currentUser = _httpContextAccessor.CurrentUser();
+                var entity = _mapper.Map<MaintenanceTable>(requestDto);
+                entity.CreatedBy = currentUser.UserName;
+                entity.CreationDate = DateTime.UtcNow;
+                entity.IsActive = true;
+                _maintenanceTableRepository.Insert(entity);
+                await _unitOfWork.CommitAsync();
+                response.Data = _mapper.Map<MaintenanceTableResponseDto>(entity);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response = ResponseDto.Error<MaintenanceTableResponseDto>(ex.Message);
+            }
+            return response;
         }
 
-        public Task<ResponseDto> Delete(Guid id)
+        public async Task<ResponseDto> Delete(Guid id)
         {
-            throw new NotImplementedException();
+            var response = ResponseDto.Create();
+            try
+            {
+                var entity = await _maintenanceTableRepository.GetFirstOrDefaultAsync(filter: x => x.MaintenanceTableId == id && x.IsActive);
+                if (entity == null)
+                {
+                    response = ResponseDto.Error("No se encontró el registro.");
+                    return response;
+                }
+                entity.IsActive = false;
+                entity.UpdateDate = DateTime.UtcNow;
+                _maintenanceTableRepository.Update(entity);
+                await _unitOfWork.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response = ResponseDto.Error(ex.Message);
+            }
+            return response;
         }
 
         public async Task<ResponseDto<MaintenanceTableResponseDto>> GetById(Guid id)
@@ -101,9 +153,37 @@ namespace Rokys.Audit.Services.Services
             return response;
         }
 
-        public Task<ResponseDto<MaintenanceTableResponseDto>> Update(Guid id, MaintenanceTableRequestDto requestDto)
+        public async Task<ResponseDto<MaintenanceTableResponseDto>> Update(Guid id, MaintenanceTableRequestDto requestDto)
         {
-            throw new NotImplementedException();
+            var response = ResponseDto.Create<MaintenanceTableResponseDto>();
+            try
+            {
+                var validate = _validator.Validate(requestDto);
+                if (!validate.IsValid)
+                {
+                    response.Messages.AddRange(validate.Errors.Select(e => new ApplicationMessage { Message = e.ErrorMessage, MessageType = ApplicationMessageType.Error }));
+                    return response;
+                }
+                var entity = await _maintenanceTableRepository.GetFirstOrDefaultAsync(filter: x => x.MaintenanceTableId == id && x.IsActive);
+                if (entity == null)
+                {
+                    response = ResponseDto.Error<MaintenanceTableResponseDto>("No se encontró el registro.");
+                    return response;
+                }
+                var currentUser = _httpContextAccessor.CurrentUser();
+                entity = _mapper.Map(requestDto, entity);
+                entity.UpdatedBy = currentUser.UserName;
+                entity.UpdateDate = DateTime.UtcNow;
+                _maintenanceTableRepository.Update(entity);
+                await _unitOfWork.CommitAsync();
+                response.Data = _mapper.Map<MaintenanceTableResponseDto>(entity);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response = ResponseDto.Error<MaintenanceTableResponseDto>(ex.Message);
+            }
+            return response;
         }
     }
 }

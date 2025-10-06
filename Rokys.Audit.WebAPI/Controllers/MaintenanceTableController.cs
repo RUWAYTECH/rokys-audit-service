@@ -32,5 +32,32 @@ namespace Rokys.Audit.WebAPI.Controllers
                 return Ok(response);
             return BadRequest(response);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] MaintenanceTableRequestDto requestDto)
+        {
+            var response = await _maintenanceTableService.Create(requestDto);
+            if (response.IsValid)
+                return Ok(response);
+            return BadRequest(response);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] MaintenanceTableRequestDto requestDto)
+        {
+            var response = await _maintenanceTableService.Update(id, requestDto);
+            if (response.IsValid)
+                return Ok(response);
+            return BadRequest(response);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete([FromRoute] Guid id)
+        {
+            var response = await _maintenanceTableService.Delete(id);
+            if (response.IsValid)
+                return Ok(response);
+            return BadRequest(response);
+        }
     }
 }

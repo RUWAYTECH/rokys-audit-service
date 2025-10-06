@@ -5,6 +5,7 @@ using Rokys.Audit.DTOs.Requests.CriteriaSubResult;
 using Rokys.Audit.DTOs.Requests.Enterprise;
 using Rokys.Audit.DTOs.Requests.Group;
 using Rokys.Audit.DTOs.Requests.MaintenanceTable;
+using Rokys.Audit.DTOs.Requests.MaintenanceDetailTable;
 using Rokys.Audit.DTOs.Requests.Proveedor;
 using Rokys.Audit.DTOs.Requests.ScaleCompany;
 using Rokys.Audit.DTOs.Requests.ScaleGroup;
@@ -33,6 +34,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
            CreateMap<AuditTemplateFieldRequestDto, AuditTemplateFields>();
            CreateMap<ScoringCriteriaRequestDto, ScoringCriteria>();
             CreateMap<MaintenanceTableRequestDto, MaintenanceTable>();
+            CreateMap<MaintenanceDetailTableRequestDto, MaintenanceDetailTable>();
             CreateMap<PeriodAuditRequestDto, PeriodAudit>();
         }
     }
