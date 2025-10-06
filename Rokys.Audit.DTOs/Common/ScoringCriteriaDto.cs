@@ -3,6 +3,7 @@
     public class ScoringCriteriaDto
     {
         public Guid ScaleGroupId { get; set; }
+        public Guid ScaleCalificationId { get; set; }
         public string CriteriaName { get; set; } = string.Empty;
         public string? CriteriaCode { get; set; }
         public string? ResultFormula { get; set; }

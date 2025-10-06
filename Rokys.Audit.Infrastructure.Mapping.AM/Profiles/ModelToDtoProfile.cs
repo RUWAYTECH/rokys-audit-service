@@ -22,7 +22,10 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
         public ModelToDtoProfile()
         {
             CreateMap<Proveedor, ProveedorResponseDto>();
-            CreateMap<ScaleCompany, ScaleCompanyResponseDto>();
+            CreateMap<ScaleCompany, ScaleCompanyResponseDto>().AfterMap((dest, src) =>
+            {
+                dest.Enterprise.Name = src.EnterpriseName;
+            });
             CreateMap<ScaleGroup, ScaleGroupResponseDto>();
             CreateMap<Group, GroupResponseDto>();
             CreateMap<CriteriaSubResult, CriteriaSubResultResponseDto>();

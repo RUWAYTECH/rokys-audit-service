@@ -157,6 +157,35 @@ CREATE TABLE AuditTemplateFields (
     INDEX IX_AuditFieldValues_FieldCode (FieldCode)
 );
 
+CREATE TABLE MaintenanceTable (
+    MaintenanceTableId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    Code NVARCHAR(50) NOT NULL,
+    Description NVARCHAR(255) NULL,
+    IsSystem BIT NOT NULL DEFAULT(0),
+    IsActive BIT NOT NULL DEFAULT(1),
+    CreationDate DATETIME NOT NULL DEFAULT(GETDATE()),
+    CreatedBy NVARCHAR(100) NOT NULL,
+    UpdateDate DATETIME NULL,
+    UpdatedBy NVARCHAR(100) NULL
+);
+
+
+CREATE TABLE MaintenanceDetailTable (
+    MaintenanceDetailTableId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    MaintenanceTableId UNIQUEIDENTIFIER NOT NULL
+        FOREIGN KEY REFERENCES MaintenanceTable(MaintenanceTableId),
+    Code NVARCHAR(50) NOT NULL,
+    Description NVARCHAR(255) NULL,
+    JsonData NVARCHAR(MAX) NULL,
+    OrderRow INT NULL,
+    IsDefault BIT NOT NULL DEFAULT(0),
+    IsActive BIT NOT NULL DEFAULT(1),
+    CreationDate DATETIME NOT NULL DEFAULT(GETDATE()),
+    CreatedBy NVARCHAR(100) NOT NULL,
+    UpdateDate DATETIME NULL,
+    UpdatedBy NVARCHAR(100) NULL
+);
+
 -- =============================================
 -- CRITERIOS DE PUNTUACIÓN
 -- =============================================
@@ -289,35 +318,6 @@ CREATE TABLE [PeriodAudit]
     UpdateDate DATETIME NULL -- Fecha de Actualización
 );
 
-CREATE TABLE MaintenanceTable (
-    MaintenanceTableId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    Code NVARCHAR(50) NOT NULL,
-    Description NVARCHAR(255) NULL,
-    IsSystem BIT NOT NULL DEFAULT(0),
-    IsActive BIT NOT NULL DEFAULT(1),
-    CreationDate DATETIME NOT NULL DEFAULT(GETDATE()),
-    CreatedBy NVARCHAR(100) NOT NULL,
-    UpdateDate DATETIME NULL,
-    UpdatedBy NVARCHAR(100) NULL
-);
-
-
-CREATE TABLE MaintenanceDetailTable (
-    MaintenanceDetailTableId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    MaintenanceTableId UNIQUEIDENTIFIER NOT NULL
-        FOREIGN KEY REFERENCES MaintenanceTable(MaintenanceTableId),
-    Code NVARCHAR(50) NOT NULL,
-    Description NVARCHAR(255) NULL,
-    JsonData NVARCHAR(MAX) NULL,
-    OrderRow INT NULL,
-    IsDefault BIT NOT NULL DEFAULT(0),
-    IsActive BIT NOT NULL DEFAULT(1),
-    CreationDate DATETIME NOT NULL DEFAULT(GETDATE()),
-    CreatedBy NVARCHAR(100) NOT NULL,
-    UpdateDate DATETIME NULL,
-    UpdatedBy NVARCHAR(100) NULL
-);
-
 
 -- Table: Result
 CREATE TABLE PeriodAuditGroupResult
@@ -393,7 +393,7 @@ CREATE TABLE PeriodAuditTableScaleTemplateResult (
     Code NVARCHAR(50) UNIQUE NOT NULL,
     Name NVARCHAR(255) NOT NULL,
     Orientation NVARCHAR(2) DEFAULT 'V', -- 'vertical' o 'horizontal'
-    CONSTRAINT CK_AuditTemplateFields_Orientation
+    CONSTRAINT CK_PeriodAuditTableScaleTemplateResult_Orientation
     CHECK (Orientation IN ('H', 'V') OR Orientation IS NULL),
 	TemplateData NVARCHAR(MAX) NULL, -- JSON almacenado como texto
     IsActive BIT DEFAULT 1, -- Está Activo

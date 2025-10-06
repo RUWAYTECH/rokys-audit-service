@@ -19,6 +19,9 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.Property(x => x.ScaleGroupId)
                 .IsRequired();
 
+            builder.Property(x => x.ScoringCriteriaId)
+                .IsRequired();
+
             builder.Property(x => x.CriteriaCode)
                 .IsRequired()
                 .HasMaxLength(10);
@@ -70,6 +73,11 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.HasOne(x => x.ScaleGroup)
                 .WithMany(sg => sg.ScoringCriteria)
                 .HasForeignKey(x => x.ScaleGroupId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(e => e.MaintenanceDetailTable)
+                .WithMany()
+                .HasForeignKey(e => e.ScoringCriteriaId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasIndex(x => x.ScaleGroupId)
