@@ -205,10 +205,11 @@ namespace Rokys.Audit.Services.Services
                     response.Messages.Add(new ApplicationMessage { Message = "Ya existe una plantilla de escala con este código.", MessageType = ApplicationMessageType.Error });
                     return response;
                 }
-
+                Console.WriteLine("dt:", entity, requestDto);
                 var currentUser = _httpContextAccessor.CurrentUser();
                 entity = _mapper.Map(requestDto, entity);
                 entity.UpdateAudit(currentUser.UserName);
+                Console.WriteLine("datos::", entity);
                 _tableScaleTemplateRepository.Update(entity);
                 await _unitOfWork.CommitAsync();
                 response.Data = _mapper.Map<TableScaleTemplateResponseDto>(entity);

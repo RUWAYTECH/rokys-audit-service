@@ -1,13 +1,11 @@
+using Rokys.Audit.DTOs.Common;
+
 namespace Rokys.Audit.DTOs.Responses.TableScaleTemplate
 {
-    public class TableScaleTemplateResponseDto
+    public class TableScaleTemplateResponseDto: TableScaleTemplateDto
     {
         public Guid TableScaleTemplateId { get; set; }
-        public Guid ScaleGroupId { get; set; }
-        public string Code { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty;
-        public string? Title { get; set; }
-        public string? TemplateData { get; set; }
+       
         public bool IsActive { get; set; }
 
         // Navigation properties

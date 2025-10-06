@@ -19,9 +19,10 @@ namespace Rokys.Audit.Services.Validations
                 .NotEmpty().WithMessage("El nombre es requerido.")
                 .MaximumLength(255).WithMessage("El nombre no puede exceder los 255 caracteres.");
 
-            RuleFor(x => x.Title)
-                .MaximumLength(255).WithMessage("El título no puede exceder los 255 caracteres.");
-
+                RuleFor(x => x.Orientation)
+                    .NotEmpty().WithMessage("La orientación es requerida.")
+                    .Must(o => o == "H" || o == "V")
+                    .WithMessage("La orientación debe ser 'H' o 'V'.");
             RuleFor(x => x.TemplateData)
                 .Must(BeValidJson).WithMessage("Los datos de la plantilla deben ser un JSON válido.")
                 .When(x => !string.IsNullOrEmpty(x.TemplateData));

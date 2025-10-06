@@ -28,8 +28,6 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .IsRequired()
                 .HasMaxLength(255);
 
-            builder.Property(x => x.Title)
-                .HasMaxLength(255);
 
             builder.Property(x => x.TemplateData)
                 .HasColumnType("nvarchar(max)");
