@@ -15,6 +15,7 @@ using Rokys.Audit.DTOs.Responses.TableScaleTemplate;
 using Rokys.Audit.DTOs.Responses.PeriodAuditFieldValues;
 using Rokys.Audit.DTOs.Responses.PeriodAudit;
 using Rokys.Audit.Model.Tables;
+using Rokys.Audit.DTOs.Responses.AuditStatus;
 
 namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
 {
@@ -41,6 +42,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
             CreateMap<MaintenanceTable, MaintenanceTableResponseDto>();
             CreateMap<MaintenanceDetailTable, MaintenanceDetailTableResponseDto>();
             CreateMap<PeriodAudit, PeriodAuditResponseDto>();
+            CreateMap<AuditStatus, AuditStatusResponseDto>();
         }
     }
 }
