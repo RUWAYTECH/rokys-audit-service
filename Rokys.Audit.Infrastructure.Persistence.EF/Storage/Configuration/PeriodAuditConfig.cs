@@ -71,28 +71,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.Property(x => x.StatusId)
                 .IsRequired();
 
-            // Objetivo general para la empresa
-            builder.Property(x => x.ObjectiveValue)
-                .IsRequired()
-                .HasColumnType("decimal(10,2)");
 
-            // Umbrales para la empresa
-            builder.Property(x => x.RiskLow)
-                .IsRequired()
-                .HasColumnType("decimal(10,2)");
-
-            builder.Property(x => x.RiskModerate)
-                .IsRequired()
-                .HasColumnType("decimal(10,2)");
-
-            builder.Property(x => x.RiskHigh)
-                .IsRequired()
-                .HasColumnType("decimal(10,2)");
-
-            // Riesgo crítico = mayor a RiesgoElevado
-            builder.Property(x => x.RiskCritical)
-                .IsRequired()
-                .HasColumnType("decimal(10,2)");
 
             builder.Property(x => x.IsActive)
                 .HasDefaultValue(true)

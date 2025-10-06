@@ -26,16 +26,7 @@ namespace Rokys.Audit.Model.Tables
 
         public Guid StatusId { get; set; } // ID de Estado
 
-        // Objetivo general para la empresa
-        public decimal ObjectiveValue { get; set; }
 
-        // Umbrales para la empresa
-        public decimal RiskLow { get; set; }
-        public decimal RiskModerate { get; set; }
-        public decimal RiskHigh { get; set; }
-
-        // Riesgo crítico = mayor a RiesgoElevado
-        public decimal RiskCritical { get; set; }
 
         public bool IsActive { get; set; } = true;
 
