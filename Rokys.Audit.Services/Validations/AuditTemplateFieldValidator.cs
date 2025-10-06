@@ -17,13 +17,16 @@ namespace Rokys.Audit.Services.Validations
                 .NotEmpty().WithMessage("El código es requerido.")
                 .MaximumLength(100).WithMessage("El código no puede exceder los 100 caracteres.");
             RuleFor(x => x.FieldType)
-                .NotEmpty().WithMessage("El tipo es requerido.")
-                .MaximumLength(50).WithMessage("El tipo no puede exceder los 50 caracteres.");
+                .MaximumLength(50).WithMessage("El tipo no puede exceder los 50 caracteres.")
+                .Must(value => string.IsNullOrEmpty(value) || new[] { "numeric", "text", "date", "select" }.Contains(value))
+                .WithMessage("El tipo debe ser uno de los siguientes valores: numeric, text, date, select.");
             RuleFor(x => x.IsCalculated);
             RuleFor(x => x.CalculationFormula)
                 .MaximumLength(500).WithMessage("La formula no puede exceder los 500 caracteres.");
             RuleFor(x => x.AcumulationType)
-                .MaximumLength(50).WithMessage("El tipo de acumulación no puede exceder los 50 caracteres.");
+                .MaximumLength(50).WithMessage("El tipo de acumulación no puede exceder los 50 caracteres.")
+                .Must(value => string.IsNullOrEmpty(value) || new[] { "SUM", "COUNT" }.Contains(value))
+                .WithMessage("El tipo de acumulación debe ser 'SUM' o 'COUNT'.");
             RuleFor(x => x.FieldOptions);
             RuleFor(x => x.DefaultValue);
         }
