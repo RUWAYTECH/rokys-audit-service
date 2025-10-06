@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Rokys.Audit.DTOs.Responses.AuditScaleTemplate;
 using Rokys.Audit.DTOs.Responses.AuditTemplateField;
+using Rokys.Audit.DTOs.Responses.CriteriaSubResult;
 using Rokys.Audit.DTOs.Responses.Enterprise;
 using Rokys.Audit.DTOs.Responses.Group;
 using Rokys.Audit.DTOs.Responses.Proveedor;
@@ -20,6 +21,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
             CreateMap<ScaleCompany, ScaleCompanyResponseDto>();
             CreateMap<ScaleGroup, ScaleGroupResponseDto>();
             CreateMap<Group, GroupResponseDto>();
+            CreateMap<CriteriaSubResult, CriteriaSubResultResponseDto>();
             //CreateMap<AuditScaleTemplate, AuditScaleTemplateResponseDto>();
             CreateMap<TableScaleTemplate, TableScaleTemplateResponseDto>().AfterMap((dest, src) =>
                 dest.ScaleGroup.Name = src.ScaleGroupName);
