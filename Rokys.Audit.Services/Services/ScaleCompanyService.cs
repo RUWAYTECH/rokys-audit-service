@@ -171,7 +171,8 @@ namespace Rokys.Audit.Services.Services
                 entity.UpdateAudit(currentUser.UserName);
                 _scaleCompanyRepository.Update(entity);
                 await _unitOfWork.CommitAsync();
-                response.Data = _mapper.Map<ScaleCompanyResponseDto>(entity);
+                var entityUpdate = await _scaleCompanyRepository.GetFirstOrDefaultAsync(filter: x => x.ScaleCompanyId == id && x.IsActive, includeProperties: [e => e.Enterprise]);
+                response.Data = _mapper.Map<ScaleCompanyResponseDto>(entityUpdate);
             }
             catch (Exception ex)
             {
