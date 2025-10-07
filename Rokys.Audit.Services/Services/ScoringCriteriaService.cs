@@ -126,16 +126,13 @@ namespace Rokys.Audit.Services.Services
             return response;
         }
 
-        public async Task<ResponseDto<PaginationResponseDto<ScoringCriteriaResponseDto>>> GetPaged(PaginationRequestDto requestDto)
+        public async Task<ResponseDto<PaginationResponseDto<ScoringCriteriaResponseDto>>> GetPaged(ScoringCriteriaFilterRequestDto requestDto)
         {
             var response = ResponseDto.Create<PaginationResponseDto<ScoringCriteriaResponseDto>>();
             try
             {
                 int totalRows;
-                Expression<Func<ScoringCriteria, bool>> filter = x => x.IsActive;
-
-                if (!string.IsNullOrEmpty(requestDto.Filter))
-                    filter = x => x.CriteriaName.Contains(requestDto.Filter) || x.CriteriaCode.Contains(requestDto.Filter);
+                var filter = BuildFilter(requestDto);
 
                 Func<IQueryable<ScoringCriteria>, IOrderedQueryable<ScoringCriteria>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 
@@ -182,7 +179,7 @@ namespace Rokys.Audit.Services.Services
                     }
                     return response;
                 }
-                var entity = await _scoringCriteriaRepository.GetFirstOrDefaultAsync(filter: x => x.ScoringCriteriaId == id && x.IsActive, includeProperties: [x=>x.ScaleGroup]);
+                var entity = await _scoringCriteriaRepository.GetFirstOrDefaultAsync(filter: x => x.ScoringCriteriaId == id && x.IsActive, includeProperties: [x => x.ScaleGroup]);
                 if (entity == null)
                 {
                     response = ResponseDto.Error<ScoringCriteriaResponseDto>("No se encontro el criterio de puntuación.");
@@ -202,6 +199,14 @@ namespace Rokys.Audit.Services.Services
                 response = ResponseDto.Error<ScoringCriteriaResponseDto>(ex.Message);
             }
             return response;
+        }
+
+        private Expression<Func<ScoringCriteria, bool>> BuildFilter(ScoringCriteriaFilterRequestDto dto)
+        {
+            return x =>
+                x.IsActive &&
+                (!dto.ScaleGroupId.HasValue || x.ScaleGroupId == dto.ScaleGroupId.Value) &&
+                (string.IsNullOrEmpty(dto.Filter) || x.CriteriaName.Contains(dto.Filter) || x.CriteriaCode.Contains(dto.Filter));
         }
     }
 }

@@ -7,6 +7,6 @@ namespace Rokys.Audit.Services.Interfaces
 {
     public interface IScoringCriteriaService : IBaseService<ScoringCriteriaRequestDto, ScoringCriteriaResponseDto>
     {
-        Task<ResponseDto<PaginationResponseDto<ScoringCriteriaResponseDto>>> GetPaged(PaginationRequestDto requestDto);
+        Task<ResponseDto<PaginationResponseDto<ScoringCriteriaResponseDto>>> GetPaged(ScoringCriteriaFilterRequestDto requestDto);
     }
 }
