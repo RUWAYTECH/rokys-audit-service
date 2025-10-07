@@ -105,12 +105,7 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<PaginationResponseDto<ScaleGroupResponseDto>>();
             try
             {
-                Expression<Func<ScaleGroup, bool>> filter = x => x.IsActive;
-                if (!string.IsNullOrEmpty(paginationRequestDto.Filter))
-                    filter = x => x.IsActive && (x.Name.Contains(paginationRequestDto.Filter) || x.Code.Contains(paginationRequestDto.Filter));
-
-                if (paginationRequestDto.GroupId.HasValue)
-                    filter = x => x.IsActive && x.GroupId == paginationRequestDto.GroupId.Value;
+                var filter = BuildFilter(paginationRequestDto);
 
                 Func<IQueryable<ScaleGroup>, IOrderedQueryable<ScaleGroup>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 
@@ -224,6 +219,17 @@ namespace Rokys.Audit.Services.Services
                 response = ResponseDto.Error<ScaleGroupResponseDto>(ex.Message);
             }
             return response;
+        }
+
+        /// <summary>
+        /// Construye el filtro dinámico para paginación de ScaleGroup.
+        /// </summary>
+        private Expression<Func<ScaleGroup, bool>> BuildFilter(ScaleGroupFilterRequestDto dto)
+        {
+            return x =>
+                x.IsActive &&
+                (!dto.GroupId.HasValue || x.GroupId == dto.GroupId.Value) &&
+                (string.IsNullOrEmpty(dto.Filter) || x.Name.Contains(dto.Filter) || x.Code.Contains(dto.Filter));
         }
     }
 }

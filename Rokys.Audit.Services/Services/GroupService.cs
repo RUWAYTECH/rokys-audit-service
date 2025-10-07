@@ -89,30 +89,28 @@ namespace Rokys.Audit.Services.Services
             return response;
         }
 
-        public async Task<ResponseDto<PaginationResponseDto<GroupResponseDto>>> GetPaged(PaginationRequestDto paginationRequestDto)
+        public async Task<ResponseDto<PaginationResponseDto<GroupResponseDto>>> GetPaged(GroupFilterRequestDto groupFilterRequestDto)
         {
             var response = ResponseDto.Create<PaginationResponseDto<GroupResponseDto>>();
             try
             {
-                Expression<Func<Group, bool>> filter = x => x.IsActive;
-                if (!string.IsNullOrEmpty(paginationRequestDto.Filter))
-                    filter = x => x.Name.Contains(paginationRequestDto.Filter) && x.IsActive;
+                var filter = BuildFilter(groupFilterRequestDto);
 
                 Func<IQueryable<Group>, IOrderedQueryable<Group>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 
                 var entities = await _groupRepository.GetPagedAsync(
                     filter: filter,
                     orderBy: orderBy,
-                    pageNumber: paginationRequestDto.PageNumber,
-                    pageSize: paginationRequestDto.PageSize
+                    pageNumber: groupFilterRequestDto.PageNumber,
+                    pageSize: groupFilterRequestDto.PageSize
                 );
 
                 var pagedResult = new PaginationResponseDto<GroupResponseDto>
                 {
                     Items = _mapper.Map<IEnumerable<GroupResponseDto>>(entities.Items),
                     TotalCount = entities.TotalRows,
-                    PageNumber = paginationRequestDto.PageNumber,
-                    PageSize = paginationRequestDto.PageSize
+                    PageNumber = groupFilterRequestDto.PageNumber,
+                    PageSize = groupFilterRequestDto.PageSize
                 };
 
                 response.Data = pagedResult;
@@ -178,5 +176,15 @@ namespace Rokys.Audit.Services.Services
             }
             return response;
         }
+
+        private Expression<Func<Group, bool>> BuildFilter(GroupFilterRequestDto dto)
+        {
+            return x =>
+                x.IsActive &&
+                (!dto.EnterpriseId.HasValue || x.EnterpriseId == dto.EnterpriseId.Value) &&
+                (string.IsNullOrEmpty(dto.Filter) || x.Name.Contains(dto.Filter));
+        }
+
+        
     }
 }

@@ -7,6 +7,6 @@ namespace Rokys.Audit.Services.Interfaces
 {
     public interface IGroupService : IBaseService<GroupRequestDto, GroupResponseDto>
     {
-        Task<ResponseDto<PaginationResponseDto<GroupResponseDto>>> GetPaged(PaginationRequestDto requestDto);
+        Task<ResponseDto<PaginationResponseDto<GroupResponseDto>>> GetPaged(GroupFilterRequestDto requestDto);
     }
 }

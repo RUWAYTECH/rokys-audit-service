@@ -25,9 +25,9 @@ namespace Rokys.Audit.WebAPI.Controllers
         }
         
         [HttpGet]
-        public async Task<IActionResult> GetPaged([FromQuery] PaginationRequestDto paginationRequestDto)
+        public async Task<IActionResult> GetPaged([FromQuery] GroupFilterRequestDto groupFilterRequestDto)
         {
-            var response = await _groupService.GetPaged(paginationRequestDto);
+            var response = await _groupService.GetPaged(groupFilterRequestDto);
             if (response.IsValid)
                 return Ok(response);
             return BadRequest(response);
