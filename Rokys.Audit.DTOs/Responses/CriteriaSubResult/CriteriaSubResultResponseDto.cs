@@ -6,6 +6,7 @@ namespace Rokys.Audit.DTOs.Responses.CriteriaSubResult
     public class CriteriaSubResultResponseDto : CriteriaSubResultDto
     {
         public Guid CriteriaSubResultId { get; set; }
+        public string? CriteriaCode { get; set; }
         public string? CreatedBy { get; set; }
         public DateTime CreationDate { get; set; }
         public string? UpdatedBy { get; set; }

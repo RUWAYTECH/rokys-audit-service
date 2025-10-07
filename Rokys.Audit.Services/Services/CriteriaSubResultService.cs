@@ -91,7 +91,14 @@ namespace Rokys.Audit.Services.Services
 					return response;
 				}
 				var currentUser = _httpContextAccessor.CurrentUser();
+				// Obtener el último código existente
+				var lastCode = _criteriaSubResultRepository.Get(x => x.IsActive)
+					.OrderByDescending(x => x.CreationDate)
+					.Select(x => x.CriteriaCode)
+					.FirstOrDefault();
+				var nextCode = Rokys.Audit.Common.Helpers.CodeGeneratorHelper.GenerateNextCode("CSR", lastCode, 4);
 				var entity = _mapper.Map<CriteriaSubResult>(requestDto);
+				entity.CriteriaCode = nextCode;
 				entity.CreateAudit(currentUser.UserName);
 				_criteriaSubResultRepository.Insert(entity);
 				await _unitOfWork.CommitAsync();
@@ -100,7 +107,14 @@ namespace Rokys.Audit.Services.Services
 			catch (Exception ex)
 			{
 				_logger.LogError(ex.Message);
-				response = ResponseDto.Error<CriteriaSubResultResponseDto>(ex.Message);
+				if (ex.Message.Contains("UNIQUE"))
+				{
+					response = ResponseDto.Error<CriteriaSubResultResponseDto>("No se pudo generar un código único. Intente nuevamente.");
+				}
+				else
+				{
+					response = ResponseDto.Error<CriteriaSubResultResponseDto>(ex.Message);
+				}
 			}
 			return response;
 		}
