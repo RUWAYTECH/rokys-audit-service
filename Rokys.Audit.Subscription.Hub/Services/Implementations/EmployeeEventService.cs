@@ -22,12 +22,12 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
         }
 
         /// <inheritdoc />
-        public async Task HandleEmployeeCreatedAsync(EventWrapper<EmployeeCreatedEvent> employeeEvent, CancellationToken cancellationToken = default)
+        public async Task HandleEmployeeCreatedAsync(EmployeeCreatedEvent employeeEvent, CancellationToken cancellationToken = default)
         {
             try
             {
                 _logger.LogInformation("Processing employee created event for Employee ID: {EmployeeId}, Name: {FirstName} {LastName}",
-                    employeeEvent.Data.EmployeeId, employeeEvent.Data.FirstName, employeeEvent.Data.LastName);
+                    employeeEvent.EmployeeId, employeeEvent.FirstName, employeeEvent.LastName);
 
                 // Aquí puedes agregar lógica específica para cuando se crea un empleado
                 // Por ejemplo: enviar notificaciones de bienvenida, crear perfiles de usuario, etc.
@@ -36,17 +36,17 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
                 // var employeeService = _serviceProvider.GetRequiredService<IEmployeeService>();
                 // var employeeDetails = await employeeService.GetByIdAsync(employeeEvent.EmployeeId);
 
-                var fullName = $"{employeeEvent.Data.FirstName} {employeeEvent.Data.LastName}";
-                await LogEmployeeActivity("CREATED", employeeEvent.Data.EmployeeId, fullName,
-                    $"Employee created - Document: {employeeEvent.Data.DocumentNumber}, Email: {employeeEvent.Data.Email}, Phone: {employeeEvent.Data.Phone}");
+                var fullName = $"{employeeEvent.FirstName} {employeeEvent.LastName}";
+                await LogEmployeeActivity("CREATED", employeeEvent.EmployeeId, fullName,
+                    $"Employee created - Document: {employeeEvent.DocumentNumber}, Email: {employeeEvent.Email}, Phone: {employeeEvent.Phone}");
 
                 _logger.LogInformation("Successfully processed employee created event for Employee ID: {EmployeeId}", 
-                    employeeEvent.Data.EmployeeId);
+                    employeeEvent.EmployeeId);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error processing employee created event for Employee ID: {EmployeeId}", 
-                    employeeEvent.Data.EmployeeId);
+                    employeeEvent.EmployeeId);
                 throw;
             }
         }
@@ -135,7 +135,7 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
                     case var key when key.Contains("employee.events.created"):
                         var createdEvent = JsonConvert.DeserializeObject<EventWrapper<EmployeeCreatedEvent>>(message);
                         if (createdEvent != null)
-                            await HandleEmployeeCreatedAsync(createdEvent, cancellationToken);
+                            await HandleEmployeeCreatedAsync(createdEvent.Data, cancellationToken);
                         break;
 
                     case var key when key.Contains("employee.events.updated"):
