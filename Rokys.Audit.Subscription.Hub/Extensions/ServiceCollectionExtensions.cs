@@ -1,12 +1,11 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Rokys.Audit.Subscription.Hub.Configuration;
 using Rokys.Audit.Subscription.Hub.Services.Implementations;
 using Rokys.Audit.Subscription.Hub.Services.Interfaces;
-using Rokys.Events.Command.Configuration;
-using Rokys.Events.Command.Events;
-using Rokys.Events.Command.Interfaces.Events;
+using Ruway.Events.Command.Configuration;
+using Ruway.Events.Command.Events;
+using Ruway.Events.Command.Interfaces.Events;
 
 namespace Rokys.Audit.Subscription.Hub.Extensions
 {
