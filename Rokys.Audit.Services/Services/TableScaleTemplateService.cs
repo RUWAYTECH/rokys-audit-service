@@ -107,22 +107,20 @@ namespace Rokys.Audit.Services.Services
             return response;
         }
 
-        public async Task<ResponseDto<PaginationResponseDto<TableScaleTemplateResponseDto>>> GetPaged(PaginationRequestDto paginationRequestDto)
+        public async Task<ResponseDto<PaginationResponseDto<TableScaleTemplateResponseDto>>> GetPaged(TableScaleTemplateFilterRequestDto filterRequestDto)
         {
             var response = ResponseDto.Create<PaginationResponseDto<TableScaleTemplateResponseDto>>();
             try
             {
-                Expression<Func<TableScaleTemplate, bool>> filter = x => x.IsActive;
-                if (!string.IsNullOrEmpty(paginationRequestDto.Filter))
-                    filter = x => x.IsActive && (x.Name.Contains(paginationRequestDto.Filter) || x.Code.Contains(paginationRequestDto.Filter));
+                var filter = BuildFilter(filterRequestDto);
 
                 Func<IQueryable<TableScaleTemplate>, IOrderedQueryable<TableScaleTemplate>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 
                 var entities = await _tableScaleTemplateRepository.GetPagedAsync(
                     filter: filter,
                     orderBy: orderBy,
-                    pageNumber: paginationRequestDto.PageNumber,
-                    pageSize: paginationRequestDto.PageSize,
+                    pageNumber: filterRequestDto.PageNumber,
+                    pageSize: filterRequestDto.PageSize,
                     includeProperties: [a => a.ScaleGroup]
                 );
 
@@ -130,8 +128,8 @@ namespace Rokys.Audit.Services.Services
                 {
                     Items = _mapper.Map<IEnumerable<TableScaleTemplateResponseDto>>(entities.Items),
                     TotalCount = entities.TotalRows,
-                    PageNumber = paginationRequestDto.PageNumber,
-                    PageSize = paginationRequestDto.PageSize
+                    PageNumber = filterRequestDto.PageNumber,
+                    PageSize = filterRequestDto.PageSize
                 };
 
                 response.Data = pagedResult;
@@ -142,6 +140,14 @@ namespace Rokys.Audit.Services.Services
                 response = ResponseDto.Error<PaginationResponseDto<TableScaleTemplateResponseDto>>(ex.Message);
             }
             return response;
+        }
+
+        private Expression<Func<TableScaleTemplate, bool>> BuildFilter(TableScaleTemplateFilterRequestDto dto)
+        {
+            return x =>
+                x.IsActive &&
+                (!dto.ScaleGroupId.HasValue || x.ScaleGroupId == dto.ScaleGroupId.Value) &&
+                (string.IsNullOrEmpty(dto.Filter) || x.Name.Contains(dto.Filter));
         }
 
         public async Task<ResponseDto<TableScaleTemplateResponseDto>> GetById(Guid id)

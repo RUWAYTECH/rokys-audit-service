@@ -11,7 +11,7 @@ namespace Rokys.Audit.Services.Interfaces
         Task<ResponseDto<TableScaleTemplateResponseDto>> Update(Guid id, TableScaleTemplateRequestDto requestDto);
         Task<ResponseDto> Delete(Guid id);
         Task<ResponseDto<TableScaleTemplateResponseDto>> GetById(Guid id);
-        Task<ResponseDto<PaginationResponseDto<TableScaleTemplateResponseDto>>> GetPaged(PaginationRequestDto paginationRequestDto);
+    Task<ResponseDto<PaginationResponseDto<TableScaleTemplateResponseDto>>> GetPaged(TableScaleTemplateFilterRequestDto filterRequestDto);
         Task<ResponseDto<IEnumerable<TableScaleTemplateResponseDto>>> GetByScaleGroupId(Guid scaleGroupId);
     }
 }

@@ -184,7 +184,5 @@ namespace Rokys.Audit.Services.Services
                 (!dto.EnterpriseId.HasValue || x.EnterpriseId == dto.EnterpriseId.Value) &&
                 (string.IsNullOrEmpty(dto.Filter) || x.Name.Contains(dto.Filter));
         }
-
-        
     }
 }
