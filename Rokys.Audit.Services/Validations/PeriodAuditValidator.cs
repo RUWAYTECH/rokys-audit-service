@@ -11,7 +11,6 @@ namespace Rokys.Audit.Services.Validations
             RuleFor(x => x.StartDate).NotEmpty();
             RuleFor(x => x.EndDate).NotEmpty();
             RuleFor(x => x.StatusId).NotEmpty();
-            RuleFor(x => x.ScaleName).NotEmpty();
         }
     }
 }

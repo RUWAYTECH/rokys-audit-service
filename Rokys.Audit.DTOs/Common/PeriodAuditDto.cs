@@ -15,14 +15,6 @@ namespace Rokys.Audit.DTOs.Common
         public DateTime EndDate { get; set; }
         public DateTime? ReportDate { get; set; }
         public int? AuditedDays { get; set; }
-        public string GlobalObservations { get; set; } = string.Empty;
-        public decimal TotalWeighting { get; set; }
         public Guid StatusId { get; set; }
-        public decimal ScoreValue { get; set; }
-        public string ScaleName { get; set; } = string.Empty;
-        public string ScaleIcon { get; set; } = string.Empty;
-        public string ScaleColor { get; set; } = string.Empty;
-        public decimal ScaleMinValue { get; set; }
-        public decimal ScaleMaxValue { get; set; }
     }
 }
