@@ -50,19 +50,34 @@ namespace Rokys.Audit.Services.Services
                     response.Messages.AddRange(validate.Errors.Select(e => new ApplicationMessage { Message = e.ErrorMessage, MessageType = ApplicationMessageType.Error }));
                     return response;
                 }
-                else
-                {
-                    var currentUser = _httpContextAccessor.CurrentUser();
-                    var entity = _mapper.Map<ScoringCriteria>(requestDto);
-                    entity.CreateAudit(currentUser.UserName);
-                    _scoringCriteriaRepository.Insert(entity);
-                    await _unitOfWork.CommitAsync();
-                    response.Data = _mapper.Map<ScoringCriteriaResponseDto>(entity);
-                }
-            } catch (Exception ex)
+                var currentUser = _httpContextAccessor.CurrentUser();
+                // Obtener el último código existente
+                var lastCode = _scoringCriteriaRepository.GetFirstOrDefault(orderBy: q => q.OrderByDescending(x => x.CreationDate))?.CriteriaCode;
+                var nextCode = Rokys.Audit.Common.Helpers.CodeGeneratorHelper.GenerateNextCode("SR", lastCode, 4);
+                var entity = _mapper.Map<ScoringCriteria>(requestDto);
+                entity.CriteriaCode = nextCode;
+                // Obtener el siguiente sortOrder para el grupo
+                var existingSortOrders = _scoringCriteriaRepository
+                    .Get(x => x.ScaleGroupId == entity.ScaleGroupId)
+                    .Select(x => x.SortOrder);
+                entity.SortOrder = Rokys.Audit.Common.Helpers.SortOrderHelper.GetNextSortOrder(existingSortOrders);
+                entity.CreateAudit(currentUser.UserName);
+                // Insertar y guardar cambios
+                _scoringCriteriaRepository.Insert(entity);
+                await _unitOfWork.CommitAsync();
+                response.Data = _mapper.Map<ScoringCriteriaResponseDto>(entity);
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                response = ResponseDto.Error<ScoringCriteriaResponseDto>(ex.Message);
+                if (ex.Message.Contains("UNIQUE"))
+                {
+                    response = ResponseDto.Error<ScoringCriteriaResponseDto>("No se pudo generar un código único. Intente nuevamente.");
+                }
+                else
+                {
+                    response = ResponseDto.Error<ScoringCriteriaResponseDto>(ex.Message);
+                }
             }
             return response;
         }

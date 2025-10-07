@@ -13,10 +13,6 @@ namespace Rokys.Audit.Services.Validations
             RuleFor(x => x.ScaleCalificationId)
                 .NotEmpty().WithMessage("El campo 'escala de calificación' es obligatorio.");
 
-            RuleFor(x => x.CriteriaCode)
-                .NotEmpty().WithMessage("El campo 'CriteriaCode' es obligatorio.")
-                .MaximumLength(10).WithMessage("El campo 'CriteriaCode' no debe exceder los 10 caracteres.");
-
             RuleFor(x => x.CriteriaName)
                 .NotEmpty().WithMessage("El campo 'CriteriaName' es obligatorio.")
                 .MaximumLength(255).WithMessage("El campo 'CriteriaName' no debe exceder los 255 caracteres.");
