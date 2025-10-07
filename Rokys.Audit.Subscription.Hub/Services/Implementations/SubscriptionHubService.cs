@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Logging;
-using Rokys.Events.Command.Events;
 using Rokys.Audit.Subscription.Hub.Services.Interfaces;
-using Rokys.Events.Command.Interfaces.Events;
+using Ruway.Events.Command.Interfaces.Events;
 
 namespace Rokys.Audit.Subscription.Hub.Services.Implementations
 {
