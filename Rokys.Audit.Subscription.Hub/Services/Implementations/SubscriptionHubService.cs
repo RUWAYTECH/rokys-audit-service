@@ -89,11 +89,11 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
             _logger.LogInformation("Setting up employee event subscriptions...");
 
             // Configurar handlers específicos por tipo de evento usando los eventos existentes
-            /*await _eventSubscriber.SubscribeAsync<EmployeeCreatedEvent>(async (employeeEvent) =>
+            await _eventSubscriber.SubscribeAsync<EmployeeCreatedEvent>(async (employeeEvent) =>
             {
                 if (_employeeEventService != null)
                     await _employeeEventService.HandleEmployeeCreatedAsync(employeeEvent);
-            }, "employee.events.created"); */
+            }, "memos.employee.events.created"); 
 
            /* await _eventSubscriber.SubscribeAsync<EmployeeUpdatedEvent>(async (employeeEvent) =>
             {
@@ -105,13 +105,13 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
             {
                 if (_employeeEventService != null)
                     await _employeeEventService.HandleEmployeeDeletedAsync(employeeEvent);
-            }, "employee.events.deleted"); */
+            }, "memos.employee.events.deleted"); */
 
             // Suscribirse a eventos genéricos de empleados (wildcard para capturar cualquier evento de empleado)
-             await _eventSubscriber.SubscribeAsync(
+             /*await _eventSubscriber.SubscribeAsync(
                 async (message, routingKey) => await _employeeEventService.HandleGenericEmployeeEventAsync(message, routingKey),
                 "#",
-                cancellationToken); 
+                cancellationToken); */
 
             _logger.LogInformation("Employee event subscriptions configured successfully");
         }

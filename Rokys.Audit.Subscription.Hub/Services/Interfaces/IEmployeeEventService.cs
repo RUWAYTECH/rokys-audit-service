@@ -10,7 +10,7 @@ namespace Rokys.Audit.Subscription.Hub.Services.Interfaces
         /// <summary>
         /// Procesa evento de creación de empleado
         /// </summary>
-        Task HandleEmployeeCreatedAsync(EventWrapper<EmployeeCreatedEvent> employeeEvent, CancellationToken cancellationToken = default);
+        Task HandleEmployeeCreatedAsync(EmployeeCreatedEvent employeeEvent, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Procesa evento de actualización de empleado
