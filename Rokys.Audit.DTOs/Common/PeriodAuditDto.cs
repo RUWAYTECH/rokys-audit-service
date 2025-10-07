@@ -4,7 +4,6 @@ namespace Rokys.Audit.DTOs.Common
 {
     public class PeriodAuditDto
     {
-        public Guid PeriodAuditId { get; set; }
         public Guid StoreId { get; set; }
         public Guid? AdministratorId { get; set; }
         public Guid? AssistantId { get; set; }

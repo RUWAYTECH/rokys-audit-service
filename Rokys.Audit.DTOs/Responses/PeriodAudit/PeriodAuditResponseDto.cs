@@ -5,7 +5,8 @@ namespace Rokys.Audit.DTOs.Responses.PeriodAudit
 {
     public class PeriodAuditResponseDto : PeriodAuditDto
     {
-        
+        public Guid PeriodAuditId { get; set; }
+
         public decimal ScoreValue { get; set; }
         public string ScaleName { get; set; } = string.Empty;
         public string ScaleIcon { get; set; } = string.Empty;
