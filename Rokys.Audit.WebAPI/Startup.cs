@@ -4,6 +4,7 @@ using Microsoft.OpenApi.Models;
 using Rokys.Audit.Infrastructure.Mapping.AM;
 using Rokys.Audit.Infrastructure.Persistence.Dp;
 using Rokys.Audit.Infrastructure.Persistence.EF.Storage;
+using Rokys.Audit.Subscription.Hub.Extensions;
 using Rokys.Audit.WebAPI.Configuration;
 using Rokys.Audit.WebAPI.DependencyInjection;
 using Rokys.Audit.WebAPI.Filters;
@@ -79,6 +80,10 @@ namespace Rokys.Audit.WebAPI
 
             ContextDp.Config();
             this.AddSecurity();
+            
+            // Add Subscription Hub
+            Services.AddSubscriptionHub(Configuration);
+            
             return DependencyConfig.Configure(Services, Configuration);
         }
 

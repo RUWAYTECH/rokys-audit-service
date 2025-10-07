@@ -51,6 +51,9 @@
     <ProjectReference Include="..\Rokys.Audit.Globalization\Rokys.Audit.Globalization.csproj">
       <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
     </ProjectReference>
+    <ProjectReference Include="..\Rokys.Audit.Subscription.Hub\Rokys.Audit.Subscription.Hub.csproj">
+      <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
+    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>
