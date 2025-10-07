@@ -5,6 +5,8 @@ namespace Rokys.Audit.DTOs.Responses.ScaleCompany
     public class ScaleCompanyResponseDto : ScaleCompanyDto
     {
         public Guid ScaleCompanyId { get; set; }
+        public int SortOrder { get; set; }
+        public string Code { get; set; } = string.Empty;
         public bool IsActive { get; set; }
         public DateTime CreationDate { get; set; }
         public string CreatedBy { get; set; } = string.Empty;

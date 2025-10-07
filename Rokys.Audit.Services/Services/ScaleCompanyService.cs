@@ -52,7 +52,19 @@ namespace Rokys.Audit.Services.Services
                     return response;
                 }
                 var currentUser = _httpContextAccessor.CurrentUser();
+                // Obtener el último código existente
+                var lastCode = _scaleCompanyRepository.Get(x => x.IsActive)
+                    .OrderByDescending(x => x.CreationDate)
+                    .Select(x => x.Code)
+                    .FirstOrDefault();
+                var nextCode = Rokys.Audit.Common.Helpers.CodeGeneratorHelper.GenerateNextCode("SC", lastCode, 4);
                 var entity = _mapper.Map<ScaleCompany>(requestDto);
+                entity.Code = nextCode;
+                // Obtener el siguiente sortOrder para la empresa
+                var existingSortOrders = _scaleCompanyRepository
+                    .Get(x => x.EnterpriseId == entity.EnterpriseId)
+                    .Select(x => x.SortOrder);
+                entity.SortOrder = Rokys.Audit.Common.Helpers.SortOrderHelper.GetNextSortOrder(existingSortOrders);
                 entity.CreateAudit(currentUser.UserName);
                 _scaleCompanyRepository.Insert(entity);
                 await _unitOfWork.CommitAsync();
@@ -61,7 +73,14 @@ namespace Rokys.Audit.Services.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                response = ResponseDto.Error<ScaleCompanyResponseDto>(ex.Message);
+                if (ex.Message.Contains("UNIQUE"))
+                {
+                    response = ResponseDto.Error<ScaleCompanyResponseDto>("No se pudo generar un código único. Intente nuevamente.");
+                }
+                else
+                {
+                    response = ResponseDto.Error<ScaleCompanyResponseDto>(ex.Message);
+                }
             }
             return response;
         }

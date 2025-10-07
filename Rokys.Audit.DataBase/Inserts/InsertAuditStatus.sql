@@ -8,7 +8,7 @@ VALUES
 -- Insert Escala into MaintenanceTable
 DECLARE @EscalaId UNIQUEIDENTIFIER = NEWID();
 INSERT INTO MaintenanceTable (MaintenanceTableId, Code, Description, IsSystem, IsActive, CreatedBy, CreationDate, UpdatedBy, UpdateDate)
-VALUES (@EscalaId, 'ESCALA', 'Tabla de Escalas de Riesgo', 1, 1, 'Admin', GETDATE(), 'Admin', GETDATE());
+VALUES (@EscalaId, 'ESC', 'Tabla de Escalas de Riesgo', 1, 1, 'Admin', GETDATE(), 'Admin', GETDATE());
 
 -- Insert details into MaintenanceDetailTable
 INSERT INTO MaintenanceDetailTable (MaintenanceDetailTableId, MaintenanceTableId, Code, Description, IsDefault, IsActive, OrderRow, JsonData, CreatedBy, CreationDate, UpdatedBy, UpdateDate)
