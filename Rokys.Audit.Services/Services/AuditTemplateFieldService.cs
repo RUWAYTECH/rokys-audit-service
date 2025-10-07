@@ -59,6 +59,12 @@ namespace Rokys.Audit.Services.Services
                     }
                     return response;
                 }
+
+                if (string.IsNullOrEmpty(requestDto.FieldOptions))
+                {
+                    requestDto.FieldOptions = "[]";
+                }
+
                 var currentUser = _httpContextAccessor.CurrentUser();
                 var entity = _mapper.Map<AuditTemplateFields>(requestDto);
                 entity.CreateAudit(currentUser.UserName);
