@@ -135,6 +135,8 @@ CREATE TABLE AuditTemplateFields (
     CONSTRAINT CK_AuditTemplateFields_AcumulationType 
     CHECK (AcumulationType IN ('SUM', 'COUNT') OR AcumulationType IS NULL), -- Tipo de Acumulación: 'sum', 'average', 'max', 'min', 'count'
     FieldOptions NVARCHAR(MAX), -- Opciones para campos tipo 'select' (JSON
+    CONSTRAINT CK_FieldOptions_IsJson 
+        CHECK (FieldOptions IS NULL OR ISJSON(FieldOptions) = 1),
     --FieldSortOrder INT DEFAULT 0,
     
     -- Valores (usa el apropiado según FieldType)
