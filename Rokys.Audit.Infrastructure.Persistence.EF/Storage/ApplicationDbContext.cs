@@ -16,6 +16,10 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
         public DbSet<ScaleGroup> ScaleGroups { get; set; }
         //public DbSet<Proveedor> Proveedores { get; set; }
         
+        // User and employee management
+        public DbSet<UserReference> UserReferences { get; set; }
+        public DbSet<EmployeeStore> EmployeeStores { get; set; }
+        
         // New audit entities
         public DbSet<TableScaleTemplate> TableScaleTemplates { get; set; }
         public DbSet<AuditTemplateFields> AuditTemplateFields { get; set; }
@@ -26,6 +30,10 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
         public DbSet<PeriodAuditScaleResult> PeriodAuditScaleResults { get; set; }
         public DbSet<PeriodAuditScaleSubResult> PeriodAuditScaleSubResults { get; set; }
         public DbSet<PeriodAuditFieldValues> PeriodAuditFieldValues { get; set; }
+        public DbSet<PeriodAuditTableScaleTemplateResult> PeriodAuditTableScaleTemplateResults { get; set; }
+        public DbSet<PeriodAuditScoringCriteriaResult> PeriodAuditScoringCriteriaResults { get; set; }
+        public DbSet<EvidenceFiles> EvidenceFiles { get; set; }
+        public DbSet<AuditStatus> AuditStatuses { get; set; }
         public DbSet<MaintenanceTable> MaintenanceTables { get; set; }
         public DbSet<MaintenanceDetailTable> MaintenanceDetailTables { get; set; }
 
@@ -40,6 +48,10 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
             // Core business configurations
             modelBuilder.ApplyConfiguration(new EnterpriseConfig());
             modelBuilder.ApplyConfiguration(new StoresConfig());
+            
+            // User and employee management configurations
+            modelBuilder.ApplyConfiguration(new UserReferenceConfig());
+            modelBuilder.ApplyConfiguration(new EmployeeStoreConfig());
             
             // Existing configurations
             modelBuilder.ApplyConfiguration(new ScaleCompanyConfig());
@@ -58,7 +70,10 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
             modelBuilder.ApplyConfiguration(new PeriodAuditFieldValuesConfig());
 
             modelBuilder.ApplyConfiguration(new AuditTemplateFieldsConfig());
+            modelBuilder.ApplyConfiguration(new PeriodAuditTableScaleTemplateResultConfig());
+            modelBuilder.ApplyConfiguration(new PeriodAuditScoringCriteriaResultConfig());
             modelBuilder.ApplyConfiguration(new EvidenceFilesConfig());
+            modelBuilder.ApplyConfiguration(new AuditStatusConfig());
 
             modelBuilder.ApplyConfiguration(new MaintenanceTableConfig());
             modelBuilder.ApplyConfiguration(new MaintenanceDetailTableConfig());
