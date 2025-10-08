@@ -270,6 +270,42 @@ CREATE TABLE AuditStatus (
 );
 
 
+CREATE TABLE UserReference (
+    UserReferenceId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    UserId UNIQUEIDENTIFIER NOT NULL, -- Security MS
+    EmployeeId UNIQUEIDENTIFIER NOT NULL,-- Memos MS
+    FirstName NVARCHAR(200) NOT NULL,
+    LastName NVARCHAR(200) NOT NULL,
+    Email NVARCHAR(150),
+    DocumentNumber NVARCHAR(20),
+    RoleCode NVARCHAR(50),
+    RoleName NVARCHAR(100),
+    IsActive BIT NOT NULL DEFAULT 1,
+    CreatedBy NVARCHAR(100) NULL,
+    CreationDate DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    UpdatedBy NVARCHAR(100) NULL,
+    UpdateDate DATETIME2 NULL
+);
+
+
+CREATE TABLE EmployeeStores (
+    EmployeeStoreId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    UserReferenceId UNIQUEIDENTIFIER NOT NULL,
+    StoreId UNIQUEIDENTIFIER NOT NULL,
+    AssignmentDate DATE NOT NULL DEFAULT GETDATE(),
+    IsActive BIT DEFAULT 1,
+    CreatedBy VARCHAR(120) NULL,
+    CreationDate DATETIME2 DEFAULT GETDATE(),
+    UpdatedBy VARCHAR(120) NULL,
+    UpdateDate DATETIME2 NULL,
+    CONSTRAINT FK_EmployeeStores_UserReference 
+        FOREIGN KEY (UserReferenceId) REFERENCES UserReference(UserReferenceId),
+    CONSTRAINT FK_EmployeeStores_Store 
+        FOREIGN KEY (StoreId) REFERENCES Stores(StoreId),
+    CONSTRAINT UQ_EmployeeStore UNIQUE (UserReferenceId, StoreId)
+);
+
+
 -- =============================================
 -- AUDIT PROCESS TABLES
 -- =============================================
@@ -282,12 +318,23 @@ CREATE TABLE [PeriodAudit]
     -- Store / audit identification
     StoreId UNIQUEIDENTIFIER REFERENCES Stores(StoreId), -- ID de Tienda
 
-    -- Participants
-    AdministratorId UNIQUEIDENTIFIER NULL, -- Administrador
-    AssistantId UNIQUEIDENTIFIER NULL, -- Asistente
-    OperationManagersId UNIQUEIDENTIFIER NULL, -- Gerentes de Operación
-    FloatingAdministratorId UNIQUEIDENTIFIER NULL, -- Administrador Suplente
-    ResponsibleAuditorId UNIQUEIDENTIFIER NULL, -- Auditor Responsable
+    -- Participants with FK to UserReference
+    AdministratorId UNIQUEIDENTIFIER NULL 
+        CONSTRAINT FK_PeriodAudit_Administrator 
+        FOREIGN KEY REFERENCES UserReference(UserReferenceId), -- Administrador
+    AssistantId UNIQUEIDENTIFIER NULL 
+        CONSTRAINT FK_PeriodAudit_Assistant 
+        FOREIGN KEY REFERENCES UserReference(UserReferenceId), -- Asistente
+    OperationManagersId UNIQUEIDENTIFIER NULL 
+        CONSTRAINT FK_PeriodAudit_OperationManagers 
+        FOREIGN KEY REFERENCES UserReference(UserReferenceId), -- Gerentes de Operación
+    FloatingAdministratorId UNIQUEIDENTIFIER NULL 
+        CONSTRAINT FK_PeriodAudit_FloatingAdministrator 
+        FOREIGN KEY REFERENCES UserReference(UserReferenceId), -- Administrador Suplente
+    ResponsibleAuditorId UNIQUEIDENTIFIER NULL 
+        CONSTRAINT FK_PeriodAudit_ResponsibleAuditor 
+        FOREIGN KEY REFERENCES UserReference(UserReferenceId), -- Auditor Responsable
+
 
     -- Dates
     StartDate DATE NOT NULL, -- Fecha de Inicio
