@@ -54,9 +54,7 @@ namespace Rokys.Audit.Services.Services
 
                 var currentUser = _httpContextAccessor.CurrentUser();
                 var entity = _mapper.Map<UserReference>(requestDto);
-                entity.UserReferenceId = Guid.NewGuid();
-                entity.CreatedBy = currentUser.UserName;
-                entity.CreationDate = DateTime.UtcNow;
+                entity.CreateAudit(currentUser.UserName);
 
                 _userReferenceRepository.Insert(entity);
                 await _unitOfWork.CommitAsync();

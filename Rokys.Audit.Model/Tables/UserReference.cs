@@ -3,7 +3,7 @@ namespace Rokys.Audit.Model.Tables
     /// <summary>
     /// Entidad de referencia de usuarios que conecta con el microservicio de seguridad y empleados
     /// </summary>
-    public class UserReference
+    public class UserReference: AuditEntity
     {
         /// <summary>
         /// ID de referencia del usuario (PK)
@@ -58,22 +58,7 @@ namespace Rokys.Audit.Model.Tables
         /// <summary>
         /// Usuario que creó el registro
         /// </summary>
-        public string? CreatedBy { get; set; }
-
-        /// <summary>
-        /// Fecha de creación del registro
-        /// </summary>
-        public DateTime CreationDate { get; set; } = DateTime.UtcNow;
-
-        /// <summary>
-        /// Usuario que actualizó el registro
-        /// </summary>
-        public string? UpdatedBy { get; set; }
-
-        /// <summary>
-        /// Fecha de última actualización
-        /// </summary>
-        public DateTime? UpdateDate { get; set; }
+      
 
         /// <summary>
         /// Nombre completo del usuario

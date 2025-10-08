@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Rokys.Audit.Subscription.Hub.Constants;
 using Rokys.Audit.Subscription.Hub.Services.Interfaces;
 using Ruway.Events.Command.Interfaces.Events;
 
@@ -11,16 +12,19 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
     {
         private readonly IEventSubscriber _eventSubscriber;
         private readonly IEmployeeEventService _employeeEventService;
+        private readonly IUserEventService _userEventService;
         private readonly ILogger<SubscriptionHubService> _logger;
         private bool _isRunning = false;
 
         public SubscriptionHubService(
             IEventSubscriber eventSubscriber,
             IEmployeeEventService employeeEventService,
+            IUserEventService userEventService,
             ILogger<SubscriptionHubService> logger)
         {
             _eventSubscriber = eventSubscriber;
             _employeeEventService = employeeEventService;
+            _userEventService = userEventService;
             _logger = logger;
         }
 
@@ -42,6 +46,8 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
 
                 // Suscribirse a eventos específicos de empleados
                 await SubscribeToEmployeeEvents(cancellationToken);
+
+                await SubscribeToUserEvents(cancellationToken);
 
                 // Iniciar el listener de eventos
                 await _eventSubscriber.StartListeningAsync(cancellationToken);
@@ -93,7 +99,51 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
             {
                 if (_employeeEventService != null)
                     await _employeeEventService.HandleEmployeeCreatedAsync(employeeEvent);
-            }, "memos.employee.events.created"); 
+            }, "memos.employee.events.created");
+
+            /* await _eventSubscriber.SubscribeAsync<EmployeeUpdatedEvent>(async (employeeEvent) =>
+             {
+                 if (_employeeEventService != null)
+                     await _employeeEventService.HandleEmployeeUpdatedAsync(employeeEvent);
+             }, "employee.events.updated");
+
+             await _eventSubscriber.SubscribeAsync<EmployeeDeletedEvent>(async (employeeEvent) =>
+             {
+                 if (_employeeEventService != null)
+                     await _employeeEventService.HandleEmployeeDeletedAsync(employeeEvent);
+             }, "memos.employee.events.deleted"); */
+
+            // Suscribirse a eventos genéricos de empleados (wildcard para capturar cualquier evento de empleado)
+            /*await _eventSubscriber.SubscribeAsync(
+               async (message, routingKey) => await _employeeEventService.HandleGenericEmployeeEventAsync(message, routingKey),
+               "#",
+               cancellationToken); */
+
+            _logger.LogInformation("Employee event subscriptions configured successfully");
+        }
+        
+         private async Task SubscribeToUserEvents(CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Setting up user event subscriptions...");
+
+            // Configurar handlers específicos por tipo de evento usando los eventos existentes
+            await _eventSubscriber.SubscribeAsync<UserUpdatedEvent>(async (userEvent) =>
+            {
+                if (_userEventService != null)
+                    await _userEventService.HandleUserUpdatedAsync(userEvent);
+            }, EventConstants.UserEvents.UserUpdated);
+
+            /* await _eventSubscriber.SubscribeAsync<UserUpdatedEvent>(async (userEvent) =>
+            {
+                if (_userEventService != null)
+                    await _userEventService.HandleUserUpdatedAsync(userEvent);
+            }, "user.events.updated");
+
+            await _eventSubscriber.SubscribeAsync<UserDeletedEvent>(async (userEvent) =>
+            {
+                if (_userEventService != null)
+                    await _userEventService.HandleUserDeletedAsync(userEvent);
+            }, "memos.user.events.deleted");
 
            /* await _eventSubscriber.SubscribeAsync<EmployeeUpdatedEvent>(async (employeeEvent) =>
             {
