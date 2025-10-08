@@ -99,7 +99,7 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
             {
                 if (_employeeEventService != null)
                     await _employeeEventService.HandleEmployeeCreatedAsync(employeeEvent);
-            }, "memos.employee.events.created");
+            }, EventConstants.EmployeeEvents.EmployeeCreated);
 
             /* await _eventSubscriber.SubscribeAsync<EmployeeUpdatedEvent>(async (employeeEvent) =>
              {
@@ -133,37 +133,15 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
                     await _userEventService.HandleUserUpdatedAsync(userEvent);
             }, EventConstants.UserEvents.UserUpdated);
 
-            /* await _eventSubscriber.SubscribeAsync<UserUpdatedEvent>(async (userEvent) =>
-            {
-                if (_userEventService != null)
-                    await _userEventService.HandleUserUpdatedAsync(userEvent);
-            }, "user.events.updated");
-
             await _eventSubscriber.SubscribeAsync<UserDeletedEvent>(async (userEvent) =>
             {
                 if (_userEventService != null)
                     await _userEventService.HandleUserDeletedAsync(userEvent);
-            }, "memos.user.events.deleted");
+            }, EventConstants.UserEvents.UserDeleted);
 
-           /* await _eventSubscriber.SubscribeAsync<EmployeeUpdatedEvent>(async (employeeEvent) =>
-            {
-                if (_employeeEventService != null)
-                    await _employeeEventService.HandleEmployeeUpdatedAsync(employeeEvent);
-            }, "employee.events.updated");
+            
 
-            await _eventSubscriber.SubscribeAsync<EmployeeDeletedEvent>(async (employeeEvent) =>
-            {
-                if (_employeeEventService != null)
-                    await _employeeEventService.HandleEmployeeDeletedAsync(employeeEvent);
-            }, "memos.employee.events.deleted"); */
-
-            // Suscribirse a eventos genéricos de empleados (wildcard para capturar cualquier evento de empleado)
-             /*await _eventSubscriber.SubscribeAsync(
-                async (message, routingKey) => await _employeeEventService.HandleGenericEmployeeEventAsync(message, routingKey),
-                "#",
-                cancellationToken); */
-
-            _logger.LogInformation("Employee event subscriptions configured successfully");
+            _logger.LogInformation("Users event subscriptions configured successfully");
         }
     }
 }

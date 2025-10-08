@@ -30,9 +30,25 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
             throw new NotImplementedException();
         }
 
-        public Task HandleUserDeletedAsync(UserDeletedEvent UserEvent, CancellationToken cancellationToken = default)
+        public async Task HandleUserDeletedAsync(UserDeletedEvent UserEvent, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+             if(UserEvent.ApplicationCode != EventConstants.ApplicationCode)
+                return;
+
+            var exist = await _userReferenceService.GetByUserId(UserEvent.UserId);
+            if (exist.Data != null)
+            {
+                var user = exist.Data;
+                await _userReferenceService.Update(user.UserReferenceId, new DTOs.Requests.UserReference.UserReferenceRequestDto
+                {
+                    UserId = user.UserId,
+                    EmployeeId = user.EmployeeId,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Email = user.Email,
+                    IsActive = false
+                });
+            }
         }
 
         public async Task HandleUserUpdatedAsync(UserUpdatedEvent UserEvent, CancellationToken cancellationToken = default)

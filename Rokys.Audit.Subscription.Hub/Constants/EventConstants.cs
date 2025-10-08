@@ -16,9 +16,9 @@ namespace Rokys.Audit.Subscription.Hub.Constants
         }
         public struct EmployeeEvents
         {
-            public const string EmployeeCreated = "security.employee.events.created";
-            public const string EmployeeUpdated = "security.employee.events.updated";
-            public const string EmployeeDeleted = "security.employee.events.deleted";
+            public const string EmployeeCreated = "memos.employee.events.created";
+            public const string EmployeeUpdated = "memos.employee.events.updated";
+            public const string EmployeeDeleted = "memos.employee.events.deleted";
         }
     }
 }
