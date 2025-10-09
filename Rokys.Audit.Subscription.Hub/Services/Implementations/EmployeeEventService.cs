@@ -62,7 +62,7 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
                     var userRef = userReference.Data;
                     _logger.LogWarning("User reference not found for Employee ID: {EmployeeId}. Creating new reference.", 
                         employeeEvent.EmployeeId);
-                    await _userReferenceService.Create(new DTOs.Requests.UserReference.UserReferenceRequestDto
+                    await _userReferenceService.Update(userRef.UserReferenceId, new DTOs.Requests.UserReference.UserReferenceRequestDto
                     {
                         UserId = userRef.UserId,
                         EmployeeId = employeeEvent.EmployeeId,
