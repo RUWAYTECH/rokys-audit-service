@@ -9,6 +9,6 @@ namespace Rokys.Audit.Services.Interfaces
 {
     public interface IMaintenanceDetailTableService : IBaseService<MaintenanceDetailTableRequestDto, MaintenanceDetailTableResponseDto>
     {
-        Task<ResponseDto<PaginationResponseDto<MaintenanceDetailTableResponseDto>>> GetPaged(PaginationRequestDto requestDto);
+        Task<ResponseDto<PaginationResponseDto<MaintenanceDetailTableResponseDto>>> GetPaged(MaintenanceDetailTableFilterRequestDto requestDto);
     }
 }

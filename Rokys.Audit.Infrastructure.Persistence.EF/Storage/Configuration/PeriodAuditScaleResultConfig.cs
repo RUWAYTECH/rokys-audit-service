@@ -25,24 +25,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .HasColumnName("ScaleGroupId")
                 .IsRequired();
 
-            builder.Property(x => x.TotalValue)
-                .IsRequired()
-                .HasColumnType("decimal(10,2)");
-
-            // Historical weighting and thresholds
-            builder.Property(x => x.AppliedLowRisk)
-                .IsRequired()
-                .HasColumnType("decimal(10,2)");
-
-            builder.Property(x => x.AppliedModerateRisk)
-                .IsRequired()
-                .HasColumnType("decimal(10,2)");
-
-            builder.Property(x => x.AppliedHighRisk)
-                .IsRequired()
-                .HasColumnType("decimal(10,2)");
-
-            builder.Property(x => x.AppliedRiskCritical)
+            builder.Property(x => x.ScoreValue)
                 .IsRequired()
                 .HasColumnType("decimal(10,2)");
 

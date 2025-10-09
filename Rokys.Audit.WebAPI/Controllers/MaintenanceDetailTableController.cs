@@ -28,7 +28,7 @@ namespace Rokys.Audit.WebAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetPaged([FromQuery] PaginationRequestDto paginationRequestDto)
+        public async Task<IActionResult> GetPaged([FromQuery] MaintenanceDetailTableFilterRequestDto paginationRequestDto)
         {
             var response = await _service.GetPaged(paginationRequestDto);
             if (response.IsValid)

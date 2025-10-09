@@ -1,12 +1,16 @@
 ﻿using FluentValidation;
 using Rokys.Audit.DTOs.Requests.AuditTemplateField;
+using Rokys.Audit.Infrastructure.Repositories;
 
 namespace Rokys.Audit.Services.Validations
 {
     public class AuditTemplateFieldValidator : AbstractValidator<AuditTemplateFieldRequestDto>
     {
-        public AuditTemplateFieldValidator() 
+        private readonly IAuditTemplateFieldRepository _auditTemplateFieldRepository;
+        public AuditTemplateFieldValidator(IAuditTemplateFieldRepository auditTemplateFieldRepository, Guid? id = null) 
         {
+            _auditTemplateFieldRepository = auditTemplateFieldRepository;
+
             RuleFor(x => x.TableScaleTemplateId)
                 .NotEmpty().WithMessage("La plantilla de tabla es requerida.")
                 .NotNull().WithMessage("La plantilla de tabla es requerida.");
@@ -15,7 +19,12 @@ namespace Rokys.Audit.Services.Validations
                 .MaximumLength(255).WithMessage("El nombre no puede exceder los 255 caracteres.");
             RuleFor(x => x.FieldCode)
                 .NotEmpty().WithMessage("El código es requerido.")
-                .MaximumLength(100).WithMessage("El código no puede exceder los 100 caracteres.");
+                .MaximumLength(100).WithMessage("El código no puede exceder los 100 caracteres.")
+                .MustAsync(async (dto, code, cancellation) =>
+                {
+                    return !await _auditTemplateFieldRepository.ExistsByCodeAsync(code, id);
+                })
+            .WithMessage("El código ya existe.");
             RuleFor(x => x.FieldType)
                 .MaximumLength(50).WithMessage("El tipo no puede exceder los 50 caracteres.")
                 .Must(value => string.IsNullOrEmpty(value) || new[] { "numeric", "text", "date", "select" }.Contains(value))

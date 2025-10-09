@@ -11,6 +11,7 @@ using Rokys.Audit.Infrastructure.Persistence.Abstract;
 using Rokys.Audit.Infrastructure.Repositories;
 using Rokys.Audit.Model.Tables;
 using Rokys.Audit.Services.Interfaces;
+using Rokys.Audit.Services.Validations;
 using System.Linq.Expressions;
 
 namespace Rokys.Audit.Services.Services
@@ -23,6 +24,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IAuditTemplateFieldRepository _auditTemplateFieldRepository;
 
         public TableScaleTemplateService(
             ITableScaleTemplateRepository tableScaleTemplateRepository,
@@ -30,7 +32,8 @@ namespace Rokys.Audit.Services.Services
             ILogger<TableScaleTemplateService> logger,
             IUnitOfWork unitOfWork,
             IAMapper mapper,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            IAuditTemplateFieldRepository auditTemplateFieldRepository)
         {
             _tableScaleTemplateRepository = tableScaleTemplateRepository;
             _fluentValidator = fluentValidator;
@@ -38,6 +41,7 @@ namespace Rokys.Audit.Services.Services
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
+            _auditTemplateFieldRepository = auditTemplateFieldRepository;
         }
 
         public async Task<ResponseDto<TableScaleTemplateResponseDto>> Create(TableScaleTemplateRequestDto requestDto)
@@ -45,7 +49,7 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<TableScaleTemplateResponseDto>();
             try
             {
-                var validate = _fluentValidator.Validate(requestDto);
+                var validate = await _fluentValidator.ValidateAsync(requestDto);
                 if (!validate.IsValid)
                 {
                     response.Messages.AddRange(validate.Errors.Select(e => new ApplicationMessage { Message = e.ErrorMessage, MessageType = ApplicationMessageType.Error }));
@@ -87,6 +91,12 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create();
             try
             {
+                var hasDependentFields = await _auditTemplateFieldRepository.GetFirstOrDefaultAsync(filter: x=>x.TableScaleTemplateId == id && x.IsActive);
+                if (hasDependentFields != null)
+                {
+                    response = ResponseDto.Error("No se puede eliminar la plantilla de escala porque tiene campos de plantilla de auditoría asociados.");
+                    return response;
+                }
                 var entity = await _tableScaleTemplateRepository.GetFirstOrDefaultAsync(filter: x => x.TableScaleTemplateId == id && x.IsActive);
                 if (entity == null)
                 {
@@ -195,12 +205,8 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<TableScaleTemplateResponseDto>();
             try
             {
-                var validate = _fluentValidator.Validate(requestDto);
-                if (!validate.IsValid)
-                {
-                    response.Messages.AddRange(validate.Errors.Select(e => new ApplicationMessage { Message = e.ErrorMessage, MessageType = ApplicationMessageType.Error }));
-                    return response;
-                }
+                var validator = new TableScaleTemplateValidator(_tableScaleTemplateRepository, id);
+                var validate = await validator.ValidateAsync(requestDto);
 
                 var entity = await _tableScaleTemplateRepository.GetFirstOrDefaultAsync(filter: x => x.TableScaleTemplateId == id && x.IsActive, includeProperties: [x=>x.ScaleGroup]);
                 if (entity == null)

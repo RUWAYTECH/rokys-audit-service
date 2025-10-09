@@ -65,7 +65,8 @@ namespace Rokys.Audit.Services.Services
                 // Insertar y guardar cambios
                 _scoringCriteriaRepository.Insert(entity);
                 await _unitOfWork.CommitAsync();
-                response.Data = _mapper.Map<ScoringCriteriaResponseDto>(entity);
+                var responseEntity = await _scoringCriteriaRepository.GetFirstOrDefaultAsync(filter: x => x.ScoringCriteriaId == entity.ScoringCriteriaId, includeProperties: [at => at.ScaleGroup]);
+                response.Data = _mapper.Map<ScoringCriteriaResponseDto>(responseEntity);
             }
             catch (Exception ex)
             {
@@ -140,7 +141,8 @@ namespace Rokys.Audit.Services.Services
                     filter: filter,
                     orderBy: orderBy,
                     pageNumber: requestDto.PageNumber,
-                    pageSize: requestDto.PageSize
+                    pageSize: requestDto.PageSize,
+                    includeProperties: [x => x.ScaleGroup]
                 );
 
                 var pagedResult = new PaginationResponseDto<ScoringCriteriaResponseDto>

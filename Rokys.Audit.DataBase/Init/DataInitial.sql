@@ -419,7 +419,7 @@ CREATE TABLE PeriodAuditScaleResult
         FOREIGN KEY REFERENCES ScaleGroup(ScaleGroupId),
 
     -- Calculation data at the time of audit
-    TotalValue DECIMAL(10,2) NOT NULL, -- Valor Total
+    ScoreValue DECIMAL(10,2) NOT NULL, -- Valor Total
 
     AppliedWeighting DECIMAL(5,2) NOT NULL, -- Ponderación
 

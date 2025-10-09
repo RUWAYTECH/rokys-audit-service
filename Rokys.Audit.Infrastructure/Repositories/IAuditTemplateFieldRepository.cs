@@ -5,5 +5,7 @@ namespace Rokys.Audit.Infrastructure.Repositories
 {
     public interface IAuditTemplateFieldRepository : IRepository<AuditTemplateFields>
     {
+        Task<bool> ExistsByCodeAsync(string code);
+        Task<bool> ExistsByCodeAsync(string code, Guid? excludeId);
     }
 }

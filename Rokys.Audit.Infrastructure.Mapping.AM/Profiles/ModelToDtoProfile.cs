@@ -38,8 +38,10 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                 dest.ScaleGroup.Name = src.ScaleGroupName);
             CreateMap<Enterprise, EnterpriseResponseDto>();
             CreateMap<Stores, StoreResponseDto>();
-            CreateMap<AuditTemplateFields, AuditTemplateFieldResponseDto>();
-            CreateMap<ScoringCriteria, ScoringCriteriaResponseDto>();
+            CreateMap<AuditTemplateFields, AuditTemplateFieldResponseDto>().AfterMap((dest, src) =>
+                dest.TableScaleTemplate.Name = src.TableScaleTemplateName);
+            CreateMap<ScoringCriteria, ScoringCriteriaResponseDto>().AfterMap((dest, src) => 
+                dest.ScaleGroup.Name = src.ScaleGroupName);
             CreateMap<MaintenanceTable, MaintenanceTableResponseDto>();
             CreateMap<MaintenanceDetailTable, MaintenanceDetailTableResponseDto>();
             CreateMap<PeriodAudit, PeriodAuditResponseDto>();

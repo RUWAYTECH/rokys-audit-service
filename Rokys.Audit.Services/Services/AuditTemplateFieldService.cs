@@ -12,6 +12,7 @@ using Rokys.Audit.Infrastructure.Persistence.Abstract;
 using Rokys.Audit.Infrastructure.Repositories;
 using Rokys.Audit.Model.Tables;
 using Rokys.Audit.Services.Interfaces;
+using Rokys.Audit.Services.Validations;
 using System.Linq.Expressions;
 
 namespace Rokys.Audit.Services.Services
@@ -46,7 +47,7 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<AuditTemplateFieldResponseDto>();
             try
             {
-                var validationResult = _fluentValidator.Validate(requestDto);
+                var validationResult = await _fluentValidator.ValidateAsync(requestDto);
                 if (!validationResult.IsValid)
                 {
                     foreach (var error in validationResult.Errors)
@@ -146,7 +147,8 @@ namespace Rokys.Audit.Services.Services
                     filter: filter,
                     orderBy: orderBy,
                     pageNumber: requestDto.PageNumber,
-                    pageSize: requestDto.PageSize
+                    pageSize: requestDto.PageSize,
+                    includeProperties: [at => at.TableScaleTemplate]
                 );
 
                 var pagedResult = new PaginationResponseDto<AuditTemplateFieldResponseDto>
@@ -172,7 +174,8 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<AuditTemplateFieldResponseDto>();
             try
             {
-                var validationResult = _fluentValidator.Validate(requestDto);
+                var validator = new AuditTemplateFieldValidator(_auditTemplateFieldRepository, id);
+                var validationResult = await validator.ValidateAsync(requestDto);
                 if (!validationResult.IsValid)
                 {
                     foreach (var error in validationResult.Errors)
@@ -185,7 +188,7 @@ namespace Rokys.Audit.Services.Services
                     }
                     return response;
                 }
-                var entity = await _auditTemplateFieldRepository.GetFirstOrDefaultAsync(filter: x => x.AuditTemplateFieldId == id && x.IsActive);
+                var entity = await _auditTemplateFieldRepository.GetFirstOrDefaultAsync(filter: x => x.AuditTemplateFieldId == id && x.IsActive, includeProperties: [x => x.TableScaleTemplate]);
                 if (entity == null)
                 {
                     response = ResponseDto.Error<AuditTemplateFieldResponseDto>("No se encontro el template.");

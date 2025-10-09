@@ -10,5 +10,6 @@ namespace Rokys.Audit.DTOs.Responses.AuditTemplateField
         public DateTime CreationDate { get; set; }
         public string? ModifiedBy { get; set; }
         public DateTime? ModificationDate { get; set; }
+        public string? TableScaleTemplateName { get; set; }
     }
 }

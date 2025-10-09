@@ -7,13 +7,9 @@ namespace Rokys.Audit.Model.Tables
         public Guid ScaleGroupId { get; set; }
 
         // Calculation data at the time of audit
-        public decimal TotalValue { get; set; }
+        public decimal ScoreValue { get; set; }
 
         // Historical weighting and thresholds
-        public decimal AppliedLowRisk { get; set; }
-        public decimal AppliedModerateRisk { get; set; }
-        public decimal AppliedHighRisk { get; set; }
-        public decimal AppliedRiskCritical { get; set; }
         public decimal AppliedWeighting { get; set; }
 
         public string? Observations { get; set; }

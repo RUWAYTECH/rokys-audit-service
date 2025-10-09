@@ -147,7 +147,7 @@ namespace Rokys.Audit.Services.Services
             return response;
         }
 
-        public async Task<ResponseDto<PaginationResponseDto<MaintenanceDetailTableResponseDto>>> GetPaged(PaginationRequestDto paginationRequestDto)
+        public async Task<ResponseDto<PaginationResponseDto<MaintenanceDetailTableResponseDto>>> GetPaged(MaintenanceDetailTableFilterRequestDto paginationRequestDto)
         {
             var response = ResponseDto.Create<PaginationResponseDto<MaintenanceDetailTableResponseDto>>();
             try
@@ -155,6 +155,9 @@ namespace Rokys.Audit.Services.Services
                 Expression<Func<MaintenanceDetailTable, bool>> filter = x => x.IsActive;
                 if (!string.IsNullOrEmpty(paginationRequestDto.Filter))
                     filter = x => x.Code.Contains(paginationRequestDto.Filter) && x.IsActive;
+
+                if (!string.IsNullOrEmpty(paginationRequestDto.MaintenanceTableCode))
+                    filter = x => x.MaintenanceTable.Code.Contains(paginationRequestDto.MaintenanceTableCode) && x.MaintenanceTable.IsActive;
 
                 Func<IQueryable<MaintenanceDetailTable>, IOrderedQueryable<MaintenanceDetailTable>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 
