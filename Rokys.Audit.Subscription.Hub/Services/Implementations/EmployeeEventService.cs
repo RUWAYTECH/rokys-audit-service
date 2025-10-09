@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Rokys.Audit.Services.Interfaces;
 using Rokys.Audit.Subscription.Hub.Services.Interfaces;
 using Ruway.Events.Command.Interfaces.Events;
 
@@ -11,14 +12,14 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
     public class EmployeeEventService : IEmployeeEventService
     {
         private readonly ILogger<EmployeeEventService> _logger;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IUserReferenceService _userReferenceService;
 
         public EmployeeEventService(
             ILogger<EmployeeEventService> logger,
-            IServiceProvider serviceProvider)
+            IUserReferenceService userReferenceService)
         {
             _logger = logger;
-            _serviceProvider = serviceProvider;
+            _userReferenceService = userReferenceService;
         }
 
         /// <inheritdoc />
@@ -26,19 +27,18 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
         {
             try
             {
-                _logger.LogInformation("Processing employee created event for Employee ID: {EmployeeId}, Name: {FirstName} {LastName}",
-                    employeeEvent.EmployeeId, employeeEvent.FirstName, employeeEvent.LastName);
-
-                // Aquí puedes agregar lógica específica para cuando se crea un empleado
-                // Por ejemplo: enviar notificaciones de bienvenida, crear perfiles de usuario, etc.
-
-                // Ejemplo de uso del IEmployeeService si necesitas validar o obtener más información
-                // var employeeService = _serviceProvider.GetRequiredService<IEmployeeService>();
-                // var employeeDetails = await employeeService.GetByIdAsync(employeeEvent.EmployeeId);
-
-                var fullName = $"{employeeEvent.FirstName} {employeeEvent.LastName}";
-                await LogEmployeeActivity("CREATED", employeeEvent.EmployeeId, fullName,
-                    $"Employee created - Document: {employeeEvent.DocumentNumber}, Email: {employeeEvent.Email}, Phone: {employeeEvent.Phone}");
+               await _userReferenceService.Create(new DTOs.Requests.UserReference.UserReferenceRequestDto
+                {
+                    UserId = null,
+                    EmployeeId = employeeEvent.EmployeeId,
+                    FirstName = employeeEvent.FirstName,
+                    LastName = employeeEvent.LastName,
+                    Email = employeeEvent.Email,
+                    PersonalEmail = employeeEvent.PersonalEmail,
+                    DocumentNumber = employeeEvent.DocumentNumber,
+                    RoleCode = null,
+                    RoleName = null
+                });
 
                 _logger.LogInformation("Successfully processed employee created event for Employee ID: {EmployeeId}", 
                     employeeEvent.EmployeeId);
@@ -52,44 +52,51 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
         }
 
         /// <inheritdoc />
-        public async Task HandleEmployeeUpdatedAsync(EventWrapper<EmployeeUpdatedEvent> employeeEvent, CancellationToken cancellationToken = default)
+        public async Task HandleEmployeeUpdatedAsync(EmployeeUpdatedEvent employeeEvent, CancellationToken cancellationToken = default)
         {
             try
             {
+                var userReference = await _userReferenceService.GetByEmployeeId(employeeEvent.EmployeeId);
+                if (userReference.Data != null)
+                {
+                    var userRef = userReference.Data;
+                    _logger.LogWarning("User reference not found for Employee ID: {EmployeeId}. Creating new reference.", 
+                        employeeEvent.EmployeeId);
+                    await _userReferenceService.Create(new DTOs.Requests.UserReference.UserReferenceRequestDto
+                    {
+                        UserId = userRef.UserId,
+                        EmployeeId = employeeEvent.EmployeeId,
+                        FirstName = employeeEvent.FirstName,
+                        LastName = employeeEvent.LastName,
+                        Email = employeeEvent.Email,
+                        PersonalEmail = employeeEvent.PersonalEmail,
+                        DocumentNumber = employeeEvent.DocumentNumber,
+                        RoleCode = userRef.RoleCode,
+                        RoleName = userRef.RoleName
+                    });
+                    return;
+                }
                
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error processing employee updated event for Employee ID: {EmployeeId}", 
-                    employeeEvent.Data.EmployeeId);
+                    employeeEvent.EmployeeId);
                 throw;
             }
         }
 
         /// <inheritdoc />
-        public async Task HandleEmployeeDeletedAsync(EventWrapper<EmployeeDeletedEvent> employeeEvent, CancellationToken cancellationToken = default)
+        public async Task HandleEmployeeDeletedAsync(EmployeeDeletedEvent employeeEvent, CancellationToken cancellationToken = default)
         {
             try
             {
-                _logger.LogInformation("Processing employee deleted event for Employee ID: {EmployeeId}",
-                    employeeEvent.Data.EmployeeId);
-
-                await LogEmployeeActivity("DELETED", employeeEvent.Data.EmployeeId, "N/A",
-                    $"Employee deleted - Employee ID: {employeeEvent.Data.EmployeeId}");
-
-                // Aquí puedes agregar lógica adicional como:
-                // - Revocar accesos
-                // - Enviar notificaciones de despedida
-                // - Transferir responsabilidades
-                // - Archivar datos
-
-                _logger.LogInformation("Successfully processed employee deleted event for Employee ID: {EmployeeId}", 
-                    employeeEvent.Data.EmployeeId);
+                await _userReferenceService.Delete(employeeEvent.EmployeeId);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error processing employee deleted event for Employee ID: {EmployeeId}", 
-                    employeeEvent.Data.EmployeeId);
+                    employeeEvent.EmployeeId);
                 throw;
             }
         }
@@ -133,13 +140,13 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
                     case var key when key.Contains("employee.events.updated"):
                         var updatedEvent = JsonConvert.DeserializeObject<EventWrapper<EmployeeUpdatedEvent>>(message);
                         if (updatedEvent != null)
-                            await HandleEmployeeUpdatedAsync(updatedEvent, cancellationToken);
+                            await HandleEmployeeUpdatedAsync(updatedEvent.Data, cancellationToken);
                         break;
 
                     case var key when key.Contains("employee.events.deleted"):
                         var deletedEvent = JsonConvert.DeserializeObject<EventWrapper<EmployeeDeletedEvent>>(message);
                         if (deletedEvent != null)
-                            await HandleEmployeeDeletedAsync(deletedEvent, cancellationToken);
+                            await HandleEmployeeDeletedAsync(deletedEvent.Data, cancellationToken);
                         break;
 
                     default:
@@ -153,32 +160,5 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
             }
         }
 
-        /// <summary>
-        /// Registra la actividad del empleado (puedes implementar persistencia aquí)
-        /// </summary>
-        private async Task LogEmployeeActivity(string action, Guid employeeId, string? employeeName, string description)
-        {
-            // Aquí puedes implementar el logging persistente
-            // Por ejemplo, guardar en base de datos, enviar a un servicio de auditoría, etc.
-            
-            _logger.LogInformation("Employee Activity - Action: {Action}, EmployeeId: {EmployeeId}, Name: {EmployeeName}, Description: {Description}",
-                action, employeeId, employeeName, description);
-
-            // Ejemplo de como podrías usar un servicio de auditoría si existe
-            // var auditService = _serviceProvider.GetService<IAuditService>();
-            // if (auditService != null)
-            // {
-            //     await auditService.LogActivityAsync(new AuditEntry
-            //     {
-            //         EntityType = "Employee",
-            //         EntityId = employeeId.ToString(),
-            //         Action = action,
-            //         Description = description,
-            //         Timestamp = DateTime.UtcNow
-            //     });
-            // }
-
-            await Task.CompletedTask;
-        }
     }
 }

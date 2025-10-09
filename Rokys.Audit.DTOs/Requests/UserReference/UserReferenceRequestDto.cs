@@ -5,7 +5,7 @@ namespace Rokys.Audit.DTOs.Requests.UserReference
         /// <summary>
         /// ID del usuario (desde Security MS)
         /// </summary>
-        public Guid UserId { get; set; }
+        public Guid? UserId { get; set; }
 
         /// <summary>
         /// ID del empleado (desde Memos MS)
