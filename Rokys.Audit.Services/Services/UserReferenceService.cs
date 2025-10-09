@@ -262,6 +262,7 @@ namespace Rokys.Audit.Services.Services
                     filter = x => x.IsActive && (x.FirstName.ToLower().Contains(searchTerm) ||
                                   x.LastName.ToLower().Contains(searchTerm) ||
                                   (x.Email != null && x.Email.ToLower().Contains(searchTerm)) ||
+                                  (x.PersonalEmail != null && x.PersonalEmail.ToLower().Contains(searchTerm)) ||
                                   (x.DocumentNumber != null && x.DocumentNumber.ToLower().Contains(searchTerm)) ||
                                   (x.RoleName != null && x.RoleName.ToLower().Contains(searchTerm)));
                 }

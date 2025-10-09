@@ -56,15 +56,7 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
         {
             try
             {
-                _logger.LogInformation("Processing employee updated event for Employee ID: {EmployeeId}, Name: {Name} {LastName}",
-                    employeeEvent.Data.EmployeeId, employeeEvent.Data.Name, employeeEvent.Data.LastName);
-
-                var fullName = $"{employeeEvent.Data.Name} {employeeEvent.Data.LastName}";
-                await LogEmployeeActivity("UPDATED", employeeEvent.Data.EmployeeId, fullName,
-                    $"Employee updated - Name changed to: {fullName}");
-
-                _logger.LogInformation("Successfully processed employee updated event for Employee ID: {EmployeeId}", 
-                    employeeEvent.Data.EmployeeId);
+               
             }
             catch (Exception ex)
             {

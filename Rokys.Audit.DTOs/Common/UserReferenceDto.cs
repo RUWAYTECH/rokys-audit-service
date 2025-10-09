@@ -28,6 +28,11 @@ namespace Rokys.Audit.DTOs.Common
         public string? Email { get; set; }
 
         /// <summary>
+        /// Correo electrónico personal
+        /// </summary>
+        public string? PersonalEmail { get; set; }
+
+        /// <summary>
         /// Número de documento
         /// </summary>
         public string? DocumentNumber { get; set; }

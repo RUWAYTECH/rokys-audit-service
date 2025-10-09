@@ -51,6 +51,13 @@ namespace Rokys.Audit.Services.Validations
                 .WithMessage("El correo no puede exceder los 150 caracteres")
                 .When(x => !string.IsNullOrWhiteSpace(x.Email));
 
+            RuleFor(x => x.PersonalEmail)
+                .EmailAddress()
+                .WithMessage("Formato de correo electrónico personal inválido")
+                .MaximumLength(150)
+                .WithMessage("El correo personal no puede exceder los 150 caracteres")
+                .When(x => !string.IsNullOrWhiteSpace(x.PersonalEmail));
+
             RuleFor(x => x.DocumentNumber)
                 .MaximumLength(20)
                 .WithMessage("El número de documento no puede exceder los 20 caracteres")

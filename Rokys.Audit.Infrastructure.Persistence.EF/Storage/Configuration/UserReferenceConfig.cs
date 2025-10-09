@@ -33,6 +33,9 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.Property(ur => ur.Email)
                 .HasMaxLength(150);
 
+            builder.Property(ur => ur.PersonalEmail)
+                .HasMaxLength(150);
+
             builder.Property(ur => ur.DocumentNumber)
                 .HasMaxLength(20);
 
@@ -109,6 +112,9 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
 
             builder.HasIndex(ur => ur.Email)
                 .HasDatabaseName("IX_UserReference_Email");
+
+            builder.HasIndex(ur => ur.PersonalEmail)
+                .HasDatabaseName("IX_UserReference_PersonalEmail");
 
             builder.HasIndex(ur => new { ur.IsActive, ur.RoleCode })
                 .HasDatabaseName("IX_UserReference_Active_Role");
