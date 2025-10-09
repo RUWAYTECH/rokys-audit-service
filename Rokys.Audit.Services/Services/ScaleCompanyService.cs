@@ -68,7 +68,8 @@ namespace Rokys.Audit.Services.Services
                 entity.CreateAudit(currentUser.UserName);
                 _scaleCompanyRepository.Insert(entity);
                 await _unitOfWork.CommitAsync();
-                response.Data = _mapper.Map<ScaleCompanyResponseDto>(entity);
+                var entityCreate = await _scaleCompanyRepository.GetFirstOrDefaultAsync(filter: x => x.ScaleCompanyId == entity.ScaleCompanyId && x.IsActive, includeProperties: [t => t.Enterprise]);
+                response.Data = _mapper.Map<ScaleCompanyResponseDto>(entityCreate);
             }
             catch (Exception ex)
             {
