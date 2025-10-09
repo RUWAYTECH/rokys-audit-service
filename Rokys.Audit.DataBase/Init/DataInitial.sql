@@ -272,11 +272,12 @@ CREATE TABLE AuditStatus (
 
 CREATE TABLE UserReference (
     UserReferenceId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    UserId UNIQUEIDENTIFIER NOT NULL, -- Security MS
+    UserId UNIQUEIDENTIFIER NULL, -- Security MS
     EmployeeId UNIQUEIDENTIFIER NOT NULL,-- Memos MS
     FirstName NVARCHAR(200) NOT NULL,
     LastName NVARCHAR(200) NOT NULL,
     Email NVARCHAR(150),
+    PersonalEmail NVARCHAR(150),
     DocumentNumber NVARCHAR(20),
     RoleCode NVARCHAR(50),
     RoleName NVARCHAR(100),

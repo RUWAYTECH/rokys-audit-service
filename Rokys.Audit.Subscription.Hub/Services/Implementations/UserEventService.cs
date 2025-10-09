@@ -41,11 +41,13 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
                 var user = exist.Data;
                 await _userReferenceService.Update(user.UserReferenceId, new DTOs.Requests.UserReference.UserReferenceRequestDto
                 {
-                    UserId = user.UserId,
+                    UserId = UserEvent.UserId,
                     EmployeeId = user.EmployeeId,
                     FirstName = user.FirstName,
                     LastName = user.LastName,
                     Email = user.Email,
+                    RoleCode = user.RoleCode,
+                    RoleName = user.RoleName,
                     IsActive = false
                 });
             }
