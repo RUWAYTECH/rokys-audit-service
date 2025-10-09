@@ -1,4 +1,5 @@
 using Rokys.Audit.DTOs.Common;
+using Rokys.Audit.DTOs.Requests.Group;
 using Rokys.Audit.DTOs.Requests.UserReference;
 using Rokys.Audit.DTOs.Responses.Common;
 using Rokys.Audit.DTOs.Responses.UserReference;
@@ -12,7 +13,7 @@ namespace Rokys.Audit.Services.Interfaces
         /// </summary>
         /// <param name="requestDto">Datos de paginación</param>
         /// <returns>Lista paginada de usuarios</returns>
-        Task<ResponseDto<PaginationResponseDto<UserReferenceResponseDto>>> GetPaged(PaginationRequestDto requestDto);
+        Task<ResponseDto<PaginationResponseDto<UserReferenceResponseDto>>> GetPaged(UseReferenceFilterRequestDto requestDto);
 
         /// <summary>
         /// Busca usuarios por UserId del sistema de seguridad

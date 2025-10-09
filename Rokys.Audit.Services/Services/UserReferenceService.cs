@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Reatil.Services.Services;
 using Rokys.Audit.DTOs.Common;
+using Rokys.Audit.DTOs.Requests.Group;
 using Rokys.Audit.DTOs.Requests.UserReference;
 using Rokys.Audit.DTOs.Responses.Common;
 using Rokys.Audit.DTOs.Responses.UserReference;
@@ -12,6 +13,7 @@ using Rokys.Audit.Infrastructure.Repositories;
 using Rokys.Audit.Model.Tables;
 using Rokys.Audit.Services.Interfaces;
 using System.Linq.Expressions;
+using Rokys.Audit.Common.Extensions;
 
 namespace Rokys.Audit.Services.Services
 {
@@ -98,7 +100,7 @@ namespace Rokys.Audit.Services.Services
                 }
 
                 // Validación personalizada para update (excluir el ID actual)
-                var existsUserId = await _userReferenceRepository.ExistsByUserIdAsync(requestDto.UserId, id);
+                var existsUserId = await _userReferenceRepository.ExistsByUserIdAsync(requestDto.UserId.Value, id);
                 if (existsUserId)
                 {
                     response.Messages.Add(new ApplicationMessage
@@ -249,7 +251,7 @@ namespace Rokys.Audit.Services.Services
             return response;
         }
 
-        public async Task<ResponseDto<PaginationResponseDto<UserReferenceResponseDto>>> GetPaged(PaginationRequestDto paginationRequestDto)
+        public async Task<ResponseDto<PaginationResponseDto<UserReferenceResponseDto>>> GetPaged(UseReferenceFilterRequestDto paginationRequestDto)
         {
             var response = ResponseDto.Create<PaginationResponseDto<UserReferenceResponseDto>>();
             try
@@ -265,6 +267,12 @@ namespace Rokys.Audit.Services.Services
                                   (x.PersonalEmail != null && x.PersonalEmail.ToLower().Contains(searchTerm)) ||
                                   (x.DocumentNumber != null && x.DocumentNumber.ToLower().Contains(searchTerm)) ||
                                   (x.RoleName != null && x.RoleName.ToLower().Contains(searchTerm)));
+                }
+
+                if (!string.IsNullOrEmpty(paginationRequestDto.RoleCode))
+                {
+                    var roleCode = paginationRequestDto.RoleCode.ToLower();
+                    filter = filter.AndAlso(x => (x.RoleCode != null && x.RoleCode.Equals(roleCode, StringComparison.CurrentCultureIgnoreCase)));
                 }
 
                 Func<IQueryable<UserReference>, IOrderedQueryable<UserReference>> orderBy = q => q.OrderBy(x => x.FirstName).ThenBy(x => x.LastName);

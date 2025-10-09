@@ -15,10 +15,12 @@ namespace Rokys.Audit.Services.Validations
             RuleFor(x => x.UserId)
                 .NotEmpty()
                 .WithMessage("El ID del usuario es requerido")
-                .MustAsync(async (dto, userId, cancellation) => 
+                .MustAsync(async (dto, userId, cancellation) =>
                 {
                     // Solo validamos duplicados en creación (cuando no hay UserReferenceId)
-                    return !await _userReferenceRepository.ExistsByUserIdAsync(userId);
+                    if (userId.HasValue)
+                        return !await _userReferenceRepository.ExistsByUserIdAsync(userId.Value);
+                    return false;
                 })
                 .WithMessage("Ya existe un usuario con este ID del sistema de seguridad");
 

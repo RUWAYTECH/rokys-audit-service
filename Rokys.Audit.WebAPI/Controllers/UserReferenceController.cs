@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Rokys.Audit.DTOs.Common;
+using Rokys.Audit.DTOs.Requests.Group;
 using Rokys.Audit.DTOs.Requests.UserReference;
 using Rokys.Audit.Services.Interfaces;
 
@@ -26,7 +27,7 @@ namespace Rokys.Audit.WebAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetPaged([FromQuery] PaginationRequestDto paginationRequestDto)
+        public async Task<IActionResult> GetPaged([FromQuery] UseReferenceFilterRequestDto paginationRequestDto)
         {
             var response = await _userReferenceService.GetPaged(paginationRequestDto);
             if (response.IsValid)
@@ -74,42 +75,6 @@ namespace Rokys.Audit.WebAPI.Controllers
         public async Task<IActionResult> GetByEmployeeId([FromRoute] Guid employeeId)
         {
             var response = await _userReferenceService.GetByEmployeeId(employeeId);
-            if (response.IsValid)
-                return Ok(response);
-            return BadRequest(response);
-        }
-
-        [HttpGet("by-document-number/{documentNumber}")]
-        public async Task<IActionResult> GetByDocumentNumber([FromRoute] string documentNumber)
-        {
-            var response = await _userReferenceService.GetByDocumentNumber(documentNumber);
-            if (response.IsValid)
-                return Ok(response);
-            return BadRequest(response);
-        }
-
-        [HttpGet("by-email/{email}")]
-        public async Task<IActionResult> GetByEmail([FromRoute] string email)
-        {
-            var response = await _userReferenceService.GetByEmail(email);
-            if (response.IsValid)
-                return Ok(response);
-            return BadRequest(response);
-        }
-
-        [HttpGet("by-role-code/{roleCode}")]
-        public async Task<IActionResult> GetByRoleCode([FromRoute] string roleCode)
-        {
-            var response = await _userReferenceService.GetByRoleCode(roleCode);
-            if (response.IsValid)
-                return Ok(response);
-            return BadRequest(response);
-        }
-
-        [HttpGet("active")]
-        public async Task<IActionResult> GetActiveUsers()
-        {
-            var response = await _userReferenceService.GetActiveUsers();
             if (response.IsValid)
                 return Ok(response);
             return BadRequest(response);
