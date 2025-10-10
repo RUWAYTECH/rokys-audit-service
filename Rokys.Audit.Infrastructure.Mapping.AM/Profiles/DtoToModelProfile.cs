@@ -17,6 +17,7 @@ using Rokys.Audit.DTOs.Requests.PeriodAudit;
 using Rokys.Audit.DTOs.Requests.UserReference;
 using Rokys.Audit.Model.Tables;
 using Rokys.Audit.DTOs.Requests.AuditStatus;
+using Rokys.Audit.DTOs.Requests.EmployeeStore;
 
 namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
 {
@@ -40,6 +41,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
             CreateMap<PeriodAuditRequestDto, PeriodAudit>();
             CreateMap<AuditStatusRequestDto, AuditStatus>();
             CreateMap<UserReferenceRequestDto, UserReference>();
+            CreateMap<EmployeeStoreRequestDto, EmployeeStore>();
         }
     }
 }

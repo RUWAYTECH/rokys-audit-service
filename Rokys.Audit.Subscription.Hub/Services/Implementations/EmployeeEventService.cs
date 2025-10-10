@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Rokys.Audit.DTOs.Requests.EmployeeStore;
 using Rokys.Audit.Services.Interfaces;
 using Rokys.Audit.Subscription.Hub.Services.Interfaces;
 using Ruway.Events.Command.Interfaces.Events;
@@ -37,8 +38,17 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
                     PersonalEmail = employeeEvent.PersonalEmail,
                     DocumentNumber = employeeEvent.DocumentNumber,
                     RoleCode = null,
-                    RoleName = null
-                });
+                    RoleName = null,
+                    EmployeeStores = employeeEvent.EmployeeStores
+                        .Select(es => new DTOs.Requests.UserReference.EmployeeStoreReferenceRequestDto
+                        {
+                            StoreId = es.StoreId,
+                            AssignmentDate = es.AssignmentDate
+                        })
+                        .ToArray(),
+               });
+
+               
 
                 _logger.LogInformation("Successfully processed employee created event for Employee ID: {EmployeeId}", 
                     employeeEvent.EmployeeId);
@@ -72,7 +82,14 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
                         PersonalEmail = employeeEvent.PersonalEmail,
                         DocumentNumber = employeeEvent.DocumentNumber,
                         RoleCode = userRef.RoleCode,
-                        RoleName = userRef.RoleName
+                        RoleName = userRef.RoleName,
+                        EmployeeStores = employeeEvent.EmployeeStores
+                            .Select(es => new DTOs.Requests.UserReference.EmployeeStoreReferenceRequestDto
+                            {
+                                StoreId = es.StoreId,
+                                AssignmentDate = es.AssignmentDate
+                            })
+                            .ToArray(),
                     });
                     return;
                 }
@@ -159,6 +176,5 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
                 _logger.LogError(ex, "Failed to deserialize employee event message: {Message}", message);
             }
         }
-
     }
 }

@@ -3,7 +3,7 @@ namespace Rokys.Audit.Model.Tables
     /// <summary>
     /// Entidad que relaciona empleados con tiendas asignadas
     /// </summary>
-    public class EmployeeStore
+    public class EmployeeStore : AuditEntity
     {
         /// <summary>
         /// ID de la relación empleado-tienda
@@ -29,27 +29,6 @@ namespace Rokys.Audit.Model.Tables
         /// Indica si la asignación está activa
         /// </summary>
         public bool IsActive { get; set; } = true;
-
-        /// <summary>
-        /// Usuario que creó el registro
-        /// </summary>
-        public string? CreatedBy { get; set; }
-
-        /// <summary>
-        /// Fecha de creación del registro
-        /// </summary>
-        public DateTime CreationDate { get; set; } = DateTime.UtcNow;
-
-        /// <summary>
-        /// Usuario que actualizó el registro
-        /// </summary>
-        public string? UpdatedBy { get; set; }
-
-        /// <summary>
-        /// Fecha de última actualización
-        /// </summary>
-        public DateTime? UpdateDate { get; set; }
-
         // Navegación
         public virtual UserReference? UserReference { get; set; }
         public virtual Stores? Store { get; set; }

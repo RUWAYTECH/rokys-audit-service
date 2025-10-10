@@ -347,7 +347,7 @@ CREATE TABLE [PeriodAudit]
     GlobalObservations NVARCHAR(MAX) NOT NULL, -- Observaciones Globales
     TotalWeighting DECIMAL(5,2) NOT NULL, -- Ponderación Total
 
-    StatusId UNIQUEIDENTIFIER NOT NULL -- ID de Estado
+    StatusId UNIQUEIDENTIFIER NULL -- ID de Estado
         FOREIGN KEY REFERENCES AuditStatus(AuditStatusId),
 
     -- Puntuación

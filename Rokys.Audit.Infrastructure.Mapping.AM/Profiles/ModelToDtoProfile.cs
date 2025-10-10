@@ -17,6 +17,7 @@ using Rokys.Audit.DTOs.Responses.PeriodAudit;
 using Rokys.Audit.DTOs.Responses.UserReference;
 using Rokys.Audit.Model.Tables;
 using Rokys.Audit.DTOs.Responses.AuditStatus;
+using Rokys.Audit.DTOs.Responses.EmployeeStore;
 
 namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
 {
@@ -25,17 +26,21 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
         public ModelToDtoProfile()
         {
             CreateMap<Proveedor, ProveedorResponseDto>();
-            CreateMap<ScaleCompany, ScaleCompanyResponseDto>().AfterMap((dest, src) =>
-            {
-                dest.Enterprise.Name = src.EnterpriseName;
-            });
+            CreateMap<ScaleCompany, ScaleCompanyResponseDto>()
+                .AfterMap((src, dest) =>
+                {
+                    dest.EnterpriseName = src.Enterprise.Name;
+                });
             CreateMap<ScaleGroup, ScaleGroupResponseDto>();
             CreateMap<Group, GroupResponseDto>();
             CreateMap<CriteriaSubResult, CriteriaSubResultResponseDto>();
             CreateMap<PeriodAuditFieldValues, PeriodAuditFieldValuesResponseDto>();
             //CreateMap<AuditScaleTemplate, AuditScaleTemplateResponseDto>();
-            CreateMap<TableScaleTemplate, TableScaleTemplateResponseDto>().AfterMap((dest, src) =>
-                dest.ScaleGroup.Name = src.ScaleGroupName);
+            CreateMap<TableScaleTemplate, TableScaleTemplateResponseDto>()
+                .AfterMap((src, dest) =>
+                {
+                    dest.ScaleGroupName = src.ScaleGroup.Name;
+                });
             CreateMap<Enterprise, EnterpriseResponseDto>();
             CreateMap<Stores, StoreResponseDto>();
             CreateMap<AuditTemplateFields, AuditTemplateFieldResponseDto>()
@@ -44,13 +49,18 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                     dest.TableScaleTemplateName= src.TableScaleTemplate.Name;
                     dest.TableScaleTemplateCode = src.TableScaleTemplate.Code;
                 });
-            CreateMap<ScoringCriteria, ScoringCriteriaResponseDto>().AfterMap((dest, src) => 
-                dest.ScaleGroup.Name = src.ScaleGroupName);
+            CreateMap<ScoringCriteria, ScoringCriteriaResponseDto>()
+                .AfterMap((src, dest) =>
+                {
+                    dest.ScaleGroupName = src.ScaleGroup.Name;
+                    dest.ScaleCalificationDescription = src.MaintenanceDetailTable.Description;
+                });
             CreateMap<MaintenanceTable, MaintenanceTableResponseDto>();
             CreateMap<MaintenanceDetailTable, MaintenanceDetailTableResponseDto>();
             CreateMap<PeriodAudit, PeriodAuditResponseDto>();
             CreateMap<AuditStatus, AuditStatusResponseDto>();
             CreateMap<UserReference, UserReferenceResponseDto>();
+            CreateMap<EmployeeStore, EmployeeStoreResponseDto>();
         }
     }
 }

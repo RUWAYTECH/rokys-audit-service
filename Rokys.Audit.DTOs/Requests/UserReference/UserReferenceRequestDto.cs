@@ -46,6 +46,7 @@ namespace Rokys.Audit.DTOs.Requests.UserReference
         /// Nombre del rol
         /// </summary>
         public string? RoleName { get; set; }
+        public EmployeeStoreReferenceRequestDto[] EmployeeStores { get; init; } = Array.Empty<EmployeeStoreReferenceRequestDto>();
 
         /// <summary>
         /// Indica si el usuario está activo

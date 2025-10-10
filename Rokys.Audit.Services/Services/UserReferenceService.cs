@@ -14,6 +14,7 @@ using Rokys.Audit.Model.Tables;
 using Rokys.Audit.Services.Interfaces;
 using System.Linq.Expressions;
 using Rokys.Audit.Common.Extensions;
+using Rokys.Audit.DTOs.Requests.EmployeeStore;
 
 namespace Rokys.Audit.Services.Services
 {
@@ -25,6 +26,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IEmployeeStoreRepository _employeeStoreRepository;
 
         public UserReferenceService(
             IUserReferenceRepository userReferenceRepository,
@@ -32,7 +34,8 @@ namespace Rokys.Audit.Services.Services
             ILogger<UserReferenceService> logger,
             IUnitOfWork unitOfWork,
             IAMapper mapper,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            IEmployeeStoreRepository employeeStoreRepository)
         {
             _userReferenceRepository = userReferenceRepository;
             _fluentValidator = fluentValidator;
@@ -40,6 +43,7 @@ namespace Rokys.Audit.Services.Services
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
+            _employeeStoreRepository = employeeStoreRepository;
         }
 
         public async Task<ResponseDto<UserReferenceResponseDto>> Create(UserReferenceRequestDto requestDto)
@@ -57,6 +61,18 @@ namespace Rokys.Audit.Services.Services
                 var currentUser = _httpContextAccessor.CurrentUser();
                 var entity = _mapper.Map<UserReference>(requestDto);
                 entity.CreateAudit(currentUser.UserName);
+
+                if (requestDto.EmployeeStores != null && requestDto.EmployeeStores.Length > 0)
+                {
+                    foreach (var store in requestDto.EmployeeStores)
+                    {
+                        _employeeStoreRepository.Insert(new EmployeeStore
+                        {
+                            UserReferenceId = requestDto.EmployeeId,
+                            StoreId = store.StoreId,
+                        });
+                    }
+                }
 
                 _userReferenceRepository.Insert(entity);
                 await _unitOfWork.CommitAsync();
@@ -129,6 +145,63 @@ namespace Rokys.Audit.Services.Services
                 entity.UpdateDate = DateTime.UtcNow;
 
                 _userReferenceRepository.Update(entity);
+
+                var existingStores = await _employeeStoreRepository.GetByUserReferenceIdAsync(id);
+                var incomingStores = requestDto.EmployeeStores;
+                if (existingStores != null)
+                {
+                    var existingList = existingStores;
+                    var incomingName = incomingStores.Select(s => s.StoreId).ToHashSet();
+
+                    foreach (var existing in existingList)
+                    {
+                        if (!incomingName.Contains(existing.StoreId))
+                        {
+                            _employeeStoreRepository.Delete(existing.EmployeeStoreId);
+                        }
+                    }
+
+                    var existingCodes = existingList.Select(s => s.StoreId).ToHashSet();
+                    var storesToAdd = incomingStores.Where(s => !existingCodes.Contains(s.StoreId));
+
+                    foreach (var store in storesToAdd)
+                    {
+                        _employeeStoreRepository.Insert(new EmployeeStore
+                        {
+                            UserReferenceId = requestDto.UserId.Value,
+                            StoreId = store.StoreId,
+                            AssignmentDate = store.AssignmentDate ?? DateTime.Now,
+                        });
+                    }
+
+                    var storesToReactivate = existingList
+                        .Where(s => incomingName.Contains(s.StoreId) && !s.IsActive);
+
+                    foreach (var store in storesToReactivate)
+                    {
+                        store.IsActive = true;
+                        _employeeStoreRepository.Update(new EmployeeStore
+                        {
+                            EmployeeStoreId = store.EmployeeStoreId,
+                            UserReferenceId = requestDto.UserId.Value,
+                            StoreId = store.StoreId,
+                            AssignmentDate = store.AssignmentDate
+                        });
+                    }
+                }
+                else
+                {
+                    foreach (var store in incomingStores)
+                    {
+                        _employeeStoreRepository.Insert(new EmployeeStore
+                        {
+                            UserReferenceId = requestDto.UserId.Value,
+                            StoreId = store.StoreId,
+                            AssignmentDate = store.AssignmentDate ?? DateTime.Now,
+                        });
+                    }
+                }
+
                 await _unitOfWork.CommitAsync();
 
                 response.Data = _mapper.Map<UserReferenceResponseDto>(entity);

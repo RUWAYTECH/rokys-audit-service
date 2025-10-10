@@ -6,6 +6,7 @@ namespace Rokys.Audit.DTOs.Responses.ScoringCriteria
     {
         public Guid ScoringCriteriaId { get; set; }
         public string? CriteriaCode { get; set; }
+        public string? CriteriaName { get; set; }
         public int SortOrder { get; set; } = 0;
 
         public bool IsActive { get; set; }
@@ -14,5 +15,6 @@ namespace Rokys.Audit.DTOs.Responses.ScoringCriteria
         public string? UpdatedBy { get; set; }
         public DateTime? UpdateDate { get; set; }
         public string? ScaleGroupName { get; set; }
+        public string? ScaleCalificationDescription { get; set; }
     }
 }
