@@ -68,8 +68,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .IsRequired()
                 .HasColumnType("decimal(5,2)");
 
-            builder.Property(x => x.StatusId)
-                .IsRequired();
+            builder.Property(x => x.StatusId);
 
 
 

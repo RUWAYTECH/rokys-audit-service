@@ -43,7 +43,7 @@ namespace Rokys.Audit.Services.Services
 			_httpContextAccessor = httpContextAccessor;
 		}
 
-		public async Task<ResponseDto<PaginationResponseDto<CriteriaSubResultResponseDto>>> GetPaged(PaginationRequestDto paginationRequestDto)
+		public async Task<ResponseDto<PaginationResponseDto<CriteriaSubResultResponseDto>>> GetPaged(CriteriaSubResultFilterRequestDto paginationRequestDto)
 		{
 			var response = ResponseDto.Create<PaginationResponseDto<CriteriaSubResultResponseDto>>();
 			try
@@ -52,7 +52,10 @@ namespace Rokys.Audit.Services.Services
 				if (!string.IsNullOrEmpty(paginationRequestDto.Filter))
 					filter = x => x.CriteriaName.Contains(paginationRequestDto.Filter) && x.IsActive;
 
-				Func<IQueryable<CriteriaSubResult>, IOrderedQueryable<CriteriaSubResult>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
+				if (paginationRequestDto.ScaleGroupId.HasValue)
+                    filter = x => x.ScaleGroupId == paginationRequestDto.ScaleGroupId && x.IsActive;
+
+                Func<IQueryable<CriteriaSubResult>, IOrderedQueryable<CriteriaSubResult>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 
 				var entities = await _criteriaSubResultRepository.GetPagedAsync(
 					filter: filter,

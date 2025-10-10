@@ -5,11 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Rokys.Audit.DTOs.Requests.AuditTemplateField
+namespace Rokys.Audit.DTOs.Requests.CriteriaSubResult
 {
-    public class AuditTemplateFieldFilterRequestDto : PaginationRequestDto
+    public class CriteriaSubResultFilterRequestDto : PaginationRequestDto
     {
-        public Guid? TableScaleTemplateId { get; set; }
         public Guid? ScaleGroupId { get; set; }
     }
 }

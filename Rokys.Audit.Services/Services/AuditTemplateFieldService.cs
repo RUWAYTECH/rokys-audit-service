@@ -71,7 +71,8 @@ namespace Rokys.Audit.Services.Services
                 entity.CreateAudit(currentUser.UserName);
                 _auditTemplateFieldRepository.Insert(entity);
                 await _unitOfWork.CommitAsync();
-                var responseData = _mapper.Map<AuditTemplateFieldResponseDto>(entity);
+                var createdEntity = await _auditTemplateFieldRepository.GetFirstOrDefaultAsync(filter: x => x.AuditTemplateFieldId == entity.AuditTemplateFieldId && x.IsActive, includeProperties: [at => at.TableScaleTemplate]);
+                var responseData = _mapper.Map<AuditTemplateFieldResponseDto>(createdEntity);
                 response = ResponseDto.Create(responseData);
             }
             catch (Exception ex)
@@ -140,6 +141,9 @@ namespace Rokys.Audit.Services.Services
 
                 if (requestDto.TableScaleTemplateId.HasValue)
                     filter = x => x.TableScaleTemplateId == requestDto.TableScaleTemplateId.Value && x.IsActive;
+
+                if (requestDto.ScaleGroupId.HasValue)
+                    filter = x => x.TableScaleTemplate.ScaleGroupId == requestDto.ScaleGroupId.Value && x.IsActive;
 
                 Func<IQueryable<AuditTemplateFields>, IOrderedQueryable<AuditTemplateFields>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 

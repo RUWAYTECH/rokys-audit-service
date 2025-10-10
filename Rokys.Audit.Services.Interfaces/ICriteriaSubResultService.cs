@@ -8,6 +8,6 @@ namespace Rokys.Audit.Services.Interfaces
 {
     public interface ICriteriaSubResultService : IBaseService<CriteriaSubResultRequestDto, CriteriaSubResultResponseDto>
     {
-        Task<ResponseDto<PaginationResponseDto<CriteriaSubResultResponseDto>>> GetPaged(PaginationRequestDto requestDto);
+        Task<ResponseDto<PaginationResponseDto<CriteriaSubResultResponseDto>>> GetPaged(CriteriaSubResultFilterRequestDto requestDto);
     }
 }

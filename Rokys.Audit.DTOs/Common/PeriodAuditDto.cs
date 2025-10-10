@@ -14,6 +14,6 @@ namespace Rokys.Audit.DTOs.Common
         public DateTime EndDate { get; set; }
         public DateTime? ReportDate { get; set; }
         public int? AuditedDays { get; set; }
-        public Guid StatusId { get; set; }
+        public Guid? StatusId { get; set; }
     }
 }

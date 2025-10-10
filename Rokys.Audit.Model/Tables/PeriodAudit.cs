@@ -24,7 +24,7 @@ namespace Rokys.Audit.Model.Tables
         public string GlobalObservations { get; set; } = string.Empty;
         public decimal TotalWeighting { get; set; }
 
-        public Guid StatusId { get; set; } // ID de Estado
+        public Guid? StatusId { get; set; } // ID de Estado
 
         // Puntuación
         public decimal ScoreValue { get; set; }
@@ -38,7 +38,7 @@ namespace Rokys.Audit.Model.Tables
 
         // Navigation properties
         public virtual Stores? Store { get; set; }
-        public virtual AuditStatus AuditStatus { get; set; } = null!;
+        public virtual AuditStatus? AuditStatus { get; set; } = null!;
         
         // Navegación a UserReference para participantes
         public virtual UserReference? Administrator { get; set; }
