@@ -56,6 +56,7 @@ namespace Rokys.Audit.Services.Services
                 entity.CreateAudit(currentUser.UserName);
                 _groupRepository.Insert(entity);
                 await _unitOfWork.CommitAsync();
+                var createResponse = await _groupRepository.GetFirstOrDefaultAsync(filter: x => x.GroupId == entity.GroupId, includeProperties: [x => x.Enterprise]);
                 response.Data = _mapper.Map<GroupResponseDto>(entity);
             }
             catch (Exception ex)
@@ -102,7 +103,8 @@ namespace Rokys.Audit.Services.Services
                     filter: filter,
                     orderBy: orderBy,
                     pageNumber: groupFilterRequestDto.PageNumber,
-                    pageSize: groupFilterRequestDto.PageSize
+                    pageSize: groupFilterRequestDto.PageSize,
+                    includeProperties: [ x => x.Enterprise]
                 );
 
                 var pagedResult = new PaginationResponseDto<GroupResponseDto>
@@ -129,7 +131,7 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<GroupResponseDto>();
             try
             {
-                var entity = await _groupRepository.GetFirstOrDefaultAsync(filter: x => x.GroupId == id && x.IsActive);
+                var entity = await _groupRepository.GetFirstOrDefaultAsync(filter: x => x.GroupId == id && x.IsActive, includeProperties: [x => x.Enterprise]);
                 if (entity == null)
                 {
                     response = ResponseDto.Error<GroupResponseDto>("No se encontró el grupo.");
@@ -156,7 +158,7 @@ namespace Rokys.Audit.Services.Services
                     response.Messages.AddRange(validate.Errors.Select(e => new ApplicationMessage { Message = e.ErrorMessage, MessageType = ApplicationMessageType.Error }));
                     return response;
                 }
-                var entity = await _groupRepository.GetFirstOrDefaultAsync(filter: x => x.GroupId == id && x.IsActive);
+                var entity = await _groupRepository.GetFirstOrDefaultAsync(filter: x => x.GroupId == id && x.IsActive, includeProperties: [x => x.Enterprise]);
                 if (entity == null)
                 {
                     response = ResponseDto.Error<GroupResponseDto>("No se encontró el grupo.");

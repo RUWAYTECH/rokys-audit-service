@@ -22,7 +22,7 @@ namespace Rokys.Audit.Services.Validations
                 .MaximumLength(100).WithMessage("El código no puede exceder los 100 caracteres.")
                 .MustAsync(async (dto, code, cancellation) =>
                 {
-                    return !await _auditTemplateFieldRepository.ExistsByCodeAsync(code, id);
+                    return !await _auditTemplateFieldRepository.ExistsByCodeAndTemplateIdAsync(code, dto.TableScaleTemplateId, id);
                 })
             .WithMessage("El código ya existe.");
             RuleFor(x => x.FieldType)

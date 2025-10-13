@@ -145,7 +145,7 @@ namespace Rokys.Audit.Services.Services
                 if (requestDto.ScaleGroupId.HasValue)
                     filter = x => x.TableScaleTemplate.ScaleGroupId == requestDto.ScaleGroupId.Value && x.IsActive;
 
-                Func<IQueryable<AuditTemplateFields>, IOrderedQueryable<AuditTemplateFields>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
+                Func<IQueryable<AuditTemplateFields>, IOrderedQueryable<AuditTemplateFields>> orderBy = q => q.OrderByDescending(x => x.FieldName);
 
                 var entities = await _auditTemplateFieldRepository.GetPagedAsync(
                     filter: filter,

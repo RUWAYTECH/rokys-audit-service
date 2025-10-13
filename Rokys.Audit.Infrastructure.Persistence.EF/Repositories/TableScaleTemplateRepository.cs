@@ -26,6 +26,19 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
                 .AnyAsync(x => x.Code == code && x.TableScaleTemplateId != excludeId && x.IsActive);
         }
 
+        public async Task<bool> ExistsByCodeAndScaleGroupIdAsync(
+            string code,
+            Guid scaleGroupId,
+            Guid? excludeId = null)
+        {
+            return await _context.TableScaleTemplates
+                .AnyAsync(x =>
+                    x.Code.ToLower() == code.ToLower() &&
+                    x.ScaleGroupId == scaleGroupId &&
+                    (excludeId == null || x.TableScaleTemplateId != excludeId) &&
+                    x.IsActive);
+        }
+
         public async Task<IEnumerable<TableScaleTemplate>> GetByScaleGroupIdAsync(Guid scaleGroupId)
         {
             return await _context.TableScaleTemplates

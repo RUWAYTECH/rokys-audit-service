@@ -20,8 +20,7 @@ namespace Rokys.Audit.Services.Validations
             .MaximumLength(50).WithMessage("El código no puede exceder los 50 caracteres.")
             .MustAsync(async (dto, code, cancellation) =>
             {
-                // Si id es null → crear, sino → actualizar
-                return !await _tableScaleTemplateRepository.ExistsByCodeAsync(code, id);
+                return !await _tableScaleTemplateRepository.ExistsByCodeAndScaleGroupIdAsync(code, dto.ScaleGroupId, id);
             })
             .WithMessage("El código ya existe.");
 

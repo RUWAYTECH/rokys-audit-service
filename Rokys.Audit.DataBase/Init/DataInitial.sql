@@ -102,7 +102,7 @@ CREATE TABLE TableScaleTemplate (
     TableScaleTemplateId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     ScaleGroupId UNIQUEIDENTIFIER NOT NULL -- ID del Grupo
         FOREIGN KEY REFERENCES ScaleGroup(ScaleGroupId),
-    Code NVARCHAR(50) UNIQUE NOT NULL,
+    Code NVARCHAR(50) NOT NULL,
     Name NVARCHAR(255) NOT NULL,
     Orientation NVARCHAR(2) DEFAULT 'V', -- 'vertical' o 'horizontal'
     CONSTRAINT CK_AuditTemplateFields_Orientation

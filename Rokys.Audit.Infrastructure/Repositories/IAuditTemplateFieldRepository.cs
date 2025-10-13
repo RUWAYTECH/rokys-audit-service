@@ -7,5 +7,6 @@ namespace Rokys.Audit.Infrastructure.Repositories
     {
         Task<bool> ExistsByCodeAsync(string code);
         Task<bool> ExistsByCodeAsync(string code, Guid? excludeId);
+        Task<bool> ExistsByCodeAndTemplateIdAsync(string code, Guid tableScaleTemplateId, Guid? excludeId = null);
     }
 }

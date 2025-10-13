@@ -32,7 +32,10 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                     dest.EnterpriseName = src.Enterprise.Name;
                 });
             CreateMap<ScaleGroup, ScaleGroupResponseDto>();
-            CreateMap<Group, GroupResponseDto>();
+            CreateMap<Group, GroupResponseDto>().AfterMap((src, dest) =>
+            {
+                dest.EnterpriseName = src.Enterprise.Name;
+            });
             CreateMap<CriteriaSubResult, CriteriaSubResultResponseDto>();
             CreateMap<PeriodAuditFieldValues, PeriodAuditFieldValuesResponseDto>();
             //CreateMap<AuditScaleTemplate, AuditScaleTemplateResponseDto>();

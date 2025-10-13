@@ -345,9 +345,10 @@ namespace Rokys.Audit.Services.Services
                 if (!string.IsNullOrEmpty(paginationRequestDto.RoleCode))
                 {
                     var roleCode = paginationRequestDto.RoleCode.ToLower();
-                    filter = filter.AndAlso(x => (x.RoleCode != null && x.RoleCode.Equals(roleCode, StringComparison.CurrentCultureIgnoreCase)));
+                    filter = filter.AndAlso(x =>
+                        x.RoleCode != null && x.RoleCode.ToLower().Contains(roleCode)
+                    );
                 }
-
                 Func<IQueryable<UserReference>, IOrderedQueryable<UserReference>> orderBy = q => q.OrderBy(x => x.FirstName).ThenBy(x => x.LastName);
 
                 var entities = await _userReferenceRepository.GetPagedAsync(
