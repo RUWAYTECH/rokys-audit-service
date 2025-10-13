@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.MaintenanceDetailTable;
 using Rokys.Audit.Services.Interfaces;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 namespace Rokys.Audit.WebAPI.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/maintenancedetailtable")]
     public class MaintenanceDetailTableController : ControllerBase
     {
