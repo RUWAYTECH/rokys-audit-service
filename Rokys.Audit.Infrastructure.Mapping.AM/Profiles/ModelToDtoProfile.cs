@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Rokys.Audit.DTOs.Responses.PeriodAuditGroupResult;
 using Rokys.Audit.DTOs.Responses.AuditScaleTemplate;
 using Rokys.Audit.DTOs.Responses.AuditTemplateField;
 using Rokys.Audit.DTOs.Responses.CriteriaSubResult;
@@ -25,6 +26,12 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
     {
         public ModelToDtoProfile()
         {
+            CreateMap<PeriodAuditGroupResult, PeriodAuditGroupResultResponseDto>()
+                .AfterMap((src, dest) =>
+                {
+                    dest.ScaleDescription = src.ScaleDescription;
+                    dest.Observations = src.Observations;
+                });
             CreateMap<Proveedor, ProveedorResponseDto>();
             CreateMap<ScaleCompany, ScaleCompanyResponseDto>()
                 .AfterMap((src, dest) =>
@@ -68,9 +75,9 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                 dest.FloatingAdministratorName = src.FloatingAdministrator?.FirstName + " " + src.FloatingAdministrator?.LastName;
                 dest.ResponsibleAuditorName = src.ResponsibleAuditor?.FirstName + " " + src.ResponsibleAuditor?.LastName;
                 dest.StatusName = src.AuditStatus?.Name;
-                dest.EnterpriseName = src.Store?.Enterprise?.Name;
-                dest.EnterpriseId = src.Store?.EnterpriseId;
-                dest.StoreName = src.Store?.Name;
+                dest.EnterpriseName = src.Store?.Enterprise?.Name ?? string.Empty;
+                dest.EnterpriseId = src.Store?.EnterpriseId ?? Guid.Empty;
+                dest.StoreName = src.Store?.Name ?? string.Empty;
             });
             CreateMap<AuditStatus, AuditStatusResponseDto>();
             CreateMap<UserReference, UserReferenceResponseDto>();

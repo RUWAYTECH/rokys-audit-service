@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Rokys.Audit.DTOs.Requests.PeriodAuditGroupResult;
 using Rokys.Audit.DTOs.Requests.AuditScaleTemplate;
 using Rokys.Audit.DTOs.Requests.AuditTemplateField;
 using Rokys.Audit.DTOs.Requests.CriteriaSubResult;
@@ -24,7 +25,8 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
     public class DtoToModelProfile : Profile
     {
         public DtoToModelProfile()
-        {
+          {
+              CreateMap<PeriodAuditGroupResultRequestDto, PeriodAuditGroupResult>();
            CreateMap<ProveedorRequestDto, Proveedor>();
            CreateMap<ScaleCompanyRequestDto, ScaleCompany>();
            CreateMap<ScaleGroupRequestDto, ScaleGroup>();

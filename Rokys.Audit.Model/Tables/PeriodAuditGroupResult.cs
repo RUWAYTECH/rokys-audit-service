@@ -1,0 +1,18 @@
+using System;
+
+namespace Rokys.Audit.Model.Tables
+{
+    public class PeriodAuditGroupResult : AuditEntity
+    {
+        public Guid PeriodAuditGroupResultId { get; set; }
+        public Guid PeriodAuditId { get; set; }
+        public Guid GroupId { get; set; }
+        public decimal ScoreValue { get; set; }
+        public string? Observations { get; set; }
+        public string? ScaleDescription { get; set; }
+        public decimal TotalWeighting { get; set; }
+        public virtual PeriodAudit PeriodAudit { get; set; }
+        public virtual Group Group { get; set; }
+        public bool IsActive { get; set; } = true;
+    }
+}
