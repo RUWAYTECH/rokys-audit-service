@@ -60,7 +60,18 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                 });
             CreateMap<MaintenanceTable, MaintenanceTableResponseDto>();
             CreateMap<MaintenanceDetailTable, MaintenanceDetailTableResponseDto>();
-            CreateMap<PeriodAudit, PeriodAuditResponseDto>();
+            CreateMap<PeriodAudit, PeriodAuditResponseDto>().AfterMap((src, dest) =>
+            {
+                dest.AdministratorName = src.Administrator?.FirstName + " " + src.Administrator?.LastName;
+                dest.AssistantName = src.Assistant?.FirstName + " " + src.Assistant?.LastName;
+                dest.OperationManagerName = src.OperationManager?.FirstName + " " + src.OperationManager?.LastName;
+                dest.FloatingAdministratorName = src.FloatingAdministrator?.FirstName + " " + src.FloatingAdministrator?.LastName;
+                dest.ResponsibleAuditorName = src.ResponsibleAuditor?.FirstName + " " + src.ResponsibleAuditor?.LastName;
+                dest.StatusName = src.AuditStatus?.Name;
+                dest.EnterpriseName = src.Store?.Enterprise?.Name;
+                dest.EnterpriseId = src.Store?.EnterpriseId;
+                dest.StoreName = src.Store?.Name;
+            });
             CreateMap<AuditStatus, AuditStatusResponseDto>();
             CreateMap<UserReference, UserReferenceResponseDto>();
             CreateMap<EmployeeStore, EmployeeStoreResponseDto>();

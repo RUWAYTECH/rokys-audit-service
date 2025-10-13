@@ -11,6 +11,15 @@ namespace Rokys.Audit.DTOs.Responses.PeriodAudit
         public string ScaleName { get; set; } = string.Empty;
         public string ScaleIcon { get; set; } = string.Empty;
         public string ScaleColor { get; set; } = string.Empty;
+        public string StoreName { get; set; } = string.Empty;
+        public string EnterpriseName { get; set; } = string.Empty;
+        public Guid? EnterpriseId { get; set; }
+        public string? AdministratorName { get; set; }
+        public string? AssistantName { get; set; }
+        public string? OperationManagerName { get; set; }
+        public string? FloatingAdministratorName { get; set; }
+        public string? ResponsibleAuditorName { get; set; }
+        public string? StatusName { get; set; }
         public decimal ScaleMinValue { get; set; }
         public decimal ScaleMaxValue { get; set; }
         public decimal TotalWeighting { get; set; }
