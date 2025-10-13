@@ -19,6 +19,7 @@ using Rokys.Audit.DTOs.Responses.UserReference;
 using Rokys.Audit.Model.Tables;
 using Rokys.Audit.DTOs.Responses.AuditStatus;
 using Rokys.Audit.DTOs.Responses.EmployeeStore;
+using Rokys.Audit.DTOs.Responses.PeriodAuditScaleResult;
 
 namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
 {
@@ -26,12 +27,8 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
     {
         public ModelToDtoProfile()
         {
-            CreateMap<PeriodAuditGroupResult, PeriodAuditGroupResultResponseDto>()
-                .AfterMap((src, dest) =>
-                {
-                    dest.ScaleDescription = src.ScaleDescription;
-                    dest.Observations = src.Observations;
-                });
+            CreateMap<PeriodAuditGroupResult, PeriodAuditGroupResultResponseDto>();
+            CreateMap<PeriodAuditScaleResult, PeriodAuditScaleResultResponseDto>();
             CreateMap<Proveedor, ProveedorResponseDto>();
             CreateMap<ScaleCompany, ScaleCompanyResponseDto>()
                 .AfterMap((src, dest) =>

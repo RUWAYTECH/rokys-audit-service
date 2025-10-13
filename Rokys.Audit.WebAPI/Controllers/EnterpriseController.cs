@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Rokys.Audit.DTOs.Requests.Enterprise;
 using Rokys.Audit.Services.Interfaces;
 
 namespace Rokys.Audit.WebAPI.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/enterprise")]
     public class EnterpriseController : ControllerBase
     {

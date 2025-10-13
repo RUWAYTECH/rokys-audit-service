@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.Group;
 using Rokys.Audit.Services.Interfaces;
@@ -6,6 +7,7 @@ using Rokys.Audit.Services.Interfaces;
 namespace Rokys.Audit.WebAPI.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/groups")]
     public class GroupController : ControllerBase
     {
