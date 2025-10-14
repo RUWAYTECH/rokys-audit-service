@@ -57,7 +57,10 @@ namespace Rokys.Audit.Services.Services
                 entity.IsActive = true;
                 _repository.Insert(entity);
                 await _unitOfWork.CommitAsync();
-                response.Data = _mapper.Map<PeriodAuditScaleResultResponseDto>(entity);
+                var createdEntity = await _repository.GetFirstOrDefaultAsync(
+                    filter: x => x.PeriodAuditScaleResultId == entity.PeriodAuditScaleResultId && x.IsActive,
+                    includeProperties: [x => x.PeriodAuditGroupResult, sg => sg.ScaleGroup]);
+                response.Data = _mapper.Map<PeriodAuditScaleResultResponseDto>(createdEntity);
             }
             catch (Exception ex)
             {
@@ -96,7 +99,9 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<PeriodAuditScaleResultResponseDto>();
             try
             {
-                var entity = await _repository.GetFirstOrDefaultAsync(filter: x => x.PeriodAuditScaleResultId == id && x.IsActive);
+                var entity = await _repository.GetFirstOrDefaultAsync(
+                    filter: x => x.PeriodAuditScaleResultId == id && x.IsActive,
+                    includeProperties: [ x => x.PeriodAuditGroupResult, sg => sg.ScaleGroup]);
                 if (entity == null)
                 {
                     response = ResponseDto.Error<PeriodAuditScaleResultResponseDto>("No se encontró el registro.");
@@ -123,7 +128,9 @@ namespace Rokys.Audit.Services.Services
                     response.Messages.AddRange(validate.Errors.Select(e => new ApplicationMessage { Message = e.ErrorMessage, MessageType = ApplicationMessageType.Error }));
                     return response;
                 }
-                var entity = await _repository.GetFirstOrDefaultAsync(filter: x => x.PeriodAuditScaleResultId == id && x.IsActive);
+                var entity = await _repository.GetFirstOrDefaultAsync(
+                    filter: x => x.PeriodAuditScaleResultId == id && x.IsActive,
+                    includeProperties: [x => x.PeriodAuditGroupResult, sg => sg.ScaleGroup]);
                 if (entity == null)
                 {
                     response = ResponseDto.Error<PeriodAuditScaleResultResponseDto>("No se encontró el registro.");

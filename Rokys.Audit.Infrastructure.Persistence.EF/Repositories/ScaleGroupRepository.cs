@@ -25,5 +25,12 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
             return await _context.ScaleGroups
                 .AnyAsync(x => x.Code == code && x.ScaleGroupId != excludeId && x.IsActive);
         }
+
+        public async Task<List<ScaleGroup>> GetByGroupIdAsync(Guid groupId)
+        {
+            return await _context.ScaleGroups
+                .Where(x => x.GroupId == groupId && x.IsActive)
+                .ToListAsync();
+        }
     }
 }

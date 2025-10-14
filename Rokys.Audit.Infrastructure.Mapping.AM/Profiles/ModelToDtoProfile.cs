@@ -28,7 +28,31 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
         public ModelToDtoProfile()
         {
             CreateMap<PeriodAuditGroupResult, PeriodAuditGroupResultResponseDto>();
-            CreateMap<PeriodAuditScaleResult, PeriodAuditScaleResultResponseDto>();
+            CreateMap<PeriodAuditScaleResult, PeriodAuditScaleResultResponseDto>()
+                .AfterMap((src, dest) =>
+                {
+                    dest.PeriodAuditGroupResult = src.PeriodAuditGroupResult != null ? new PeriodAuditGroupResultResponseDto
+                    {
+                        PeriodAuditGroupResultId = src.PeriodAuditGroupResult.PeriodAuditGroupResultId,
+                        PeriodAuditId = src.PeriodAuditGroupResult.PeriodAuditId,
+                        GroupId = src.PeriodAuditGroupResult.GroupId,
+                        ScoreValue = src.PeriodAuditGroupResult.ScoreValue,
+                        Observations = src.PeriodAuditGroupResult.Observations,
+                        ScaleDescription = src.PeriodAuditGroupResult.ScaleDescription,
+                        TotalWeighting = src.PeriodAuditGroupResult.TotalWeighting,
+                        GroupColor = src.PeriodAuditGroupResult.GroupColor,
+                        IsActive = src.PeriodAuditGroupResult.IsActive,
+                    } : null;
+                    dest.ScaleGroup = src.ScaleGroup != null ? new ScaleGroupResponseDto
+                    {
+                        ScaleGroupId = src.ScaleGroup.ScaleGroupId,
+                        GroupId = src.ScaleGroup.GroupId,
+                        Name = src.ScaleGroup.Name,
+                        Code = src.ScaleGroup.Code,
+                        Weighting = src.ScaleGroup.Weighting,
+                        IsActive = src.ScaleGroup.IsActive,
+                    } : null;
+                });
             CreateMap<Proveedor, ProveedorResponseDto>();
             CreateMap<ScaleCompany, ScaleCompanyResponseDto>()
                 .AfterMap((src, dest) =>
@@ -75,6 +99,22 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                 dest.EnterpriseName = src.Store?.Enterprise?.Name ?? string.Empty;
                 dest.EnterpriseId = src.Store?.EnterpriseId ?? Guid.Empty;
                 dest.StoreName = src.Store?.Name ?? string.Empty;
+
+                if (src.AuditStatus != null)
+                {
+                    dest.AuditStatus = new AuditStatusResponseDto
+                    {
+                        AuditStatusId = src.AuditStatus.AuditStatusId,
+                        Name = src.AuditStatus.Name,
+                        ColorCode = src.AuditStatus.ColorCode,
+                        Code = src.AuditStatus.Code,
+                        IsActive = src.AuditStatus.IsActive,
+                        CreatedBy = src.AuditStatus.CreatedBy,
+                        CreationDate = src.AuditStatus.CreationDate,
+                        UpdatedBy = src.AuditStatus.UpdatedBy,
+                        UpdateDate = src.AuditStatus.UpdateDate
+                    };
+                }
             });
             CreateMap<AuditStatus, AuditStatusResponseDto>();
             CreateMap<UserReference, UserReferenceResponseDto>();

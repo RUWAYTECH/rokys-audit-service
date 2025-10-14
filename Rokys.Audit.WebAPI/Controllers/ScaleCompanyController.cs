@@ -23,7 +23,7 @@ namespace Rokys.Audit.WebAPI.Controllers
             return BadRequest(response);
         }
         [HttpGet]
-        public async Task<IActionResult> GetPaged([FromQuery] PaginationRequestDto paginationRequestDto)
+        public async Task<IActionResult> GetPaged([FromQuery] ScaleCompanyFilterRequestDto paginationRequestDto)
         {
             var response = await _scaleCompanyService.GetPaged(paginationRequestDto);
             if (response.IsValid)

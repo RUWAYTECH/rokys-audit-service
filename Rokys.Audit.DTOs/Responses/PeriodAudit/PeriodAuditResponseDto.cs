@@ -1,5 +1,6 @@
 using System;
 using Rokys.Audit.DTOs.Common;
+using Rokys.Audit.DTOs.Responses.AuditStatus;
 
 namespace Rokys.Audit.DTOs.Responses.PeriodAudit
 {
@@ -29,5 +30,6 @@ namespace Rokys.Audit.DTOs.Responses.PeriodAudit
         public string? UpdatedBy { get; set; }
         public DateTime? UpdateDate { get; set; }
         public bool IsActive { get; set; }
+        public AuditStatusResponseDto? AuditStatus { get; set; }
     }
 }

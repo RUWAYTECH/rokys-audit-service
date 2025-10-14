@@ -109,7 +109,7 @@ namespace Rokys.Audit.Services.Services
             return response;
         }
 
-        public async Task<ResponseDto<PaginationResponseDto<ScaleCompanyResponseDto>>> GetPaged(PaginationRequestDto paginationRequestDto)
+        public async Task<ResponseDto<PaginationResponseDto<ScaleCompanyResponseDto>>> GetPaged(ScaleCompanyFilterRequestDto paginationRequestDto)
         {
             var response = ResponseDto.Create<PaginationResponseDto<ScaleCompanyResponseDto>>();
             try
@@ -118,6 +118,9 @@ namespace Rokys.Audit.Services.Services
                 Expression<Func<ScaleCompany, bool>> filter = x => x.IsActive;
                 if (!string.IsNullOrEmpty(paginationRequestDto.Filter))
                     filter = x => x.Name.Contains(paginationRequestDto.Filter);
+
+                if (paginationRequestDto.EnterpriseId.HasValue)
+                    filter = x => x.EnterpriseId == paginationRequestDto.EnterpriseId.Value && x.IsActive;
 
                 Func<IQueryable<ScaleCompany>, IOrderedQueryable<ScaleCompany>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 
