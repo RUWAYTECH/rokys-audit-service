@@ -71,6 +71,7 @@ CREATE TABLE [Group]
 
     -- Auditoría
     IsActive BIT DEFAULT 1, -- Está Activo
+    HasSourceData BIT DEFAULT 0, -- Tiene Datos Fuente
     CreatedBy VARCHAR(120) NULL, -- Creado Por
     CreationDate DATETIME2 DEFAULT GETDATE(), -- Fecha de Creación
     UpdatedBy VARCHAR(120) NULL, -- Actualizado Por
@@ -385,6 +386,7 @@ CREATE TABLE PeriodAuditGroupResult
     TotalWeighting DECIMAL(5,2) NOT NULL, -- Ponderación Total
 
     GroupColor NVARCHAR(20) NULL, -- Código de Color del Grupo
+    HasEvidence BIT DEFAULT 0,
   
     -- Record audit
     IsActive BIT DEFAULT 1, -- Está Activo
@@ -397,8 +399,9 @@ CREATE TABLE PeriodAuditGroupResult
 
 CREATE TABLE EvidenceFiles (
     EvidenceFileId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    PeriodAuditGroupResultId UNIQUEIDENTIFIER NOT NULL 
-        FOREIGN KEY REFERENCES PeriodAuditGroupResult(PeriodAuditGroupResultId) ON DELETE CASCADE,
+    EntityId UNIQUEIDENTIFIER NOT NULL,
+    EntityName NVARCHAR(255) NOT NULL, 
+        
     OriginalName NVARCHAR(255) NOT NULL, -- Nombre original del archivo
     FileName NVARCHAR(255) NOT NULL,
     FileUrl NVARCHAR(500) NOT NULL, -- URL o path del archivo
