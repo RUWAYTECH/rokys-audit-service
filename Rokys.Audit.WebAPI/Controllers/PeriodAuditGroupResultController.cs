@@ -2,14 +2,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Rokys.Audit.DTOs.Requests.PeriodAuditGroupResult;
 using Rokys.Audit.Services.Interfaces;
-using System;
-using System.Threading.Tasks;
 
 namespace Rokys.Audit.WebAPI.Controllers
 {
     [ApiController]
     [Authorize]
-    [Route("api/[controller]")]
+    [Route("api/period-audit-group-result")]
     public class PeriodAuditGroupResultController : ControllerBase
     {
         private readonly IPeriodAuditGroupResultService _service;
@@ -47,11 +45,13 @@ namespace Rokys.Audit.WebAPI.Controllers
             return Ok(result);
         }
 
-        [HttpPost("paged")]
-        public async Task<IActionResult> GetPaged([FromBody] PeriodAuditGroupResultFilterRequestDto filter)
+        [HttpGet]
+        public async Task<IActionResult> GetPaged([FromQuery] PeriodAuditGroupResultFilterRequestDto paginationRequestDto)
         {
-            var result = await _service.GetPaged(filter);
-            return Ok(result);
+            var response = await _service.GetPaged(paginationRequestDto);
+            if (response.IsValid)
+                return Ok(response);
+            return BadRequest(response);
         }
     }
 }

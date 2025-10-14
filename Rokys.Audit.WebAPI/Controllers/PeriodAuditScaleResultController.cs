@@ -9,7 +9,7 @@ namespace Rokys.Audit.WebAPI.Controllers
 {
     [ApiController]
     [Authorize]
-    [Route("api/[controller]")]
+    [Route("api/period-audit-scale-result")]
     public class PeriodAuditScaleResultController : ControllerBase
     {
         private readonly IPeriodAuditScaleResultService _service;
@@ -23,35 +23,45 @@ namespace Rokys.Audit.WebAPI.Controllers
         public async Task<IActionResult> Create([FromBody] PeriodAuditScaleResultRequestDto dto)
         {
             var result = await _service.Create(dto);
-            return Ok(result);
+            if (result.IsValid)
+                return Ok(result);
+            return BadRequest(result);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] PeriodAuditScaleResultRequestDto dto)
         {
             var result = await _service.Update(id, dto);
-            return Ok(result);
+            if (result.IsValid)
+                return Ok(result);
+            return BadRequest(result);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
             var result = await _service.Delete(id);
-            return Ok(result);
+            if (result.IsValid)
+                return Ok(result);
+            return BadRequest(result);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
             var result = await _service.GetById(id);
-            return Ok(result);
+            if (result.IsValid)
+                return Ok(result);
+            return BadRequest(result);
         }
 
-        [HttpPost("paged")]
-        public async Task<IActionResult> GetPaged([FromBody] PeriodAuditScaleResultFilterRequestDto filter)
+        [HttpGet]
+        public async Task<IActionResult> GetPaged([FromQuery] PeriodAuditScaleResultFilterRequestDto filter)
         {
             var result = await _service.GetPaged(filter);
-            return Ok(result);
+            if (result.IsValid)
+                return Ok(result);
+            return BadRequest(result);
         }
     }
 }

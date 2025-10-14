@@ -8,6 +8,7 @@ using Rokys.Audit.DTOs.Responses.Common;
 using Rokys.Audit.DTOs.Responses.PeriodAuditGroupResult;
 using Rokys.Audit.Infrastructure.IMapping;
 using Rokys.Audit.Infrastructure.Persistence.Abstract;
+using Rokys.Audit.Infrastructure.Repositories;
 using Rokys.Audit.Model.Tables;
 using Rokys.Audit.Services.Interfaces;
 using System.Linq.Expressions;
@@ -16,7 +17,7 @@ namespace Rokys.Audit.Services.Services
 {
     public class PeriodAuditGroupResultService : IPeriodAuditGroupResultService
     {
-        private readonly IRepository<PeriodAuditGroupResult> _repository;
+        private readonly IPeriodAuditGroupResultRepository _repository;
         private readonly IValidator<PeriodAuditGroupResultRequestDto> _validator;
         private readonly ILogger<PeriodAuditGroupResultService> _logger;
         private readonly IUnitOfWork _unitOfWork;
@@ -24,7 +25,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public PeriodAuditGroupResultService(
-            IRepository<PeriodAuditGroupResult> repository,
+            IPeriodAuditGroupResultRepository repository,
             IValidator<PeriodAuditGroupResultRequestDto> validator,
             ILogger<PeriodAuditGroupResultService> logger,
             IUnitOfWork unitOfWork,
@@ -38,28 +39,6 @@ namespace Rokys.Audit.Services.Services
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
         }
-
-        private Expression<Func<PeriodAuditGroupResult, bool>> BuildFilter(PeriodAuditGroupResultFilterRequestDto filterRequestDto)
-        {
-            Expression<Func<PeriodAuditGroupResult, bool>> filter = x => x.IsActive;
-            if (filterRequestDto.PeriodAuditId.HasValue)
-            {
-                var prevFilter = filter;
-                filter = x => prevFilter.Compile().Invoke(x) && x.PeriodAuditId == filterRequestDto.PeriodAuditId.Value;
-            }
-            if (filterRequestDto.GroupId.HasValue)
-            {
-                var prevFilter = filter;
-                filter = x => prevFilter.Compile().Invoke(x) && x.GroupId == filterRequestDto.GroupId.Value;
-            }
-            if (!string.IsNullOrEmpty(filterRequestDto.Filter))
-            {
-                var prevFilter = filter;
-                filter = x => prevFilter.Compile().Invoke(x) && (x.ScaleDescription.Contains(filterRequestDto.Filter) || x.Observations.Contains(filterRequestDto.Filter));
-            }
-            return filter;
-        }
-
         public async Task<ResponseDto<PeriodAuditGroupResultResponseDto>> Create(PeriodAuditGroupResultRequestDto requestDto)
         {
             var response = ResponseDto.Create<PeriodAuditGroupResultResponseDto>();
@@ -77,7 +56,10 @@ namespace Rokys.Audit.Services.Services
                 entity.IsActive = true;
                 _repository.Insert(entity);
                 await _unitOfWork.CommitAsync();
-                response.Data = _mapper.Map<PeriodAuditGroupResultResponseDto>(entity);
+                var createdEntity = await _repository.GetFirstOrDefaultAsync(
+                    filter: x => x.PeriodAuditGroupResultId == entity.PeriodAuditGroupResultId && x.IsActive,
+                    includeProperties: [x => x.Group, y => y.PeriodAudit]);
+                response.Data = _mapper.Map<PeriodAuditGroupResultResponseDto>(createdEntity);
             }
             catch (Exception ex)
             {
@@ -92,7 +74,9 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create();
             try
             {
-                var entity = await _repository.GetFirstOrDefaultAsync(filter: x => x.PeriodAuditGroupResultId == id && x.IsActive);
+                var entity = await _repository.GetFirstOrDefaultAsync(
+                    filter: x => x.PeriodAuditGroupResultId == id && x.IsActive,
+                    includeProperties: [x => x.Group, y => y.PeriodAudit]);
                 if (entity == null)
                 {
                     response = ResponseDto.Error("No se encontró el registro.");
@@ -116,7 +100,9 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<PeriodAuditGroupResultResponseDto>();
             try
             {
-                var entity = await _repository.GetFirstOrDefaultAsync(filter: x => x.PeriodAuditGroupResultId == id && x.IsActive);
+                var entity = await _repository.GetFirstOrDefaultAsync(
+                    filter: x => x.PeriodAuditGroupResultId == id && x.IsActive, 
+                    includeProperties: [ x => x.Group, y => y.PeriodAudit]);
                 if (entity == null)
                 {
                     response = ResponseDto.Error<PeriodAuditGroupResultResponseDto>("No se encontró el registro.");
@@ -143,7 +129,9 @@ namespace Rokys.Audit.Services.Services
                     response.Messages.AddRange(validate.Errors.Select(e => new ApplicationMessage { Message = e.ErrorMessage, MessageType = ApplicationMessageType.Error }));
                     return response;
                 }
-                var entity = await _repository.GetFirstOrDefaultAsync(filter: x => x.PeriodAuditGroupResultId == id && x.IsActive);
+                var entity = await _repository.GetFirstOrDefaultAsync(
+                    filter: x => x.PeriodAuditGroupResultId == id && x.IsActive, 
+                    includeProperties: [ x => x.Group, y => y.PeriodAudit ]);
                 if (entity == null)
                 {
                     response = ResponseDto.Error<PeriodAuditGroupResultResponseDto>("No se encontró el registro.");
@@ -169,13 +157,28 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<PaginationResponseDto<PeriodAuditGroupResultResponseDto>>();
             try
             {
-                var filter = BuildFilter(filterRequestDto);
+                Expression<Func<PeriodAuditGroupResult, bool>> filter = x => x.IsActive;
+                if (filterRequestDto.PeriodAuditId.HasValue)
+                {
+                    filter = x => x.PeriodAuditId == filterRequestDto.PeriodAuditId.Value;
+                }
+                if (filterRequestDto.GroupId.HasValue)
+                {
+                    filter = x => x.GroupId == filterRequestDto.GroupId.Value;
+                }
+                if (!string.IsNullOrEmpty(filterRequestDto.Filter))
+                {
+                    filter = x => (x.ScaleDescription.Contains(filterRequestDto.Filter) || x.Observations.Contains(filterRequestDto.Filter));
+                }
+
                 Func<IQueryable<PeriodAuditGroupResult>, IOrderedQueryable<PeriodAuditGroupResult>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
                 var entities = await _repository.GetPagedAsync(
                     filter: filter,
                     orderBy: orderBy,
                     pageNumber: filterRequestDto.PageNumber,
-                    pageSize: filterRequestDto.PageSize
+                    pageSize: filterRequestDto.PageSize,
+                    includeProperties: [ x => x.Group, x => x.PeriodAudit]
+
                 );
                 var pagedResult = new PaginationResponseDto<PeriodAuditGroupResultResponseDto>
                 {

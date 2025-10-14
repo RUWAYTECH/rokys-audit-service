@@ -2,6 +2,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Reatil.Services.Services;
+using Rokys.Audit.Common.Constant;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.PeriodAudit;
 using Rokys.Audit.DTOs.Responses.Common;
@@ -11,11 +12,7 @@ using Rokys.Audit.Infrastructure.Persistence.Abstract;
 using Rokys.Audit.Infrastructure.Repositories;
 using Rokys.Audit.Model.Tables;
 using Rokys.Audit.Services.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
 
 namespace Rokys.Audit.Services.Services
 {
@@ -59,7 +56,7 @@ namespace Rokys.Audit.Services.Services
                     return response;
                 }
 
-                var auditStatus = await _auditStatusRepository.GetFirstOrDefaultAsync(filter: x => x.Code == "PRO" && x.IsActive);
+                var auditStatus = await _auditStatusRepository.GetFirstOrDefaultAsync(filter: x => x.Code == AuditStatusCode.InProgress && x.IsActive);
 
                 var currentUser = _httpContextAccessor.CurrentUser();
                 var entity = _mapper.Map<PeriodAudit>(requestDto);
@@ -160,7 +157,7 @@ namespace Rokys.Audit.Services.Services
             return response;
         }
 
-        public async Task<ResponseDto<PaginationResponseDto<PeriodAuditResponseDto>>> GetPaged(PaginationRequestDto paginationRequestDto)
+        public async Task<ResponseDto<PaginationResponseDto<PeriodAuditResponseDto>>> GetPaged(PeriodAuditFilterRequestDto paginationRequestDto)
         {
             var response = ResponseDto.Create<PaginationResponseDto<PeriodAuditResponseDto>>();
             try
@@ -168,6 +165,12 @@ namespace Rokys.Audit.Services.Services
                 Expression<Func<PeriodAudit, bool>> filter = x => x.IsActive;
                 if (!string.IsNullOrEmpty(paginationRequestDto.Filter))
                     filter = x => x.GlobalObservations.Contains(paginationRequestDto.Filter) && x.IsActive;
+
+                if (paginationRequestDto.StoreId.HasValue)
+                    filter = x => x.StoreId == paginationRequestDto.StoreId.Value && x.IsActive;
+
+                if (paginationRequestDto.EnterpriseId.HasValue)
+                    filter = x => x.Store.EnterpriseId == paginationRequestDto.EnterpriseId.Value && x.IsActive;
 
                 Func<IQueryable<PeriodAudit>, IOrderedQueryable<PeriodAudit>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 

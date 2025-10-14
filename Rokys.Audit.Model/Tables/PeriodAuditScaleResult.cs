@@ -3,7 +3,7 @@ namespace Rokys.Audit.Model.Tables
     public class PeriodAuditScaleResult : AuditEntity
     {
         public Guid PeriodAuditScaleResultId { get; set; } = Guid.NewGuid();
-        public Guid PeriodAuditResultId { get; set; }
+        public Guid PeriodAuditGroupResultId { get; set; }
         public Guid ScaleGroupId { get; set; }
 
         // Calculation data at the time of audit
@@ -13,10 +13,12 @@ namespace Rokys.Audit.Model.Tables
         public decimal AppliedWeighting { get; set; }
 
         public string? Observations { get; set; }
+        public string? ScaleDescription { get; set; }
+        public string? ScaleColor { get; set; }
         public bool IsActive { get; set; } = true;
 
         // Navigation properties
-        public virtual PeriodAuditResult PeriodAuditResult { get; set; } = null!;
+        public virtual PeriodAuditGroupResult PeriodAuditGroupResult { get; set; } = null!;
         public virtual ScaleGroup ScaleGroup { get; set; } = null!;
         public virtual ICollection<PeriodAuditTableScaleTemplateResult> PeriodAuditTableScaleTemplateResults { get; set; } = new List<PeriodAuditTableScaleTemplateResult>();
         public virtual ICollection<PeriodAuditScoringCriteriaResult> PeriodAuditScoringCriteriaResults { get; set; } = new List<PeriodAuditScoringCriteriaResult>();

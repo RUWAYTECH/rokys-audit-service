@@ -17,8 +17,8 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .IsRequired()
                 .ValueGeneratedOnAdd();
 
-            builder.Property(x => x.PeriodAuditResultId)
-                .HasColumnName("PeriodAuditResultId")
+            builder.Property(x => x.PeriodAuditGroupResultId)
+                .HasColumnName("PeriodAuditGroupResultId")
                 .IsRequired();
 
             builder.Property(x => x.ScaleGroupId)
@@ -36,6 +36,16 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.Property(x => x.Observations)
                 .HasColumnName("Observations")
                 .HasColumnType("NVARCHAR(MAX)")
+                .IsRequired(false);
+
+            builder.Property(x => x.ScaleDescription)
+                .HasColumnName("ScaleDescription")
+                .HasMaxLength(200)
+                .IsRequired(false);
+
+            builder.Property(x => x.ScaleColor)
+                .HasColumnName("ScaleColor")
+                .HasMaxLength(20)
                 .IsRequired(false);
 
             builder.Property(x => x.IsActive)
@@ -66,7 +76,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .IsRequired(false);
 
             // Foreign key relationships
-            builder.HasOne(x => x.PeriodAuditResult)
+            builder.HasOne(x => x.PeriodAuditGroupResult)
                 .WithMany(x => x.PeriodAuditScaleResults)
                 .HasForeignKey(x => x.PeriodAuditResultId)
                 .OnDelete(DeleteBehavior.Restrict);

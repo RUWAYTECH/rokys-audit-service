@@ -37,6 +37,8 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
         public DbSet<MaintenanceTable> MaintenanceTables { get; set; }
         public DbSet<MaintenanceDetailTable> MaintenanceDetailTables { get; set; }
 
+        public DbSet<PeriodAuditGroupResult> PeriodAuditGroupResults { get; set; }
+
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
@@ -77,6 +79,8 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
 
             modelBuilder.ApplyConfiguration(new MaintenanceTableConfig());
             modelBuilder.ApplyConfiguration(new MaintenanceDetailTableConfig());
+
+            modelBuilder.ApplyConfiguration(new PeriodAuditGroupResultConfig());
         }
     }
 }

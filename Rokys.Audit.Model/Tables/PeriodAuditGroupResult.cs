@@ -13,6 +13,7 @@ namespace Rokys.Audit.Model.Tables
         public decimal TotalWeighting { get; set; }
         public virtual PeriodAudit PeriodAudit { get; set; }
         public virtual Group Group { get; set; }
+        public string? GroupColor { get; set; }
         public bool IsActive { get; set; } = true;
     }
 }

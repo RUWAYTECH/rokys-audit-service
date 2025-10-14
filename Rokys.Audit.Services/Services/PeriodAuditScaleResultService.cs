@@ -40,27 +40,6 @@ namespace Rokys.Audit.Services.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        private Expression<Func<PeriodAuditScaleResult, bool>> BuildFilter(PeriodAuditScaleResultFilterRequestDto filterRequestDto)
-        {
-            Expression<Func<PeriodAuditScaleResult, bool>> filter = x => x.IsActive;
-            if (filterRequestDto.PeriodAuditResultId.HasValue)
-            {
-                var prevFilter = filter;
-                filter = x => prevFilter.Compile().Invoke(x) && x.PeriodAuditResultId == filterRequestDto.PeriodAuditResultId.Value;
-            }
-            if (filterRequestDto.ScaleGroupId.HasValue)
-            {
-                var prevFilter = filter;
-                filter = x => prevFilter.Compile().Invoke(x) && x.ScaleGroupId == filterRequestDto.ScaleGroupId.Value;
-            }
-            if (!string.IsNullOrEmpty(filterRequestDto.Filter))
-            {
-                var prevFilter = filter;
-                filter = x => prevFilter.Compile().Invoke(x) && (x.Observations != null && x.Observations.Contains(filterRequestDto.Filter));
-            }
-            return filter;
-        }
-
         public async Task<ResponseDto<PeriodAuditScaleResultResponseDto>> Create(PeriodAuditScaleResultRequestDto requestDto)
         {
             var response = ResponseDto.Create<PeriodAuditScaleResultResponseDto>();
@@ -170,7 +149,20 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<PaginationResponseDto<PeriodAuditScaleResultResponseDto>>();
             try
             {
-                var filter = BuildFilter(filterRequestDto);
+                Expression<Func<PeriodAuditScaleResult, bool>> filter = x => x.IsActive;
+                if (filterRequestDto.PeriodAuditResultId.HasValue)
+                {
+                    filter = x => x.PeriodAuditResultId == filterRequestDto.PeriodAuditResultId.Value;
+                }
+                if (filterRequestDto.ScaleGroupId.HasValue)
+                {
+                    filter = x => x.ScaleGroupId == filterRequestDto.ScaleGroupId.Value;
+                }
+                if (!string.IsNullOrEmpty(filterRequestDto.Filter))
+                {
+                    filter = x => (x.Observations != null && x.Observations.Contains(filterRequestDto.Filter));
+                }
+
                 Func<IQueryable<PeriodAuditScaleResult>, IOrderedQueryable<PeriodAuditScaleResult>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
                 var entities = await _repository.GetPagedAsync(
                     filter: filter,

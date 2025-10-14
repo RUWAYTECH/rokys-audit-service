@@ -383,6 +383,8 @@ CREATE TABLE PeriodAuditGroupResult
     Observations NVARCHAR(150) NULL, -- Observaciones
     ScaleDescription NVARCHAR(150) NULL, -- Descripción de la Escala
     TotalWeighting DECIMAL(5,2) NOT NULL, -- Ponderación Total
+
+    GroupColor NVARCHAR(20) NULL, -- Código de Color del Grupo
   
     -- Record audit
     IsActive BIT DEFAULT 1, -- Está Activo
@@ -426,6 +428,9 @@ CREATE TABLE PeriodAuditScaleResult
 
 
     Observations NVARCHAR(MAX) NULL, -- Observaciones
+
+    ScaleDescription NVARCHAR(150) NULL, -- Descripción de la Escala
+    ScaleColor NVARCHAR(20) NULL, -- Código de Color de la Escala
 
     -- Record audit
     IsActive BIT DEFAULT 1, -- Está Activo

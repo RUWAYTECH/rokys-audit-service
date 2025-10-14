@@ -91,10 +91,10 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Navigation properties
-            builder.HasMany(x => x.PeriodAuditScaleResults)
-                .WithOne(pasr => pasr.PeriodAuditResult)
-                .HasForeignKey(pasr => pasr.PeriodAuditResultId)
-                .OnDelete(DeleteBehavior.Restrict);
+            //builder.HasMany(x => x.PeriodAuditScaleResults)
+            //    .WithOne(pasr => pasr.PeriodAuditResult)
+            //    .HasForeignKey(pasr => pasr.PeriodAuditResultId)
+            //    .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasMany(x => x.EvidenceFiles)
                 .WithOne(ef => ef.PeriodAuditResult)

@@ -5,12 +5,8 @@ using Rokys.Audit.DTOs.Responses.Common;
 
 namespace Rokys.Audit.Services.Interfaces
 {
-    public interface IPeriodAuditGroupResultService
+    public interface IPeriodAuditGroupResultService : IBaseService<PeriodAuditGroupResultRequestDto, PeriodAuditGroupResultResponseDto>
     {
-        Task<ResponseDto<PeriodAuditGroupResultResponseDto>> Create(PeriodAuditGroupResultRequestDto requestDto);
-        Task<ResponseDto<PeriodAuditGroupResultResponseDto>> Update(Guid id, PeriodAuditGroupResultRequestDto requestDto);
-        Task<ResponseDto> Delete(Guid id);
-        Task<ResponseDto<PeriodAuditGroupResultResponseDto>> GetById(Guid id);
         Task<ResponseDto<PaginationResponseDto<PeriodAuditGroupResultResponseDto>>> GetPaged(PeriodAuditGroupResultFilterRequestDto filterRequestDto);
     }
 }
