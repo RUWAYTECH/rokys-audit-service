@@ -152,7 +152,7 @@ namespace Rokys.Audit.Services.Services
                 Expression<Func<PeriodAuditScaleResult, bool>> filter = x => x.IsActive;
                 if (filterRequestDto.PeriodAuditResultId.HasValue)
                 {
-                    filter = x => x.PeriodAuditResultId == filterRequestDto.PeriodAuditResultId.Value;
+                    filter = x => x.PeriodAuditGroupResultId == filterRequestDto.PeriodAuditResultId.Value;
                 }
                 if (filterRequestDto.ScaleGroupId.HasValue)
                 {
@@ -169,7 +169,7 @@ namespace Rokys.Audit.Services.Services
                     orderBy: orderBy,
                     pageNumber: filterRequestDto.PageNumber,
                     pageSize: filterRequestDto.PageSize,
-                    includeProperties: [ x => x.ScaleGroup, x => x.PeriodAuditResult ]
+                    includeProperties: [ x => x.ScaleGroup, x => x.PeriodAuditGroupResult ]
                 );
                 var pagedResult = new PaginationResponseDto<PeriodAuditScaleResultResponseDto>
                 {

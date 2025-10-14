@@ -78,7 +78,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             // Foreign key relationships
             builder.HasOne(x => x.PeriodAuditGroupResult)
                 .WithMany(x => x.PeriodAuditScaleResults)
-                .HasForeignKey(x => x.PeriodAuditResultId)
+                .HasForeignKey(x => x.PeriodAuditGroupResultId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(x => x.ScaleGroup)
@@ -103,7 +103,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Indexes
-            builder.HasIndex(x => new { x.PeriodAuditResultId, x.ScaleGroupId })
+            builder.HasIndex(x => new { x.PeriodAuditGroupResultId, x.ScaleGroupId })
                 .IsUnique()
                 .HasDatabaseName("IX_PeriodAuditScaleResult_Result_ScaleGroup");
         }

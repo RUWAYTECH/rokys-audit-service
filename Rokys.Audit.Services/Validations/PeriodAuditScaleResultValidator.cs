@@ -7,7 +7,7 @@ namespace Rokys.Audit.Services.Validations
     {
         public PeriodAuditScaleResultValidator()
         {
-            RuleFor(x => x.PeriodAuditResultId).NotEmpty();
+            RuleFor(x => x.PeriodAuditGroupResultId).NotEmpty();
             RuleFor(x => x.ScaleGroupId).NotEmpty();
             RuleFor(x => x.ScoreValue).GreaterThanOrEqualTo(0);
             RuleFor(x => x.AppliedWeighting).GreaterThanOrEqualTo(0);

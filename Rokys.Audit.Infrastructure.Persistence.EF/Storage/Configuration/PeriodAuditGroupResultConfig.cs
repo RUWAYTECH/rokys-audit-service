@@ -66,13 +66,14 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .HasColumnName("UpdateDate")
                 .IsRequired(false);
 
-            // Relationships
+            // Relaciones corregidas
             builder.HasOne(x => x.PeriodAudit)
-                .WithMany()
+                .WithMany(pa => pa.PeriodAuditGroupResults)
                 .HasForeignKey(x => x.PeriodAuditId)
                 .OnDelete(DeleteBehavior.Restrict);
+
             builder.HasOne(x => x.Group)
-                .WithMany()
+                .WithMany(g => g.PeriodAuditGroupResults)
                 .HasForeignKey(x => x.GroupId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
