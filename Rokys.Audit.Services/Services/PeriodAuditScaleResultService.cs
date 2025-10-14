@@ -150,9 +150,9 @@ namespace Rokys.Audit.Services.Services
             try
             {
                 Expression<Func<PeriodAuditScaleResult, bool>> filter = x => x.IsActive;
-                if (filterRequestDto.PeriodAuditResultId.HasValue)
+                if (filterRequestDto.PeriodAuditGroupResultId.HasValue)
                 {
-                    filter = x => x.PeriodAuditGroupResultId == filterRequestDto.PeriodAuditResultId.Value;
+                    filter = x => x.PeriodAuditGroupResultId == filterRequestDto.PeriodAuditGroupResultId.Value;
                 }
                 if (filterRequestDto.ScaleGroupId.HasValue)
                 {
