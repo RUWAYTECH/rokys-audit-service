@@ -7,7 +7,6 @@ namespace Rokys.Audit.DTOs.Common
         public decimal ScoreValue { get; set; }
         public decimal AppliedWeighting { get; set; }
         public string? Observations { get; set; }
-        public bool IsActive { get; set; }
         public string? ScaleDescription { get; set; }
         public string? ScaleColor { get; set; }
     }
