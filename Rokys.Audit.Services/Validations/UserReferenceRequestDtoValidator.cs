@@ -30,7 +30,9 @@ namespace Rokys.Audit.Services.Validations
                 .MustAsync(async (dto, employeeId, cancellation) => 
                 {
                     // Solo validamos duplicados en creación (cuando no hay UserReferenceId)
-                    return !await _userReferenceRepository.ExistsByEmployeeIdAsync(employeeId);
+                    if (employeeId.HasValue)
+                        return !await _userReferenceRepository.ExistsByEmployeeIdAsync(employeeId.Value);
+                    return false;
                 })
                 .WithMessage("Ya existe un usuario con este ID del sistema de empleados");
 

@@ -7,6 +7,8 @@ namespace Rokys.Audit.Model.Tables
         public Guid TableScaleTemplateId { get; set; }
         public string? TemplateData { get; set; } // JSON almacenado como texto
         public bool IsActive { get; set; } = true;
+        public string? Code { get; set; }
+        public string? Name { get; set; }
 
         // Navigation properties
         public virtual PeriodAuditScaleResult PeriodAuditScaleResult { get; set; } = null!;
