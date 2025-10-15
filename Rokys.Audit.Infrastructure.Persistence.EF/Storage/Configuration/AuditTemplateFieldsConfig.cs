@@ -33,7 +33,8 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .IsRequired()
                 .HasMaxLength(50);
 
-            builder.Property(x => x.IsCalculated);
+            builder.Property(x => x.IsCalculated)
+                .HasMaxLength(50);
 
             builder.Property(x => x.CalculationFormula)
                 .HasMaxLength(500);

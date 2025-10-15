@@ -71,6 +71,7 @@ CREATE TABLE [Group]
 
     -- Auditoría
     IsActive BIT DEFAULT 1, -- Está Activo
+    HasSourceData BIT DEFAULT 0, -- Tiene Datos Fuente
     CreatedBy VARCHAR(120) NULL, -- Creado Por
     CreationDate DATETIME2 DEFAULT GETDATE(), -- Fecha de Creación
     UpdatedBy VARCHAR(120) NULL, -- Actualizado Por
@@ -129,7 +130,7 @@ CREATE TABLE AuditTemplateFields (
     FieldCode NVARCHAR(100) NOT NULL,
     FieldName NVARCHAR(255) NOT NULL,
     FieldType NVARCHAR(50) NOT NULL, -- numeric, text, date, boolean, select, image
-    IsCalculated BIT DEFAULT 0, -- Si es un campo calculado
+    IsCalculated VARCHAR(50), -- Si es un campo calculado
     CalculationFormula NVARCHAR(500), -- Fórmula para calcular el valor (si es calculado)
     AcumulationType NVARCHAR(50) NULL, -- Tipo de Acumulación: 'NA', 'SUM', 'AVERAGE', 'MAX', 'MIN', 'COUNT'
     CONSTRAINT CK_AuditTemplateFields_AcumulationType 
@@ -384,7 +385,8 @@ CREATE TABLE PeriodAuditGroupResult
     ScaleDescription NVARCHAR(150) NULL, -- Descripción de la Escala
     TotalWeighting DECIMAL(5,2) NOT NULL, -- Ponderación Total
 
-    GroupColor NVARCHAR(20) NULL, -- Código de Color del Grupo
+    ScaleColor NVARCHAR(20) NULL, -- Código de Color del Grupo
+    HasEvidence BIT DEFAULT 0,
   
     -- Record audit
     IsActive BIT DEFAULT 1, -- Está Activo
@@ -395,10 +397,12 @@ CREATE TABLE PeriodAuditGroupResult
 );
 
 
-CREATE TABLE EvidenceFiles (
-    EvidenceFileId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    PeriodAuditGroupResultId UNIQUEIDENTIFIER NOT NULL 
-        FOREIGN KEY REFERENCES PeriodAuditGroupResult(PeriodAuditGroupResultId) ON DELETE CASCADE,
+CREATE TABLE StorageFiles (
+    StorageFileId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    EntityId UNIQUEIDENTIFIER NOT NULL,
+    EntityName NVARCHAR(255) NOT NULL, 
+    ClassificationType NVARCHAR(100) NULL, -- Tipo de Clasificación (opcional)
+        
     OriginalName NVARCHAR(255) NOT NULL, -- Nombre original del archivo
     FileName NVARCHAR(255) NOT NULL,
     FileUrl NVARCHAR(500) NOT NULL, -- URL o path del archivo

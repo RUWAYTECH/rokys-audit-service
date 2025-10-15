@@ -6,7 +6,7 @@
         public string? FieldCode { get; set; }
         public string? FieldName { get; set; }
         public string? FieldType { get; set; }
-        public bool? IsCalculated { get; set; }
+        public string? IsCalculated { get; set; }
         public string? CalculationFormula { get; set; }
         public string? AcumulationType { get; set; }
         public string? FieldOptions { get; set; }
