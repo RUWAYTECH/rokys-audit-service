@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Rokys.Audit.Subscription.Hub.Constants;
 using Rokys.Audit.Subscription.Hub.Services.Interfaces;
 using Ruway.Events.Command.Interfaces.Events;
+using Ruway.Events.Command.Interfaces.Constants;
 
 namespace Rokys.Audit.Subscription.Hub.Services.Implementations
 {
@@ -101,17 +102,17 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
                     await _employeeEventService.HandleEmployeeCreatedAsync(employeeEvent);
             }, EventConstants.EmployeeEvents.EmployeeCreated);
 
-            /* await _eventSubscriber.SubscribeAsync<EmployeeUpdatedEvent>(async (employeeEvent) =>
+            await _eventSubscriber.SubscribeAsync<EmployeeUpdatedEvent>(async (employeeEvent) =>
              {
                  if (_employeeEventService != null)
                      await _employeeEventService.HandleEmployeeUpdatedAsync(employeeEvent);
-             }, "employee.events.updated");
+             }, EventConstants.EmployeeEvents.EmployeeUpdated);
 
              await _eventSubscriber.SubscribeAsync<EmployeeDeletedEvent>(async (employeeEvent) =>
              {
                  if (_employeeEventService != null)
                      await _employeeEventService.HandleEmployeeDeletedAsync(employeeEvent);
-             }, "memos.employee.events.deleted"); */
+             }, EventConstants.EmployeeEvents.EmployeeDeleted);
 
             // Suscribirse a eventos genéricos de empleados (wildcard para capturar cualquier evento de empleado)
             /*await _eventSubscriber.SubscribeAsync(
@@ -139,7 +140,7 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
                     await _userEventService.HandleUserDeletedAsync(userEvent);
             }, EventConstants.UserEvents.UserDeleted);
 
-            
+
 
             _logger.LogInformation("Users event subscriptions configured successfully");
         }

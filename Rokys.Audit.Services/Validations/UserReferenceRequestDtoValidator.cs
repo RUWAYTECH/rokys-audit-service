@@ -13,26 +13,24 @@ namespace Rokys.Audit.Services.Validations
             _userReferenceRepository = userReferenceRepository;
 
             RuleFor(x => x.UserId)
-                .NotEmpty()
-                .WithMessage("El ID del usuario es requerido")
                 .MustAsync(async (dto, userId, cancellation) =>
                 {
-                    // Solo validamos duplicados en creación (cuando no hay UserReferenceId)
-                    if (userId.HasValue)
-                        return !await _userReferenceRepository.ExistsByUserIdAsync(userId.Value);
-                    return false;
+                    // Si el UserId es null, no validamos duplicado (es válido)
+                    if (!userId.HasValue)
+                        return true;
+
+                    // Si tiene valor, verificamos que no exista ya en la BD
+                    return !await _userReferenceRepository.ExistsByUserIdAsync(userId.Value);
                 })
                 .WithMessage("Ya existe un usuario con este ID del sistema de seguridad");
 
             RuleFor(x => x.EmployeeId)
-                .NotEmpty()
-                .WithMessage("El ID del empleado es requerido")
                 .MustAsync(async (dto, employeeId, cancellation) => 
                 {
-                    // Solo validamos duplicados en creación (cuando no hay UserReferenceId)
-                    if (employeeId.HasValue)
+                    if (employeeId == null || employeeId == Guid.Empty)
+                        return true;
+                    else
                         return !await _userReferenceRepository.ExistsByEmployeeIdAsync(employeeId.Value);
-                    return false;
                 })
                 .WithMessage("Ya existe un usuario con este ID del sistema de empleados");
 

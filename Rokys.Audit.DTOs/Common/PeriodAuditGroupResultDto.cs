@@ -9,5 +9,6 @@
         public string? ScaleDescription { get; set; }
         public decimal? TotalWeighting { get; set; }
         public string? ScaleColor { get; set; }
+        public bool? HasEvidence { get; set; }
     }
 }

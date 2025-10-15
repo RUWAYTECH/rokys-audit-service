@@ -18,7 +18,7 @@ namespace Rokys.Audit.Model.Tables
         /// <summary>
         /// ID del empleado (desde Memos MS)
         /// </summary>
-        public Guid EmployeeId { get; set; }
+        public Guid? EmployeeId { get; set; }
 
         /// <summary>
         /// Nombre del usuario

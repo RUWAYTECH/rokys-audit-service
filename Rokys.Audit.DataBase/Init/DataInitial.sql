@@ -274,7 +274,7 @@ CREATE TABLE AuditStatus (
 CREATE TABLE UserReference (
     UserReferenceId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     UserId UNIQUEIDENTIFIER NULL, -- Security MS
-    EmployeeId UNIQUEIDENTIFIER NOT NULL,-- Memos MS
+    EmployeeId UNIQUEIDENTIFIER NULL,-- Memos MS
     FirstName NVARCHAR(200) NOT NULL,
     LastName NVARCHAR(200) NOT NULL,
     Email NVARCHAR(150),
@@ -399,8 +399,8 @@ CREATE TABLE PeriodAuditGroupResult
 
 CREATE TABLE StorageFiles (
     StorageFileId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    EntityId UNIQUEIDENTIFIER NOT NULL,
-    EntityName NVARCHAR(255) NOT NULL, 
+    EntityId UNIQUEIDENTIFIER NULL,
+    EntityName NVARCHAR(255) NULL, 
     ClassificationType NVARCHAR(100) NULL, -- Tipo de Clasificación (opcional)
         
     OriginalName NVARCHAR(255) NOT NULL, -- Nombre original del archivo
