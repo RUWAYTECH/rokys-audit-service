@@ -51,7 +51,7 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<UserReferenceResponseDto>();
             try
             {
-                var validate = _fluentValidator.Validate(requestDto);
+                var validate = await _fluentValidator.ValidateAsync(requestDto);
                 if (!validate.IsValid)
                 {
                     response.Messages.AddRange(validate.Errors.Select(e => new ApplicationMessage { Message = e.ErrorMessage, MessageType = ApplicationMessageType.Error }));
@@ -59,8 +59,23 @@ namespace Rokys.Audit.Services.Services
                 }
 
                 var currentUser = _httpContextAccessor.CurrentUser();
-                var entity = _mapper.Map<UserReference>(requestDto);
+                var requestCopy = new UserReferenceRequestDto
+                {
+                    UserId = requestDto.UserId,
+                    EmployeeId = requestDto.EmployeeId,
+                    FirstName = requestDto.FirstName,
+                    LastName = requestDto.LastName,
+                    Email = requestDto.Email,
+                    PersonalEmail = requestDto.PersonalEmail,
+                    DocumentNumber = requestDto.DocumentNumber,
+                    RoleCode = requestDto.RoleCode,
+                    RoleName = requestDto.RoleName,
+                    IsActive = requestDto.IsActive,
+                    EmployeeStores = null
+                };
+                var entity = _mapper.Map<UserReference>(requestCopy);
                 entity.CreateAudit(currentUser.UserName);
+                _userReferenceRepository.Insert(entity);
 
                 if (requestDto.EmployeeStores != null && requestDto.EmployeeStores.Length > 0)
                 {
@@ -74,7 +89,6 @@ namespace Rokys.Audit.Services.Services
                     }
                 }
 
-                _userReferenceRepository.Insert(entity);
                 await _unitOfWork.CommitAsync();
 
                 response.Data = _mapper.Map<UserReferenceResponseDto>(entity);
@@ -127,7 +141,7 @@ namespace Rokys.Audit.Services.Services
                     return response;
                 }
 
-                if (requestDto.EmployeeId.HasValue)
+                if (requestDto.EmployeeId != null && requestDto.EmployeeId != Guid.Empty)
                 {
                     var existsEmployeeId = await _userReferenceRepository.ExistsByEmployeeIdAsync(requestDto.EmployeeId.Value, id);
                     if (existsEmployeeId)

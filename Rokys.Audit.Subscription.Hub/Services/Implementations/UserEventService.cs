@@ -39,15 +39,9 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
             if (exist.Data != null)
             {
                 var user = exist.Data;
+                exist.Data.IsActive = false;
                 await _userReferenceService.Update(user.UserReferenceId, new DTOs.Requests.UserReference.UserReferenceRequestDto
                 {
-                    UserId = UserEvent.UserId,
-                    EmployeeId = user.EmployeeId,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    Email = user.Email,
-                    RoleCode = user.RoleCode,
-                    RoleName = user.RoleName,
                     IsActive = false
                 });
             }

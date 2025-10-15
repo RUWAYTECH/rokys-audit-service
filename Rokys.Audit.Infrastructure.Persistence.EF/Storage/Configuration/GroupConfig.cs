@@ -27,6 +27,10 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .IsRequired()
                 .HasColumnType("decimal(5,2)");
 
+            builder.Property(g => g.HasSourceData)
+                .IsRequired(false)
+                .HasDefaultValue(false);
+
             builder.Property(g => g.IsActive)
                 .HasDefaultValue(true);
 
