@@ -149,11 +149,21 @@ namespace Rokys.Audit.Services.Services
 
 
                 var currentUser = _httpContextAccessor.CurrentUser();
+                var requestCopy = new UserReferenceRequestDto
+                {
+                    UserId = entity.UserId,
+                    EmployeeId = requestDto.EmployeeId,
+                    FirstName = requestDto.FirstName,
+                    LastName = requestDto.LastName,
+                    Email = requestDto.Email,
+                    PersonalEmail = requestDto.PersonalEmail,
+                    DocumentNumber = requestDto.DocumentNumber,
+                    RoleCode = entity.RoleCode,
+                    RoleName = entity.RoleName,
+                    EmployeeStores = null
+                };
                 // Mapear los cambios
-                requestDto.UserId = entity.UserId; // Asegurar que UserId no se cambie
-                requestDto.RoleCode = entity.RoleCode; // Asegurar que RoleCode no se cambie
-                requestDto.RoleName = entity.RoleName; // Asegurar que RoleName no se cambie
-                _mapper.Map(requestDto, entity);
+                _mapper.Map(requestCopy, entity);
                 entity.UpdateAudit(currentUser.UserName);
 
                 _userReferenceRepository.Update(entity);

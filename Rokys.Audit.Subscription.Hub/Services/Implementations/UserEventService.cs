@@ -1,10 +1,8 @@
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using Rokys.Audit.Services.Interfaces;
 using Rokys.Audit.Subscription.Hub.Constants;
 using Rokys.Audit.Subscription.Hub.Services.Interfaces;
 using Ruway.Events.Command.Interfaces.Events;
-using static Rokys.Audit.Subscription.Hub.Constants.EventConstants;
 
 namespace Rokys.Audit.Subscription.Hub.Services.Implementations
 {    

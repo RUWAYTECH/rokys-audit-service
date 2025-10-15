@@ -16,8 +16,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .IsRequired()
                 .ValueGeneratedOnAdd();
 
-            builder.Property(ur => ur.UserId)
-                .IsRequired();
+            builder.Property(ur => ur.UserId);
 
             builder.Property(ur => ur.EmployeeId);
 
@@ -59,9 +58,6 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .HasMaxLength(100);
 
             builder.Property(ur => ur.UpdateDate);
-
-            // Propiedad computada no mapeada
-            builder.Ignore(ur => ur.FullName);
 
             // Navegación - PeriodAudit como Administrador
             builder.HasMany(ur => ur.AdministratorAudits)
