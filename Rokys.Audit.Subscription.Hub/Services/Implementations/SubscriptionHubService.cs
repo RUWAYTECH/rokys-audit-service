@@ -131,13 +131,13 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
             {
                 if (_userEventService != null)
                     await _userEventService.HandleUserUpdatedAsync(userEvent);
-            }, EventConstants.UserEvents.UserUpdated);
+            }, CommonConstants.UserEvents.UserUpdated);
 
             await _eventSubscriber.SubscribeAsync<UserDeletedEvent>(async (userEvent) =>
             {
                 if (_userEventService != null)
                     await _userEventService.HandleUserDeletedAsync(userEvent);
-            }, EventConstants.UserEvents.UserDeleted);
+            }, CommonConstants.UserEvents.UserDeleted);
 
             
 

@@ -32,7 +32,7 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
 
         public async Task HandleUserDeletedAsync(UserDeletedEvent UserEvent, CancellationToken cancellationToken = default)
         {
-             if(UserEvent.ApplicationCode != EventConstants.ApplicationCode)
+             if(UserEvent.ApplicationCode != CommonConstants.ApplicationCode)
                 return;
 
             var exist = await _userReferenceService.GetByUserId(UserEvent.UserId);
@@ -55,7 +55,7 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
 
         public async Task HandleUserUpdatedAsync(UserUpdatedEvent UserEvent, CancellationToken cancellationToken = default)
         {
-            if(UserEvent.ApplicationCode != EventConstants.ApplicationCode)
+            if(UserEvent.ApplicationCode != CommonConstants.ApplicationCode)
                 return;
 
             var exist = await _userReferenceService.GetByUserId(UserEvent.UserId);
