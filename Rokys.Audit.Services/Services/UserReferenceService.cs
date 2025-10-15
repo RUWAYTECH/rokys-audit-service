@@ -68,7 +68,7 @@ namespace Rokys.Audit.Services.Services
                     {
                         _employeeStoreRepository.Insert(new EmployeeStore
                         {
-                            UserReferenceId = requestDto.EmployeeId,
+                            UserReferenceId =entity.UserReferenceId,
                             StoreId = store.StoreId,
                         });
                     }
@@ -127,16 +127,20 @@ namespace Rokys.Audit.Services.Services
                     return response;
                 }
 
-                var existsEmployeeId = await _userReferenceRepository.ExistsByEmployeeIdAsync(requestDto.EmployeeId, id);
-                if (existsEmployeeId)
+                if (requestDto.EmployeeId.HasValue)
                 {
-                    response.Messages.Add(new ApplicationMessage
+                    var existsEmployeeId = await _userReferenceRepository.ExistsByEmployeeIdAsync(requestDto.EmployeeId.Value, id);
+                    if (existsEmployeeId)
                     {
-                        Message = "Ya existe otro usuario con este ID del sistema de empleados",
-                        MessageType = ApplicationMessageType.Error
-                    });
-                    return response;
+                        response.Messages.Add(new ApplicationMessage
+                        {
+                            Message = "Ya existe otro usuario con este ID del sistema de empleados",
+                            MessageType = ApplicationMessageType.Error
+                        });
+                        return response;
+                    }
                 }
+
 
                 var currentUser = _httpContextAccessor.CurrentUser();
                 // Mapear los cambios
@@ -168,7 +172,7 @@ namespace Rokys.Audit.Services.Services
                     {
                         _employeeStoreRepository.Insert(new EmployeeStore
                         {
-                            UserReferenceId = requestDto.UserId.Value,
+                            UserReferenceId = entity.UserReferenceId,
                             StoreId = store.StoreId,
                             AssignmentDate = store.AssignmentDate ?? DateTime.Now,
                         });
@@ -183,7 +187,7 @@ namespace Rokys.Audit.Services.Services
                         _employeeStoreRepository.Update(new EmployeeStore
                         {
                             EmployeeStoreId = store.EmployeeStoreId,
-                            UserReferenceId = requestDto.UserId.Value,
+                            UserReferenceId = entity.UserReferenceId,
                             StoreId = store.StoreId,
                             AssignmentDate = store.AssignmentDate
                         });
@@ -195,7 +199,7 @@ namespace Rokys.Audit.Services.Services
                     {
                         _employeeStoreRepository.Insert(new EmployeeStore
                         {
-                            UserReferenceId = requestDto.UserId.Value,
+                            UserReferenceId = entity.UserReferenceId,
                             StoreId = store.StoreId,
                             AssignmentDate = store.AssignmentDate ?? DateTime.Now,
                         });
