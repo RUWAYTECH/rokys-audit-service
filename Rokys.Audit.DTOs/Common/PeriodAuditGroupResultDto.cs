@@ -8,6 +8,6 @@
         public string? Observations { get; set; }
         public string? ScaleDescription { get; set; }
         public decimal? TotalWeighting { get; set; }
-        public string? GroupColor { get; set; }
+        public string? ScaleColor { get; set; }
     }
 }

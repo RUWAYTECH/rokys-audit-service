@@ -4,15 +4,15 @@ using Rokys.Audit.Model.Tables;
 
 namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
 {
-    public class EvidenceFilesConfig : IEntityTypeConfiguration<EvidenceFiles>
+    public class StorageFilesConfig : IEntityTypeConfiguration<StorageFiles>
     {
-        public void Configure(EntityTypeBuilder<EvidenceFiles> builder)
+        public void Configure(EntityTypeBuilder<StorageFiles> builder)
         {
-            builder.ToTable("EvidenceFiles");
+            builder.ToTable("StorageFiles");
 
-            builder.HasKey(x => x.EvidenceFileId);
+            builder.HasKey(x => x.StorageFileId);
 
-            builder.Property(x => x.EvidenceFileId)
+            builder.Property(x => x.StorageFileId)
                 .IsRequired()
                 .ValueGeneratedOnAdd()
                 .HasDefaultValueSql("NEWID()");
@@ -23,6 +23,9 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.Property(x => x.OriginalName)
                 .IsRequired()
                 .HasMaxLength(255);
+
+            builder.Property(x => x.ClassificationType)
+                .HasMaxLength(200);
 
             builder.Property(x => x.FileName)
                 .IsRequired()

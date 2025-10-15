@@ -42,8 +42,8 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .IsRequired()
                 .HasColumnType("decimal(5,2)");
 
-            builder.Property(x => x.GroupColor)
-                .HasColumnName("GroupColor")
+            builder.Property(x => x.ScaleColor)
+                .HasColumnName("ScaleColor")
                 .HasMaxLength(20)
                 .IsRequired(false);
             builder.Property(x => x.IsActive)

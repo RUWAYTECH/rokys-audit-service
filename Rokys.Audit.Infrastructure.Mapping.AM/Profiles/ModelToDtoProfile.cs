@@ -27,22 +27,14 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
     {
         public ModelToDtoProfile()
         {
-            CreateMap<PeriodAuditGroupResult, PeriodAuditGroupResultResponseDto>();
+            CreateMap<PeriodAuditGroupResult, PeriodAuditGroupResultResponseDto>()
+                .AfterMap((src, dest) =>
+                {
+                    dest.GroupName = src.Group != null ? src.Group.Name : string.Empty;
+                });
             CreateMap<PeriodAuditScaleResult, PeriodAuditScaleResultResponseDto>()
                 .AfterMap((src, dest) =>
                 {
-                    dest.PeriodAuditGroupResult = src.PeriodAuditGroupResult != null ? new PeriodAuditGroupResultResponseDto
-                    {
-                        PeriodAuditGroupResultId = src.PeriodAuditGroupResult.PeriodAuditGroupResultId,
-                        PeriodAuditId = src.PeriodAuditGroupResult.PeriodAuditId,
-                        GroupId = src.PeriodAuditGroupResult.GroupId,
-                        ScoreValue = src.PeriodAuditGroupResult.ScoreValue,
-                        Observations = src.PeriodAuditGroupResult.Observations,
-                        ScaleDescription = src.PeriodAuditGroupResult.ScaleDescription,
-                        TotalWeighting = src.PeriodAuditGroupResult.TotalWeighting,
-                        GroupColor = src.PeriodAuditGroupResult.GroupColor,
-                        IsActive = src.PeriodAuditGroupResult.IsActive,
-                    } : null;
                     dest.ScaleGroup = src.ScaleGroup != null ? new ScaleGroupResponseDto
                     {
                         ScaleGroupId = src.ScaleGroup.ScaleGroupId,
@@ -62,7 +54,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
             CreateMap<ScaleGroup, ScaleGroupResponseDto>();
             CreateMap<Group, GroupResponseDto>().AfterMap((src, dest) =>
             {
-                dest.EnterpriseName = src.Enterprise.Name;
+                dest.EnterpriseName = src.Enterprise?.Name;
             });
             CreateMap<CriteriaSubResult, CriteriaSubResultResponseDto>();
             CreateMap<PeriodAuditFieldValues, PeriodAuditFieldValuesResponseDto>();
