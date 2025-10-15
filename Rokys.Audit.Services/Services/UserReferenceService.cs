@@ -51,7 +51,7 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<UserReferenceResponseDto>();
             try
             {
-                var validate = _fluentValidator.Validate(requestDto);
+                var validate = await _fluentValidator.ValidateAsync(requestDto);
                 if (!validate.IsValid)
                 {
                     response.Messages.AddRange(validate.Errors.Select(e => new ApplicationMessage { Message = e.ErrorMessage, MessageType = ApplicationMessageType.Error }));
@@ -59,22 +59,40 @@ namespace Rokys.Audit.Services.Services
                 }
 
                 var currentUser = _httpContextAccessor.CurrentUser();
-                var entity = _mapper.Map<UserReference>(requestDto);
+                var requestCopy = new UserReferenceRequestDto
+                {
+                    UserId = requestDto.UserId,
+                    EmployeeId = requestDto.EmployeeId,
+                    FirstName = requestDto.FirstName,
+                    LastName = requestDto.LastName,
+                    Email = requestDto.Email,
+                    PersonalEmail = requestDto.PersonalEmail,
+                    DocumentNumber = requestDto.DocumentNumber,
+                    RoleCode = requestDto.RoleCode,
+                    RoleName = requestDto.RoleName,
+                    EmployeeStores = null
+                };
+                var entity = _mapper.Map<UserReference>(requestCopy);
                 entity.CreateAudit(currentUser.UserName);
+                entity.IsActive = true;
+                _userReferenceRepository.Insert(entity);
 
                 if (requestDto.EmployeeStores != null && requestDto.EmployeeStores.Length > 0)
                 {
                     foreach (var store in requestDto.EmployeeStores)
                     {
-                        _employeeStoreRepository.Insert(new EmployeeStore
+                        var employeeStore = new EmployeeStore
                         {
-                            UserReferenceId =entity.UserReferenceId,
+                            UserReferenceId = entity.UserReferenceId,
                             StoreId = store.StoreId,
-                        });
+                            AssignmentDate = store.AssignmentDate ?? DateTime.Now,
+                            IsActive = true,
+                        };
+                        employeeStore.CreateAudit(currentUser.UserName);
+                        _employeeStoreRepository.Insert(employeeStore);
                     }
                 }
 
-                _userReferenceRepository.Insert(entity);
                 await _unitOfWork.CommitAsync();
 
                 response.Data = _mapper.Map<UserReferenceResponseDto>(entity);
@@ -104,7 +122,7 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<UserReferenceResponseDto>();
             try
             {
-                var entity = await _userReferenceRepository.GetByKeyAsync(id);
+                var entity = await _userReferenceRepository.GetFirstOrDefaultAsync(filter: x => x.UserReferenceId == id && x.IsActive);
                 if (entity == null)
                 {
                     response.Messages.Add(new ApplicationMessage
@@ -115,19 +133,7 @@ namespace Rokys.Audit.Services.Services
                     return response;
                 }
 
-                // Validación personalizada para update (excluir el ID actual)
-                var existsUserId = await _userReferenceRepository.ExistsByUserIdAsync(requestDto.UserId.Value, id);
-                if (existsUserId)
-                {
-                    response.Messages.Add(new ApplicationMessage
-                    {
-                        Message = "Ya existe otro usuario con este ID del sistema de seguridad",
-                        MessageType = ApplicationMessageType.Error
-                    });
-                    return response;
-                }
-
-                if (requestDto.EmployeeId.HasValue)
+                if (requestDto.EmployeeId != null && requestDto.EmployeeId != Guid.Empty)
                 {
                     var existsEmployeeId = await _userReferenceRepository.ExistsByEmployeeIdAsync(requestDto.EmployeeId.Value, id);
                     if (existsEmployeeId)
@@ -144,9 +150,11 @@ namespace Rokys.Audit.Services.Services
 
                 var currentUser = _httpContextAccessor.CurrentUser();
                 // Mapear los cambios
+                requestDto.UserId = entity.UserId; // Asegurar que UserId no se cambie
+                requestDto.RoleCode = entity.RoleCode; // Asegurar que RoleCode no se cambie
+                requestDto.RoleName = entity.RoleName; // Asegurar que RoleName no se cambie
                 _mapper.Map(requestDto, entity);
-                entity.UpdatedBy = currentUser.UserName;
-                entity.UpdateDate = DateTime.UtcNow;
+                entity.UpdateAudit(currentUser.UserName);
 
                 _userReferenceRepository.Update(entity);
 
@@ -155,54 +163,56 @@ namespace Rokys.Audit.Services.Services
                 if (existingStores != null)
                 {
                     var existingList = existingStores;
-                    var incomingName = incomingStores.Select(s => s.StoreId).ToHashSet();
+                    var incomingStoreIds = incomingStores.Select(s => s.StoreId).ToHashSet();
 
                     foreach (var existing in existingList)
                     {
-                        if (!incomingName.Contains(existing.StoreId))
+                        if (!incomingStoreIds.Contains(existing.StoreId))
                         {
-                            _employeeStoreRepository.Delete(existing.EmployeeStoreId);
+                            existing.IsActive = false;
+                            _employeeStoreRepository.Update(existing);
                         }
                     }
 
-                    var existingCodes = existingList.Select(s => s.StoreId).ToHashSet();
-                    var storesToAdd = incomingStores.Where(s => !existingCodes.Contains(s.StoreId));
+                    var existingIds = existingList.Select(s => s.StoreId).ToHashSet();
+                    var storesToAdd = incomingStores.Where(s => !existingIds.Contains(s.StoreId));
 
                     foreach (var store in storesToAdd)
                     {
-                        _employeeStoreRepository.Insert(new EmployeeStore
+                        var employeeStore = new EmployeeStore
                         {
                             UserReferenceId = entity.UserReferenceId,
                             StoreId = store.StoreId,
                             AssignmentDate = store.AssignmentDate ?? DateTime.Now,
-                        });
+                            IsActive = true,
+                        };
+                        employeeStore.CreateAudit(currentUser.UserName);
+                        _employeeStoreRepository.Insert(employeeStore);
                     }
 
                     var storesToReactivate = existingList
-                        .Where(s => incomingName.Contains(s.StoreId) && !s.IsActive);
+                        .Where(s => incomingStoreIds.Contains(s.StoreId) && !s.IsActive);
 
                     foreach (var store in storesToReactivate)
                     {
                         store.IsActive = true;
-                        _employeeStoreRepository.Update(new EmployeeStore
-                        {
-                            EmployeeStoreId = store.EmployeeStoreId,
-                            UserReferenceId = entity.UserReferenceId,
-                            StoreId = store.StoreId,
-                            AssignmentDate = store.AssignmentDate
-                        });
+                        store.UpdateAudit(currentUser.UserName);
+                        _employeeStoreRepository.Update(store);
                     }
                 }
                 else
                 {
                     foreach (var store in incomingStores)
                     {
-                        _employeeStoreRepository.Insert(new EmployeeStore
+                        var employeeStore = new EmployeeStore
                         {
                             UserReferenceId = entity.UserReferenceId,
                             StoreId = store.StoreId,
                             AssignmentDate = store.AssignmentDate ?? DateTime.Now,
-                        });
+                            IsActive = true,
+                        };
+                        employeeStore.CreateAudit(currentUser.UserName);
+                        _employeeStoreRepository.Insert(employeeStore);
                     }
                 }
 

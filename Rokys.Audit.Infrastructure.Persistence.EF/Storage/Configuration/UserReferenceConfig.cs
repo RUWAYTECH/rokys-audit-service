@@ -19,8 +19,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.Property(ur => ur.UserId)
                 .IsRequired();
 
-            builder.Property(ur => ur.EmployeeId)
-                .IsRequired();
+            builder.Property(ur => ur.EmployeeId);
 
             builder.Property(ur => ur.FirstName)
                 .IsRequired()

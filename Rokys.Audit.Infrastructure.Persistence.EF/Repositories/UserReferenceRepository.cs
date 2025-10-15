@@ -55,7 +55,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
 
         public async Task<bool> ExistsByUserIdAsync(Guid userId, Guid? excludeId = null)
         {
-            var query = DbSet.Where(ur => ur.UserId == userId);
+            var query = DbSet.Where(ur => ur.UserId == userId && ur.IsActive);
             
             if (excludeId.HasValue)
             {

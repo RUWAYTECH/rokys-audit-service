@@ -4,6 +4,7 @@ using Rokys.Audit.Services.Interfaces;
 using Rokys.Audit.Subscription.Hub.Constants;
 using Rokys.Audit.Subscription.Hub.Services.Interfaces;
 using Ruway.Events.Command.Interfaces.Events;
+using static Rokys.Audit.Subscription.Hub.Constants.EventConstants;
 
 namespace Rokys.Audit.Subscription.Hub.Services.Implementations
 {    
@@ -38,18 +39,7 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
             var exist = await _userReferenceService.GetByUserId(UserEvent.UserId);
             if (exist.Data != null)
             {
-                var user = exist.Data;
-                await _userReferenceService.Update(user.UserReferenceId, new DTOs.Requests.UserReference.UserReferenceRequestDto
-                {
-                    UserId = UserEvent.UserId,
-                    EmployeeId = user.EmployeeId,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    Email = user.Email,
-                    RoleCode = user.RoleCode,
-                    RoleName = user.RoleName,
-                    IsActive = false
-                });
+                await _userReferenceService.Delete(exist.Data.UserReferenceId);
             }
         }
 
@@ -61,32 +51,55 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
             var exist = await _userReferenceService.GetByUserId(UserEvent.UserId);
             if (exist.Data == null)
             {
-
-                await _userReferenceService.Create(new DTOs.Requests.UserReference.UserReferenceRequestDto
+                if (UserEvent.EmployeeId.HasValue)
                 {
-                    UserId = UserEvent.UserId,
-                    EmployeeId = UserEvent.EmployeeId,
-                    FirstName = UserEvent.FirstName,
-                    LastName = UserEvent.LastName,
-                    Email = UserEvent.Email,
-                });
+                    var employeeExist = await _userReferenceService.GetByEmployeeId(UserEvent.EmployeeId.Value);
+                    if (employeeExist.Data != null)
+                    {
+                        await UpdateUser(employeeExist.Data.UserReferenceId, UserEvent);
+                    }
+                    else
+                    {
+                        await CreateUser(UserEvent);
+                    }
+                }
+                else
+                {
+                    await CreateUser(UserEvent);
+                }
             }
             else
             {
-                var user = exist.Data;
-                user.EmployeeId = UserEvent.EmployeeId;
-                user.FirstName = UserEvent.FirstName;
-                user.LastName = UserEvent.LastName;
-                user.Email = UserEvent.Email;
-                await _userReferenceService.Update(user.UserReferenceId, new DTOs.Requests.UserReference.UserReferenceRequestDto
-                {
-                    UserId = UserEvent.UserId,
-                    EmployeeId = UserEvent.EmployeeId,
-                    FirstName = UserEvent.FirstName,
-                    LastName = UserEvent.LastName,
-                    Email = UserEvent.Email,
-                });
+                await UpdateUser(exist.Data.UserReferenceId, UserEvent);
             }
+        }
+
+        private async Task CreateUser(UserUpdatedEvent UserEvent)
+        {
+            await _userReferenceService.Create(new DTOs.Requests.UserReference.UserReferenceRequestDto
+            {
+                UserId = UserEvent.UserId,
+                EmployeeId = UserEvent.EmployeeId,
+                FirstName = UserEvent.FirstName,
+                LastName = UserEvent.LastName,
+                Email = UserEvent.Email,
+                RoleCode = UserEvent.RoleCodes,
+                RoleName = UserEvent.RoleNames,
+            });
+        }
+
+        private async Task UpdateUser(Guid userReferenceId, UserUpdatedEvent userEvent)
+        {
+            await _userReferenceService.Update(userReferenceId, new DTOs.Requests.UserReference.UserReferenceRequestDto
+            {
+                UserId = userEvent.UserId,
+                EmployeeId = userEvent.EmployeeId,
+                FirstName = userEvent.FirstName,
+                LastName = userEvent.LastName,
+                Email = userEvent.Email,
+                RoleCode = userEvent.RoleCodes,
+                RoleName = userEvent.RoleNames,
+            });
         }
     }
 }

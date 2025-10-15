@@ -46,6 +46,11 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .HasColumnName("ScaleColor")
                 .HasMaxLength(20)
                 .IsRequired(false);
+
+            builder.Property(x => x.HasEvidence)
+                .HasColumnName("HasEvidence")
+                .IsRequired(false);
+
             builder.Property(x => x.IsActive)
                 .HasColumnName("IsActive")
                 .HasDefaultValue(true)

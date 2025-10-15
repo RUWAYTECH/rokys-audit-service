@@ -8,7 +8,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
     {
         public void Configure(EntityTypeBuilder<EmployeeStore> builder)
         {
-            builder.ToTable("EmployeeStore");
+            builder.ToTable("EmployeeStores");
 
             builder.HasKey(es => es.EmployeeStoreId);
 
