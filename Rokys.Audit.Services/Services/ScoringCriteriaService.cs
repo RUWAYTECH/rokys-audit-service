@@ -142,6 +142,9 @@ namespace Rokys.Audit.Services.Services
 
                 Func<IQueryable<ScoringCriteria>, IOrderedQueryable<ScoringCriteria>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 
+                if (requestDto.ScaleGroupId.HasValue)
+                    filter = x => x.ScaleGroupId == requestDto.ScaleGroupId.Value && x.IsActive;
+
                 var entities = await _scoringCriteriaRepository.GetPagedAsync(
                     filter: filter,
                     orderBy: orderBy,

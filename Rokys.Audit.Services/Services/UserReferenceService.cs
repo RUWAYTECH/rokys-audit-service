@@ -117,6 +117,53 @@ namespace Rokys.Audit.Services.Services
             return response;
         }
 
+        public async Task<ResponseDto<UserReferenceResponseDto>> UpdateByUser(Guid userReferenceId, UserReferenceRequestDto requestDto)
+        {
+             var response = ResponseDto.Create<UserReferenceResponseDto>();
+            try
+            {
+                var entity = await _userReferenceRepository.GetFirstOrDefaultAsync(x => x.UserReferenceId == userReferenceId);
+                if (entity == null)
+                {
+                    response.Messages.Add(new ApplicationMessage
+                    {
+                        Message = "Usuario no encontrado",
+                        MessageType = ApplicationMessageType.Error
+                    });
+                    return response;
+                }
+                var currentUser = _httpContextAccessor.CurrentUser();
+
+                entity.UserId = requestDto.UserId;                 
+                entity.EmployeeId = requestDto.EmployeeId;
+                entity.FirstName = requestDto.FirstName;
+                entity.LastName = requestDto.LastName;
+                entity.Email = requestDto.Email;
+                entity.PersonalEmail = requestDto.PersonalEmail;
+                entity.RoleCode = requestDto.RoleCode;
+                entity.RoleName = requestDto.RoleName;
+                entity.DocumentNumber = requestDto.DocumentNumber;
+                entity.IsActive = true;
+                entity.UpdateAudit(currentUser.UserName);
+                
+                _userReferenceRepository.Update(entity);
+                await _unitOfWork.CommitAsync();
+
+                response.Data = _mapper.Map<UserReferenceResponseDto>(entity);
+
+            }catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating UserReference with UserId: {UserId}", userReferenceId);
+                response.Messages.Add(new ApplicationMessage
+                {
+                    Message = "Error interno del servidor al actualizar el usuario",
+                    MessageType = ApplicationMessageType.Error
+                });
+            } 
+
+            return response;
+        }
+
         public async Task<ResponseDto<UserReferenceResponseDto>> Update(Guid id, UserReferenceRequestDto requestDto)
         {
             var response = ResponseDto.Create<UserReferenceResponseDto>();
@@ -409,7 +456,7 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<UserReferenceResponseDto?>();
             try
             {
-                var entity = await _userReferenceRepository.GetFirstOrDefaultAsync(x => x.UserId == userId && x.IsActive);
+                var entity = await _userReferenceRepository.GetByUserIdAsync(userId);
                 response.Data = entity != null ? _mapper.Map<UserReferenceResponseDto>(entity) : null;
             }
             catch (Exception ex)

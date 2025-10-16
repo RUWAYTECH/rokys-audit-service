@@ -13,31 +13,31 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
 
         public async Task<UserReference?> GetByUserIdAsync(Guid userId)
         {
-            return await DbSet
+            return await DbSet.AsNoTracking()
                 .FirstOrDefaultAsync(ur => ur.UserId == userId);
         }
 
         public async Task<UserReference?> GetByEmployeeIdAsync(Guid employeeId)
         {
-            return await DbSet
+            return await DbSet.AsNoTracking()
                 .FirstOrDefaultAsync(ur => ur.EmployeeId == employeeId);
         }
 
         public async Task<UserReference?> GetByDocumentNumberAsync(string documentNumber)
         {
-            return await DbSet
+            return await DbSet.AsNoTracking()
                 .FirstOrDefaultAsync(ur => ur.DocumentNumber == documentNumber);
         }
 
         public async Task<UserReference?> GetByEmailAsync(string email)
         {
-            return await DbSet
+            return await DbSet.AsNoTracking()
                 .FirstOrDefaultAsync(ur => ur.Email == email);
         }
 
         public async Task<List<UserReference>> GetByRoleCodeAsync(string roleCode)
         {
-            return await DbSet
+            return await DbSet.AsNoTracking()
                 .Where(ur => ur.RoleCode == roleCode && ur.IsActive)
                 .OrderBy(ur => ur.FirstName)
                 .ThenBy(ur => ur.LastName)
@@ -46,7 +46,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
 
         public async Task<List<UserReference>> GetActiveUsersAsync()
         {
-            return await DbSet
+            return await DbSet.AsNoTracking()
                 .Where(ur => ur.IsActive)
                 .OrderBy(ur => ur.FirstName)
                 .ThenBy(ur => ur.LastName)
