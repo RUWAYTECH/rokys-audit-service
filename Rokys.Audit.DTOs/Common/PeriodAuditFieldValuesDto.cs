@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json.Nodes;
 
 namespace Rokys.Audit.DTOs.Common
 {
@@ -13,7 +14,7 @@ namespace Rokys.Audit.DTOs.Common
         public string? CalculationFormula { get; set; }
         public string? AcumulationType { get; set; }
         public string? FieldOptions { get; set; }
-        public string? TableDataHorizontal { get; set; }
+        public JsonArray? TableDataHorizontal { get; set; }
         public string? TextValue { get; set; }
         public decimal? NumericValue { get; set; }
         public DateTime? DateValue { get; set; }

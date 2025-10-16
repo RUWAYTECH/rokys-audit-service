@@ -14,6 +14,7 @@ using Rokys.Audit.Infrastructure.Repositories;
 using Rokys.Audit.Model.Tables;
 using Rokys.Audit.Services.Interfaces;
 using Rokys.Audit.DTOs.Requests.PeriodAuditFieldValues;
+using Newtonsoft.Json;
 
 namespace Rokys.Audit.Services.Services
 {
@@ -259,9 +260,7 @@ namespace Rokys.Audit.Services.Services
 
                     if (fieldValueEntity == null)
                         continue;
-
                     _mapper.Map(fieldValueDto, fieldValueEntity);
-
                     _fieldValuesRepository.Update(fieldValueEntity);
                 }
 
