@@ -57,7 +57,7 @@ namespace Rokys.Audit.Services.Services
                     return response;
                 }
 
-                var auditStatus = await _auditStatusRepository.GetFirstOrDefaultAsync(filter: x => x.Code == AuditStatusCode.InProgress && x.IsActive);
+                var auditStatus = await _auditStatusRepository.GetFirstOrDefaultAsync(filter: x => x.Code == AuditStatusCode.Pending && x.IsActive);
 
                 var currentUser = _httpContextAccessor.CurrentUser();
                 var entity = _mapper.Map<PeriodAudit>(requestDto);
