@@ -10,7 +10,7 @@ namespace Rokys.Audit.Model.Tables
         public string FieldCode { get; set; } = string.Empty;
         public string FieldName { get; set; } = string.Empty;
         public string FieldType { get; set; } = string.Empty; // numeric, text, date, boolean, select, image
-        public bool IsCalculated { get; set; } = false; // Si es un campo calculado
+        public string IsCalculated { get; set; } // Si es un campo calculado
         public string? CalculationFormula { get; set; } // Fórmula para calcular el valor (si es calculado)
         public string? AcumulationType { get; set; } // Tipo de Acumulación: 'NA', 'SUM', 'AVERAGE', 'MAX', 'MIN', 'COUNT'
         public string? FieldOptions { get; set; } // Opciones para campos tipo 'select' (JSON)

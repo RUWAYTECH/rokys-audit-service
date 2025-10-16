@@ -26,6 +26,10 @@ namespace Rokys.Audit.Services.Services
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IScaleGroupRepository _scaleGroupRepository;
         private readonly IPeriodAuditScaleResultRepository _periodAuditScaleResultRepository;
+        private readonly ITableScaleTemplateRepository _tableScaleTemplateRepository;
+        private readonly IPeriodAuditTableScaleTemplateResultRepository _periodAuditTableScaleTemplateResultRepository;
+        private readonly IAuditTemplateFieldRepository _auditTemplateFieldRepository;
+        private readonly IPeriodAuditFieldValuesRepository _periodAuditFieldValuesRepository;
 
         public PeriodAuditGroupResultService(
             IPeriodAuditGroupResultRepository repository,
@@ -35,7 +39,11 @@ namespace Rokys.Audit.Services.Services
             IAMapper mapper,
             IHttpContextAccessor httpContextAccessor,
             IScaleGroupRepository scaleGroupRepository,
-            IPeriodAuditScaleResultRepository periodAuditScaleResultRepository)
+            IPeriodAuditScaleResultRepository periodAuditScaleResultRepository,
+            ITableScaleTemplateRepository tableScaleTemplateRepository,
+            IPeriodAuditTableScaleTemplateResultRepository periodAuditTableScaleTemplateResultRepository,
+            IAuditTemplateFieldRepository auditTemplateFieldRepository,
+            IPeriodAuditFieldValuesRepository periodAuditFieldValuesRepository)
         {
             _repository = repository;
             _validator = validator;
@@ -45,6 +53,10 @@ namespace Rokys.Audit.Services.Services
             _httpContextAccessor = httpContextAccessor;
             _scaleGroupRepository = scaleGroupRepository;
             _periodAuditScaleResultRepository = periodAuditScaleResultRepository;
+            _tableScaleTemplateRepository = tableScaleTemplateRepository;
+            _periodAuditTableScaleTemplateResultRepository = periodAuditTableScaleTemplateResultRepository;
+            _auditTemplateFieldRepository = auditTemplateFieldRepository;
+            _periodAuditFieldValuesRepository = periodAuditFieldValuesRepository;
         }
         public async Task<ResponseDto<PeriodAuditGroupResultResponseDto>> Create(PeriodAuditGroupResultRequestDto requestDto)
         {
@@ -81,6 +93,45 @@ namespace Rokys.Audit.Services.Services
                     };
                     periodAuditScaleResult.CreateAudit(currentUser.UserName);
                     _periodAuditScaleResultRepository.Insert(periodAuditScaleResult);
+                    var tableScaleTemplates = await _tableScaleTemplateRepository.GetByScaleGroupId(periodAuditScaleResult.ScaleGroupId);
+                    if (tableScaleTemplates != null && tableScaleTemplates.Any())
+                    {
+                        foreach (var template in tableScaleTemplates)
+                        {
+                            var periodAuditTableScaleTemplateResult = new PeriodAuditTableScaleTemplateResult
+                            {
+                                PeriodAuditScaleResultId = periodAuditScaleResult.PeriodAuditScaleResultId,
+                                TableScaleTemplateId = template.TableScaleTemplateId,
+                                Code = template.Code,
+                                Name = template.Name,
+                                Orientation = template.Orientation,
+                                TemplateData = template.TemplateData,
+                            };
+                            periodAuditTableScaleTemplateResult.CreateAudit(currentUser.UserName);
+                            _periodAuditTableScaleTemplateResultRepository.Insert(periodAuditTableScaleTemplateResult);
+                            var auditTemplateField = await _auditTemplateFieldRepository.GetByTemplateId(template.TableScaleTemplateId);
+                            if (auditTemplateField != null && auditTemplateField.Any())
+                            {
+                                foreach (var field in auditTemplateField)
+                                {
+                                    var periodAuditFieldValue = new PeriodAuditFieldValues
+                                    {
+                                        PeriodAuditTableScaleTemplateResultId = periodAuditTableScaleTemplateResult.PeriodAuditTableScaleTemplateResultId,
+                                        AuditTemplateFieldId = field.AuditTemplateFieldId,
+                                        FieldCode = field.FieldCode,
+                                        FieldName = field.FieldName,
+                                        FieldType = field.FieldType,
+                                        IsCalculated = field.IsCalculated,
+                                        CalculationFormula = field.CalculationFormula,
+                                        AcumulationType = field.AcumulationType,
+                                        FieldOptions = field.FieldOptions,
+                                    };
+                                    periodAuditFieldValue.CreateAudit(currentUser.UserName);
+                                    _periodAuditFieldValuesRepository.Insert(periodAuditFieldValue);
+                                }
+                            }
+                        }
+                    }
                 }
 
                 await _unitOfWork.CommitAsync();

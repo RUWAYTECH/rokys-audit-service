@@ -9,7 +9,7 @@ namespace Rokys.Audit.DTOs.Common
         public string FieldCode { get; set; } = string.Empty;
         public string FieldName { get; set; } = string.Empty;
         public string FieldType { get; set; } = string.Empty;
-        public bool IsCalculated { get; set; }
+        public string IsCalculated { get; set; }
         public string? CalculationFormula { get; set; }
         public string? AcumulationType { get; set; }
         public string? FieldOptions { get; set; }

@@ -34,5 +34,14 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
                     (excludeId == null || x.AuditTemplateFieldId != excludeId)
                     && x.IsActive);
         }
+
+        public async Task<List<AuditTemplateFields>> GetByTemplateId(Guid tableScaleTemplateId)
+        {
+            return await _context.AuditTemplateFields
+                .Where(x => x.TableScaleTemplateId == tableScaleTemplateId && x.IsActive)
+                .Include(x => x.TableScaleTemplate)
+                .OrderBy(x => x.FieldName)
+                .ToListAsync();
+        }
     }
 }

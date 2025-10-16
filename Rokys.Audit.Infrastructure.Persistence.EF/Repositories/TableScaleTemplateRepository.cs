@@ -47,5 +47,14 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
                 .OrderBy(x => x.Name)
                 .ToListAsync();
         }
+
+        public async Task<List<TableScaleTemplate>> GetByScaleGroupId(Guid scaleGroupId)
+        {
+            return await _context.TableScaleTemplates
+                .Where(x => x.ScaleGroupId == scaleGroupId && x.IsActive)
+                .Include(x => x.ScaleGroup)
+                .OrderBy(x => x.Name)
+                .ToListAsync();
+        }
     }
 }

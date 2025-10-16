@@ -16,14 +16,14 @@ namespace Rokys.Audit.Model.Tables
         public void CreateAudit(string? userName)
         {
             CreatedBy = userName ?? "system.admin";
-            CreationDate = DateTime.UtcNow;
-            UpdateDate = DateTime.UtcNow;
+            CreationDate = DateTime.Now;
+            UpdateDate = DateTime.Now;
             UpdatedBy = CreatedBy;
         }
 
         public void UpdateAudit(string? userName)
         {
-            UpdateDate = DateTime.UtcNow;
+            UpdateDate = DateTime.Now;
             UpdatedBy = userName ?? "system.admin";
         }
     }
