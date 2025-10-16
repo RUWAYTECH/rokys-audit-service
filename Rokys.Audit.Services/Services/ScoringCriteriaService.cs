@@ -211,6 +211,46 @@ namespace Rokys.Audit.Services.Services
             return response;
         }
 
+        public async Task<ResponseDto<bool>> ChangeOrder(Guid scaleGroupId, int currentSortOrder, int newSortOrder)
+        {
+            var response = ResponseDto.Create<bool>();
+            try
+            {
+                var items = _scoringCriteriaRepository
+                    .Get(x => x.ScaleGroupId == scaleGroupId && x.IsActive)
+                    .OrderBy(x => x.SortOrder)
+                    .ToList();
+
+                var currentIndex = items.FindIndex(x => x.SortOrder == currentSortOrder);
+                var newIndex = items.FindIndex(x => x.SortOrder == newSortOrder);
+
+                if (currentIndex == -1 || newIndex == -1)
+                {
+                    response = ResponseDto.Error<bool>("SortOrder no encontrado en el grupo.");
+                    return response;
+                }
+
+                var movedItem = items[currentIndex];
+                items.RemoveAt(currentIndex);
+                items.Insert(newIndex, movedItem);
+
+                // Actualizar el SortOrder de todos
+                for (int i = 0; i < items.Count; i++)
+                {
+                    items[i].SortOrder = i + 1;
+                    _scoringCriteriaRepository.Update(items[i]);
+                }
+                await _unitOfWork.CommitAsync();
+                response.Data = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response = ResponseDto.Error<bool>(ex.Message);
+            }
+            return response;
+        }
+
         private Expression<Func<ScoringCriteria, bool>> BuildFilter(ScoringCriteriaFilterRequestDto dto)
         {
             return x =>

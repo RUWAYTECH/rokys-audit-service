@@ -52,5 +52,17 @@ namespace Rokys.Audit.WebAPI.Controllers
                 return Ok(response);
             return BadRequest(response);
         }
+
+        /// <summary>
+        /// Cambia el orden de un criterio dentro de un grupo de escala
+        /// </summary>
+        [HttpPost("change-order")]
+        public async Task<IActionResult> ChangeOrder([FromBody] ChangeScoringCriteriaOrderRequestDto request)
+        {
+            var response = await _scoringCriteriaService.ChangeOrder(request.ScaleGroupId, request.CurrentPosition, request.NewPosition);
+            if (response.IsValid)
+                return Ok(response);
+            return BadRequest(response);
+        }
     }
 }
