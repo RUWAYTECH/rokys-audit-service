@@ -110,7 +110,7 @@ namespace Rokys.Audit.Services.Services
 
                 Func<IQueryable<ScaleGroup>, IOrderedQueryable<ScaleGroup>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 
-                if (string.IsNullOrEmpty(paginationRequestDto.Filter))
+                if (!string.IsNullOrEmpty(paginationRequestDto.Filter))
                     filter = filter.AndAlso(x => x.Code.Contains(paginationRequestDto.Filter) || x.Name.Contains(paginationRequestDto.Filter));
 
                 if (paginationRequestDto.GroupId.HasValue)
