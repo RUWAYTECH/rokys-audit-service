@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Reatil.Services.Services;
+using Rokys.Audit.Common.Extensions;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.MaintenanceTable;
 using Rokys.Audit.DTOs.Responses.Common;
@@ -120,10 +121,10 @@ namespace Rokys.Audit.Services.Services
                 int totalRows;
                 Expression<Func<MaintenanceTable, bool>> filter = x => x.IsActive;
                 if (!string.IsNullOrEmpty(requestDto.Filter))
-                    filter = x => x.Code.Contains(requestDto.Filter) || x.Description.Contains(requestDto.Filter);
+                    filter = filter.AndAlso(x => x.Code.Contains(requestDto.Filter) || x.Description.Contains(requestDto.Filter));
 
                 if(!string.IsNullOrEmpty(requestDto.Code))
-                    filter = x => x.Code == requestDto.Code && x.IsActive;
+                    filter = filter.AndAlso(x => x.Code == requestDto.Code && x.IsActive);
 
                 Func<IQueryable<MaintenanceTable>, IOrderedQueryable<MaintenanceTable>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 

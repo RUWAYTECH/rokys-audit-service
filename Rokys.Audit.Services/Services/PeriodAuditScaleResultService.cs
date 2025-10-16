@@ -2,6 +2,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Reatil.Services.Services;
+using Rokys.Audit.Common.Extensions;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.PeriodAuditScaleResult;
 using Rokys.Audit.DTOs.Responses.Common;
@@ -159,15 +160,15 @@ namespace Rokys.Audit.Services.Services
                 Expression<Func<PeriodAuditScaleResult, bool>> filter = x => x.IsActive;
                 if (filterRequestDto.PeriodAuditGroupResultId.HasValue)
                 {
-                    filter = x => x.PeriodAuditGroupResultId == filterRequestDto.PeriodAuditGroupResultId.Value;
+                    filter = filter.AndAlso(x => x.PeriodAuditGroupResultId == filterRequestDto.PeriodAuditGroupResultId.Value);
                 }
                 if (filterRequestDto.ScaleGroupId.HasValue)
                 {
-                    filter = x => x.ScaleGroupId == filterRequestDto.ScaleGroupId.Value;
+                    filter = filter.AndAlso(x => x.ScaleGroupId == filterRequestDto.ScaleGroupId.Value);
                 }
                 if (!string.IsNullOrEmpty(filterRequestDto.Filter))
                 {
-                    filter = x => (x.Observations != null && x.Observations.Contains(filterRequestDto.Filter));
+                    filter = filter.AndAlso(x => (x.Observations != null && x.Observations.Contains(filterRequestDto.Filter)));
                 }
 
                 Func<IQueryable<PeriodAuditScaleResult>, IOrderedQueryable<PeriodAuditScaleResult>> orderBy = q => q.OrderByDescending(x => x.CreationDate);

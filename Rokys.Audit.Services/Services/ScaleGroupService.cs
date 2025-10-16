@@ -2,6 +2,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Reatil.Services.Services;
+using Rokys.Audit.Common.Extensions;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.ScaleGroup;
 using Rokys.Audit.DTOs.Responses.Common;
@@ -105,9 +106,15 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<PaginationResponseDto<ScaleGroupResponseDto>>();
             try
             {
-                var filter = BuildFilter(paginationRequestDto);
+                Expression<Func<ScaleGroup, bool>> filter = x => x.IsActive;
 
                 Func<IQueryable<ScaleGroup>, IOrderedQueryable<ScaleGroup>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
+
+                if (string.IsNullOrEmpty(paginationRequestDto.Filter))
+                    filter = filter.AndAlso(x => x.Code.Contains(paginationRequestDto.Filter) || x.Name.Contains(paginationRequestDto.Filter));
+
+                if (paginationRequestDto.GroupId.HasValue)
+                    filter = filter.AndAlso(x => x.GroupId == paginationRequestDto.GroupId.Value);
 
                 var entities = await _scaleGroupRepository.GetPagedAsync(
                     filter: filter,
@@ -219,17 +226,6 @@ namespace Rokys.Audit.Services.Services
                 response = ResponseDto.Error<ScaleGroupResponseDto>(ex.Message);
             }
             return response;
-        }
-
-        /// <summary>
-        /// Construye el filtro dinámico para paginación de ScaleGroup.
-        /// </summary>
-        private Expression<Func<ScaleGroup, bool>> BuildFilter(ScaleGroupFilterRequestDto dto)
-        {
-            return x =>
-                x.IsActive &&
-                (!dto.GroupId.HasValue || x.GroupId == dto.GroupId.Value) &&
-                (string.IsNullOrEmpty(dto.Filter) || x.Name.Contains(dto.Filter) || x.Code.Contains(dto.Filter));
         }
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Reatil.Services.Services;
+using Rokys.Audit.Common.Extensions;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.ScoringCriteria;
 using Rokys.Audit.DTOs.Responses.Common;
@@ -142,8 +143,11 @@ namespace Rokys.Audit.Services.Services
 
                 Func<IQueryable<ScoringCriteria>, IOrderedQueryable<ScoringCriteria>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 
+                if (string.IsNullOrEmpty(requestDto.Filter))
+                    filter = filter.AndAlso(x => x.CriteriaName.Contains(requestDto.Filter) || x.CriteriaCode.Contains(requestDto.Filter) );
+
                 if (requestDto.ScaleGroupId.HasValue)
-                    filter = x => x.ScaleGroupId == requestDto.ScaleGroupId.Value && x.IsActive;
+                    filter = filter.AndAlso(x => x.ScaleGroupId == requestDto.ScaleGroupId.Value && x.IsActive);
 
                 var entities = await _scoringCriteriaRepository.GetPagedAsync(
                     filter: filter,

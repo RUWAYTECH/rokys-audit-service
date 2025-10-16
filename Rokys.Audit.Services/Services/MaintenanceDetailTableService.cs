@@ -2,6 +2,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Reatil.Services.Services;
+using Rokys.Audit.Common.Extensions;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.MaintenanceDetailTable;
 using Rokys.Audit.DTOs.Responses.Common;
@@ -154,10 +155,10 @@ namespace Rokys.Audit.Services.Services
             {
                 Expression<Func<MaintenanceDetailTable, bool>> filter = x => x.IsActive;
                 if (!string.IsNullOrEmpty(paginationRequestDto.Filter))
-                    filter = x => x.Code.Contains(paginationRequestDto.Filter) && x.IsActive;
+                    filter = filter.AndAlso(x => x.Code.Contains(paginationRequestDto.Filter));
 
                 if (!string.IsNullOrEmpty(paginationRequestDto.MaintenanceTableCode))
-                    filter = x => x.MaintenanceTable.Code.Contains(paginationRequestDto.MaintenanceTableCode) && x.MaintenanceTable.IsActive;
+                    filter = filter.AndAlso(x => x.MaintenanceTable.Code.Contains(paginationRequestDto.MaintenanceTableCode) && x.MaintenanceTable.IsActive);
 
                 Func<IQueryable<MaintenanceDetailTable>, IOrderedQueryable<MaintenanceDetailTable>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 

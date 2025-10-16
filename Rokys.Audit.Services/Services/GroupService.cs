@@ -2,6 +2,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Reatil.Services.Services;
+using Rokys.Audit.Common.Extensions;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.Group;
 using Rokys.Audit.DTOs.Responses.Common;
@@ -95,7 +96,13 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<PaginationResponseDto<GroupResponseDto>>();
             try
             {
-                var filter = BuildFilter(groupFilterRequestDto);
+                //var filter = BuildFilter(groupFilterRequestDto);
+                Expression<Func<Group, bool>> filter = x => x.IsActive;
+                if (!string.IsNullOrEmpty(groupFilterRequestDto.Filter))
+                    filter = filter.AndAlso(x => x.Name.Contains(groupFilterRequestDto.Filter) && x.IsActive);
+
+                if (groupFilterRequestDto.EnterpriseId.HasValue)
+                    filter = filter.AndAlso(x => x.EnterpriseId == groupFilterRequestDto.EnterpriseId.Value);
 
                 Func<IQueryable<Group>, IOrderedQueryable<Group>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 
@@ -177,14 +184,6 @@ namespace Rokys.Audit.Services.Services
                 response = ResponseDto.Error<GroupResponseDto>(ex.Message);
             }
             return response;
-        }
-
-        private Expression<Func<Group, bool>> BuildFilter(GroupFilterRequestDto dto)
-        {
-            return x =>
-                x.IsActive &&
-                (!dto.EnterpriseId.HasValue || x.EnterpriseId == dto.EnterpriseId.Value) &&
-                (string.IsNullOrEmpty(dto.Filter) || x.Name.Contains(dto.Filter));
         }
     }
 }

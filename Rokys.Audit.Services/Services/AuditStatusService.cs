@@ -2,6 +2,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Reatil.Services.Services;
+using Rokys.Audit.Common.Extensions;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.AuditStatus;
 using Rokys.Audit.DTOs.Responses.AuditStatus;
@@ -153,7 +154,7 @@ namespace Rokys.Audit.Services.Services
             {
                 Expression<Func<AuditStatus, bool>> filter = x => x.IsActive;
                 if (!string.IsNullOrEmpty(paginationRequestDto.Filter))
-                    filter = x => x.Name.Contains(paginationRequestDto.Filter) && x.IsActive;
+                    filter = filter.AndAlso(x => x.Name.Contains(paginationRequestDto.Filter) && x.IsActive);
 
                 Func<IQueryable<AuditStatus>, IOrderedQueryable<AuditStatus>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 

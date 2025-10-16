@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Reatil.Services.Services;
 using Rokys.Audit.Common.Constant;
+using Rokys.Audit.Common.Extensions;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.PeriodAudit;
 using Rokys.Audit.DTOs.Responses.Common;
@@ -164,13 +165,22 @@ namespace Rokys.Audit.Services.Services
             {
                 Expression<Func<PeriodAudit, bool>> filter = x => x.IsActive;
                 if (!string.IsNullOrEmpty(paginationRequestDto.Filter))
-                    filter = x => x.GlobalObservations.Contains(paginationRequestDto.Filter) && x.IsActive;
+                    filter = filter.AndAlso(x => x.GlobalObservations.Contains(paginationRequestDto.Filter) && x.IsActive);
 
                 if (paginationRequestDto.StoreId.HasValue)
-                    filter = x => x.StoreId == paginationRequestDto.StoreId.Value && x.IsActive;
+                    filter = filter.AndAlso(x => x.StoreId == paginationRequestDto.StoreId.Value && x.IsActive);
 
                 if (paginationRequestDto.EnterpriseId.HasValue)
-                    filter = x => x.Store.EnterpriseId == paginationRequestDto.EnterpriseId.Value && x.IsActive;
+                    filter = filter.AndAlso(x => x.Store.EnterpriseId == paginationRequestDto.EnterpriseId.Value && x.IsActive);
+
+                if (paginationRequestDto.ResponsibleAuditorId.HasValue)
+                    filter = filter.AndAlso(x => x.ResponsibleAuditorId == paginationRequestDto.ResponsibleAuditorId.Value && x.IsActive);
+
+                if (paginationRequestDto.EndDate.HasValue)
+                    filter = filter.AndAlso(x => x.EndDate >= paginationRequestDto.EndDate.Value && x.IsActive);
+
+                if (paginationRequestDto.StartDate.HasValue)
+                    filter = filter.AndAlso(x => x.StartDate == paginationRequestDto.StartDate.Value && x.IsActive);
 
                 Func<IQueryable<PeriodAudit>, IOrderedQueryable<PeriodAudit>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Reatil.Services.Services;
+using Rokys.Audit.Common.Extensions;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.AuditTemplateField;
 using Rokys.Audit.DTOs.Responses.AuditTemplateField;
@@ -137,13 +138,13 @@ namespace Rokys.Audit.Services.Services
                 Expression<Func<AuditTemplateFields, bool>> filter = x => x.IsActive;
 
                 if (!string.IsNullOrEmpty(requestDto.Filter))
-                    filter = x => x.FieldName.Contains(requestDto.Filter);
+                    filter = filter.AndAlso(x => x.FieldName.Contains(requestDto.Filter));
 
                 if (requestDto.TableScaleTemplateId.HasValue)
-                    filter = x => x.TableScaleTemplateId == requestDto.TableScaleTemplateId.Value && x.IsActive;
+                    filter = filter.AndAlso(x => x.TableScaleTemplateId == requestDto.TableScaleTemplateId.Value);
 
                 if (requestDto.ScaleGroupId.HasValue)
-                    filter = x => x.TableScaleTemplate.ScaleGroupId == requestDto.ScaleGroupId.Value && x.IsActive;
+                    filter = filter.AndAlso(x => x.TableScaleTemplate.ScaleGroupId == requestDto.ScaleGroupId.Value);
 
                 Func<IQueryable<AuditTemplateFields>, IOrderedQueryable<AuditTemplateFields>> orderBy = q => q.OrderByDescending(x => x.FieldName);
 

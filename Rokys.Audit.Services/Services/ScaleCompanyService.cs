@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Reatil.Services.Services;
+using Rokys.Audit.Common.Extensions;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.ScaleCompany;
 using Rokys.Audit.DTOs.Responses.Common;
@@ -117,10 +118,10 @@ namespace Rokys.Audit.Services.Services
                 int totalRows;
                 Expression<Func<ScaleCompany, bool>> filter = x => x.IsActive;
                 if (!string.IsNullOrEmpty(paginationRequestDto.Filter))
-                    filter = x => x.Name.Contains(paginationRequestDto.Filter);
+                    filter = filter.AndAlso(x => x.Name.Contains(paginationRequestDto.Filter));
 
                 if (paginationRequestDto.EnterpriseId.HasValue)
-                    filter = x => x.EnterpriseId == paginationRequestDto.EnterpriseId.Value && x.IsActive;
+                    filter = filter.AndAlso(x => x.EnterpriseId == paginationRequestDto.EnterpriseId.Value);
 
                 Func<IQueryable<ScaleCompany>, IOrderedQueryable<ScaleCompany>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 

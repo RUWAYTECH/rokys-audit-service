@@ -2,6 +2,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Reatil.Services.Services;
+using Rokys.Audit.Common.Extensions;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.PeriodAuditFieldValues;
 using Rokys.Audit.DTOs.Responses.Common;
@@ -152,7 +153,7 @@ namespace Rokys.Audit.Services.Services
             {
                 Expression<Func<PeriodAuditFieldValues, bool>> filter = x => x.IsActive;
                 if (!string.IsNullOrEmpty(paginationRequestDto.Filter))
-                    filter = x => x.FieldName.Contains(paginationRequestDto.Filter) && x.IsActive;
+                    filter = filter.AndAlso(x => x.FieldName.Contains(paginationRequestDto.Filter));
 
                 Func<IQueryable<PeriodAuditFieldValues>, IOrderedQueryable<PeriodAuditFieldValues>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 

@@ -15,6 +15,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Reatil.Services.Services;
+using Rokys.Audit.Common.Extensions;
 
 namespace Rokys.Audit.Services.Services
 {
@@ -50,10 +51,10 @@ namespace Rokys.Audit.Services.Services
 			{
 				Expression<Func<CriteriaSubResult, bool>> filter = x => x.IsActive;
 				if (!string.IsNullOrEmpty(paginationRequestDto.Filter))
-					filter = x => x.CriteriaName.Contains(paginationRequestDto.Filter) && x.IsActive;
+					filter = filter.AndAlso(x => x.CriteriaName.Contains(paginationRequestDto.Filter));
 
 				if (paginationRequestDto.ScaleGroupId.HasValue)
-                    filter = x => x.ScaleGroupId == paginationRequestDto.ScaleGroupId && x.IsActive;
+                    filter = filter.AndAlso(x => x.ScaleGroupId == paginationRequestDto.ScaleGroupId);
 
                 Func<IQueryable<CriteriaSubResult>, IOrderedQueryable<CriteriaSubResult>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 
