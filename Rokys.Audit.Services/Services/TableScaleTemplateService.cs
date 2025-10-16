@@ -206,14 +206,6 @@ namespace Rokys.Audit.Services.Services
                     response = ResponseDto.Error<TableScaleTemplateResponseDto>("No se encontró la plantilla de escala.");
                     return response;
                 }
-
-                // Verificar si ya existe un código duplicado (excluyendo el actual)
-                var existsByCode = await _tableScaleTemplateRepository.ExistsByCodeAsync(requestDto.Code, id);
-                if (existsByCode)
-                {
-                    response.Messages.Add(new ApplicationMessage { Message = "Ya existe una plantilla de escala con este código.", MessageType = ApplicationMessageType.Error });
-                    return response;
-                }
                 var currentUser = _httpContextAccessor.CurrentUser();
                 entity = _mapper.Map(requestDto, entity);
                 entity.UpdateAudit(currentUser.UserName);
