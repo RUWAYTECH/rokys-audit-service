@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Rokys.Audit.WebAPI.Controllers
 {
     [ApiController]
-    [Route("api/periodauditfieldvalues")]
+    [Route("api/period-audit-field-values")]
     public class PeriodAuditFieldValuesController : ControllerBase
     {
         private readonly IPeriodAuditFieldValuesService _service;
