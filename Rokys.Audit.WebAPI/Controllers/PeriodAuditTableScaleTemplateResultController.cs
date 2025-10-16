@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Rokys.Audit.DTOs.Requests.PeriodAuditFieldValues;
 using Rokys.Audit.DTOs.Requests.PeriodAuditTableScaleTemplateResult;
 using Rokys.Audit.Services.Interfaces;
 
@@ -66,6 +67,21 @@ namespace Rokys.Audit.WebAPI.Controllers
         {
             var result = await _service.Delete(id);
             if (!result.Data) return NotFound(result);
+            return Ok(result);
+        }
+
+        [HttpGet("getbyperiodauditscaleresult/{periodAuditScaleResultId}")]
+        public async Task<IActionResult> GetByPeriodAuditScaleResult([FromRoute]Guid periodAuditScaleResultId)
+        {
+            var result = await _service.GetByPeriodAuditScaleResult(periodAuditScaleResultId);
+            if (result.Data == null) return NotFound(result);
+            return Ok(result);
+        }
+
+        [HttpPut("updatebyperiodauditsacaleresult/{id}")]
+        public async Task<IActionResult> UpdateAllFieldValues([FromRoute]Guid id, [FromBody] PeriodAuditFieldValuesUpdateAllValuesRequestDto request)
+        {
+            var result = await _service.UpdateAllFieldValues(id, request);
             return Ok(result);
         }
     }

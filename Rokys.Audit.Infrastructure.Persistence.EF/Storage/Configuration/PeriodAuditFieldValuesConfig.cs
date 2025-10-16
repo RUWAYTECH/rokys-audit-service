@@ -20,8 +20,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.Property(x => x.AuditTemplateFieldId)
                 .IsRequired(false);
 
-            builder.Property(x => x.PeriodAuditTableScaleTemplateResultId)
-                .IsRequired(false);
+            builder.Property(x => x.PeriodAuditTableScaleTemplateResultId);
 
             // Información del Campo (desnormalizado)
             builder.Property(x => x.FieldCode)

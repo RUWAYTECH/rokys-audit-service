@@ -113,6 +113,8 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
             CreateMap<UserReference, UserReferenceResponseDto>();
             CreateMap<EmployeeStore, EmployeeStoreResponseDto>();
             CreateMap<PeriodAuditTableScaleTemplateResult, PeriodAuditTableScaleTemplateResultResponseDto>();
+            CreateMap<PeriodAuditTableScaleTemplateResult, PeriodAuditTableScaleTemplateResultListResponseDto>();
+            CreateMap<PeriodAuditFieldValues, PeriodAuditFieldValuesListResponseDto>();
         }
     }
 }

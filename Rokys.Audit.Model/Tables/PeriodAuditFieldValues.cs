@@ -4,7 +4,7 @@ namespace Rokys.Audit.Model.Tables
     {
         public Guid PeriodAuditFieldValueId { get; set; } = Guid.NewGuid();
         public Guid? AuditTemplateFieldId { get; set; }
-        public Guid? PeriodAuditTableScaleTemplateResultId { get; set; }
+        public Guid PeriodAuditTableScaleTemplateResultId { get; set; }
 
         // Información del Campo (desnormalizado)
         public string FieldCode { get; set; } = string.Empty;

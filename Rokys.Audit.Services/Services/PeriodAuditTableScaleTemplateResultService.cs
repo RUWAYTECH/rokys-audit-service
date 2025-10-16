@@ -13,6 +13,7 @@ using Rokys.Audit.Infrastructure.Persistence.Abstract;
 using Rokys.Audit.Infrastructure.Repositories;
 using Rokys.Audit.Model.Tables;
 using Rokys.Audit.Services.Interfaces;
+using Rokys.Audit.DTOs.Requests.PeriodAuditFieldValues;
 
 namespace Rokys.Audit.Services.Services
 {
@@ -24,6 +25,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IPeriodAuditFieldValuesRepository _fieldValuesRepository;
 
         public PeriodAuditTableScaleTemplateResultService(
             IPeriodAuditTableScaleTemplateResultRepository repository,
@@ -31,7 +33,8 @@ namespace Rokys.Audit.Services.Services
             ILogger<PeriodAuditTableScaleTemplateResultService> logger,
             IUnitOfWork unitOfWork,
             IAMapper mapper,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            IPeriodAuditFieldValuesRepository periodAuditFieldValuesRepository)
         {
             _repository = repository;
             _validator = validator;
@@ -39,6 +42,7 @@ namespace Rokys.Audit.Services.Services
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
+            _fieldValuesRepository = periodAuditFieldValuesRepository;
         }
 
         public async Task<ResponseDto<PeriodAuditTableScaleTemplateResultResponseDto>> Create(PeriodAuditTableScaleTemplateResultRequestDto requestDto)
@@ -183,6 +187,101 @@ namespace Rokys.Audit.Services.Services
                 _logger.LogError(ex, "Error filtering PeriodAuditTableScaleTemplateResults");
                 response.Messages.Add(new ApplicationMessage { Message = ex.Message, MessageType = ApplicationMessageType.Error });
             }
+            return response;
+        }
+
+        public async Task<ResponseDto<List<PeriodAuditTableScaleTemplateResultListResponseDto>>> GetByPeriodAuditScaleResult(Guid periodAuditScaleResultId)
+        {
+            var response = ResponseDto.Create<List<PeriodAuditTableScaleTemplateResultListResponseDto>>();
+            try
+            {
+                var entities = await _repository.GetAsync(x => x.PeriodAuditScaleResultId == periodAuditScaleResultId);
+                if (entities == null)
+                {
+                    response.WithMessage("No se encontro resultados", null, ApplicationMessageType.Error);
+                    return response;
+                }
+                var periodAuditTableScaleTemplateIds = entities
+                    .Select(e => e.PeriodAuditTableScaleTemplateResultId)
+                    .ToList();
+
+                var periodAuditFieldValues = await _fieldValuesRepository.GetAsync(
+                    x => periodAuditTableScaleTemplateIds.Contains(x.PeriodAuditTableScaleTemplateResultId)
+                );
+
+                foreach (var entity in entities)
+                {
+                    entity.PeriodAuditFieldValues = periodAuditFieldValues
+                        .Where(fv => fv.PeriodAuditTableScaleTemplateResultId == entity.PeriodAuditTableScaleTemplateResultId)
+                        .ToList();
+                }
+                response.Data = _mapper.Map<List<PeriodAuditTableScaleTemplateResultListResponseDto>>(entities);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response.Messages.Add(new ApplicationMessage { Message = ex.Message, MessageType = ApplicationMessageType.Error });
+            }
+            return response;
+        }
+
+        public async Task<ResponseDto<bool>> UpdateAllFieldValues(
+            Guid periodAuditScaleResultId,
+            PeriodAuditFieldValuesUpdateAllValuesRequestDto periodAuditFieldValuesUpdateAllValuesRequestDto)
+        {
+            var response = ResponseDto.Create<bool>();
+
+            try
+            {
+                // Buscar entidad principal
+                var entity = await _repository.GetFirstOrDefaultAsync(x => x.PeriodAuditScaleResultId == periodAuditScaleResultId);
+                if (entity == null)
+                {
+                    response.WithMessage("No se encontró resultados", null, ApplicationMessageType.Error);
+                    return response;
+                }
+
+                // Buscar valores de campo relacionados
+                var periodAuditFieldValues = await _fieldValuesRepository.GetAsync(
+                    x => x.PeriodAuditTableScaleTemplateResultId == entity.PeriodAuditTableScaleTemplateResultId);
+
+                if (periodAuditFieldValues == null || !periodAuditFieldValues.Any())
+                {
+                    response.WithMessage("No se encontraron valores de campo para actualizar", null, ApplicationMessageType.Error);
+                    return response;
+                }
+
+
+                foreach (var fieldValueDto in periodAuditFieldValuesUpdateAllValuesRequestDto.PeriodAuditFieldValues)
+                {
+                    var fieldValueEntity = periodAuditFieldValues
+                        .FirstOrDefault(fv => fv.PeriodAuditFieldValueId == fieldValueDto.PeriodAuditFieldValueId);
+
+                    if (fieldValueEntity == null)
+                        continue;
+
+                    _mapper.Map(fieldValueDto, fieldValueEntity);
+
+                    _fieldValuesRepository.Update(fieldValueEntity);
+                }
+
+                await _unitOfWork.CommitAsync();
+
+                response.Data = true;
+                response.WithMessage("Actualización completada correctamente.", null, ApplicationMessageType.Success);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, "Error al actualizar valores de campo");
+
+                response.Data = false;
+                response.Messages.Add(new ApplicationMessage
+                {
+                    Message = ex.Message,
+                    MessageType = ApplicationMessageType.Error
+                });
+            }
+
             return response;
         }
     }

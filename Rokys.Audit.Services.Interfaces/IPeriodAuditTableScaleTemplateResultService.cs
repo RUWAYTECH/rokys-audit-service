@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Rokys.Audit.DTOs.Requests.PeriodAuditTableScaleTemplateResult;
 using Rokys.Audit.DTOs.Responses.PeriodAuditTableScaleTemplateResult;
 using Rokys.Audit.DTOs.Responses.Common;
+using Rokys.Audit.DTOs.Requests.PeriodAuditFieldValues;
 
 namespace Rokys.Audit.Services.Interfaces
 {
@@ -15,5 +16,7 @@ namespace Rokys.Audit.Services.Interfaces
         Task<ResponseDto<PeriodAuditTableScaleTemplateResultResponseDto>> GetById(Guid id);
         Task<ResponseDto<List<PeriodAuditTableScaleTemplateResultResponseDto>>> GetAll();
         Task<ResponseDto<List<PeriodAuditTableScaleTemplateResultResponseDto>>> Filter(PeriodAuditTableScaleTemplateResultFilterRequestDto filter);
+        Task<ResponseDto<List<PeriodAuditTableScaleTemplateResultListResponseDto>>> GetByPeriodAuditScaleResult(Guid periodAuditScaleResultId);
+        Task<ResponseDto<bool>> UpdateAllFieldValues(Guid periodAuditScaleResultId, PeriodAuditFieldValuesUpdateAllValuesRequestDto periodAuditFieldValuesUpdateAllValuesRequestDto);
     }
 }
