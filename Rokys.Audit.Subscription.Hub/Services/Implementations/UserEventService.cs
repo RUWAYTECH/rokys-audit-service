@@ -88,7 +88,7 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
 
         private async Task UpdateUser(Guid userReferenceId, UserUpdatedEvent userEvent)
         {
-            await _userReferenceService.Update(userReferenceId, new DTOs.Requests.UserReference.UserReferenceRequestDto
+            await _userReferenceService.UpdateByUser(userReferenceId, new DTOs.Requests.UserReference.UserReferenceRequestDto
             {
                 UserId = userEvent.UserId,
                 EmployeeId = userEvent.EmployeeId,

@@ -55,5 +55,7 @@ namespace Rokys.Audit.Services.Interfaces
         /// </summary>
         /// <returns>Lista de usuarios activos</returns>
         Task<ResponseDto<List<UserReferenceResponseDto>>> GetActiveUsers();
+
+        Task<ResponseDto<UserReferenceResponseDto>> UpdateByUser(Guid userReferenceId, UserReferenceRequestDto requestDto);
     }
 }
