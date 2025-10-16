@@ -20,6 +20,7 @@ using Rokys.Audit.Model.Tables;
 using Rokys.Audit.DTOs.Responses.AuditStatus;
 using Rokys.Audit.DTOs.Responses.EmployeeStore;
 using Rokys.Audit.DTOs.Responses.PeriodAuditScaleResult;
+using Rokys.Audit.DTOs.Responses.PeriodAuditTableScaleTemplateResult;
 
 namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
 {
@@ -111,6 +112,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
             CreateMap<AuditStatus, AuditStatusResponseDto>();
             CreateMap<UserReference, UserReferenceResponseDto>();
             CreateMap<EmployeeStore, EmployeeStoreResponseDto>();
+            CreateMap<PeriodAuditTableScaleTemplateResult, PeriodAuditTableScaleTemplateResultResponseDto>();
         }
     }
 }

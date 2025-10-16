@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Rokys.Audit.DTOs.Requests.PeriodAuditGroupResult;
 using Rokys.Audit.DTOs.Requests.AuditScaleTemplate;
+using Rokys.Audit.DTOs.Requests.PeriodAuditTableScaleTemplateResult;
 using Rokys.Audit.DTOs.Requests.AuditTemplateField;
 using Rokys.Audit.DTOs.Requests.CriteriaSubResult;
 using Rokys.Audit.DTOs.Requests.Enterprise;
@@ -46,6 +47,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
             CreateMap<AuditStatusRequestDto, AuditStatus>();
             CreateMap<UserReferenceRequestDto, UserReference>();
             CreateMap<EmployeeStoreRequestDto, EmployeeStore>();
+            CreateMap<PeriodAuditTableScaleTemplateResultRequestDto, PeriodAuditTableScaleTemplateResult>();
         }
     }
 }
