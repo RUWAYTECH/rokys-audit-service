@@ -34,6 +34,8 @@ namespace Rokys.Audit.Services.Services
         private readonly IPeriodAuditScaleSubResultRepository _periodAuditScaleSubResultRepository;
         private readonly IPeriodAuditScoringCriteriaResultRepository _periodAuditScoringCriteriaResultRepository;
         private readonly IScoringCriteriaRepository _scoringCriteriaRepository;
+        private readonly IScaleCompanyRepository _scaleCompanyRepository;
+        private readonly IPeriodAuditService _periodAuditService;
 
         public PeriodAuditGroupResultService(
             IPeriodAuditGroupResultRepository repository,
@@ -51,7 +53,9 @@ namespace Rokys.Audit.Services.Services
             ICriteriaSubResultRepository criteriaSubResultRepository,
             IPeriodAuditScaleSubResultRepository periodAuditScaleSubResultRepository,
             IPeriodAuditScoringCriteriaResultRepository periodAuditScoringCriteriaResultRepository,
-            IScoringCriteriaRepository scoringCriteriaRepository)
+            IScoringCriteriaRepository scoringCriteriaRepository,
+            IScaleCompanyRepository scaleCompanyRepository,
+            IPeriodAuditService periodAuditService)
         {
             _repository = repository;
             _validator = validator;
@@ -69,6 +73,8 @@ namespace Rokys.Audit.Services.Services
             _periodAuditScaleSubResultRepository = periodAuditScaleSubResultRepository;
             _periodAuditScoringCriteriaResultRepository = periodAuditScoringCriteriaResultRepository;
             _scoringCriteriaRepository = scoringCriteriaRepository;
+            _scaleCompanyRepository = scaleCompanyRepository;
+            _periodAuditService = periodAuditService;
         }
         public async Task<ResponseDto<PeriodAuditGroupResultResponseDto>> Create(PeriodAuditGroupResultRequestDto requestDto)
         {
@@ -415,6 +421,62 @@ namespace Rokys.Audit.Services.Services
             {
                 _logger.LogError(ex.Message);
                 response = ResponseDto.Error<PaginationResponseDto<PeriodAuditGroupResultResponseDto>>(ex.Message);
+            }
+            return response;
+        }
+
+        public async Task<ResponseDto<bool>> Recalculate(Guid periodAuditGroupResultId)
+        {
+            var response = ResponseDto.Create<bool>();
+            try
+            {
+                var entity = await _repository.GetFirstOrDefaultAsync(
+                    filter: x => x.PeriodAuditGroupResultId == periodAuditGroupResultId && x.IsActive,
+                    includeProperties: [x => x.Group, y => y.PeriodAudit.Store]);
+
+                var periodAuditScaleResult = await _periodAuditScaleResultRepository.GetByPeriodAuditGroupResultId(periodAuditGroupResultId);
+                decimal acumulatedScore = 0;
+                foreach (var scaleResult in periodAuditScaleResult)
+                {
+                    var scaleScore = (scaleResult.AppliedWeighting / 100) *  scaleResult.ScoreValue;
+                    acumulatedScore += scaleScore;
+                }
+                var scaleCompany = await _scaleCompanyRepository.GetByEnterpriseIdAsync(entity.PeriodAudit.Store!.EnterpriseId);
+                if (scaleCompany == null)
+                {
+                    response = ResponseDto.Error<bool>("No se encontró la escala asociada a la empresa.");
+                    return response;
+                }
+
+                bool scaleFound = false;
+                foreach (var scale in scaleCompany)
+                {
+                    if (acumulatedScore >= scale.MinValue && acumulatedScore <= scale.MaxValue)
+                    {
+                        entity.ScaleDescription = scale.Name;
+                        entity.ScaleColor = scale.ColorCode;
+                        scaleFound = true;
+                        break;
+                    }
+                }
+
+                if (!scaleFound)
+                {
+                    response = ResponseDto.Error<bool>("No se encontró una escala válida para la puntuación calculada.");
+                    return response;
+                }
+                entity.ScoreValue = acumulatedScore;
+                _repository.Update(entity);
+
+                await _unitOfWork.CommitAsync();
+
+                await _periodAuditService.Recalculate(entity.PeriodAuditId);
+                response.Data = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response = ResponseDto.Error<bool>(ex.Message);
             }
             return response;
         }

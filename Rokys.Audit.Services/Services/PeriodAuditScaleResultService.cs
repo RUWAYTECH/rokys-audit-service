@@ -31,6 +31,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IScaleCompanyRepository _scaleCompanyRepository;
         private readonly IPeriodAuditScoringCriteriaResultRepository _periodAuditScoringCriteriaResultRepository;
         private readonly IPeriodAuditScaleSubResultRepository _periodAuditScaleSubResultRepository;
+        private readonly IPeriodAuditGroupResultService _periodAuditGroupResultService;
 
         public PeriodAuditScaleResultService(
             IPeriodAuditScaleResultRepository repository,
@@ -44,7 +45,8 @@ namespace Rokys.Audit.Services.Services
             IScoringCriteriaRepository scoringCriteriaRepository,
             IScaleCompanyRepository scaleCompanyRepository,
             IPeriodAuditScoringCriteriaResultRepository periodAuditScoringCriteriaResultRepository,
-            IPeriodAuditScaleSubResultRepository periodAuditScaleSubResultRepository)
+            IPeriodAuditScaleSubResultRepository periodAuditScaleSubResultRepository,
+            IPeriodAuditGroupResultService periodAuditGroupResultService)
         {
             _repository = repository;
             _validator = validator;
@@ -58,6 +60,7 @@ namespace Rokys.Audit.Services.Services
             _scaleCompanyRepository = scaleCompanyRepository;
             _periodAuditScoringCriteriaResultRepository = periodAuditScoringCriteriaResultRepository;
             _periodAuditScaleSubResultRepository = periodAuditScaleSubResultRepository;
+            _periodAuditGroupResultService = periodAuditGroupResultService;
         }
 
         public async Task<ResponseDto<PeriodAuditScaleResultResponseDto>> Create(PeriodAuditScaleResultRequestDto requestDto)
@@ -275,14 +278,10 @@ namespace Rokys.Audit.Services.Services
                     return response;
                 }
                 // Guardar el PeriodAuditScoringCriteriaResult
-                var newScoringCriteriaResult = new PeriodAuditScoringCriteriaResult
-                {
-                    PeriodAuditScaleResultId = periodAuditScaleResultId,
-                    ResultObtained = periodAuditFieldValuesUpdateAllValuesRequestDto.ResultObtained,
-                };
+                scoringCriteriaResult.ResultObtained = periodAuditFieldValuesUpdateAllValuesRequestDto.ResultObtained;
                 var currentUser = _httpContextAccessor.CurrentUser();
-                newScoringCriteriaResult.UpdateAudit(currentUser.UserName);
-                _periodAuditScoringCriteriaResultRepository.Update(newScoringCriteriaResult);
+                scoringCriteriaResult.UpdateAudit(currentUser.UserName);
+                _periodAuditScoringCriteriaResultRepository.Update(scoringCriteriaResult);
 
                 // Actualizar los PeriodAuditScaleSubResult
                 foreach (var subResultDto in periodAuditFieldValuesUpdateAllValuesRequestDto.PeriodAuditScaleSubResult)
@@ -302,15 +301,22 @@ namespace Rokys.Audit.Services.Services
 
                 periodAuditScaleResults.ScoreValue = scoringCriteriaResult.Score;
                 // Actualizar color y descripción de la escala según el nuevo puntaje
+                bool foundScale = false;
                 foreach (var scale in scaleCompany)
                 {
                     if (periodAuditScaleResults.ScoreValue <= scale.MaxValue && periodAuditScaleResults.ScoreValue >= scale.MinValue)
                     {
                         periodAuditScaleResults.ScaleColor = scale.ColorCode;
                         periodAuditScaleResults.ScaleDescription = scale.Name;
+                        foundScale = true;
                         break;
                     }
                     
+                }
+                if (!foundScale)
+                {
+                    response.WithMessage("No se encontró una escala correspondiente para el puntaje obtenido", null, ApplicationMessageType.Error);
+                    return response;
                 }
                 _repository.Update(periodAuditScaleResults);
 
@@ -342,6 +348,8 @@ namespace Rokys.Audit.Services.Services
                 }
 
                 await _unitOfWork.CommitAsync();
+
+                await _periodAuditGroupResultService.Recalculate(periodAuditScaleResults.PeriodAuditGroupResultId);
 
                 response.Data = true;
                 response.WithMessage("Actualización completada correctamente.", null, ApplicationMessageType.Success);

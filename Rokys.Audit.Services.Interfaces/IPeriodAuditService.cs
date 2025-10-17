@@ -10,5 +10,6 @@ namespace Rokys.Audit.Services.Interfaces
     public interface IPeriodAuditService : IBaseService<PeriodAuditRequestDto, PeriodAuditResponseDto>
     {
         Task<ResponseDto<PaginationResponseDto<PeriodAuditResponseDto>>> GetPaged(PeriodAuditFilterRequestDto requestDto);
+        Task<ResponseDto<bool>> Recalculate(Guid periodAuditId);
     }
 }

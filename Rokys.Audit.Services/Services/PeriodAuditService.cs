@@ -26,6 +26,8 @@ namespace Rokys.Audit.Services.Services
         private readonly IAMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IAuditStatusRepository _auditStatusRepository;
+        private readonly IPeriodAuditGroupResultRepository _periodAuditGroupResultRepository;
+        private readonly IScaleCompanyRepository _scaleCompanyRepository;
 
         public PeriodAuditService(
             IRepository<PeriodAudit> repository,
@@ -34,7 +36,9 @@ namespace Rokys.Audit.Services.Services
             IUnitOfWork unitOfWork,
             IAMapper mapper,
             IHttpContextAccessor httpContextAccessor,
-            IAuditStatusRepository auditStatusRepository)
+            IAuditStatusRepository auditStatusRepository,
+            IPeriodAuditGroupResultRepository periodAuditGroupResultRepository,
+            IScaleCompanyRepository scaleCompanyRepository)
         {
             _repository = repository;
             _validator = validator;
@@ -43,6 +47,8 @@ namespace Rokys.Audit.Services.Services
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
             _auditStatusRepository = auditStatusRepository;
+            _periodAuditGroupResultRepository = periodAuditGroupResultRepository;
+            _scaleCompanyRepository = scaleCompanyRepository;
         }
 
         public async Task<ResponseDto<PeriodAuditResponseDto>> Create(PeriodAuditRequestDto requestDto)
@@ -206,6 +212,63 @@ namespace Rokys.Audit.Services.Services
             {
                 _logger.LogError(ex.Message);
                 response = ResponseDto.Error<PaginationResponseDto<PeriodAuditResponseDto>>(ex.Message);
+            }
+            return response;
+        }
+
+        public async Task<ResponseDto<bool>> Recalculate(Guid periodAuditId)
+        {
+            var response = ResponseDto.Create<bool>();
+            try
+            {
+                var entity = await _repository.GetFirstOrDefaultAsync(x=>x.PeriodAuditId == periodAuditId && x.IsActive, includeProperties: [x=>x.Store]);
+                if (entity == null)
+                {
+                    response = ResponseDto.Error<bool>("No se encontró el registro.");
+                    return response;
+                }
+                var periodAuditGroupResults = _periodAuditGroupResultRepository.GetByPeriodAuditIdAsync(periodAuditId);
+                decimal acumulatedScore = 0;
+                foreach (var groupResult in await periodAuditGroupResults)
+                {
+                    var score = groupResult.ScoreValue * (groupResult.TotalWeighting / 100);
+                    acumulatedScore += score;
+                }
+                var scaleCompany = await _scaleCompanyRepository.GetByEnterpriseIdAsync(entity.Store!.EnterpriseId);
+                if (scaleCompany == null) {
+                    response = ResponseDto.Error<bool>("No se encontró la escala asociada a la empresa.");
+                    return response;
+                }
+
+                bool scaleFound = false;
+                foreach (var scale in scaleCompany)
+                {
+                    if (acumulatedScore >= scale.MinValue && acumulatedScore <= scale.MaxValue)
+                    {
+                        entity.ScaleName = scale.Name;
+                        entity.ScaleIcon = scale.Icon;
+                        entity.ScaleColor = scale.ColorCode;
+                        scaleFound = true;
+                        break;
+                    }
+                }
+
+                if (!scaleFound)
+                {
+                    response = ResponseDto.Error<bool>("No se encontró una escala válida para la puntuación calculada.");
+                    return response;
+                }
+
+                entity.ScoreValue = acumulatedScore;
+                _repository.Update(entity);
+
+                await _unitOfWork.CommitAsync();
+                response.Data = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response = ResponseDto.Error<bool>(ex.Message);
             }
             return response;
         }

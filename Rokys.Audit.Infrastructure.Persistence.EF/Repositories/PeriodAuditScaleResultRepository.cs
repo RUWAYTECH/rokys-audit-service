@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Rokys.Audit.Infrastructure.Persistence.Abstract;
 using Rokys.Audit.Infrastructure.Persistence.EF.Storage;
 using Rokys.Audit.Infrastructure.Repositories;
 using Rokys.Audit.Model.Tables;
