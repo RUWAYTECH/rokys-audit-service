@@ -63,5 +63,14 @@ namespace Rokys.Audit.WebAPI.Controllers
                 return Ok(result);
             return BadRequest(result);
         }
+
+        [HttpGet("custom/{id}")]
+        public async Task<IActionResult> GetByIdCustomData(Guid id)
+        {
+            var result = await _service.GetByIdCustomData(id);
+            if (result.IsValid)
+                return Ok(result);
+            return BadRequest(result);
+        }
     }
 }

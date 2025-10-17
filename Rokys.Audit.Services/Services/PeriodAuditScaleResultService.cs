@@ -24,6 +24,8 @@ namespace Rokys.Audit.Services.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IPeriodAuditRepository _periodAuditRepository;
+        private readonly IPeriodAuditGroupResultRepository _periodAuditGroupResultRepository;
 
         public PeriodAuditScaleResultService(
             IPeriodAuditScaleResultRepository repository,
@@ -31,7 +33,9 @@ namespace Rokys.Audit.Services.Services
             ILogger<PeriodAuditScaleResultService> logger,
             IUnitOfWork unitOfWork,
             IAMapper mapper,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            IPeriodAuditRepository periodAuditRepository,
+            IPeriodAuditGroupResultRepository periodAuditGroupResultRepository)
         {
             _repository = repository;
             _validator = validator;
@@ -39,6 +43,8 @@ namespace Rokys.Audit.Services.Services
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
+            _periodAuditRepository = periodAuditRepository;
+            _periodAuditGroupResultRepository = periodAuditGroupResultRepository;
         }
 
         public async Task<ResponseDto<PeriodAuditScaleResultResponseDto>> Create(PeriodAuditScaleResultRequestDto requestDto)
@@ -192,6 +198,35 @@ namespace Rokys.Audit.Services.Services
             {
                 _logger.LogError(ex.Message);
                 response = ResponseDto.Error<PaginationResponseDto<PeriodAuditScaleResultResponseDto>>(ex.Message);
+            }
+            return response;
+        }
+
+        public async Task<ResponseDto<PeriodAuditScaleResultCustomResponseDto>> GetByIdCustomData(Guid id)
+        {
+            var response = ResponseDto.Create<PeriodAuditScaleResultCustomResponseDto>();
+            try
+            {
+                var entity = await _repository.GetFirstOrDefaultAsync(filter: x => x.PeriodAuditScaleResultId == id, 
+                    includeProperties: [ e => e.PeriodAuditGroupResult.PeriodAudit.Store.Enterprise,
+                        sg => sg.ScaleGroup,
+                        a => a.PeriodAuditGroupResult.PeriodAudit.Administrator,
+                        op => op.PeriodAuditGroupResult.PeriodAudit.OperationManager,
+                        fa => fa.PeriodAuditGroupResult.PeriodAudit.FloatingAdministrator,
+                        ra => ra.PeriodAuditGroupResult.PeriodAudit.ResponsibleAuditor,
+                        asi => asi.PeriodAuditGroupResult.PeriodAudit.Assistant]);
+                if (entity == null)
+                {
+                    response.Messages.Add(new ApplicationMessage { Message = "No se encontro la entidad", MessageType = ApplicationMessageType.Error });
+                    return response;
+                }
+                var customDto = _mapper.Map<PeriodAuditScaleResultCustomResponseDto>(entity);
+                response.Data = customDto;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response.Messages.Add(new ApplicationMessage { Message = ex.Message, MessageType = ApplicationMessageType.Error });
             }
             return response;
         }
