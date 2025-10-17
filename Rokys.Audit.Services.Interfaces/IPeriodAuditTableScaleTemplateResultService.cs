@@ -17,6 +17,5 @@ namespace Rokys.Audit.Services.Interfaces
         Task<ResponseDto<List<PeriodAuditTableScaleTemplateResultResponseDto>>> GetAll();
         Task<ResponseDto<List<PeriodAuditTableScaleTemplateResultResponseDto>>> Filter(PeriodAuditTableScaleTemplateResultFilterRequestDto filter);
         Task<ResponseDto<List<PeriodAuditTableScaleTemplateResultListResponseDto>>> GetByPeriodAuditScaleResult(Guid periodAuditScaleResultId);
-        Task<ResponseDto<bool>> UpdateAllFieldValues(Guid periodAuditScaleResultId, PeriodAuditFieldValuesUpdateAllValuesRequestDto periodAuditFieldValuesUpdateAllValuesRequestDto);
     }
 }

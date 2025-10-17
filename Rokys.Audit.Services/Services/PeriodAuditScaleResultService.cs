@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Reatil.Services.Services;
 using Rokys.Audit.Common.Extensions;
 using Rokys.Audit.DTOs.Common;
+using Rokys.Audit.DTOs.Requests.PeriodAuditFieldValues;
 using Rokys.Audit.DTOs.Requests.PeriodAuditScaleResult;
 using Rokys.Audit.DTOs.Responses.Common;
 using Rokys.Audit.DTOs.Responses.PeriodAuditScaleResult;
@@ -24,8 +25,11 @@ namespace Rokys.Audit.Services.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IPeriodAuditRepository _periodAuditRepository;
-        private readonly IPeriodAuditGroupResultRepository _periodAuditGroupResultRepository;
+        private readonly IPeriodAuditTableScaleTemplateResultRepository _periodAuditTableScaleTemplateResultRepository;
+        private readonly IPeriodAuditFieldValuesRepository _fieldValuesRepository;
+        private readonly IScoringCriteriaRepository _scoringCriteriaRepository;
+        private readonly IScaleCompanyRepository _scaleCompanyRepository;
+        private readonly IPeriodAuditScoringCriteriaResultRepository _periodAuditScoringCriteriaResultRepository;
 
         public PeriodAuditScaleResultService(
             IPeriodAuditScaleResultRepository repository,
@@ -34,8 +38,11 @@ namespace Rokys.Audit.Services.Services
             IUnitOfWork unitOfWork,
             IAMapper mapper,
             IHttpContextAccessor httpContextAccessor,
-            IPeriodAuditRepository periodAuditRepository,
-            IPeriodAuditGroupResultRepository periodAuditGroupResultRepository)
+            IPeriodAuditTableScaleTemplateResultRepository periodAuditTableScaleTemplateResultRepository,
+            IPeriodAuditFieldValuesRepository fieldValuesRepository,
+            IScoringCriteriaRepository scoringCriteriaRepository,
+            IScaleCompanyRepository scaleCompanyRepository,
+            IPeriodAuditScoringCriteriaResultRepository periodAuditScoringCriteriaResultRepository)
         {
             _repository = repository;
             _validator = validator;
@@ -43,8 +50,11 @@ namespace Rokys.Audit.Services.Services
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
-            _periodAuditRepository = periodAuditRepository;
-            _periodAuditGroupResultRepository = periodAuditGroupResultRepository;
+            _periodAuditTableScaleTemplateResultRepository = periodAuditTableScaleTemplateResultRepository;
+            _fieldValuesRepository = fieldValuesRepository;
+            _scoringCriteriaRepository = scoringCriteriaRepository;
+            _scaleCompanyRepository = scaleCompanyRepository;
+            _periodAuditScoringCriteriaResultRepository = periodAuditScoringCriteriaResultRepository;
         }
 
         public async Task<ResponseDto<PeriodAuditScaleResultResponseDto>> Create(PeriodAuditScaleResultRequestDto requestDto)
@@ -228,6 +238,112 @@ namespace Rokys.Audit.Services.Services
                 _logger.LogError(ex.Message);
                 response.Messages.Add(new ApplicationMessage { Message = ex.Message, MessageType = ApplicationMessageType.Error });
             }
+            return response;
+        }
+
+        public async Task<ResponseDto<bool>> UpdateAllFieldValues(
+            Guid periodAuditScaleResultId,
+            PeriodAuditFieldValuesUpdateAllValuesRequestDto periodAuditFieldValuesUpdateAllValuesRequestDto)
+        {
+            var response = ResponseDto.Create<bool>();
+            try
+            {
+                if (periodAuditFieldValuesUpdateAllValuesRequestDto.ScoringCriteriaId == Guid.Empty)
+                {
+                    response.WithMessage("El ID de criterio de puntuación no puede estar vacío", null, ApplicationMessageType.Error);
+                    return response;
+                }
+                var scoringCriteriaResult = await _scoringCriteriaRepository.GetFirstOrDefaultAsync(
+                    x => x.ScoringCriteriaId == periodAuditFieldValuesUpdateAllValuesRequestDto.ScoringCriteriaId && x.IsActive);
+                if (scoringCriteriaResult == null)
+                {
+                    response.WithMessage("No se encontró el criterio de puntuación para el ID proporcionado", null, ApplicationMessageType.Error);
+                    return response;
+                }
+
+                var periodAuditScaleResults = await _repository.GetFirstOrDefaultAsync(x => x.PeriodAuditScaleResultId == periodAuditScaleResultId && x.IsActive);
+                if (periodAuditScaleResults == null)
+                {
+                    response.WithMessage("No se encontró el resultado del grupo de auditoría para el ID proporcionado", null, ApplicationMessageType.Error);
+                    return response;
+                }
+                // Guardar el PeriodAuditScoringCriteriaResult
+                var newScoringCriteriaResult = new PeriodAuditScoringCriteriaResult
+                {
+                    PeriodAuditScaleResultId = periodAuditScaleResultId,
+                    CriteriaName = scoringCriteriaResult.CriteriaName,
+                    CriteriaCode = scoringCriteriaResult.CriteriaCode,
+                    Score = scoringCriteriaResult.Score,
+                    ResultFormula = scoringCriteriaResult.ResultFormula,
+                    ComparisonOperator = scoringCriteriaResult.ComparisonOperator,
+                    ExpectedValue = scoringCriteriaResult.ExpectedValue,
+                    ResultObtained = periodAuditFieldValuesUpdateAllValuesRequestDto.ResultObtained,
+                };
+                var currentUser = _httpContextAccessor.CurrentUser();
+                newScoringCriteriaResult.CreateAudit(currentUser.UserName);
+                _periodAuditScoringCriteriaResultRepository.Insert(newScoringCriteriaResult);
+
+                var customResponse = await this.GetByIdCustomData(periodAuditScaleResultId);
+                var scaleCompany = await _scaleCompanyRepository.GetAsync(x => x.EnterpriseId == customResponse.Data.PeriodAudit.EnterpriseId && x.IsActive);
+
+                periodAuditScaleResults.ScoreValue = scoringCriteriaResult.Score;
+                // Actualizar color y descripción de la escala según el nuevo puntaje
+                foreach (var scale in scaleCompany)
+                {
+                    if (periodAuditScaleResults.ScoreValue <= scale.MaxValue && periodAuditScaleResults.ScoreValue >= scale.MinValue)
+                    {
+                        periodAuditScaleResults.ScaleColor = scale.ColorCode;
+                        periodAuditScaleResults.ScaleDescription = scale.Name;
+                        break;
+                    }
+                    
+                }
+                _repository.Update(periodAuditScaleResults);
+
+                var periodAuditTableScaleTemplateResults = await _periodAuditTableScaleTemplateResultRepository.GetAsync(x=>x.PeriodAuditScaleResultId == periodAuditScaleResults.PeriodAuditScaleResultId && x.IsActive);
+
+                var periodAuditTableScaleTemplateResultIds = periodAuditTableScaleTemplateResults
+                    .Select(x => x.PeriodAuditTableScaleTemplateResultId)
+                    .ToList();
+
+                // Buscar valores de campo relacionados
+                var periodAuditFieldValues = await _fieldValuesRepository.GetAsync(
+                    x => periodAuditTableScaleTemplateResultIds.Contains(x.PeriodAuditTableScaleTemplateResultId) && x.IsActive);
+
+                if (periodAuditFieldValues == null || !periodAuditFieldValues.Any())
+                {
+                    response.WithMessage("No se encontraron valores de campo para actualizar", null, ApplicationMessageType.Error);
+                    return response;
+                }
+
+                foreach (var fieldValueDto in periodAuditFieldValuesUpdateAllValuesRequestDto.PeriodAuditFieldValues)
+                {
+                    var fieldValueEntity = periodAuditFieldValues
+                        .FirstOrDefault(fv => fv.PeriodAuditFieldValueId == fieldValueDto.PeriodAuditFieldValueId);
+
+                    if (fieldValueEntity == null)
+                        continue;
+                    _mapper.Map(fieldValueDto, fieldValueEntity);
+                    _fieldValuesRepository.Update(fieldValueEntity);
+                }
+
+                await _unitOfWork.CommitAsync();
+
+                response.Data = true;
+                response.WithMessage("Actualización completada correctamente.", null, ApplicationMessageType.Success);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, "Error al actualizar valores de campo");
+
+                response.Data = false;
+                response.Messages.Add(new ApplicationMessage
+                {
+                    Message = ex.Message,
+                    MessageType = ApplicationMessageType.Error
+                });
+            }
+
             return response;
         }
     }

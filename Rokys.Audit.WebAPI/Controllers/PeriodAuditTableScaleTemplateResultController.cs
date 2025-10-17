@@ -77,12 +77,5 @@ namespace Rokys.Audit.WebAPI.Controllers
             if (result.Data == null) return NotFound(result);
             return Ok(result);
         }
-
-        [HttpPut("updatebyperiodauditsacaleresult/{id}")]
-        public async Task<IActionResult> UpdateAllFieldValues([FromRoute]Guid id, [FromBody] PeriodAuditFieldValuesUpdateAllValuesRequestDto request)
-        {
-            var result = await _service.UpdateAllFieldValues(id, request);
-            return Ok(result);
-        }
     }
 }

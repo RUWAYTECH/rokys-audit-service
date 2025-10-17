@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Rokys.Audit.DTOs.Requests.PeriodAuditFieldValues;
 using Rokys.Audit.DTOs.Requests.PeriodAuditScaleResult;
 using Rokys.Audit.Services.Interfaces;
 using System;
@@ -68,6 +69,15 @@ namespace Rokys.Audit.WebAPI.Controllers
         public async Task<IActionResult> GetByIdCustomData(Guid id)
         {
             var result = await _service.GetByIdCustomData(id);
+            if (result.IsValid)
+                return Ok(result);
+            return BadRequest(result);
+        }
+
+        [HttpPut("update-all-field-values/{periodAuditScaleResultId}")]
+        public async Task<IActionResult> UpdateAllFieldValues(Guid periodAuditScaleResultId, [FromBody] PeriodAuditFieldValuesUpdateAllValuesRequestDto periodAuditFieldValuesUpdateAllValuesRequestDto)
+        {
+            var result = await _service.UpdateAllFieldValues(periodAuditScaleResultId, periodAuditFieldValuesUpdateAllValuesRequestDto);
             if (result.IsValid)
                 return Ok(result);
             return BadRequest(result);
