@@ -449,7 +449,7 @@ CREATE TABLE PeriodAuditTableScaleTemplateResult (
     PeriodAuditScaleResultId UNIQUEIDENTIFIER NOT NULL 
         FOREIGN KEY REFERENCES PeriodAuditScaleResult(PeriodAuditScaleResultId) ON DELETE CASCADE,
     TableScaleTemplateId UNIQUEIDENTIFIER NULL,
-    Code NVARCHAR(50) UNIQUE NOT NULL,
+    Code NVARCHAR(50) NOT NULL,
     Name NVARCHAR(255) NOT NULL,
     Orientation NVARCHAR(2) DEFAULT 'V', -- 'vertical' o 'horizontal'
     CONSTRAINT CK_PeriodAuditTableScaleTemplateResult_Orientation
