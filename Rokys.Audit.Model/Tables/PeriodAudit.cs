@@ -13,6 +13,7 @@ namespace Rokys.Audit.Model.Tables
         public Guid? OperationManagersId { get; set; }
         public Guid? FloatingAdministratorId { get; set; }
         public Guid? ResponsibleAuditorId { get; set; }
+        public Guid? SupervisorId { get; set; }
 
         // Dates
         public DateTime StartDate { get; set; }
@@ -46,7 +47,8 @@ namespace Rokys.Audit.Model.Tables
         public virtual UserReference? OperationManager { get; set; }
         public virtual UserReference? FloatingAdministrator { get; set; }
         public virtual UserReference? ResponsibleAuditor { get; set; }
-        
+        public virtual UserReference? Supervisor { get; set; }
+
         public virtual ICollection<PeriodAuditResult> PeriodAuditResults { get; set; } = new List<PeriodAuditResult>();
     public virtual ICollection<PeriodAuditGroupResult> PeriodAuditGroupResults { get; set; } = new List<PeriodAuditGroupResult>();
     }

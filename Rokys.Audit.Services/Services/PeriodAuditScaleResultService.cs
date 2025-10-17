@@ -30,6 +30,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IScoringCriteriaRepository _scoringCriteriaRepository;
         private readonly IScaleCompanyRepository _scaleCompanyRepository;
         private readonly IPeriodAuditScoringCriteriaResultRepository _periodAuditScoringCriteriaResultRepository;
+        private readonly IPeriodAuditScaleSubResultRepository _periodAuditScaleSubResultRepository;
 
         public PeriodAuditScaleResultService(
             IPeriodAuditScaleResultRepository repository,
@@ -42,7 +43,8 @@ namespace Rokys.Audit.Services.Services
             IPeriodAuditFieldValuesRepository fieldValuesRepository,
             IScoringCriteriaRepository scoringCriteriaRepository,
             IScaleCompanyRepository scaleCompanyRepository,
-            IPeriodAuditScoringCriteriaResultRepository periodAuditScoringCriteriaResultRepository)
+            IPeriodAuditScoringCriteriaResultRepository periodAuditScoringCriteriaResultRepository,
+            IPeriodAuditScaleSubResultRepository periodAuditScaleSubResultRepository)
         {
             _repository = repository;
             _validator = validator;
@@ -55,6 +57,7 @@ namespace Rokys.Audit.Services.Services
             _scoringCriteriaRepository = scoringCriteriaRepository;
             _scaleCompanyRepository = scaleCompanyRepository;
             _periodAuditScoringCriteriaResultRepository = periodAuditScoringCriteriaResultRepository;
+            _periodAuditScaleSubResultRepository = periodAuditScaleSubResultRepository;
         }
 
         public async Task<ResponseDto<PeriodAuditScaleResultResponseDto>> Create(PeriodAuditScaleResultRequestDto requestDto)
@@ -224,12 +227,16 @@ namespace Rokys.Audit.Services.Services
                         op => op.PeriodAuditGroupResult.PeriodAudit.OperationManager,
                         fa => fa.PeriodAuditGroupResult.PeriodAudit.FloatingAdministrator,
                         ra => ra.PeriodAuditGroupResult.PeriodAudit.ResponsibleAuditor,
-                        asi => asi.PeriodAuditGroupResult.PeriodAudit.Assistant]);
+                        asi => asi.PeriodAuditGroupResult.PeriodAudit.Assistant,
+                        su => su.PeriodAuditGroupResult.PeriodAudit.Supervisor,
+                        pas => pas.PeriodAuditScaleSubResults,
+                        pasc => pasc.PeriodAuditScoringCriteriaResults]);
                 if (entity == null)
                 {
                     response.Messages.Add(new ApplicationMessage { Message = "No se encontro la entidad", MessageType = ApplicationMessageType.Error });
                     return response;
                 }
+
                 var customDto = _mapper.Map<PeriodAuditScaleResultCustomResponseDto>(entity);
                 response.Data = customDto;
             }
@@ -248,13 +255,13 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<bool>();
             try
             {
-                if (periodAuditFieldValuesUpdateAllValuesRequestDto.ScoringCriteriaId == Guid.Empty)
+                if (periodAuditFieldValuesUpdateAllValuesRequestDto.PeriodAuditScoringCriteriaResultId == Guid.Empty)
                 {
                     response.WithMessage("El ID de criterio de puntuación no puede estar vacío", null, ApplicationMessageType.Error);
                     return response;
                 }
-                var scoringCriteriaResult = await _scoringCriteriaRepository.GetFirstOrDefaultAsync(
-                    x => x.ScoringCriteriaId == periodAuditFieldValuesUpdateAllValuesRequestDto.ScoringCriteriaId && x.IsActive);
+                var scoringCriteriaResult = await _periodAuditScoringCriteriaResultRepository.GetFirstOrDefaultAsync(
+                    x => x.PeriodAuditScoringCriteriaResultId == periodAuditFieldValuesUpdateAllValuesRequestDto.PeriodAuditScoringCriteriaResultId && x.IsActive);
                 if (scoringCriteriaResult == null)
                 {
                     response.WithMessage("No se encontró el criterio de puntuación para el ID proporcionado", null, ApplicationMessageType.Error);
@@ -271,17 +278,24 @@ namespace Rokys.Audit.Services.Services
                 var newScoringCriteriaResult = new PeriodAuditScoringCriteriaResult
                 {
                     PeriodAuditScaleResultId = periodAuditScaleResultId,
-                    CriteriaName = scoringCriteriaResult.CriteriaName,
-                    CriteriaCode = scoringCriteriaResult.CriteriaCode,
-                    Score = scoringCriteriaResult.Score,
-                    ResultFormula = scoringCriteriaResult.ResultFormula,
-                    ComparisonOperator = scoringCriteriaResult.ComparisonOperator,
-                    ExpectedValue = scoringCriteriaResult.ExpectedValue,
                     ResultObtained = periodAuditFieldValuesUpdateAllValuesRequestDto.ResultObtained,
                 };
                 var currentUser = _httpContextAccessor.CurrentUser();
-                newScoringCriteriaResult.CreateAudit(currentUser.UserName);
-                _periodAuditScoringCriteriaResultRepository.Insert(newScoringCriteriaResult);
+                newScoringCriteriaResult.UpdateAudit(currentUser.UserName);
+                _periodAuditScoringCriteriaResultRepository.Update(newScoringCriteriaResult);
+
+                // Actualizar los PeriodAuditScaleSubResult
+                foreach (var subResultDto in periodAuditFieldValuesUpdateAllValuesRequestDto.PeriodAuditScaleSubResult)
+                {
+                    var subResultEntity = await _periodAuditScaleSubResultRepository.GetFirstOrDefaultAsync(
+                        x => x.PeriodAuditScaleSubResultId == subResultDto.PeriodAuditScaleSubResultId && x.IsActive);
+                    if (subResultEntity != null)
+                    {
+                        subResultEntity.ScoreObtained = subResultDto.ScoreObtained;
+                        subResultEntity.UpdateAudit(currentUser.UserName);
+                        _periodAuditScaleSubResultRepository.Update(subResultEntity);
+                    }
+                }
 
                 var customResponse = await this.GetByIdCustomData(periodAuditScaleResultId);
                 var scaleCompany = await _scaleCompanyRepository.GetAsync(x => x.EnterpriseId == customResponse.Data.PeriodAudit.EnterpriseId && x.IsActive);

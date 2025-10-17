@@ -89,6 +89,12 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .HasForeignKey(pa => pa.ResponsibleAuditorId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // Navegación - Supervisores
+            builder.HasMany(ur => ur.SupervisorAudits)
+                .WithOne(pa => pa.Supervisor)
+                .HasForeignKey(pa => pa.SupervisorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             // Navegación - EmployeeStores
             builder.HasMany(ur => ur.EmployeeStores)
                 .WithOne(es => es.UserReference)

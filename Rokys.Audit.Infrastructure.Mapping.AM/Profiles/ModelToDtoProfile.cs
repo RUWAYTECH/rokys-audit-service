@@ -21,6 +21,8 @@ using Rokys.Audit.DTOs.Responses.AuditStatus;
 using Rokys.Audit.DTOs.Responses.EmployeeStore;
 using Rokys.Audit.DTOs.Responses.PeriodAuditScaleResult;
 using Rokys.Audit.DTOs.Responses.PeriodAuditTableScaleTemplateResult;
+using Rokys.Audit.DTOs.Responses.PeriodAuditScoringCriteriaResult;
+using Rokys.Audit.DTOs.Responses.PeriodAuditScaleSubResult;
 
 namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
 {
@@ -153,7 +155,37 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                         Weighting = src.ScaleGroup.Weighting,
                         IsActive = src.ScaleGroup.IsActive,
                     };
+                    dest.PeriodAuditScaleSubResult = src.PeriodAuditScaleSubResults.Select(subResult => new PeriodAuditScaleSubResultResponseDto
+                    {
+                        PeriodAuditScaleSubResultId = subResult.PeriodAuditScaleSubResultId,
+                        PeriodAuditScaleResultId = subResult.PeriodAuditScaleResultId,
+                        CriteriaSubResultId = subResult.CriteriaSubResultId,
+                        IsActive = subResult.IsActive,
+                        CriteriaCode = subResult.CriteriaCode,
+                        CriteriaName = subResult.CriteriaName,
+                        EvaluatedValue = subResult.EvaluatedValue,
+                        CalculatedResult = subResult.CalculatedResult,
+                        AppliedFormula = subResult.AppliedFormula,
+                        ScoreObtained = subResult.ScoreObtained,
+                        ColorCode = subResult.ColorCode
+                    }).ToList();
+                    dest.PeriodAuditScoringCriteriaResult = src.PeriodAuditScoringCriteriaResults.Select(criteriaResult => new PeriodAuditScoringCriteriaResultResponseDto
+                    {
+                        PeriodAuditScoringCriteriaResultId = criteriaResult.PeriodAuditScoringCriteriaResultId,
+                        PeriodAuditScaleResultId = criteriaResult.PeriodAuditScaleResultId,
+                        IsActive = criteriaResult.IsActive,
+                        CriteriaCode = criteriaResult.CriteriaCode,
+                        CriteriaName = criteriaResult.CriteriaName,
+                        ResultFormula = criteriaResult.ResultFormula,
+                        ComparisonOperator = criteriaResult.ComparisonOperator,
+                        ExpectedValue = criteriaResult.ExpectedValue,
+                        Score = criteriaResult.Score,
+                        ResultObtained = criteriaResult.ResultObtained,
+
+                    }).ToList();
                 });
+            CreateMap<PeriodAuditScoringCriteriaResult, PeriodAuditScoringCriteriaResultResponseDto>();
+            CreateMap<PeriodAuditScaleSubResult, PeriodAuditScaleSubResultResponseDto>();
         }
     }
 }

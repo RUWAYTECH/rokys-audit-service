@@ -40,6 +40,10 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .HasColumnName("ResponsibleAuditorId")
                 .IsRequired(false);
 
+            builder.Property(x => x.SupervisorId)
+                .HasColumnName("SupervisorId")
+                .IsRequired(false);
+
             builder.Property(x => x.StartDate)
                 .HasColumnName("StartDate")
                 .HasColumnType("datetime2(7)")

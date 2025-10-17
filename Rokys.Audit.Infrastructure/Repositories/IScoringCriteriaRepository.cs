@@ -5,5 +5,6 @@ namespace Rokys.Audit.Infrastructure.Repositories
 {
     public interface IScoringCriteriaRepository : IRepository<ScoringCriteria>
     {
+        Task<List<ScoringCriteria>> GetByScaleGroupIdAsync(Guid scaleGroupId);
     }
 }

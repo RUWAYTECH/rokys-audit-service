@@ -67,7 +67,7 @@ namespace Rokys.Audit.Services.Services
                 await _unitOfWork.CommitAsync();
                 var entityCreate = await _repository.GetFirstOrDefaultAsync(
                     filter: x => x.PeriodAuditId == entity.PeriodAuditId && x.IsActive,
-                    includeProperties: [x => x.Store.Enterprise, x => x.Administrator, x => x.Assistant, x => x.OperationManager, x => x.FloatingAdministrator, x => x.ResponsibleAuditor, x => x.AuditStatus]);
+                    includeProperties: [x => x.Store.Enterprise, x => x.Administrator, x => x.Assistant, x => x.OperationManager, x => x.FloatingAdministrator, x => x.ResponsibleAuditor, x => x.AuditStatus, su => su.Supervisor]);
                 response.Data = _mapper.Map<PeriodAuditResponseDto>(entityCreate);
             }
             catch (Exception ex)
@@ -108,7 +108,7 @@ namespace Rokys.Audit.Services.Services
             {
                 var entity = await _repository.GetFirstOrDefaultAsync(
                     filter: x => x.PeriodAuditId == id && x.IsActive,
-                    includeProperties: [x => x.Store.Enterprise, x => x.Administrator, x => x.Assistant, x => x.OperationManager, x => x.FloatingAdministrator, x => x.ResponsibleAuditor, x => x.AuditStatus]);
+                    includeProperties: [x => x.Store.Enterprise, x => x.Administrator, x => x.Assistant, x => x.OperationManager, x => x.FloatingAdministrator, x => x.ResponsibleAuditor, x => x.AuditStatus, su => su.Supervisor]);
                 if (entity == null)
                 {
                     response = ResponseDto.Error<PeriodAuditResponseDto>("No se encontró el registro.");
@@ -137,7 +137,7 @@ namespace Rokys.Audit.Services.Services
                 }
                 var entity = await _repository.GetFirstOrDefaultAsync(
                     filter: x => x.PeriodAuditId == id && x.IsActive, 
-                    includeProperties: [x => x.Store.Enterprise, x => x.Administrator, x => x.Assistant, x => x.OperationManager, x => x.FloatingAdministrator, x => x.ResponsibleAuditor, x => x.AuditStatus ]);
+                    includeProperties: [x => x.Store.Enterprise, x => x.Administrator, x => x.Assistant, x => x.OperationManager, x => x.FloatingAdministrator, x => x.ResponsibleAuditor, x => x.AuditStatus, su => su.Supervisor]);
                 if (entity == null)
                 {
                     response = ResponseDto.Error<PeriodAuditResponseDto>("No se encontró el registro.");
@@ -189,7 +189,7 @@ namespace Rokys.Audit.Services.Services
                     orderBy: orderBy,
                     pageNumber: paginationRequestDto.PageNumber,
                     pageSize: paginationRequestDto.PageSize,
-                    includeProperties: [ x => x.Store.Enterprise, x => x.Administrator, x => x.Assistant, x => x.OperationManager, x => x.FloatingAdministrator, x => x.ResponsibleAuditor, x => x.AuditStatus]
+                    includeProperties: [ x => x.Store.Enterprise, x => x.Administrator, x => x.Assistant, x => x.OperationManager, x => x.FloatingAdministrator, x => x.ResponsibleAuditor, x => x.AuditStatus, su => su.Supervisor]
                 );
 
                 var pagedResult = new PaginationResponseDto<PeriodAuditResponseDto>

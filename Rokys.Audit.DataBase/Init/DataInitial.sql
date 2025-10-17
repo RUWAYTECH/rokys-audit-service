@@ -336,6 +336,9 @@ CREATE TABLE [PeriodAudit]
     ResponsibleAuditorId UNIQUEIDENTIFIER NULL 
         CONSTRAINT FK_PeriodAudit_ResponsibleAuditor 
         FOREIGN KEY REFERENCES UserReference(UserReferenceId), -- Auditor Responsable
+    SupervisorId UNIQUEIDENTIFIER NULL 
+        CONSTRAINT FK_PeriodAudit_Supervisor 
+        FOREIGN KEY REFERENCES UserReference(UserReferenceId), -- Supervisor
 
 
     -- Dates

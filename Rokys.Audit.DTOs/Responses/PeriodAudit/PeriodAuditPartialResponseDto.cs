@@ -19,6 +19,7 @@ namespace Rokys.Audit.DTOs.Responses.PeriodAudit
         public string? OperationManagerName { get; set; }
         public string? FloatingAdministratorName { get; set; }
         public string? ResponsibleAuditorName { get; set; }
+        public string? SupervisorName { get; set; }
         public string? StatusName { get; set; }
         public decimal ScaleMinValue { get; set; }
         public decimal ScaleMaxValue { get; set; }

@@ -85,6 +85,9 @@ namespace Rokys.Audit.Model.Tables
         // Navegación - Auditorías donde es Auditor Responsable
         public virtual ICollection<PeriodAudit>? ResponsibleAuditorAudits { get; set; }
 
+        // Navegación - Auditorías donde es Supervisor
+        public virtual ICollection<PeriodAudit>? SupervisorAudits { get; set; }
+
         // Navegación - Stores asignadas
         public virtual ICollection<EmployeeStore>? EmployeeStores { get; set; }
     }
