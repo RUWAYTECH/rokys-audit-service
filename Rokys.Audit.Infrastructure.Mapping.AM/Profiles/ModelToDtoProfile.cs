@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using System;
+using System.Linq;
 using Rokys.Audit.DTOs.Responses.PeriodAuditGroupResult;
 using Rokys.Audit.DTOs.Responses.AuditScaleTemplate;
 using Rokys.Audit.DTOs.Responses.AuditTemplateField;
@@ -124,28 +126,40 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                 {
                     dest.PeriodAudit = new PeriodAuditPartialResponseDto
                     {
-                        PeriodAuditId = src.PeriodAuditGroupResult.PeriodAudit.PeriodAuditId,
-                        StoreId = src.PeriodAuditGroupResult.PeriodAudit.Store.StoreId,
-                        StoreName = src.PeriodAuditGroupResult.PeriodAudit.Store != null ? src.PeriodAuditGroupResult.PeriodAudit.Store.Name : string.Empty,
-                        EnterpriseId = src.PeriodAuditGroupResult.PeriodAudit.Store != null ? src.PeriodAuditGroupResult.PeriodAudit.Store.EnterpriseId : Guid.Empty,
-                        EnterpriseName = src.PeriodAuditGroupResult.PeriodAudit.Store != null && src.PeriodAuditGroupResult.PeriodAudit.Store.Enterprise != null ? src.PeriodAuditGroupResult.PeriodAudit.Store.Enterprise.Name : string.Empty,
-                        AdministratorId = src.PeriodAuditGroupResult.PeriodAudit.AdministratorId,
-                        AdministratorName = src.PeriodAuditGroupResult.PeriodAudit.Administrator != null ? $"{src.PeriodAuditGroupResult.PeriodAudit.Administrator.FirstName} {src.PeriodAuditGroupResult.PeriodAudit.Administrator.LastName}" : string.Empty,
-                        AssistantId = src.PeriodAuditGroupResult.PeriodAudit.AssistantId,
-                        AssistantName = src.PeriodAuditGroupResult.PeriodAudit.Assistant != null ? $"{src.PeriodAuditGroupResult.PeriodAudit.Assistant.FirstName} {src.PeriodAuditGroupResult.PeriodAudit.Assistant.LastName}" : string.Empty,
-                        OperationManagersId = src.PeriodAuditGroupResult.PeriodAudit.OperationManagersId,
-                        OperationManagerName = src.PeriodAuditGroupResult.PeriodAudit.OperationManager != null ? $"{src.PeriodAuditGroupResult.PeriodAudit.OperationManager.FirstName} {src.PeriodAuditGroupResult.PeriodAudit.OperationManager.LastName}" : string.Empty,
-                        FloatingAdministratorId = src.PeriodAuditGroupResult.PeriodAudit.FloatingAdministratorId,
-                        FloatingAdministratorName = src.PeriodAuditGroupResult.PeriodAudit.FloatingAdministrator != null ? $"{src.PeriodAuditGroupResult.PeriodAudit.FloatingAdministrator.FirstName} {src.PeriodAuditGroupResult.PeriodAudit.FloatingAdministrator.LastName}" : string.Empty,
-                        ResponsibleAuditorId = src.PeriodAuditGroupResult.PeriodAudit.ResponsibleAuditorId,
-                        ResponsibleAuditorName = src.PeriodAuditGroupResult.PeriodAudit.ResponsibleAuditor != null ? $"{src.PeriodAuditGroupResult.PeriodAudit.ResponsibleAuditor.FirstName} {src.PeriodAuditGroupResult.PeriodAudit.ResponsibleAuditor.LastName}" : string.Empty,
-                        StatusId = src.PeriodAuditGroupResult.PeriodAudit.StatusId,
-                        StatusName = src.PeriodAuditGroupResult.PeriodAudit.AuditStatus != null ? src.PeriodAuditGroupResult.PeriodAudit.AuditStatus.Name : string.Empty,
-                        StartDate = src.PeriodAuditGroupResult.PeriodAudit.StartDate,
-                        EndDate = src.PeriodAuditGroupResult.PeriodAudit.EndDate,
-                        ReportDate = src.PeriodAuditGroupResult.PeriodAudit.ReportDate,
-                        IsActive = src.PeriodAuditGroupResult.PeriodAudit.IsActive,
+                        PeriodAuditId = src.PeriodAuditGroupResult?.PeriodAudit?.PeriodAuditId ?? Guid.Empty,
+                        StoreId = src.PeriodAuditGroupResult?.PeriodAudit?.Store?.StoreId ?? Guid.Empty,
+                        StoreName = src.PeriodAuditGroupResult?.PeriodAudit?.Store?.Name ?? string.Empty,
+                        EnterpriseId = src.PeriodAuditGroupResult?.PeriodAudit?.Store?.EnterpriseId ?? Guid.Empty,
+                        EnterpriseName = src.PeriodAuditGroupResult?.PeriodAudit?.Store?.Enterprise?.Name ?? string.Empty,
+                        AdministratorId = src.PeriodAuditGroupResult?.PeriodAudit?.AdministratorId ?? Guid.Empty,
+                        AdministratorName = ($"{src.PeriodAuditGroupResult?.PeriodAudit?.Administrator?.FirstName} {src.PeriodAuditGroupResult?.PeriodAudit?.Administrator?.LastName}").Trim() ?? string.Empty,
+                        AssistantId = src.PeriodAuditGroupResult?.PeriodAudit?.AssistantId ?? Guid.Empty,
+                        AssistantName = ($"{src.PeriodAuditGroupResult?.PeriodAudit?.Assistant?.FirstName} {src.PeriodAuditGroupResult?.PeriodAudit?.Assistant?.LastName}").Trim() ?? string.Empty,
+                        OperationManagersId = src.PeriodAuditGroupResult?.PeriodAudit?.OperationManagersId ?? Guid.Empty,
+                        OperationManagerName = ($"{src.PeriodAuditGroupResult?.PeriodAudit?.OperationManager?.FirstName} {src.PeriodAuditGroupResult?.PeriodAudit?.OperationManager?.LastName}").Trim() ?? string.Empty,
+                        FloatingAdministratorId = src.PeriodAuditGroupResult?.PeriodAudit?.FloatingAdministratorId ?? Guid.Empty,
+                        FloatingAdministratorName = ($"{src.PeriodAuditGroupResult?.PeriodAudit?.FloatingAdministrator?.FirstName} {src.PeriodAuditGroupResult?.PeriodAudit?.FloatingAdministrator?.LastName}").Trim() ?? string.Empty,
+                        ResponsibleAuditorId = src.PeriodAuditGroupResult?.PeriodAudit?.ResponsibleAuditorId ?? Guid.Empty,
+                        ResponsibleAuditorName = ($"{src.PeriodAuditGroupResult?.PeriodAudit?.ResponsibleAuditor?.FirstName} {src.PeriodAuditGroupResult?.PeriodAudit?.ResponsibleAuditor?.LastName}").Trim() ?? string.Empty,
+                        StatusId = src.PeriodAuditGroupResult?.PeriodAudit?.StatusId ?? Guid.Empty,
+                        StatusName = src.PeriodAuditGroupResult?.PeriodAudit?.AuditStatus?.Name ?? string.Empty,
+                        StartDate = src.PeriodAuditGroupResult?.PeriodAudit?.StartDate ?? default,
+                        EndDate = src.PeriodAuditGroupResult?.PeriodAudit?.EndDate ?? default,
+                        ReportDate = src.PeriodAuditGroupResult?.PeriodAudit?.ReportDate,
+                        IsActive = src.PeriodAuditGroupResult?.PeriodAudit?.IsActive ?? false,
                     };
+                    dest.ScaleCompany = src.PeriodAuditGroupResult?.PeriodAudit?.Store?.Enterprise?.ScaleCompanies
+                        ?.Where(sc => sc.IsActive)
+                        .Select(sc => new ScaleCompanyResponseDto
+                        {
+                            ScaleCompanyId = sc.ScaleCompanyId,
+                            Code = sc.Code,
+                            SortOrder = sc.SortOrder,
+                            IsActive = sc.IsActive,
+                            CreationDate = sc.CreationDate,
+                            CreatedBy = sc.CreatedBy,
+                        })
+                        .ToList() ?? new List<ScaleCompanyResponseDto>();
                     dest.ScaleGroup = new ScaleGroupPartialResponseDto
                     {
                         ScaleGroupId = src.ScaleGroup.ScaleGroupId,

@@ -224,7 +224,8 @@ namespace Rokys.Audit.Services.Services
             try
             {
                 var entity = await _repository.GetFirstOrDefaultAsync(filter: x => x.PeriodAuditScaleResultId == id, 
-                    includeProperties: [ e => e.PeriodAuditGroupResult.PeriodAudit.Store.Enterprise,
+                    includeProperties: [ e => e.PeriodAuditGroupResult.PeriodAudit.Store.Enterprise.ScaleCompanies,
+                        sc => sc.PeriodAuditGroupResult.PeriodAudit.Store.Enterprise.ScaleCompanies,
                         sg => sg.ScaleGroup,
                         a => a.PeriodAuditGroupResult.PeriodAudit.Administrator,
                         op => op.PeriodAuditGroupResult.PeriodAudit.OperationManager,

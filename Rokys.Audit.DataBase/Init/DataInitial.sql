@@ -196,8 +196,6 @@ CREATE TABLE ScoringCriteria (
     ScoringCriteriaId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     ScaleGroupId UNIQUEIDENTIFIER NOT NULL 
         FOREIGN KEY REFERENCES ScaleGroup(ScaleGroupId),
-    ScaleCalificationId UNIQUEIDENTIFIER NOT NULL -- ID de la Escala de Calificación
-        FOREIGN KEY REFERENCES MaintenanceDetailTable(MaintenanceDetailTableId),
 
     CriteriaCode NVARCHAR(10) NOT NULL, -- AUTO GENERATE PREFIX SR-{4 DIGITS}
     -- Identificación del Criterio
