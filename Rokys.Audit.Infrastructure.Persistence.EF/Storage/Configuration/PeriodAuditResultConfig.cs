@@ -96,11 +96,6 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             //    .HasForeignKey(pasr => pasr.PeriodAuditResultId)
             //    .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasMany(x => x.EvidenceFiles)
-                .WithOne(ef => ef.PeriodAuditResult)
-                .HasForeignKey(ef => ef.PeriodAuditResultId)
-                .OnDelete(DeleteBehavior.Cascade);
-
             // Indexes
             builder.HasIndex(x => new { x.PeriodAuditId, x.GroupId })
                 .IsUnique()
