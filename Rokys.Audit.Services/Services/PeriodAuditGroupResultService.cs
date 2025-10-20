@@ -1,5 +1,6 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Reatil.Services.Services;
 using Rokys.Audit.Common.Extensions;
@@ -36,6 +37,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IScoringCriteriaRepository _scoringCriteriaRepository;
         private readonly IScaleCompanyRepository _scaleCompanyRepository;
         private readonly IPeriodAuditService _periodAuditService;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
 
         public PeriodAuditGroupResultService(
             IPeriodAuditGroupResultRepository repository,
@@ -55,7 +57,8 @@ namespace Rokys.Audit.Services.Services
             IPeriodAuditScoringCriteriaResultRepository periodAuditScoringCriteriaResultRepository,
             IScoringCriteriaRepository scoringCriteriaRepository,
             IScaleCompanyRepository scaleCompanyRepository,
-            IPeriodAuditService periodAuditService)
+            IPeriodAuditService periodAuditService,
+            IServiceScopeFactory serviceScopeFactory)
         {
             _repository = repository;
             _validator = validator;
@@ -75,6 +78,7 @@ namespace Rokys.Audit.Services.Services
             _scoringCriteriaRepository = scoringCriteriaRepository;
             _scaleCompanyRepository = scaleCompanyRepository;
             _periodAuditService = periodAuditService;
+            _serviceScopeFactory = serviceScopeFactory;
         }
         public async Task<ResponseDto<PeriodAuditGroupResultResponseDto>> Create(PeriodAuditGroupResultRequestDto requestDto)
         {
@@ -470,8 +474,16 @@ namespace Rokys.Audit.Services.Services
 
                 await _unitOfWork.CommitAsync();
 
-                await _periodAuditService.Recalculate(entity.PeriodAuditId);
-                response.Data = true;
+                await using (var scope = _serviceScopeFactory.CreateAsyncScope())
+                {
+                    var auditService = scope.ServiceProvider.GetRequiredService<IPeriodAuditService>();
+                    var responseAudit = await auditService.Recalculate(entity.PeriodAuditId);
+
+                    if (responseAudit.IsValid)
+                        response.Data = true;
+                    else
+                        response.Messages.AddRange(responseAudit.Messages);
+                }
             }
             catch (Exception ex)
             {

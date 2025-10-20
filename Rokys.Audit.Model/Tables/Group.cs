@@ -6,7 +6,6 @@ namespace Rokys.Audit.Model.Tables
         public Guid EnterpriseId { get; set; }
         public string Name { get; set; } = string.Empty;
         public decimal Weighting { get; set; }
-        public bool? HasSourceData { get; set; }
         public bool IsActive { get; set; }
 
         // Navigation properties

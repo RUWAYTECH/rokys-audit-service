@@ -15,6 +15,9 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.Property(a => a.Code).IsRequired().HasMaxLength(10);
             builder.Property(a => a.Name).IsRequired().HasMaxLength(200);
             builder.Property(a => a.Weighting).IsRequired().HasColumnType("decimal(5,2)");
+            builder.Property(g => g.HasSourceData)
+                .IsRequired(false)
+                .HasDefaultValue(false);
             builder.Property(a => a.IsActive).HasDefaultValue(true);
             builder.Property(a => a.CreatedBy).HasMaxLength(120);
             builder.Property(a => a.CreationDate).HasDefaultValueSql("GETDATE()");
