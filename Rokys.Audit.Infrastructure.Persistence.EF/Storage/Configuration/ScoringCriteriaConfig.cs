@@ -75,11 +75,6 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .HasForeignKey(x => x.ScaleGroupId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasOne(e => e.MaintenanceDetailTable)
-                .WithMany()
-                .HasForeignKey(e => e.ScaleCalificationId)
-                .OnDelete(DeleteBehavior.Restrict);
-
             builder.HasIndex(x => x.ScaleGroupId)
                 .HasDatabaseName("IX_ScoringCriteria_ScaleGroupId");
         }

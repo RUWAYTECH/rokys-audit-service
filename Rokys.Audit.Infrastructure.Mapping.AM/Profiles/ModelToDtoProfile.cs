@@ -82,7 +82,6 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                 .AfterMap((src, dest) =>
                 {
                     dest.ScaleGroupName = src.ScaleGroup.Name;
-                    dest.ScaleCalificationDescription = src.MaintenanceDetailTable.Description;
                 });
             CreateMap<MaintenanceTable, MaintenanceTableResponseDto>();
             CreateMap<MaintenanceDetailTable, MaintenanceDetailTableResponseDto>();

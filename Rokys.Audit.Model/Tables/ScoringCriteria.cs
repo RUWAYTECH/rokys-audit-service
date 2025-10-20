@@ -4,7 +4,6 @@ namespace Rokys.Audit.Model.Tables
     {
         public Guid ScoringCriteriaId { get; set; } = Guid.NewGuid();
         public Guid ScaleGroupId { get; set; }
-        public Guid ScaleCalificationId { get; set; }
         
         // Identificación del Criterio
         public string CriteriaName { get; set; } = string.Empty; // Nombre del Criterio
@@ -26,6 +25,5 @@ namespace Rokys.Audit.Model.Tables
 
         // Navigation properties
         public virtual ScaleGroup ScaleGroup { get; set; } = null!;
-        public virtual MaintenanceDetailTable MaintenanceDetailTable { get; set; } = null!;
     }
 }

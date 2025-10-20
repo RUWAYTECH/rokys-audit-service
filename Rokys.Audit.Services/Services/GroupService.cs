@@ -332,7 +332,6 @@ namespace Rokys.Audit.Services.Services
                     {
                         ScoringCriteriaId = Guid.NewGuid(),
                         ScaleGroupId = scaleGroupMapping[originalCriteria.ScaleGroupId],
-                        ScaleCalificationId = originalCriteria.ScaleCalificationId,
                         CriteriaName = originalCriteria.CriteriaName,
                         CriteriaCode = originalCriteria.CriteriaCode,
                         ResultFormula = originalCriteria.ResultFormula,

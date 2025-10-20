@@ -68,7 +68,7 @@ namespace Rokys.Audit.Services.Services
                 await _unitOfWork.CommitAsync();
                 var responseEntity = await _scoringCriteriaRepository.GetFirstOrDefaultAsync(
                     filter: x => x.ScoringCriteriaId == entity.ScoringCriteriaId,
-                    includeProperties: [at => at.ScaleGroup, mdt => mdt.MaintenanceDetailTable]);
+                    includeProperties: [at => at.ScaleGroup]);
                 response.Data = _mapper.Map<ScoringCriteriaResponseDto>(responseEntity);
             }
             catch (Exception ex)
@@ -93,7 +93,7 @@ namespace Rokys.Audit.Services.Services
             {
                 var entity = await _scoringCriteriaRepository.GetFirstOrDefaultAsync(
                     filter: x => x.ScoringCriteriaId == id && x.IsActive,
-                    includeProperties: [at => at.ScaleGroup, mdt => mdt.MaintenanceDetailTable]);
+                    includeProperties: [at => at.ScaleGroup]);
                 if (entity == null)
                 {
                     response = ResponseDto.Error("No se encontro el criterio de puntuación.");
@@ -118,7 +118,7 @@ namespace Rokys.Audit.Services.Services
             {
                 var entity = _scoringCriteriaRepository.GetFirstOrDefault(
                     filter: x => x.ScoringCriteriaId == id && x.IsActive,
-                    includeProperties: [at => at.ScaleGroup, mdt => mdt.MaintenanceDetailTable]);
+                    includeProperties: [at => at.ScaleGroup]);
                 if (entity == null)
                 {
                     response = ResponseDto.Error<ScoringCriteriaResponseDto>("No se encontro el criterio de puntuación.");
@@ -154,7 +154,7 @@ namespace Rokys.Audit.Services.Services
                     orderBy: orderBy,
                     pageNumber: requestDto.PageNumber,
                     pageSize: requestDto.PageSize,
-                    includeProperties: [x => x.ScaleGroup, mdt => mdt.MaintenanceDetailTable]
+                    includeProperties: [x => x.ScaleGroup]
                 );
 
                 var pagedResult = new PaginationResponseDto<ScoringCriteriaResponseDto>
@@ -193,7 +193,7 @@ namespace Rokys.Audit.Services.Services
                     }
                     return response;
                 }
-                var entity = await _scoringCriteriaRepository.GetFirstOrDefaultAsync(filter: x => x.ScoringCriteriaId == id && x.IsActive, includeProperties: [x => x.ScaleGroup, mdt => mdt.MaintenanceDetailTable]);
+                var entity = await _scoringCriteriaRepository.GetFirstOrDefaultAsync(filter: x => x.ScoringCriteriaId == id && x.IsActive, includeProperties: [x => x.ScaleGroup]);
                 if (entity == null)
                 {
                     response = ResponseDto.Error<ScoringCriteriaResponseDto>("No se encontro el criterio de puntuación.");

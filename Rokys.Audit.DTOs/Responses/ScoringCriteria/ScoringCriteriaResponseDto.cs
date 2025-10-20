@@ -15,6 +15,5 @@ namespace Rokys.Audit.DTOs.Responses.ScoringCriteria
         public string? UpdatedBy { get; set; }
         public DateTime? UpdateDate { get; set; }
         public string? ScaleGroupName { get; set; }
-        public string? ScaleCalificationDescription { get; set; }
     }
 }
