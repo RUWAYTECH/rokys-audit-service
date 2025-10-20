@@ -14,5 +14,9 @@ namespace Rokys.Audit.DTOs.Requests.Group
         /// ID del grupo a clonar
         /// </summary>
         public Guid GroupId { get; set; }
+
+        public string Name { get; set; }
+
+        public decimal Weighting { get; set; }
     }
 }

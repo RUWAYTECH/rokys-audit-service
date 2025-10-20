@@ -234,9 +234,8 @@ namespace Rokys.Audit.Services.Services
                 {
                     GroupId = Guid.NewGuid(),
                     EnterpriseId = requestDto.EnterpriseId,
-                    Name = $"{originalGroup.Name} - Copia",
-                    Weighting = originalGroup.Weighting,
-                    HasSourceData = originalGroup.HasSourceData,
+                    Name = requestDto.Name,
+                    Weighting = requestDto.Weighting,
                     IsActive = true
                 };
                 clonedGroup.CreateAudit(currentUser.UserName);
