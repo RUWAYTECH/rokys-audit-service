@@ -5,7 +5,6 @@ namespace Rokys.Audit.DTOs.Common
         public Guid EnterpriseId { get; set; }
         public string Name { get; set; }
         public decimal Weighting { get; set; }
-        public bool? HasSourceData { get; set; }
     }
 }
 

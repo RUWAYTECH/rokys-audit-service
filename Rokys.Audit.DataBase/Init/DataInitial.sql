@@ -71,7 +71,6 @@ CREATE TABLE [Group]
 
     -- Auditoría
     IsActive BIT DEFAULT 1, -- Está Activo
-    HasSourceData BIT DEFAULT 0, -- Tiene Datos Fuente
     CreatedBy VARCHAR(120) NULL, -- Creado Por
     CreationDate DATETIME2 DEFAULT GETDATE(), -- Fecha de Creación
     UpdatedBy VARCHAR(120) NULL, -- Actualizado Por
@@ -85,6 +84,8 @@ CREATE TABLE ScaleGroup
         FOREIGN KEY REFERENCES [Group](GroupId),
     Code NVARCHAR(10)  NOT NULL, -- Código del Grupo
     Name NVARCHAR(200) NOT NULL, -- Nombre
+    
+    HasSourceData BIT DEFAULT 0, -- Tiene Datos Fuente
 
     -- Group weighting
     Weighting DECIMAL(5,2) NOT NULL, -- Ponderación
@@ -196,8 +197,6 @@ CREATE TABLE ScoringCriteria (
     ScoringCriteriaId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     ScaleGroupId UNIQUEIDENTIFIER NOT NULL 
         FOREIGN KEY REFERENCES ScaleGroup(ScaleGroupId),
-    ScaleCalificationId UNIQUEIDENTIFIER NOT NULL -- ID de la Escala de Calificación
-        FOREIGN KEY REFERENCES MaintenanceDetailTable(MaintenanceDetailTableId),
 
     CriteriaCode NVARCHAR(10) NOT NULL, -- AUTO GENERATE PREFIX SR-{4 DIGITS}
     -- Identificación del Criterio

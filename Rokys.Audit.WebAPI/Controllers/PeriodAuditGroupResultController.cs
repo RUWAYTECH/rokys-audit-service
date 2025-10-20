@@ -53,5 +53,14 @@ namespace Rokys.Audit.WebAPI.Controllers
                 return Ok(response);
             return BadRequest(response);
         }
+
+        [HttpGet("recalculate/{periodAuditGroupResultId}")]
+        public async Task<IActionResult> Recalculate([FromRoute]Guid periodAuditGroupResultId)
+        {
+            var response = await _service.Recalculate(periodAuditGroupResultId);
+            if (response.IsValid)
+                return Ok(response);
+            return BadRequest(response);
+        }
     }
 }

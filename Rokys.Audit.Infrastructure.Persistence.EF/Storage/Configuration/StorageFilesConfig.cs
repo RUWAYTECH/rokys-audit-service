@@ -17,14 +17,17 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .ValueGeneratedOnAdd()
                 .HasDefaultValueSql("NEWID()");
 
-            builder.Property(x => x.PeriodAuditResultId)
-                .IsRequired();
-
             builder.Property(x => x.OriginalName)
                 .IsRequired()
                 .HasMaxLength(255);
 
             builder.Property(x => x.ClassificationType)
+                .HasMaxLength(200);
+
+            builder.Property(x => x.EntityId)
+                .IsRequired();
+
+            builder.Property(x => x.EntityName)
                 .HasMaxLength(200);
 
             builder.Property(x => x.FileName)
@@ -62,12 +65,6 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
 
             builder.Property(x => x.UpdateDate)
                 .HasColumnType("datetime2");
-
-            // Navigation properties
-            builder.HasOne(x => x.PeriodAuditResult)
-                .WithMany(par => par.EvidenceFiles)
-                .HasForeignKey(x => x.PeriodAuditResultId)
-                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
