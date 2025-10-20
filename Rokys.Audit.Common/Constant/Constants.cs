@@ -26,5 +26,9 @@
         {
             public const string OPERACIONES_CONFIRMACION = @"\Template\Mail\Operaciones.Confirmacion.html";
         }
+        public struct FileDirectories
+        {
+            public const string Uploads = "Uploads";
+        }
     }
 }

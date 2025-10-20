@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Rokys.Audit.Infrastructure.Persistence.EF.Storage;
 using Rokys.Audit.Infrastructure.Repositories;
 using Rokys.Audit.Model.Tables;
@@ -31,6 +31,25 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
             return await _context.ScaleGroups
                 .Where(x => x.GroupId == groupId && x.IsActive)
                 .ToListAsync();
+        }
+        public async Task<bool> GetValidatorByGroupIdAsync(string code, Guid groupId, Guid? excludeId)
+        {
+            var group = await _context.ScaleGroups
+                .Include(x => x.Group.Enterprise)
+                .FirstOrDefaultAsync(x => x.GroupId == groupId && x.IsActive);
+
+            if (group == null)
+                return false;
+
+            var normalizedCode = code.ToLower();
+
+            var exists = await _context.ScaleGroups
+                .AnyAsync(x => x.Group.EnterpriseId == group.Group.EnterpriseId &&
+                               x.Code.ToLower() == normalizedCode &&
+                               x.ScaleGroupId != excludeId &&
+                               x.IsActive);
+
+            return exists;
         }
     }
 }

@@ -12,6 +12,7 @@ using Rokys.Audit.Infrastructure.Persistence.Abstract;
 using Rokys.Audit.Infrastructure.Repositories;
 using Rokys.Audit.Model.Tables;
 using Rokys.Audit.Services.Interfaces;
+using Rokys.Audit.Services.Validations;
 using System.Linq.Expressions;
 
 namespace Rokys.Audit.Services.Services
@@ -46,7 +47,7 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<ScaleGroupResponseDto>();
             try
             {
-                var validate = _fluentValidator.Validate(requestDto);
+                var validate = await _fluentValidator.ValidateAsync(requestDto);
                 if (!validate.IsValid)
                 {
                     response.Messages.AddRange(validate.Errors.Select(e => new ApplicationMessage { Message = e.ErrorMessage, MessageType = ApplicationMessageType.Error }));
@@ -191,7 +192,8 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<ScaleGroupResponseDto>();
             try
             {
-                var validate = _fluentValidator.Validate(requestDto);
+                var validator = new ScaleGroupValidator(_scaleGroupRepository, id);
+                var validate = await validator.ValidateAsync(requestDto);
                 if (!validate.IsValid)
                 {
                     response.Messages.AddRange(validate.Errors.Select(e => new ApplicationMessage { Message = e.ErrorMessage, MessageType = ApplicationMessageType.Error }));

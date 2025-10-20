@@ -199,7 +199,7 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<List<PeriodAuditTableScaleTemplateResultListResponseDto>>();
             try
             {
-                var entities = await _repository.GetAsync(x => x.PeriodAuditScaleResultId == periodAuditScaleResultId);
+                var entities = await _repository.GetByPeriodAuditScaleResultId(periodAuditScaleResultId);
                 if (entities == null)
                 {
                     response.WithMessage("No se encontro resultados", null, ApplicationMessageType.Error);

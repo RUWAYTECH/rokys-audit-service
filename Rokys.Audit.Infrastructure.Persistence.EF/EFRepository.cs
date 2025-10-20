@@ -217,6 +217,11 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF
                 query = orderBy(query);
 
             int rowsCount = await query.CountAsync();
+            if (pageSize <= 0 || pageNumber <= 0)
+            {
+                var allItems = await query.ToListAsync();
+                return (allItems, rowsCount);
+            }
             var items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
             return (items, rowsCount);
         }

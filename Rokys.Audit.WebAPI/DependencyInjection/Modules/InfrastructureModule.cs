@@ -22,7 +22,8 @@ namespace Rokys.Audit.WebAPI.DependencyInjection.Modules
         {
 
             builder.RegisterInstance(_configuration.GetSection("JwtSettings").Get<JwtSettings>());
-            
+            builder.RegisterInstance(_configuration.GetSection("FileSettings").Get<FileSettings>());
+
 
             builder.RegisterAssemblyTypes(typeof(ProveedorRepository).GetTypeInfo().Assembly).AsImplementedInterfaces();
 

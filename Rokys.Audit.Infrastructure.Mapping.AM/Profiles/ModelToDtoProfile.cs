@@ -155,8 +155,14 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                         .Select(sc => new ScaleCompanyResponseDto
                         {
                             ScaleCompanyId = sc.ScaleCompanyId,
+                            Name = sc.Name,
                             Code = sc.Code,
                             SortOrder = sc.SortOrder,
+                            MinValue = sc.MinValue,
+                            MaxValue = sc.MaxValue,
+                            ColorCode = sc.ColorCode,
+                            Icon = sc.Icon,
+                            EnterpriseId = sc.EnterpriseId,
                             IsActive = sc.IsActive,
                             CreationDate = sc.CreationDate,
                             CreatedBy = sc.CreatedBy,

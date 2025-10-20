@@ -14,6 +14,7 @@ using Rokys.Audit.Infrastructure.Repositories;
 using Rokys.Audit.Model.Tables;
 using Rokys.Audit.Services.Interfaces;
 using System.Linq.Expressions;
+using static Rokys.Audit.Common.Constant.Constants;
 
 namespace Rokys.Audit.Services.Services
 {
@@ -38,6 +39,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IScaleCompanyRepository _scaleCompanyRepository;
         private readonly IPeriodAuditService _periodAuditService;
         private readonly IServiceScopeFactory _serviceScopeFactory;
+        private readonly FileSettings _fileSettings;
 
         public PeriodAuditGroupResultService(
             IPeriodAuditGroupResultRepository repository,
@@ -58,7 +60,8 @@ namespace Rokys.Audit.Services.Services
             IScoringCriteriaRepository scoringCriteriaRepository,
             IScaleCompanyRepository scaleCompanyRepository,
             IPeriodAuditService periodAuditService,
-            IServiceScopeFactory serviceScopeFactory)
+            IServiceScopeFactory serviceScopeFactory,
+            FileSettings fileSettings)
         {
             _repository = repository;
             _validator = validator;
@@ -79,6 +82,7 @@ namespace Rokys.Audit.Services.Services
             _scaleCompanyRepository = scaleCompanyRepository;
             _periodAuditService = periodAuditService;
             _serviceScopeFactory = serviceScopeFactory;
+            _fileSettings = fileSettings;
         }
         public async Task<ResponseDto<PeriodAuditGroupResultResponseDto>> Create(PeriodAuditGroupResultRequestDto requestDto)
         {
@@ -491,6 +495,21 @@ namespace Rokys.Audit.Services.Services
                 response = ResponseDto.Error<bool>(ex.Message);
             }
             return response;
+        }
+        private async Task<(string fileName, string filePath)> SaveMemoFileAsync(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return (null, null);
+            var uploadsFolder = Path.Combine(_fileSettings.Path, FileDirectories.Uploads);
+            if (!Directory.Exists(uploadsFolder))
+                Directory.CreateDirectory(uploadsFolder);
+            var fileName = $"{Guid.NewGuid()}_{file.FileName}";
+            var filePath = Path.Combine(uploadsFolder, fileName);
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+            return (file.FileName, fileName);
         }
     }
 }

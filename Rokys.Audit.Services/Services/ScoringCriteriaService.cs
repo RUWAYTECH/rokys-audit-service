@@ -141,7 +141,7 @@ namespace Rokys.Audit.Services.Services
             {
                 Expression<Func<ScoringCriteria, bool>> filter = x => x.IsActive;
 
-                Func<IQueryable<ScoringCriteria>, IOrderedQueryable<ScoringCriteria>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
+                Func<IQueryable<ScoringCriteria>, IOrderedQueryable<ScoringCriteria>> orderBy = q => q.OrderBy(x => x.SortOrder);
 
                 if (!string.IsNullOrEmpty(requestDto.Filter))
                     filter = filter.AndAlso(x => x.CriteriaName.Contains(requestDto.Filter) || x.CriteriaCode.Contains(requestDto.Filter) );

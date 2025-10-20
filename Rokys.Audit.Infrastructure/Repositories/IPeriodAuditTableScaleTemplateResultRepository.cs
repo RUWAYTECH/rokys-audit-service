@@ -5,5 +5,6 @@ namespace Rokys.Audit.Infrastructure.Repositories
 {
     public interface IPeriodAuditTableScaleTemplateResultRepository : IRepository<PeriodAuditTableScaleTemplateResult>
     {
+        Task<List<PeriodAuditTableScaleTemplateResult>> GetByPeriodAuditScaleResultId(Guid periodAuditScaleResultId);
     }
 }
