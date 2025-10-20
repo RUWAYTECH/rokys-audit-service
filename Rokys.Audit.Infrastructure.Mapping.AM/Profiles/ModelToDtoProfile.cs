@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using Rokys.Audit.DTOs.Responses.PeriodAuditGroupResult;
+using Rokys.Audit.DTOs.Responses.StorageFiles;
 using Rokys.Audit.DTOs.Responses.AuditScaleTemplate;
 using Rokys.Audit.DTOs.Responses.AuditTemplateField;
 using Rokys.Audit.DTOs.Responses.CriteriaSubResult;
@@ -118,6 +119,8 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
             CreateMap<EmployeeStore, EmployeeStoreResponseDto>();
             CreateMap<PeriodAuditTableScaleTemplateResult, PeriodAuditTableScaleTemplateResultResponseDto>();
             CreateMap<PeriodAuditTableScaleTemplateResult, PeriodAuditTableScaleTemplateResultListResponseDto>();
+            CreateMap<StorageFiles, StorageFileResponseDto>();
+            CreateMap<StorageFiles, StorageFileListResponseDto>();
             CreateMap<PeriodAuditFieldValues, PeriodAuditFieldValuesListResponseDto>();
             CreateMap<ScaleGroup, ScaleGroupPartialResponseDto>();
             CreateMap<PeriodAudit, PeriodAuditPartialResponseDto>();

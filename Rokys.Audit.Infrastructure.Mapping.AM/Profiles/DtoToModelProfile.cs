@@ -21,6 +21,7 @@ using Rokys.Audit.Model.Tables;
 using Rokys.Audit.DTOs.Requests.AuditStatus;
 using Rokys.Audit.DTOs.Requests.EmployeeStore;
 using Rokys.Audit.DTOs.Requests.PeriodAuditScaleResult;
+using Rokys.Audit.DTOs.Requests.StorageFiles;
 
 namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
 {
@@ -50,6 +51,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
             CreateMap<PeriodAuditTableScaleTemplateResultRequestDto, PeriodAuditTableScaleTemplateResult>();
             CreateMap<PeriodAuditFieldValuesUpdateAllValuesRequestDto, PeriodAuditFieldValues>();
             CreateMap<UpdatePeriodAuditFieldValuesRequestDto, PeriodAuditFieldValues>();
+            CreateMap<StorageFileRequestDto, StorageFiles>();
         }
     }
 }
