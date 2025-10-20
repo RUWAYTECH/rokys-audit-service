@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.Group;
+using Rokys.Audit.DTOs.Responses.Group;
 using Rokys.Audit.Services.Interfaces;
 
 namespace Rokys.Audit.WebAPI.Controllers
@@ -57,6 +58,20 @@ namespace Rokys.Audit.WebAPI.Controllers
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
             var response = await _groupService.Delete(id);
+            if (response.IsValid)
+                return Ok(response);
+            return BadRequest(response);
+        }
+
+        /// <summary>
+        /// Clona un grupo y todas sus entidades hijas a una nueva empresa
+        /// </summary>
+        /// <param name="requestDto">Datos para la clonación del grupo</param>
+        /// <returns>Información del grupo clonado y estadísticas de clonación</returns>
+        [HttpPost("clone")]
+        public async Task<IActionResult> Clone([FromBody] GroupCloneRequestDto requestDto)
+        {
+            var response = await _groupService.CloneGroupAsync(requestDto);
             if (response.IsValid)
                 return Ok(response);
             return BadRequest(response);
