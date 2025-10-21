@@ -64,5 +64,13 @@ namespace Rokys.Audit.WebAPI.Controllers
                 return Ok(response);
             return BadRequest(response);
         }
+        [HttpGet("last-audit-by-store/{storeId}")]
+        public async Task<IActionResult> GetLastAuditByStoreId([FromRoute] Guid storeId)
+        {
+            var response = await _service.GetLasAuditByStoreId(storeId);
+            if (response.IsValid)
+                return Ok(response);
+            return BadRequest(response);
+        }
     }
 }

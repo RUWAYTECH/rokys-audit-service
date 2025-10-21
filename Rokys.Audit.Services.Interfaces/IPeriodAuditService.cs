@@ -11,5 +11,6 @@ namespace Rokys.Audit.Services.Interfaces
     {
         Task<ResponseDto<PaginationResponseDto<PeriodAuditResponseDto>>> GetPaged(PeriodAuditFilterRequestDto requestDto);
         Task<ResponseDto<bool>> Recalculate(Guid periodAuditId);
+        Task<ResponseDto<LastAuditByStoreIdResponseDto>> GetLasAuditByStoreId(Guid storeId);
     }
 }
