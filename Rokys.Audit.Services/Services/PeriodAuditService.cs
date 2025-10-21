@@ -66,6 +66,14 @@ namespace Rokys.Audit.Services.Services
                 var auditStatus = await _auditStatusRepository.GetFirstOrDefaultAsync(filter: x => x.Code == AuditStatusCode.Pending && x.IsActive);
 
                 var currentUser = _httpContextAccessor.CurrentUser();
+                // Obtener el último código existente
+                var lastCode = _repository.Get()
+                    .OrderByDescending(x => x.CreationDate)
+                    .Select(x => x.CorrelativeNumber)
+                    .FirstOrDefault();
+                var currentYear = DateTime.Now.Year;
+                var nextCode = Rokys.Audit.Common.Helpers.CodeGeneratorHelper.GenerateNextCode("CSR-" + currentYear, lastCode, 4);
+                requestDto.CorrelativeNumber = nextCode;
                 var entity = _mapper.Map<PeriodAudit>(requestDto);
                 entity.StatusId = auditStatus.AuditStatusId;
                 entity.CreateAudit(currentUser.UserName);
