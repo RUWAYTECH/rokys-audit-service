@@ -23,6 +23,5 @@ namespace Rokys.Audit.Model.Tables
         public virtual PeriodAudit PeriodAudit { get; set; } = null!;
         public virtual Group Group { get; set; } = null!;
         //public virtual ICollection<PeriodAuditScaleResult> PeriodAuditScaleResults { get; set; } = new List<PeriodAuditScaleResult>();
-        public virtual ICollection<StorageFiles> EvidenceFiles { get; set; } = new List<StorageFiles>();
     }
 }

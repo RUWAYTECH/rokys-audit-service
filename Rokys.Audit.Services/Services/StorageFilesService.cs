@@ -13,6 +13,7 @@ using Rokys.Audit.Infrastructure.Repositories;
 using Rokys.Audit.Model.Tables;
 using Rokys.Audit.Services.Interfaces;
 using System.Linq.Expressions;
+using static Rokys.Audit.Common.Constant.Constants;
 
 namespace Rokys.Audit.Services.Services
 {
@@ -24,6 +25,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly FileSettings _fileSettings;
 
         public StorageFilesService(
             IStorageFilesRepository storageFilesRepository,
@@ -31,7 +33,8 @@ namespace Rokys.Audit.Services.Services
             ILogger<StorageFilesService> logger,
             IUnitOfWork unitOfWork,
             IAMapper mapper,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            FileSettings fileSettings)
         {
             _storageFilesRepository = storageFilesRepository;
             _validator = validator;
@@ -39,6 +42,7 @@ namespace Rokys.Audit.Services.Services
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
+            _fileSettings = fileSettings;
         }
 
         public async Task<ResponseDto<StorageFileResponseDto>> Create(StorageFileRequestDto requestDto)
@@ -54,8 +58,20 @@ namespace Rokys.Audit.Services.Services
                 }
                 var currentUser = _httpContextAccessor.CurrentUser();
                 var entity = _mapper.Map<StorageFiles>(requestDto);
+                if (requestDto.File != null && requestDto.File.Length > 0)
+                {
+                    var (originalName, filePath) = await SaveMemoFileAsync(requestDto.File);
+                    entity.OriginalName = requestDto.File.FileName;
+                    entity.FileName = originalName;
+                    entity.FileUrl = filePath;
+                    entity.EntityId = requestDto.EntityId;
+                    entity.FileType = Path.GetExtension(requestDto.File.FileName).ToLower();
+                    entity.EntityName = requestDto.EntityName;
+                    entity.ClassificationType = requestDto.ClassificationType;
+                    entity.UploadDate = DateTime.Now;
+                    entity.UploadedBy = currentUser.UserName;
+                }
                 entity.CreateAudit(currentUser.UserName);
-                entity.IsActive = requestDto.IsActive ?? true;
                 _storageFilesRepository.Insert(entity);
                 await _unitOfWork.CommitAsync();
                 response.Data = _mapper.Map<StorageFileResponseDto>(entity);
@@ -181,6 +197,21 @@ namespace Rokys.Audit.Services.Services
                 response = ResponseDto.Error<StorageFileResponseDto>(ex.Message);
             }
             return response;
+        }
+        private async Task<(string fileName, string filePath)> SaveMemoFileAsync(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return (null, null);
+            var uploadsFolder = Path.Combine(_fileSettings.Path, FileDirectories.Uploads);
+            if (!Directory.Exists(uploadsFolder))
+                Directory.CreateDirectory(uploadsFolder);
+            var fileName = $"{Guid.NewGuid()}_{file.FileName}";
+            var filePath = Path.Combine(uploadsFolder, fileName);
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+            return (file.FileName, fileName);
         }
     }
 }

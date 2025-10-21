@@ -22,7 +22,8 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .HasMaxLength(255);
 
             builder.Property(x => x.ClassificationType)
-                .HasMaxLength(200);
+                .HasMaxLength(200)
+                .IsRequired(false);
 
             builder.Property(x => x.EntityId)
                 .IsRequired();

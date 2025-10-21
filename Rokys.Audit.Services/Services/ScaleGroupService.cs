@@ -14,6 +14,7 @@ using Rokys.Audit.Model.Tables;
 using Rokys.Audit.Services.Interfaces;
 using Rokys.Audit.Services.Validations;
 using System.Linq.Expressions;
+using static Rokys.Audit.Common.Constant.Constants;
 
 namespace Rokys.Audit.Services.Services
 {
@@ -25,6 +26,8 @@ namespace Rokys.Audit.Services.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly FileSettings _fileSettings;
+        private readonly IStorageFilesRepository _storageFilesRepository;
 
         public ScaleGroupService(
             IScaleGroupRepository scaleGroupRepository,
@@ -32,7 +35,9 @@ namespace Rokys.Audit.Services.Services
             ILogger<ScaleGroupService> logger,
             IUnitOfWork unitOfWork,
             IAMapper mapper,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            FileSettings fileSettings,
+            IStorageFilesRepository storageFilesRepository)
         {
             _scaleGroupRepository = scaleGroupRepository;
             _fluentValidator = fluentValidator;
@@ -40,6 +45,8 @@ namespace Rokys.Audit.Services.Services
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
+            _fileSettings = fileSettings;
+            _storageFilesRepository = storageFilesRepository;
         }
 
         public async Task<ResponseDto<ScaleGroupResponseDto>> Create(ScaleGroupRequestDto requestDto)
@@ -61,11 +68,36 @@ namespace Rokys.Audit.Services.Services
                     response.Messages.Add(new ApplicationMessage { Message = "Ya existe un grupo de escala con este código.", MessageType = ApplicationMessageType.Error });
                     return response;
                 }
-
                 var currentUser = _httpContextAccessor.CurrentUser();
                 var entity = _mapper.Map<ScaleGroup>(requestDto);
                 entity.CreateAudit(currentUser.UserName);
                 _scaleGroupRepository.Insert(entity);
+                var storageFile = new StorageFiles();
+                if (requestDto.HasSourceData == true && requestDto.File == null)
+                {
+                    response.Messages.Add(new ApplicationMessage
+                    {
+                        Message = "Si seleccionó que es con archivo, debe subir un archivo.",
+                        MessageType = ApplicationMessageType.Error
+                    });
+                    return response;
+                }
+                if (requestDto.File != null && requestDto.File.Length > 0)
+                {
+                    requestDto.HasSourceData = false;
+                    var (originalName, filePath) = await SaveMemoFileAsync(requestDto.File);
+                    storageFile.OriginalName = requestDto.File.FileName;
+                    storageFile.FileName = originalName;
+                    storageFile.FileUrl = filePath;
+                    storageFile.EntityId = entity.ScaleGroupId;
+                    storageFile.FileType = Path.GetExtension(requestDto.File.FileName).ToLower();
+                    storageFile.EntityName = entity.Name;
+                    storageFile.ClassificationType = "Data source template";
+                    storageFile.UploadDate = DateTime.Now;
+                    storageFile.UploadedBy = currentUser.UserName;
+                }
+                storageFile.CreateAudit(currentUser.UserName);
+                _storageFilesRepository.Insert(storageFile);
                 await _unitOfWork.CommitAsync();
                 response.Data = _mapper.Map<ScaleGroupResponseDto>(entity);
             }
@@ -228,6 +260,21 @@ namespace Rokys.Audit.Services.Services
                 response = ResponseDto.Error<ScaleGroupResponseDto>(ex.Message);
             }
             return response;
+        }
+        private async Task<(string fileName, string filePath)> SaveMemoFileAsync(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return (null, null);
+            var uploadsFolder = Path.Combine(_fileSettings.Path, FileDirectories.Uploads);
+            if (!Directory.Exists(uploadsFolder))
+                Directory.CreateDirectory(uploadsFolder);
+            var fileName = $"{Guid.NewGuid()}_{file.FileName}";
+            var filePath = Path.Combine(uploadsFolder, fileName);
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+            return (file.FileName, fileName);
         }
     }
 }

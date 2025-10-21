@@ -15,8 +15,8 @@ namespace Rokys.Audit.WebAPI.Controllers
             _service = service;
         }
 
-        [HttpPost("paged")]
-        public async Task<IActionResult> GetPaged([FromBody] StorageFileFilterRequestDto request)
+        [HttpGet()]
+        public async Task<IActionResult> GetPaged([FromQuery] StorageFileFilterRequestDto request)
         {
             var res = await _service.GetPaged(request);
             return Ok(res);
@@ -30,16 +30,10 @@ namespace Rokys.Audit.WebAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] StorageFileRequestDto request)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> Create([FromForm] StorageFileRequestDto request)
         {
             var res = await _service.Create(request);
-            return Ok(res);
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] StorageFileRequestDto request)
-        {
-            var res = await _service.Update(id, request);
             return Ok(res);
         }
 
