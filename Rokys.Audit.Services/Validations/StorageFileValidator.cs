@@ -7,11 +7,9 @@ namespace Rokys.Audit.Services.Validations
     {
         public StorageFileValidator()
         {
-            RuleFor(x => x.OriginalName).NotEmpty().MaximumLength(255);
-            RuleFor(x => x.FileName).NotEmpty().MaximumLength(255);
-            RuleFor(x => x.FileUrl).NotEmpty().MaximumLength(500);
+            RuleFor(x => x.EntityId).NotEmpty().WithMessage("El identificador es obligatorio.");
+            RuleFor(x => x.EntityName).MaximumLength(200).When(x => !string.IsNullOrWhiteSpace(x.EntityName));
             RuleFor(x => x.ClassificationType).MaximumLength(200).When(x => !string.IsNullOrWhiteSpace(x.ClassificationType));
-            RuleFor(x => x.EntityId).NotEmpty();
         }
     }
 }

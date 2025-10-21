@@ -506,5 +506,34 @@ namespace Rokys.Audit.Services.Services
             }
             return response;
         }
+
+        public async Task<ResponseDto<LastAuditByStoreIdResponseDto>> GetLasAuditByStoreId(Guid storeId)
+        {
+            var response = ResponseDto.Create<LastAuditByStoreIdResponseDto>();
+            try
+            {
+                var entity = await _repository.GetFirstOrDefaultAsync(
+                    filter: x => x.StoreId == storeId && x.IsActive,
+                    orderBy: q => q.OrderByDescending(x => x.EndDate)
+                );
+                if (entity == null)
+                {
+                    response.Data = null;
+                    return response;
+                }
+                var lastAudit = new LastAuditByStoreIdResponseDto
+                {
+                    LastAuditDate = entity?.EndDate
+                };
+                response.Data = lastAudit;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response = ResponseDto.Error<LastAuditByStoreIdResponseDto>(ex.Message);
+            }
+            return response;
+        }
+
     }
 }

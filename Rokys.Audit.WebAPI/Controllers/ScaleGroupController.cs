@@ -19,7 +19,8 @@ namespace Rokys.Audit.WebAPI.Controllers
         }
         
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] ScaleGroupRequestDto requestDto)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> Create([FromForm] ScaleGroupRequestDto requestDto)
         {
             var response = await _scaleGroupService.Create(requestDto);
             if (response.IsValid)
