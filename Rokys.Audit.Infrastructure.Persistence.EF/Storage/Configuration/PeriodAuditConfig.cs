@@ -74,6 +74,11 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
 
             builder.Property(x => x.StatusId);
 
+            builder.Property(x => x.CorrelativeNumber)
+                .HasColumnName("CorrelativeNumber")
+                .HasMaxLength(50)
+                .IsRequired(false);
+
 
 
             builder.Property(x => x.IsActive)

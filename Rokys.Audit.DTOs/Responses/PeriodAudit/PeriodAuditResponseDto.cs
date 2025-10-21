@@ -31,6 +31,7 @@ namespace Rokys.Audit.DTOs.Responses.PeriodAudit
         public string? UpdatedBy { get; set; }
         public DateTime? UpdateDate { get; set; }
         public bool IsActive { get; set; }
+        public string? CorrelativeNumber { get; set; }
         public AuditStatusResponseDto? AuditStatus { get; set; }
     }
 }

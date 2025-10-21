@@ -35,6 +35,8 @@ namespace Rokys.Audit.Model.Tables
         public decimal ScaleMinValue { get; set; } // Valor Mínimo de la Escala
         public decimal ScaleMaxValue { get; set; } // Valor Máximo de la Escala
 
+        public string? CorrelativeNumber { get; set; } // Número Correlativo
+
         public bool IsActive { get; set; } = true;
 
         // Navigation properties

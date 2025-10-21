@@ -353,6 +353,8 @@ CREATE TABLE [PeriodAudit]
     StatusId UNIQUEIDENTIFIER NULL -- ID de Estado
         FOREIGN KEY REFERENCES AuditStatus(AuditStatusId),
 
+    CorrelativeNumber VARCHAR(50) NULL, -- Número Correlativo de la Auditoría
+
     -- Puntuación
     ScoreValue DECIMAL(10,2) NOT NULL,
     ScaleName NVARCHAR(100) NOT NULL, -- Nombre de la Escala

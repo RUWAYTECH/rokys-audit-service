@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Reatil.Services.Services;
 using Rokys.Audit.Common.Constant;
 using Rokys.Audit.Common.Extensions;
+using Rokys.Audit.Common.Helpers;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.PeriodAudit;
 using Rokys.Audit.DTOs.Responses.Common;
@@ -66,15 +67,15 @@ namespace Rokys.Audit.Services.Services
                 var auditStatus = await _auditStatusRepository.GetFirstOrDefaultAsync(filter: x => x.Code == AuditStatusCode.Pending && x.IsActive);
 
                 var currentUser = _httpContextAccessor.CurrentUser();
+                var entity = _mapper.Map<PeriodAudit>(requestDto);
                 // Obtener el último código existente
                 var lastCode = _repository.Get()
                     .OrderByDescending(x => x.CreationDate)
                     .Select(x => x.CorrelativeNumber)
                     .FirstOrDefault();
                 var currentYear = DateTime.Now.Year;
-                var nextCode = Rokys.Audit.Common.Helpers.CodeGeneratorHelper.GenerateNextCode("CSR-" + currentYear, lastCode, 4);
-                requestDto.CorrelativeNumber = nextCode;
-                var entity = _mapper.Map<PeriodAudit>(requestDto);
+                var nextCode = CodeGeneratorHelper.GenerateNextCode("CSR-" + currentYear, lastCode, 4);
+                entity.CorrelativeNumber = nextCode;
                 entity.StatusId = auditStatus.AuditStatusId;
                 entity.CreateAudit(currentUser.UserName);
                 _repository.Insert(entity);
