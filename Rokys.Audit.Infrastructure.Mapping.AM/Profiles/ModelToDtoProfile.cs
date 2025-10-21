@@ -26,6 +26,7 @@ using Rokys.Audit.DTOs.Responses.PeriodAuditScaleResult;
 using Rokys.Audit.DTOs.Responses.PeriodAuditTableScaleTemplateResult;
 using Rokys.Audit.DTOs.Responses.PeriodAuditScoringCriteriaResult;
 using Rokys.Audit.DTOs.Responses.PeriodAuditScaleSubResult;
+using Rokys.Audit.DTOs.Responses.InboxItems;
 
 namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
 {
@@ -208,6 +209,8 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                 });
             CreateMap<PeriodAuditScoringCriteriaResult, PeriodAuditScoringCriteriaResultResponseDto>();
             CreateMap<PeriodAuditScaleSubResult, PeriodAuditScaleSubResultResponseDto>();
+            CreateMap<InboxItems, InboxItemResponseDto>();
+            CreateMap<InboxItems, InboxItemListResponseDto>();
         }
     }
 }

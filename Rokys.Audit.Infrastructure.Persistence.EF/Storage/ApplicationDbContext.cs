@@ -33,6 +33,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
         public DbSet<PeriodAuditTableScaleTemplateResult> PeriodAuditTableScaleTemplateResults { get; set; }
         public DbSet<PeriodAuditScoringCriteriaResult> PeriodAuditScoringCriteriaResults { get; set; }
         public DbSet<StorageFiles> EvidenceFiles { get; set; }
+    public DbSet<InboxItems> InboxItems { get; set; }
         public DbSet<AuditStatus> AuditStatuses { get; set; }
         public DbSet<MaintenanceTable> MaintenanceTables { get; set; }
         public DbSet<MaintenanceDetailTable> MaintenanceDetailTables { get; set; }
@@ -75,6 +76,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
             modelBuilder.ApplyConfiguration(new PeriodAuditTableScaleTemplateResultConfig());
             modelBuilder.ApplyConfiguration(new PeriodAuditScoringCriteriaResultConfig());
             modelBuilder.ApplyConfiguration(new StorageFilesConfig());
+            modelBuilder.ApplyConfiguration(new InboxItemsConfig());
             modelBuilder.ApplyConfiguration(new AuditStatusConfig());
 
             modelBuilder.ApplyConfiguration(new MaintenanceTableConfig());

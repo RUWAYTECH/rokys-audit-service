@@ -18,7 +18,6 @@ CREATE TABLE Enterprise (
 );
 
 
-
 -- Stores table
 CREATE TABLE Stores (
     StoreId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
@@ -372,6 +371,9 @@ CREATE TABLE [PeriodAudit]
     UpdatedBy VARCHAR(120) NULL, -- Actualizado Por
     UpdateDate DATETIME NULL -- Fecha de Actualización
 );
+
+
+
 
 
 -- Table: Result

@@ -4,7 +4,8 @@ VALUES
     (NEWID(), 'Finalizado', 'FIN', '#4CAF50', 1, 'Admin', GETDATE(), 'Admin', GETDATE()),
     (NEWID(), 'En proceso', 'PRO', '#2196F3', 1, 'Admin', GETDATE(), 'Admin', GETDATE()),
     (NEWID(), 'Cancelado', 'CAN', '#F44336', 1, 'Admin', GETDATE(), 'Admin', GETDATE()),
-    (NEWID(), 'Pendiente', 'PEN', '#FF9800', 1, 'Admin', GETDATE(), 'Admin', GETDATE());
+    (NEWID(), 'Pendiente', 'PEN', '#FF9800', 1, 'Admin', GETDATE(), 'Admin', GETDATE()),
+    (NEWID(), 'En revisión', 'REV', '#FFC107', 1, 'Admin', GETDATE(), 'Admin', GETDATE());
 
 -- Insert Escala into MaintenanceTable
 DECLARE @EscalaId UNIQUEIDENTIFIER = NEWID();
