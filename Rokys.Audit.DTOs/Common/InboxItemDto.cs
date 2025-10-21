@@ -9,10 +9,13 @@ namespace Rokys.Audit.DTOs.Common
         public Guid? NextStatusId { get; set; }
         public Guid? PrevUserId { get; set; }
         public Guid? NextUserId { get; set; }
+
         public Guid? ApproverId { get; set; }
     public string? Comments { get; set; }
+        public Guid? UserId { get; set; }
+        public string? Action { get; set; }
     // DueDate and Priority were removed from the InboxItems domain per recent design decision
-        public bool IsActive { get; set; }
+        public bool IsActive { get; set; } = true;
     public string? CreatedBy { get; set; }
         public DateTime? CreationDate { get; set; }
     public string? UpdatedBy { get; set; }

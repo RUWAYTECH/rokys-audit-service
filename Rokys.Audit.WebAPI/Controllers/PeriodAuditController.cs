@@ -56,6 +56,15 @@ namespace Rokys.Audit.WebAPI.Controllers
             return BadRequest(response);
         }
 
+        [HttpPost("{id}/action")]
+        public async Task<IActionResult> Action([FromRoute] Guid id, [FromBody] PeriodAuditActionRequestDto requestDto)
+        {
+            var response = await _service.ProcessAction(id, requestDto);
+            if (response.IsValid)
+                return Ok(response);
+            return BadRequest(response);
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {

@@ -55,6 +55,14 @@ namespace Rokys.Audit.Services.Services
 
                 var currentUser = _httpContextAccessor.CurrentUser();
                 var entity = _mapper.Map<InboxItems>(requestDto);
+                // set who registered the action (if available)
+                if (currentUser != null)
+                    entity.UserId = currentUser.UserId;
+
+                // if incoming DTO provides an action label, keep it
+                if (!string.IsNullOrEmpty(requestDto.Action))
+                    entity.Action = requestDto.Action;
+
                 entity.CreateAudit(currentUser.UserName);
                 _inboxRepository.Insert(entity);
                 await _unitOfWork.CommitAsync();
@@ -169,6 +177,11 @@ namespace Rokys.Audit.Services.Services
 
                 var currentUser = _httpContextAccessor.CurrentUser();
                 entity = _mapper.Map(requestDto, entity);
+                // preserve who updated/registered action if provided
+                if (currentUser != null)
+                    entity.UserId = currentUser.UserId;
+                if (!string.IsNullOrEmpty(requestDto.Action))
+                    entity.Action = requestDto.Action;
                 entity.UpdateAudit(currentUser.UserName);
                 _inboxRepository.Update(entity);
                 await _unitOfWork.CommitAsync();

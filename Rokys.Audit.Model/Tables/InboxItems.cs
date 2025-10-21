@@ -12,6 +12,10 @@ namespace Rokys.Audit.Model.Tables
         public Guid? NextUserId { get; set; }
         public Guid? ApproverId { get; set; }
     public string? Comments { get; set; }
+        // quien registró la acción en este inbox
+        public Guid? UserId { get; set; }
+        // acción ejecutada: 'Aprobada','Cancelada','Devuelta', etc.
+        public string? Action { get; set; }
         public bool IsActive { get; set; } = true;
     }
 }

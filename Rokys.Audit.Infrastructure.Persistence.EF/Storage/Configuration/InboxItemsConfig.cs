@@ -20,7 +20,12 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.Property(x => x.Comments)
                 .HasColumnType("nvarchar(max)");
 
-            // DueDate and Priority removed from InboxItems
+            builder.Property(x => x.UserId)
+                .HasColumnName("UserId");
+
+            builder.Property(x => x.Action)
+                .HasMaxLength(100)
+                .HasColumnName("Action");
 
             builder.Property(x => x.IsActive)
                 .IsRequired()

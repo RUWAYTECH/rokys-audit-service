@@ -6,5 +6,6 @@
         public const string InProgress = "PRO";
         public const string Canceled = "CAN";
         public const string Pending = "PEN";
+        public const string InReview = "REV";
     }
 }
