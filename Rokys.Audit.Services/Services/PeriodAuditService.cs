@@ -170,6 +170,10 @@ namespace Rokys.Audit.Services.Services
                     return response;
                 }
                 response.Data = _mapper.Map<PeriodAuditResponseDto>(entity);
+                // Load related inbox items and map them
+                var inboxEntities = await _inboxItemsRepository.GetAsync(filter: x => x.PeriodAuditId == entity.PeriodAuditId && x.IsActive, orderBy: q => q.OrderBy(s => s.SequenceNumber));
+                var inboxDtos = _mapper.Map<IEnumerable<Rokys.Audit.DTOs.Responses.InboxItems.InboxItemResponseDto>>(inboxEntities ?? new List<InboxItems>());
+                response.Data!.InboxItems = inboxDtos.ToList();
             }
             catch (Exception ex)
             {
@@ -252,6 +256,20 @@ namespace Rokys.Audit.Services.Services
                     PageSize = paginationRequestDto.PageSize
                 };
 
+                // For the paged items, load inbox items in batch and attach them to each response DTO
+                var itemsList = pagedResult.Items.ToList();
+                var periodIds = entities.Items.Select(i => i.PeriodAuditId).ToList();
+                var inboxForPeriods = await _inboxItemsRepository.GetAsync(filter: x => periodIds.Contains(x.PeriodAuditId!.Value) && x.IsActive);
+                var inboxMapped = _mapper.Map<IEnumerable<Rokys.Audit.DTOs.Responses.InboxItems.InboxItemResponseDto>>(inboxForPeriods ?? new List<InboxItems>());
+                var inboxLookup = inboxMapped.GroupBy(i => i.PeriodAuditId ?? Guid.Empty).ToDictionary(g => g.Key, g => g.OrderBy(x => x.SequenceNumber).ToList());
+                foreach (var it in itemsList)
+                {
+                    var key = it.PeriodAuditId;
+                    if (key != Guid.Empty && inboxLookup.TryGetValue(key, out var list))
+                        it.InboxItems = list;
+                }
+
+                pagedResult.Items = itemsList;
                 response.Data = pagedResult;
             }
             catch (Exception ex)
