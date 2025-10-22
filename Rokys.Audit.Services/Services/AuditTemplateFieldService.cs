@@ -20,7 +20,8 @@ namespace Rokys.Audit.Services.Services
 {
     public class AuditTemplateFieldService : IAuditTemplateFieldService
     {
-        private readonly IAuditTemplateFieldRepository _auditTemplateFieldRepository;
+    private readonly IAuditTemplateFieldRepository _auditTemplateFieldRepository;
+    private readonly ITableScaleTemplateRepository _tableScaleTemplateRepository;
         private readonly IValidator<AuditTemplateFieldRequestDto> _fluentValidator;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAMapper _mapper;
@@ -29,6 +30,7 @@ namespace Rokys.Audit.Services.Services
 
         public AuditTemplateFieldService(
             IAuditTemplateFieldRepository auditTemplateFieldRepository,
+            ITableScaleTemplateRepository tableScaleTemplateRepository,
             IValidator<AuditTemplateFieldRequestDto> fluentValidator,
             IUnitOfWork unitOfWork,
             IAMapper mapper,
@@ -36,6 +38,7 @@ namespace Rokys.Audit.Services.Services
             IHttpContextAccessor httpContextAccessor)
         {
             _auditTemplateFieldRepository = auditTemplateFieldRepository;
+            _tableScaleTemplateRepository = tableScaleTemplateRepository;
             _fluentValidator = fluentValidator;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -68,18 +71,65 @@ namespace Rokys.Audit.Services.Services
                 }
 
                 var currentUser = _httpContextAccessor.CurrentUser();
+                var userName = currentUser?.UserName ?? "system";
                 var entity = _mapper.Map<AuditTemplateFields>(requestDto);
-                entity.CreateAudit(currentUser.UserName);
+
+                // Assign SortOrder server-side: next value within the TableScaleTemplateId group
+                var existingSortOrders = (await _auditTemplateFieldRepository.GetAsync(filter: x => x.TableScaleTemplateId == requestDto.TableScaleTemplateId && x.IsActive))
+                    .Select(x => x.SortOrder);
+                entity.SortOrder = Rokys.Audit.Common.Helpers.SortOrderHelper.GetNextSortOrder(existingSortOrders);
+
+                entity.CreateAudit(userName);
                 _auditTemplateFieldRepository.Insert(entity);
                 await _unitOfWork.CommitAsync();
-                var createdEntity = await _auditTemplateFieldRepository.GetFirstOrDefaultAsync(filter: x => x.AuditTemplateFieldId == entity.AuditTemplateFieldId && x.IsActive, includeProperties: [at => at.TableScaleTemplate]);
-                var responseData = _mapper.Map<AuditTemplateFieldResponseDto>(createdEntity);
-                response = ResponseDto.Create(responseData);
+
+                // Map the in-memory entity to response DTO and enrich with TableScaleTemplate info
+                var createdEntity = await _auditTemplateFieldRepository.GetFirstOrDefaultAsync(filter: x => x.AuditTemplateFieldId == entity.AuditTemplateFieldId && x.IsActive,
+                    includeProperties: [at => at.TableScaleTemplate]);
+                
+                response.Data = _mapper.Map<AuditTemplateFieldResponseDto>(createdEntity);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
                 response = ResponseDto.Error<AuditTemplateFieldResponseDto>(ex.Message);
+            }
+            return response;
+        }
+
+        public async Task<ResponseDto<bool>> ChangeOrder(AuditTemplateFieldOrderRequestDto request)
+        {
+            var response = ResponseDto.Create<bool>();
+            try
+            {
+                var items = (await _auditTemplateFieldRepository.GetAsync(filter: x => x.TableScaleTemplateId == request.TableScaleTemplateId && x.IsActive))
+                    .OrderBy(x => x.SortOrder)
+                    .ToList();
+
+                var currentIndex = items.FindIndex(x => x.SortOrder == request.CurrentPosition);
+                var newIndex = items.FindIndex(x => x.SortOrder == request.NewPosition);
+                if (currentIndex < 0 || newIndex < 0)
+                {
+                    response = ResponseDto.Error<bool>("SortOrder no encontrado en la plantilla.");
+                    return response;
+                }
+
+                var item = items[currentIndex];
+                items.RemoveAt(currentIndex);
+                items.Insert(newIndex, item);
+
+                for (int i = 0; i < items.Count; i++)
+                {
+                    items[i].SortOrder = i + 1;
+                    _auditTemplateFieldRepository.Update(items[i]);
+                }
+                await _unitOfWork.CommitAsync();
+                response.Data = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response = ResponseDto.Error<bool>(ex.Message);
             }
             return response;
         }
@@ -134,7 +184,6 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<PaginationResponseDto<AuditTemplateFieldResponseDto>>();
             try
             {
-                int totalRows;
                 Expression<Func<AuditTemplateFields, bool>> filter = x => x.IsActive;
 
                 if (!string.IsNullOrEmpty(requestDto.Filter))
@@ -146,7 +195,7 @@ namespace Rokys.Audit.Services.Services
                 if (requestDto.ScaleGroupId.HasValue)
                     filter = filter.AndAlso(x => x.TableScaleTemplate.ScaleGroupId == requestDto.ScaleGroupId.Value);
 
-                Func<IQueryable<AuditTemplateFields>, IOrderedQueryable<AuditTemplateFields>> orderBy = q => q.OrderByDescending(x => x.FieldName);
+                Func<IQueryable<AuditTemplateFields>, IOrderedQueryable<AuditTemplateFields>> orderBy = q => q.OrderBy(x => x.SortOrder);
 
                 var entities = await _auditTemplateFieldRepository.GetPagedAsync(
                     filter: filter,
@@ -200,8 +249,9 @@ namespace Rokys.Audit.Services.Services
                     return response;
                 }
                 var currentUser = _httpContextAccessor.CurrentUser();
+                var userName = currentUser?.UserName ?? "system";
                 entity = _mapper.Map(requestDto, entity);
-                entity.UpdateAudit(currentUser.UserName);
+                entity.UpdateAudit(userName);
                 _auditTemplateFieldRepository.Update(entity);
                 await _unitOfWork.CommitAsync();
                 var responseData = _mapper.Map<AuditTemplateFieldResponseDto>(entity);

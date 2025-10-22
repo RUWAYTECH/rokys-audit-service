@@ -15,6 +15,7 @@ namespace Rokys.Audit.Model.Tables
         public string? FieldOptions { get; set; } // Opciones para campos tipo 'select' (JSON)
 
         // Metadatos
+    public int SortOrder { get; set; } = 0;
         public string? DefaultValue { get; set; }
         public bool IsActive { get; set; } = true;
 

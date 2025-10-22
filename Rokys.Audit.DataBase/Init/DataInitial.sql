@@ -173,7 +173,7 @@ CREATE TABLE AuditTemplateFields (
     FieldOptions NVARCHAR(MAX), -- Opciones para campos tipo 'select' (JSON
     CONSTRAINT CK_FieldOptions_IsJson 
         CHECK (FieldOptions IS NULL OR ISJSON(FieldOptions) = 1),
-    --FieldSortOrder INT DEFAULT 0,
+    SortOrder INT DEFAULT 0,
     
     -- Valores (usa el apropiado según FieldType)
     --TextValue NVARCHAR(MAX),

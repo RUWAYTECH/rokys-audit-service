@@ -49,6 +49,10 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.Property(x => x.DefaultValue)
                 .HasColumnType("nvarchar(max)");
 
+            builder.Property(x => x.SortOrder)
+                .IsRequired()
+                .HasDefaultValue(0);
+
             builder.Property(x => x.IsActive)
                 .IsRequired()
                 .HasDefaultValue(true);
@@ -81,6 +85,9 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             // Indexes
             builder.HasIndex(x => x.FieldCode)
                 .HasDatabaseName("IX_AuditTemplateFields_FieldCode");
+
+            builder.HasIndex(x => x.SortOrder)
+                .HasDatabaseName("IX_AuditTemplateFields_SortOrder");
 
             builder.HasIndex(x => x.TableScaleTemplateId)
                 .HasDatabaseName("IX_AuditTemplateFields_TableScaleTemplateId");

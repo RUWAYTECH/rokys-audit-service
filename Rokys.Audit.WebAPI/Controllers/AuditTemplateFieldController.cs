@@ -58,5 +58,13 @@ namespace Rokys.Audit.WebAPI.Controllers
                 return Ok(response);
             return BadRequest(response);
         }
+
+        [HttpPut("change-order")] 
+        public async Task<IActionResult> ChangeOrder([FromBody] AuditTemplateFieldOrderRequestDto request)
+        {
+            var response = await _auditTemplateFieldService.ChangeOrder(request);
+            if (response.IsValid) return Ok(response);
+            return BadRequest(response);
+        }
     }
 }

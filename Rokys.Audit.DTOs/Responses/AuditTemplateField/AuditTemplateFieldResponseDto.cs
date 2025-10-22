@@ -6,6 +6,8 @@ namespace Rokys.Audit.DTOs.Responses.AuditTemplateField
     {
         public Guid AuditTemplateFieldId { get; set; }
         public bool IsActive { get; set; }
+        public int SortOrder { get; set; }
+
         public string CreatedBy { get; set; }
         public DateTime CreationDate { get; set; }
         public string? ModifiedBy { get; set; }
