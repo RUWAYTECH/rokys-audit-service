@@ -84,7 +84,7 @@ namespace Rokys.Audit.Services.Services
                     .Select(x => x.CorrelativeNumber)
                     .FirstOrDefault();
                 var currentYear = DateTime.Now.Year;
-                var nextCode = CodeGeneratorHelper.GenerateNextCode("CSR-" + currentYear, lastCode, 4);
+                var nextCode = CodeGeneratorHelper.GenerateNextCode("AUD" + currentYear, lastCode, 4);
                 entity.CorrelativeNumber = nextCode;
                 entity.StatusId = auditStatus.AuditStatusId;
                 entity.CreateAudit(currentUserName);
