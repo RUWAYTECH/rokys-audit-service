@@ -97,6 +97,7 @@ CREATE TABLE InboxItems (
     UserId UNIQUEIDENTIFIER NULL
         FOREIGN KEY REFERENCES UserReference(UserReferenceId), -- quien registró la acción
     Action NVARCHAR(100) NULL, -- acción realizada: 'Aprobada','Cancelada','Devuelta', etc.
+    SequenceNumber INT NOT NULL DEFAULT 0, -- número secuencial por PeriodAudit para identificar el último creado
 
     -- Auditoría común
     IsActive BIT DEFAULT 1,
@@ -389,6 +390,7 @@ CREATE TABLE [PeriodAudit]
 
     -- Puntuación
     ScoreValue DECIMAL(10,2) NOT NULL,
+    ScaleCode NVARCHAR(10) NOT NULL, -- Código de la Escala
     ScaleName NVARCHAR(100) NOT NULL, -- Nombre de la Escala
     ScaleIcon NVARCHAR(20) NOT NULL, -- Icon de la Escala
     ScaleColor NVARCHAR(10) NOT NULL, -- Valor de la Escala
@@ -617,3 +619,32 @@ CREATE TABLE PeriodAuditScaleSubResult (
     INDEX IX_PeriodAuditScaleSubResult_CriteriaId (CriteriaSubResultId),
     UNIQUE (PeriodAuditScaleResultId, CriteriaSubResultId) -- Un sub-resultado por criterio por resultado de escala
 );
+
+
+-- Índice compuesto principal para ScaleCode con columnas de filtrado frecuente
+CREATE NONCLUSTERED INDEX IX_PeriodAudit_ScaleCode_Optimized 
+ON PeriodAudit (ScaleCode, IsActive, StoreId, CreationDate)
+INCLUDE (ScaleName, ScaleColor, ScaleIcon, ScoreValue, ScaleMinValue, ScaleMaxValue, StatusId)
+WITH (
+    PAD_INDEX = OFF,
+    STATISTICS_NORECOMPUTE = OFF,
+    SORT_IN_TEMPDB = OFF,
+    DROP_EXISTING = OFF,
+    ONLINE = OFF,
+    ALLOW_ROW_LOCKS = ON,
+    ALLOW_PAGE_LOCKS = ON,
+    FILLFACTOR = 90
+);
+
+-- Índice específico para consultas de reportes por rangos de fecha
+CREATE NONCLUSTERED INDEX IX_PeriodAudit_ScaleCode_DateRange
+ON PeriodAudit (ScaleCode, CreationDate, IsActive)
+INCLUDE (StoreId, ScoreValue, StatusId)
+WHERE IsActive = 1
+WITH (FILLFACTOR = 95);
+
+-- Índice para consultas de estadísticas por escala
+CREATE NONCLUSTERED INDEX IX_PeriodAudit_ScaleCode_Statistics
+ON PeriodAudit (ScaleCode, StatusId, IsActive)
+INCLUDE (ScoreValue, StoreId, CreationDate)
+WITH (FILLFACTOR = 90);

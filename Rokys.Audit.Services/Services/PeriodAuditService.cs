@@ -1,5 +1,4 @@
 using FluentValidation;
-using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Reatil.Services.Services;
@@ -31,6 +30,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IPeriodAuditGroupResultRepository _periodAuditGroupResultRepository;
         private readonly IScaleCompanyRepository _scaleCompanyRepository;
         private readonly IInboxItemsRepository _inboxItemsRepository;
+    private readonly IInboxItemsService _inboxItemsService;
         private readonly IUserReferenceRepository _userReferenceRepository;
 
         public PeriodAuditService(
@@ -44,6 +44,7 @@ namespace Rokys.Audit.Services.Services
             IPeriodAuditGroupResultRepository periodAuditGroupResultRepository,
             IScaleCompanyRepository scaleCompanyRepository,
             IInboxItemsRepository inboxItemsRepository,
+            IInboxItemsService inboxItemsService,
             IUserReferenceRepository userReferenceRepository)
         {
             _repository = repository;
@@ -56,6 +57,7 @@ namespace Rokys.Audit.Services.Services
             _periodAuditGroupResultRepository = periodAuditGroupResultRepository;
             _scaleCompanyRepository = scaleCompanyRepository;
             _inboxItemsRepository = inboxItemsRepository;
+            _inboxItemsService = inboxItemsService;
             _userReferenceRepository = userReferenceRepository;
         }
 
@@ -94,45 +96,27 @@ namespace Rokys.Audit.Services.Services
                 // Crear registro en InboxItems: prev user = administrador, next user = auditor responsable
                 try
                 {
-                    if (_inboxItemsRepository != null)
+                    // Build InboxItemRequestDto and reuse the inbox service to handle creation (sequence number, user mapping, audit fields)
+                    var inboxDto = new Rokys.Audit.DTOs.Requests.InboxItems.InboxItemRequestDto
                     {
-                        Guid? prevUserId = null;
-                        Guid? nextUserId = null;
-                        if (entity.AdministratorId.HasValue)
-                        {
-                            var adminRef = await _userReferenceRepository.GetByUserIdAsync(entity.AdministratorId.Value);
-                            if (adminRef != null) prevUserId = adminRef.UserReferenceId;
-                        }
-                        if (entity.ResponsibleAuditorId.HasValue)
-                        {
-                            var auditorRef = await _userReferenceRepository.GetByUserIdAsync(entity.ResponsibleAuditorId.Value);
-                            if (auditorRef != null) nextUserId = auditorRef.UserReferenceId;
-                        }
+                        PeriodAuditId = entity.PeriodAuditId,
+                        PrevStatusId = (await _auditStatusRepository.GetFirstOrDefaultAsync(f => f.Code == AuditStatusCode.Pending && f.IsActive))?.AuditStatusId,
+                        NextStatusId = (await _auditStatusRepository.GetFirstOrDefaultAsync(f => f.Code == AuditStatusCode.InProgress && f.IsActive))?.AuditStatusId,
+                        Comments = "Auditoría creada",
+                        Action = "Creado",
+                        IsActive = true
+                    };
 
-                        var inboxItem = new InboxItems
-                        {
-                            PeriodAuditId = entity.PeriodAuditId,
-                            PrevUserId = prevUserId,
-                            NextUserId = nextUserId,
-                            PrevStatusId = (await _auditStatusRepository.GetFirstOrDefaultAsync(f => f.Code == AuditStatusCode.Pending && f.IsActive))?.AuditStatusId,
-                            NextStatusId = (await _auditStatusRepository.GetFirstOrDefaultAsync(f => f.Code == AuditStatusCode.InProgress && f.IsActive))?.AuditStatusId,
-                            Comments = "Auditoría creada",
-                            IsActive = true
-                        };
-                        var currentUser2 = _httpContextAccessor.CurrentUser();
-                        var currentUser2Name = currentUser2?.UserName ?? "system";
-                        // record who created the inbox entry and the action (only if user exists in UserReference)
-                        if (currentUser2 != null)
-                        {
-                            var actorRef = await _userReferenceRepository.GetByUserIdAsync(currentUser2.UserId);
-                            if (actorRef != null)
-                                inboxItem.UserId = actorRef.UserReferenceId;
-                            inboxItem.Action = "Creado";
-                            inboxItem.CreateAudit(currentUser2Name);
-                        }
-                        _inboxItemsRepository.Insert(inboxItem);
-                        await _unitOfWork.CommitAsync();
-                    }
+                    // set prev/next users using system user ids -> inbox service will map to UserReference internally
+                    if (entity.AdministratorId.HasValue)
+                        inboxDto.PrevUserId = entity.AdministratorId;
+                    if (entity.ResponsibleAuditorId.HasValue)
+                        inboxDto.NextUserId = entity.ResponsibleAuditorId;
+
+                    // let the inbox service decide the SequenceNumber and actor mapping
+                    var inboxCreateResponse = await _inboxItemsService.Create(inboxDto);
+                    if (!inboxCreateResponse.IsValid)
+                        _logger.LogWarning("Inbox item creation returned non-valid: {Messages}", string.Join(';', inboxCreateResponse.Messages.Select(m => m.Message)));
                 }
                 catch (Exception exInbox)
                 {
@@ -364,34 +348,25 @@ namespace Rokys.Audit.Services.Services
                 var action = requestDto.Action?.Trim().ToLowerInvariant();
 
                 // We'll create an inbox record for every state transition
-                var inboxItem = new InboxItems
-                {
-                    PeriodAuditId = entity.PeriodAuditId,
-                    PrevStatusId = entity.StatusId,
-                    IsActive = true,
-                    Comments = requestDto.Comments
-                };
-
-                // Default next user/status
-                Guid? nextUserId = null;
                 Guid? prevUserId = null;
-                _logger.LogDebug("ProcessAction for PeriodAuditId={PeriodAuditId} AdministratorId={AdministratorId} ResponsibleAuditorId={ResponsibleAuditorId} StatusId={StatusId}", entity.PeriodAuditId, entity.AdministratorId, entity.ResponsibleAuditorId, entity.StatusId);
+                Guid? nextUserId = null;
+                Guid? prevStatusId = entity.StatusId;
+                Guid? nextStatusId = null;
+                var comments = requestDto.Comments;
+                var actionText = string.Empty;
                 // PrevUser: if exists assign current ResponsibleAuditor or Administrator depending on who had it
                 if (entity.ResponsibleAuditorId.HasValue)
                 {
                     prevUserId = entity.ResponsibleAuditorId.Value;
                     var auditorRef = await _userReferenceRepository.GetFirstOrDefaultAsync(filter: x=>x.UserReferenceId == entity.ResponsibleAuditorId.Value && x.IsActive);
-                    _logger.LogDebug("Found auditorRef for ResponsibleAuditorId={ResponsibleAuditorId}: {UserReference}", entity.ResponsibleAuditorId, auditorRef != null ? auditorRef.UserReferenceId.ToString() : "null");
                     if (auditorRef != null) prevUserId = auditorRef.UserReferenceId;
                 }
                 if (prevUserId == null && entity.AdministratorId.HasValue)
                 {
                     var adminRef = await _userReferenceRepository.GetFirstOrDefaultAsync(filter: x => x.UserReferenceId == entity.AdministratorId.Value && x.IsActive);
-                    _logger.LogDebug("Found adminRef for AdministratorId={AdministratorId}: {UserReference}", entity.AdministratorId, adminRef != null ? adminRef.UserReferenceId.ToString() : "null");
                     if (adminRef != null) prevUserId = adminRef.UserReferenceId;
                 }
 
-                inboxItem.PrevUserId = prevUserId;
                 Guid newStatusId;
                 // Handle actions
                 if (action == "approve")
@@ -401,31 +376,29 @@ namespace Rokys.Audit.Services.Services
                     {
                         newStatusId = statusInProgress?.AuditStatusId ?? entity.StatusId ?? Guid.Empty;
 
-                        inboxItem.NextStatusId = statusInProgress?.AuditStatusId;
+                        nextStatusId = statusInProgress?.AuditStatusId;
                         // Next user should be responsible auditor
                         if (entity.ResponsibleAuditorId.HasValue)
                         {
                             var auditorRef = await _userReferenceRepository.GetFirstOrDefaultAsync(filter: x => x.UserReferenceId == entity.ResponsibleAuditorId.Value && x.IsActive);
-                            _logger.LogDebug("Found auditorRef for Next ResponsibleAuditorId={ResponsibleAuditorId}: {UserReference}", entity.ResponsibleAuditorId, auditorRef != null ? auditorRef.UserReferenceId.ToString() : "null");
                             if (auditorRef != null) nextUserId = auditorRef.UserReferenceId;
                         }
                     }
                     else if (entity.StatusId == statusInProgress?.AuditStatusId)
                     {
                         newStatusId = statusInReview?.AuditStatusId ?? entity.StatusId ?? Guid.Empty;
-                        inboxItem.NextStatusId = statusInReview?.AuditStatusId;
+                        nextStatusId = statusInReview?.AuditStatusId;
                         // Next user: maybe a reviewer or supervisor; fallback to administrator
                         if (entity.AdministratorId.HasValue)
                         {
                             var adminRef = await _userReferenceRepository.GetFirstOrDefaultAsync(filter: x => x.UserReferenceId == entity.AdministratorId.Value && x.IsActive);
-                            _logger.LogDebug("Found adminRef for Next AdministratorId={AdministratorId}: {UserReference}", entity.AdministratorId, adminRef != null ? adminRef.UserReferenceId.ToString() : "null");
                             if (adminRef != null) nextUserId = adminRef.UserReferenceId;
                         }
                     }
                     else if (entity.StatusId == statusInReview?.AuditStatusId)
                     {
                         newStatusId = statusFinal?.AuditStatusId ?? entity.StatusId ?? Guid.Empty;
-                        inboxItem.NextStatusId = statusFinal?.AuditStatusId;
+                        nextStatusId = statusFinal?.AuditStatusId;
                         // Finalized - no next user
                         nextUserId = null;
                     }
@@ -434,7 +407,7 @@ namespace Rokys.Audit.Services.Services
                         return ResponseDto.Error("La acción de aprobación no aplica en el estado actual.");
                     }
 
-                    inboxItem.Action = "Aprobada";
+                    actionText = "Aprobada";
                 }
                 else if (action == "cancel" || action == "cancelar")
                 {
@@ -442,10 +415,10 @@ namespace Rokys.Audit.Services.Services
                     if (entity.StatusId == statusInProgress?.AuditStatusId || entity.StatusId == statusPending?.AuditStatusId)
                     {
                         newStatusId = statusCanceled?.AuditStatusId ?? entity.StatusId ?? Guid.Empty;
-                        inboxItem.NextStatusId = statusCanceled?.AuditStatusId;
+                        nextStatusId = statusCanceled?.AuditStatusId;
                         // canceled -> no next user
                         nextUserId = null;
-                        inboxItem.Action = "Cancelada";
+                        actionText = "Cancelada";
                     }
                     else
                     {
@@ -458,14 +431,14 @@ namespace Rokys.Audit.Services.Services
                     if (entity.StatusId == statusInReview?.AuditStatusId)
                     {
                         newStatusId = statusInProgress?.AuditStatusId ?? entity.StatusId ?? Guid.Empty;
-                        inboxItem.NextStatusId = statusInProgress?.AuditStatusId;
+                        nextStatusId = statusInProgress?.AuditStatusId;
                         // send back to responsible auditor
                         if (entity.ResponsibleAuditorId.HasValue)
                         {
                             var auditorRef = await _userReferenceRepository.GetByUserIdAsync(entity.ResponsibleAuditorId.Value);
                             if (auditorRef != null) nextUserId = auditorRef.UserReferenceId;
                         }
-                        inboxItem.Action = "Devuelta";
+                        actionText = "Devuelta";
                     }
                     else
                     {
@@ -478,18 +451,35 @@ namespace Rokys.Audit.Services.Services
                 }
 
                 // Assign next user
-                inboxItem.NextUserId = nextUserId;
+                // We'll delegate creation of the inbox item to the inbox service (it will calculate sequence and map actor user)
+                var inboxDto = new Rokys.Audit.DTOs.Requests.InboxItems.InboxItemRequestDto
+                {
+                    PeriodAuditId = entity.PeriodAuditId,
+                    PrevUserId = prevUserId,
+                    NextUserId = nextUserId,
+                    PrevStatusId = prevStatusId,
+                    NextStatusId = nextStatusId,
+                    Comments = comments,
+                    Action = actionText,
+                    IsActive = true,
+                    // actor (system user id) will be mapped by the inbox service to UserReferenceId
+                    UserId = currentUser?.UserId
+                };
 
-                inboxItem.CreateAudit(currentUserName);
-
-                // record who made the change on the period audit
-                
+                // Update period audit status
                 var periodAudit = await _repository.GetFirstOrDefaultAsync(f => f.PeriodAuditId == entity.PeriodAuditId && f.IsActive);
                 periodAudit.StatusId = newStatusId;
                 periodAudit.UpdateAudit(currentUserName);
 
                 _repository.Update(periodAudit);
-                _inboxItemsRepository.Insert(inboxItem);
+
+                // Create inbox via service (handles sequence and user mapping)
+                var inboxCreateResponse = await _inboxItemsService.Create(inboxDto);
+                if (!inboxCreateResponse.IsValid)
+                {
+                    _logger.LogWarning("Inbox item creation during ProcessAction returned non-valid: {Messages}", string.Join(';', inboxCreateResponse.Messages.Select(m => m.Message)));
+                }
+
                 await _unitOfWork.CommitAsync();
 
                 response = ResponseDto.Create(new ApplicationMessage[] { });
@@ -513,7 +503,8 @@ namespace Rokys.Audit.Services.Services
                 );
                 if (entity == null)
                 {
-                    response.Data = null;
+                    // return empty result instead of null to satisfy nullable reference types
+                    response.Data = new LastAuditByStoreIdResponseDto { LastAuditDate = null };
                     return response;
                 }
                 var lastAudit = new LastAuditByStoreIdResponseDto

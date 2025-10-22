@@ -14,6 +14,8 @@ namespace Rokys.Audit.DTOs.Common
     public string? Comments { get; set; }
         public Guid? UserId { get; set; }
         public string? Action { get; set; }
+        // sequence per PeriodAudit
+        public int SequenceNumber { get; set; }
     // DueDate and Priority were removed from the InboxItems domain per recent design decision
         public bool IsActive { get; set; } = true;
     public string? CreatedBy { get; set; }
