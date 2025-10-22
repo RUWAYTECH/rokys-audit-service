@@ -1,3 +1,5 @@
+using Rokys.Audit.Common.Helpers.FileConvert;
+
 namespace Rokys.Audit.DTOs.Responses.StorageFiles
 {
     public class StorageFileResponseDto
@@ -17,5 +19,6 @@ namespace Rokys.Audit.DTOs.Responses.StorageFiles
         public DateTime CreationDate { get; set; }
         public string? UpdatedBy { get; set; }
         public DateTime? UpdateDate { get; set; }
+        public FileBase64Result? Base64Result { get; set; }
     }
 }

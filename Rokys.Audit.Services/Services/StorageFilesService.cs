@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Reatil.Services.Services;
 using Rokys.Audit.Common.Extensions;
+using Rokys.Audit.Common.Helpers.FileConvert;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.StorageFiles;
 using Rokys.Audit.DTOs.Responses.Common;
@@ -119,7 +120,24 @@ namespace Rokys.Audit.Services.Services
                     response = ResponseDto.Error<StorageFileResponseDto>("No se encontró el archivo.");
                     return response;
                 }
-                response.Data = _mapper.Map<StorageFileResponseDto>(entity);
+                byte[] excelBytes = Array.Empty<byte>();
+
+                if (!string.IsNullOrEmpty(entity.FileUrl))
+                {
+                    var filePath = Path.Combine(_fileSettings.Path, FileDirectories.Uploads, entity.FileUrl);
+                    if (File.Exists(filePath))
+                    {
+                        excelBytes = File.ReadAllBytes(filePath);
+                    }
+                }
+
+                var base64File = Convert.ToBase64String(excelBytes);
+                var fileInfo = FileConvertHelper.FileBase64Result(base64File);
+                var entityResponse = _mapper.Map<StorageFileResponseDto>(entity);
+
+                entityResponse.Base64Result = fileInfo;
+                
+                response.Data = entityResponse;
             }
             catch (Exception ex)
             {
@@ -190,6 +208,49 @@ namespace Rokys.Audit.Services.Services
                 _storageFilesRepository.Update(entity);
                 await _unitOfWork.CommitAsync();
                 response.Data = _mapper.Map<StorageFileResponseDto>(entity);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response = ResponseDto.Error<StorageFileResponseDto>(ex.Message);
+            }
+            return response;
+        }
+        public async Task<ResponseDto<StorageFileResponseDto>> GetExcelFile(Guid? id, Guid? entityId)
+        {
+            var response = ResponseDto.Create<StorageFileResponseDto>();
+            try
+            {
+                if (!id.HasValue && !entityId.HasValue)
+                {
+                    response = ResponseDto.Error<StorageFileResponseDto>("Es obligatorio que envie uno de las 2 entidades.");
+                    return response;
+                }
+                var entity = await _storageFilesRepository.GetFirstOrDefaultAsync(
+                                filter: x =>
+                                    (!id.HasValue || x.StorageFileId == id.Value) &&
+                                    (!entityId.HasValue || x.EntityId == entityId.Value) &&
+                                    x.IsActive
+                            );
+                if (entity == null)
+                {
+                    response = ResponseDto.Error<StorageFileResponseDto>("No se encontró el archivo.");
+                    return response;
+                }
+                byte[] excelBytes = Array.Empty<byte>();
+                if (!string.IsNullOrEmpty(entity.FileUrl))
+                {
+                    var filePath = Path.Combine(_fileSettings.Path, FileDirectories.Uploads, entity.FileUrl);
+                    if (File.Exists(filePath))
+                    {
+                        excelBytes = File.ReadAllBytes(filePath);
+                    }
+                }
+                var base64File = Convert.ToBase64String(excelBytes);
+                var fileInfo = FileConvertHelper.FileBase64Result(base64File);
+                var entityResponse = _mapper.Map<StorageFileResponseDto>(entity);
+                entityResponse.Base64Result = fileInfo;
+                response.Data = entityResponse;
             }
             catch (Exception ex)
             {
