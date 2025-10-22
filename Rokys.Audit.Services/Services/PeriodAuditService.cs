@@ -247,11 +247,8 @@ namespace Rokys.Audit.Services.Services
                 if (paginationRequestDto.ResponsibleAuditorId.HasValue)
                     filter = filter.AndAlso(x => x.ResponsibleAuditorId == paginationRequestDto.ResponsibleAuditorId.Value && x.IsActive);
 
-                if (paginationRequestDto.EndDate.HasValue)
-                    filter = filter.AndAlso(x => x.EndDate >= paginationRequestDto.EndDate.Value && x.IsActive);
-
-                if (paginationRequestDto.StartDate.HasValue)
-                    filter = filter.AndAlso(x => x.StartDate == paginationRequestDto.StartDate.Value && x.IsActive);
+                if (paginationRequestDto.StartDate.HasValue && paginationRequestDto.EndDate.HasValue)
+                    filter = filter.AndAlso(x => x.StartDate >= paginationRequestDto.StartDate.Value && x.EndDate <= paginationRequestDto.EndDate.Value && x.IsActive);
 
                 Func<IQueryable<PeriodAudit>, IOrderedQueryable<PeriodAudit>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 
