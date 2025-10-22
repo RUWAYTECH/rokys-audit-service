@@ -56,10 +56,10 @@ namespace Rokys.Audit.WebAPI.Controllers
             return BadRequest(response);
         }
 
-        [HttpPost("{id}/action")]
-        public async Task<IActionResult> Action([FromRoute] Guid id, [FromBody] PeriodAuditActionRequestDto requestDto)
+        [HttpPost("action")]
+        public async Task<IActionResult> Action([FromBody] PeriodAuditBatchActionRequestDto requestDto)
         {
-            var response = await _service.ProcessAction(id, requestDto);
+            var response = await _service.ProcessAction(requestDto);
             if (response.IsValid)
                 return Ok(response);
             return BadRequest(response);
