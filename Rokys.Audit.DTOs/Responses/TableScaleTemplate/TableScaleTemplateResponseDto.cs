@@ -10,6 +10,8 @@ namespace Rokys.Audit.DTOs.Responses.TableScaleTemplate
 
         // Navigation properties
         public string? ScaleGroupName { get; set; }
+        public int SortOrder { get; set; }
+
 
         // Audit properties
         public DateTime CreationDate { get; set; }

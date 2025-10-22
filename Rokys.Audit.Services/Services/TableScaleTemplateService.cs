@@ -63,6 +63,12 @@ namespace Rokys.Audit.Services.Services
 
                 var currentUser = _httpContextAccessor.CurrentUser();
                 var entity = _mapper.Map<TableScaleTemplate>(requestDto);
+
+                // Ensure SortOrder is assigned server-side: next value within the ScaleGroup
+                var existingSortOrders = (await _tableScaleTemplateRepository.GetAsync(filter: x => x.ScaleGroupId == requestDto.ScaleGroupId && x.IsActive))
+                    .Select(x => x.SortOrder);
+                entity.SortOrder = Rokys.Audit.Common.Helpers.SortOrderHelper.GetNextSortOrder(existingSortOrders);
+
                 entity.CreateAudit(currentUser.UserName);
                 _tableScaleTemplateRepository.Insert(entity);
                 await _unitOfWork.CommitAsync();
