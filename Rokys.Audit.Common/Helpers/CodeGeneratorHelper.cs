@@ -23,10 +23,19 @@ namespace Rokys.Audit.Common.Helpers
 
                 if (parts.Length >= 2)
                 {
-                    // Obtiene la parte numérica (último segmento)
-                    var numericPart = parts[^1];
-                    if (int.TryParse(numericPart, out int current))
-                        nextNumber = current + 1;
+                    // Si el prefijo del lastCode es distinto al prefijo actual, reiniciamos la secuencia
+                    var lastPrefix = parts[0];
+                    if (!string.Equals(lastPrefix, prefix, StringComparison.OrdinalIgnoreCase))
+                    {
+                        nextNumber = 1;
+                    }
+                    else
+                    {
+                        // Obtiene la parte numérica (último segmento)
+                        var numericPart = parts[^1];
+                        if (int.TryParse(numericPart, out int current))
+                            nextNumber = current + 1;
+                    }
                 }
             }
 
