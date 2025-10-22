@@ -192,7 +192,9 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                         ScoreObtained = subResult.ScoreObtained,
                         ColorCode = subResult.ColorCode
                     }).ToList();
-                    dest.PeriodAuditScoringCriteriaResult = src.PeriodAuditScoringCriteriaResults.Select(criteriaResult => new PeriodAuditScoringCriteriaResultResponseDto
+                    dest.PeriodAuditScoringCriteriaResult = src.PeriodAuditScoringCriteriaResults
+                    .OrderBy(criteriaResult => criteriaResult.SortOrder)
+                    .Select(criteriaResult => new PeriodAuditScoringCriteriaResultResponseDto
                     {
                         PeriodAuditScoringCriteriaResultId = criteriaResult.PeriodAuditScoringCriteriaResultId,
                         PeriodAuditScaleResultId = criteriaResult.PeriodAuditScaleResultId,
@@ -204,6 +206,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                         ExpectedValue = criteriaResult.ExpectedValue,
                         Score = criteriaResult.Score,
                         ResultObtained = criteriaResult.ResultObtained,
+                        SortOrder = criteriaResult.SortOrder,
 
                     }).ToList();
                 });
