@@ -13,5 +13,6 @@ namespace Rokys.Audit.Services.Interfaces
         Task<ResponseDto<TableScaleTemplateResponseDto>> GetById(Guid id);
     Task<ResponseDto<PaginationResponseDto<TableScaleTemplateResponseDto>>> GetPaged(TableScaleTemplateFilterRequestDto filterRequestDto);
         Task<ResponseDto<IEnumerable<TableScaleTemplateResponseDto>>> GetByScaleGroupId(Guid scaleGroupId);
+        Task<ResponseDto<bool>> ChangeOrder(Guid scaleGroupId, int currentPosition, int newPosition);
     }
 }

@@ -6,7 +6,9 @@ namespace Rokys.Audit.Model.Tables
     public Guid ScaleGroupId { get; set; }
     public string Code { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
-    public string Orientation { get; set; }
+    public string Orientation { get; set; } = "V";
+    // Persistent order within a ScaleGroup
+    public int SortOrder { get; set; } = 0;
     public string? TemplateData { get; set; } // JSON almacenado como texto
     public bool IsActive { get; set; } = true;
 

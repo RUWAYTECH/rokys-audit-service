@@ -51,6 +51,15 @@ namespace Rokys.Audit.WebAPI.Controllers
                 return Ok(response);
             return BadRequest(response);
         }
+
+        [HttpPut("change-order")]
+        public async Task<IActionResult> ChangeOrder([FromBody] ChangeTableScaleTemplateOrderRequestDto requestDto)
+        {
+            var response = await _tableScaleTemplateService.ChangeOrder(requestDto.ScaleGroupId, requestDto.CurrentPosition, requestDto.NewPosition);
+            if (response.IsValid)
+                return Ok(response);
+            return BadRequest(response);
+        }
         
         [HttpPut("{id}")]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] TableScaleTemplateRequestDto requestDto)

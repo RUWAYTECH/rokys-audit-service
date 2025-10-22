@@ -32,6 +32,10 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.Property(x => x.TemplateData)
                 .HasColumnType("nvarchar(max)");
 
+            builder.Property(x => x.SortOrder)
+                .IsRequired()
+                .HasDefaultValue(0);
+
             builder.Property(x => x.IsActive)
                 .IsRequired()
                 .HasDefaultValue(true);

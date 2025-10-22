@@ -116,8 +116,7 @@ namespace Rokys.Audit.Services.Services
             {
                 var filter = BuildFilter(filterRequestDto);
 
-                Func<IQueryable<TableScaleTemplate>, IOrderedQueryable<TableScaleTemplate>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
-
+                Func<IQueryable<TableScaleTemplate>, IOrderedQueryable<TableScaleTemplate>> orderBy = q => q.OrderBy(x => x.SortOrder);
                 var entities = await _tableScaleTemplateRepository.GetPagedAsync(
                     filter: filter,
                     orderBy: orderBy,
@@ -217,6 +216,45 @@ namespace Rokys.Audit.Services.Services
             {
                 _logger.LogError(ex.Message);
                 response = ResponseDto.Error<TableScaleTemplateResponseDto>(ex.Message);
+            }
+            return response;
+        }
+
+        public async Task<ResponseDto<bool>> ChangeOrder(Guid scaleGroupId, int currentPosition, int newPosition)
+        {
+            var response = ResponseDto.Create<bool>();
+            try
+            {
+                // get all templates for group ordered by SortOrder
+                var items = (await _tableScaleTemplateRepository.GetAsync(filter: x => x.ScaleGroupId == scaleGroupId && x.IsActive))
+                    .OrderBy(x => x.SortOrder)
+                    .ToList();
+
+                var currentIndex = items.FindIndex(x => x.SortOrder == currentPosition);
+                var newIndex = items.FindIndex(x => x.SortOrder == newPosition);
+                if (currentIndex < 0 || newIndex < 0)
+                {
+                    response = ResponseDto.Error<bool>("SortOrder no encontrado en el grupo.");
+                    return response;
+                }
+
+                var item = items[currentIndex];
+                items.RemoveAt(currentIndex);
+                items.Insert(newIndex, item);
+
+                // update sort orders sequentially starting at 1
+                for (int i = 0; i < items.Count; i++)
+                {
+                    items[i].SortOrder = i + 1;
+                    _tableScaleTemplateRepository.Update(items[i]);
+                }
+                await _unitOfWork.CommitAsync();
+                response.Data = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response = ResponseDto.Error<bool>(ex.Message);
             }
             return response;
         }

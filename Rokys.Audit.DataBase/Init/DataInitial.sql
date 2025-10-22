@@ -140,6 +140,7 @@ CREATE TABLE TableScaleTemplate (
     Code NVARCHAR(50) NOT NULL,
     Name NVARCHAR(255) NOT NULL,
     Orientation NVARCHAR(2) DEFAULT 'V', -- 'vertical' o 'horizontal'
+    SortOrder INT DEFAULT 0,
     CONSTRAINT CK_AuditTemplateFields_Orientation
     CHECK (Orientation IN ('H', 'V') OR Orientation IS NULL), --
     TemplateData NVARCHAR(MAX) NULL, -- JSON almacenado como texto
