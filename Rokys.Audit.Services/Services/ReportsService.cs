@@ -44,7 +44,7 @@ namespace Rokys.Audit.Services.Services
                 // Agrupar auditorías por ScaleCode y mes
                 var auditsByScaleAndMonth = periodAudits
                     .Where(x => !string.IsNullOrEmpty(x.ScaleCode))
-                    .GroupBy(x => new { x.ScaleCode, x.ScaleName, x.ScaleColor })
+                    .GroupBy(x => new { x.StoreId, x.ScaleCode, x.ScaleName, x.ScaleColor })
                     .ToList();
 
                 // Crear series dinámicamente basadas en los ScaleCodes encontrados
@@ -92,28 +92,7 @@ namespace Rokys.Audit.Services.Services
                         Tooltip = new DashboardTooltipDto { ValueSuffix = " pts" }
                     });
                 }
-
-                // Agregar serie de tiendas auditadas por mes
-                var storesAuditedData = new List<decimal>();
-                for (int month = 1; month <= 12; month++)
-                {
-                    var uniqueStoresCount = periodAudits
-                        .Where(x => x.CreationDate.Month == month)
-                        .Select(x => x.StoreId)
-                        .Distinct()
-                        .Count();
-                    storesAuditedData.Add(uniqueStoresCount);
-                }
-
-                series.Add(new DashboardSeriesDto
-                {
-                    Name = "Tiendas auditadas",
-                    Type = "spline",
-                    YAxis = 1,
-                    Color = "#ff6b35",
-                    Data = storesAuditedData,
-                    Tooltip = new DashboardTooltipDto { ValueSuffix = " tiendas" }
-                });
+              
 
                 var dashboardData = new DashboardDataResponseDto
                 {
