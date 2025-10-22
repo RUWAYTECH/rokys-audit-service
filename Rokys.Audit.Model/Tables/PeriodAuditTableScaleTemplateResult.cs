@@ -9,6 +9,7 @@ namespace Rokys.Audit.Model.Tables
         public bool IsActive { get; set; } = true;
         public string? Code { get; set; }
         public string? Name { get; set; }
+        public int? SortOrder { get; set; }
         public string? Orientation { get; set; }
 
         // Navigation properties
