@@ -1,9 +1,6 @@
 ﻿using AutoMapper;
-using System;
-using System.Linq;
 using Rokys.Audit.DTOs.Responses.PeriodAuditGroupResult;
 using Rokys.Audit.DTOs.Responses.StorageFiles;
-using Rokys.Audit.DTOs.Responses.AuditScaleTemplate;
 using Rokys.Audit.DTOs.Responses.AuditTemplateField;
 using Rokys.Audit.DTOs.Responses.CriteriaSubResult;
 using Rokys.Audit.DTOs.Responses.Enterprise;

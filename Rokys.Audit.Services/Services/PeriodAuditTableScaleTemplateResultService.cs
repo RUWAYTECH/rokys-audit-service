@@ -210,8 +210,11 @@ namespace Rokys.Audit.Services.Services
                     .ToList();
 
                 var periodAuditFieldValues = await _fieldValuesRepository.GetAsync(
-                    x => periodAuditTableScaleTemplateIds.Contains(x.PeriodAuditTableScaleTemplateResultId)
-                );
+                                                x => periodAuditTableScaleTemplateIds.Contains(x.PeriodAuditTableScaleTemplateResultId),
+                                                orderBy: q => q
+                                                    .OrderBy(d => d.PeriodAuditTableScaleTemplateResult.SortOrder)
+                                                    .ThenBy(d => d.SortOrder) // o el campo interno que quieras usar
+                                            );
 
                 foreach (var entity in entities)
                 {
