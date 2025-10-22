@@ -93,6 +93,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                 dest.OperationManagerName = src.OperationManager?.FirstName + " " + src.OperationManager?.LastName;
                 dest.FloatingAdministratorName = src.FloatingAdministrator?.FirstName + " " + src.FloatingAdministrator?.LastName;
                 dest.ResponsibleAuditorName = src.ResponsibleAuditor?.FirstName + " " + src.ResponsibleAuditor?.LastName;
+                dest.SupervisorName = src.Supervisor?.FirstName + " " + src.Supervisor?.LastName;
                 dest.StatusName = src.AuditStatus?.Name;
                 dest.EnterpriseName = src.Store?.Enterprise?.Name ?? string.Empty;
                 dest.EnterpriseId = src.Store?.EnterpriseId ?? Guid.Empty;
@@ -144,6 +145,8 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                         FloatingAdministratorName = ($"{src.PeriodAuditGroupResult?.PeriodAudit?.FloatingAdministrator?.FirstName} {src.PeriodAuditGroupResult?.PeriodAudit?.FloatingAdministrator?.LastName}").Trim() ?? string.Empty,
                         ResponsibleAuditorId = src.PeriodAuditGroupResult?.PeriodAudit?.ResponsibleAuditorId ?? Guid.Empty,
                         ResponsibleAuditorName = ($"{src.PeriodAuditGroupResult?.PeriodAudit?.ResponsibleAuditor?.FirstName} {src.PeriodAuditGroupResult?.PeriodAudit?.ResponsibleAuditor?.LastName}").Trim() ?? string.Empty,
+                        SupervisorId = src.PeriodAuditGroupResult?.PeriodAudit?.SupervisorId ?? Guid.Empty,
+                        SupervisorName = ($"{src.PeriodAuditGroupResult?.PeriodAudit?.Supervisor?.FirstName} {src.PeriodAuditGroupResult?.PeriodAudit?.Supervisor?.LastName}").Trim() ?? string.Empty,
                         StatusId = src.PeriodAuditGroupResult?.PeriodAudit?.StatusId ?? Guid.Empty,
                         StatusName = src.PeriodAuditGroupResult?.PeriodAudit?.AuditStatus?.Name ?? string.Empty,
                         StartDate = src.PeriodAuditGroupResult?.PeriodAudit?.StartDate ?? default,

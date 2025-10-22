@@ -274,7 +274,7 @@ namespace Rokys.Audit.Services.Services
                     });
                     return response;
                 }
-                if (requestDto.File?.Length > 0)
+                if (requestDto.File?.Length > 0 || requestDto.HasSourceData == false)
                     await SaveOrReplaceFileAsync(id,  entity.Name, requestDto, currentUser.UserName);
                 await _unitOfWork.CommitAsync();
 
@@ -293,24 +293,32 @@ namespace Rokys.Audit.Services.Services
             var existingFile = await _storageFilesRepository.GetFirstOrDefaultAsync(x => x.EntityId == entityId && x.IsActive);
 
             if (existingFile != null)
-                _storageFilesRepository.Delete(existingFile);
-
-            var (originalName, filePath) = await SaveMemoFileAsync(requestDto.File);
-            var newFile = new StorageFiles
             {
-                OriginalName = requestDto.File.FileName,
-                FileName = filePath,
-                FileUrl = filePath,
-                EntityId = entityId,
-                FileType = Path.GetExtension(requestDto.File.FileName).ToLower(),
-                EntityName = entityName,
-                ClassificationType = "Data source template",
-                UploadDate = DateTime.Now,
-                UploadedBy = userName
-            };
-            newFile.CreateAudit(userName);
-            _storageFilesRepository.Insert(newFile);
+                var filePath = Path.Combine(_fileSettings.Path, FileDirectories.Uploads, existingFile.FileUrl);
+                if (File.Exists(filePath))
+                    File.Delete(filePath);
 
+                _storageFilesRepository.Delete(existingFile);
+            }
+
+            if (requestDto.HasSourceData == true && requestDto.File.Length > 0)
+            {
+                var (originalName, filePath) = await SaveMemoFileAsync(requestDto.File);
+                var newFile = new StorageFiles
+                {
+                    OriginalName = requestDto.File.FileName,
+                    FileName = filePath,
+                    FileUrl = filePath,
+                    EntityId = entityId,
+                    FileType = Path.GetExtension(requestDto.File.FileName).ToLower(),
+                    EntityName = entityName,
+                    ClassificationType = "Data source template",
+                    UploadDate = DateTime.Now,
+                    UploadedBy = userName
+                };
+                newFile.CreateAudit(userName);
+                _storageFilesRepository.Insert(newFile);
+            }
         }
         private async Task<(string fileName, string filePath)> SaveMemoFileAsync(IFormFile file)
         {

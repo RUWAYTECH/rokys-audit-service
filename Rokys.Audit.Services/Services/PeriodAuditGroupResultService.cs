@@ -136,6 +136,7 @@ namespace Rokys.Audit.Services.Services
                                 Name = template.Name,
                                 Orientation = template.Orientation,
                                 TemplateData = template.TemplateData,
+                                SortOrder = template.SortOrder
                             };
                             periodAuditTableScaleTemplateResult.CreateAudit(currentUser.UserName);
                             _periodAuditTableScaleTemplateResultRepository.Insert(periodAuditTableScaleTemplateResult);
@@ -156,6 +157,7 @@ namespace Rokys.Audit.Services.Services
                                         CalculationFormula = field.CalculationFormula,
                                         AcumulationType = field.AcumulationType,
                                         FieldOptions = field.FieldOptions,
+                                        SortOrder = field.SortOrder
                                     };
                                     periodAuditFieldValue.CreateAudit(currentUser.UserName);
                                     _periodAuditFieldValuesRepository.Insert(periodAuditFieldValue);

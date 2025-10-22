@@ -43,5 +43,11 @@ namespace Rokys.Audit.WebAPI.Controllers
             var res = await _service.Delete(id);
             return Ok(res);
         }
+        [HttpGet("excel-file")]
+        public async Task<IActionResult> GetExcelFile([FromQuery] Guid? id, [FromQuery] Guid? entityId)
+        {
+            var res = await _service.GetExcelFile(id, entityId);
+            return Ok(res);
+        }
     }
 }

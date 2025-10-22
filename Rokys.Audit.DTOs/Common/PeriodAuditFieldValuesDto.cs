@@ -23,5 +23,6 @@ namespace Rokys.Audit.DTOs.Common
         public string? FieldOptionsValue { get; set; }
         public string? ValidationStatus { get; set; }
         public string? ValidationMessage { get; set; }
+        public int? SortOrder { get; set; }
     }
 }

@@ -25,6 +25,7 @@ namespace Rokys.Audit.Model.Tables
         
         public string? ValidationStatus { get; set; } // 'valid', 'invalid', 'pending', 'warning'
         public string? ValidationMessage { get; set; }
+        public int? SortOrder { get; set; }
         public bool IsActive { get; set; } = true;
 
         // Navigation properties

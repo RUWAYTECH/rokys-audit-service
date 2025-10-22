@@ -71,6 +71,8 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.Property(x => x.ValidationMessage)
                 .HasMaxLength(500);
 
+            builder.Property(x => x.SortOrder);
+
             builder.Property(x => x.IsActive)
                 .HasColumnName("IsActive")
                 .HasDefaultValue(true)
