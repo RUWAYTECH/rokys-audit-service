@@ -27,6 +27,11 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .HasMaxLength(100)
                 .HasColumnName("Action");
 
+            builder.Property(x => x.SequenceNumber)
+                .HasColumnName("SequenceNumber")
+                .IsRequired()
+                .HasDefaultValue(0);
+
             builder.Property(x => x.IsActive)
                 .IsRequired()
                 .HasDefaultValue(true);

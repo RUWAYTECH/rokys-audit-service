@@ -97,6 +97,7 @@ CREATE TABLE InboxItems (
     UserId UNIQUEIDENTIFIER NULL
         FOREIGN KEY REFERENCES UserReference(UserReferenceId), -- quien registró la acción
     Action NVARCHAR(100) NULL, -- acción realizada: 'Aprobada','Cancelada','Devuelta', etc.
+    SequenceNumber INT NOT NULL DEFAULT 0, -- número secuencial por PeriodAudit para identificar el último creado
 
     -- Auditoría común
     IsActive BIT DEFAULT 1,

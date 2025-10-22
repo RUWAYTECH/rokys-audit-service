@@ -24,6 +24,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IUserReferenceRepository _userReferenceRepository;
 
         public InboxItemsService(
             IInboxItemsRepository inboxRepository,
@@ -31,7 +32,8 @@ namespace Rokys.Audit.Services.Services
             ILogger<InboxItemsService> logger,
             IUnitOfWork unitOfWork,
             IAMapper mapper,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            IUserReferenceRepository userReferenceRepository)
         {
             _inboxRepository = inboxRepository;
             _validator = validator;
@@ -39,6 +41,7 @@ namespace Rokys.Audit.Services.Services
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
+            _userReferenceRepository = userReferenceRepository;
         }
 
         public async Task<ResponseDto<InboxItemResponseDto>> Create(InboxItemRequestDto requestDto)
@@ -55,15 +58,42 @@ namespace Rokys.Audit.Services.Services
 
                 var currentUser = _httpContextAccessor.CurrentUser();
                 var entity = _mapper.Map<InboxItems>(requestDto);
-                // set who registered the action (if available)
-                if (currentUser != null)
-                    entity.UserId = currentUser.UserId;
+                // resolve provided request user id (system user) to UserReferenceId if given
+                if (requestDto.UserId.HasValue)
+                {
+                    var actorRef = await _userReferenceRepository.GetByUserIdAsync(requestDto.UserId.Value);
+                    if (actorRef != null)
+                        entity.UserId = actorRef.UserReferenceId;
+                }
+                else if (currentUser != null)
+                {
+                    // set who registered the action (if available)
+                    var actorRef = await _userReferenceRepository.GetByUserIdAsync(currentUser.UserId);
+                    if (actorRef != null)
+                        entity.UserId = actorRef.UserReferenceId;
+                    else
+                        entity.UserId = null;
+                }
+
+                // compute next sequence number for this PeriodAudit
+                if (entity.PeriodAuditId.HasValue)
+                {
+                    var last = await _inboxRepository.GetFirstOrDefaultAsync(filter: x => x.PeriodAuditId == entity.PeriodAuditId.Value && x.IsActive, orderBy: q => q.OrderByDescending(x => x.SequenceNumber));
+                    entity.SequenceNumber = (last?.SequenceNumber ?? 0) + 1;
+                }
+
+                // Normalize user references: PrevUserId, NextUserId, ApproverId, UserId
+                entity.PrevUserId = await NormalizeUserRefAsync(entity.PrevUserId);
+                entity.NextUserId = await NormalizeUserRefAsync(entity.NextUserId);
+                entity.ApproverId = await NormalizeUserRefAsync(entity.ApproverId);
+                // entity.UserId already mapped earlier from requestDto/currentUser if possible, but normalize just in case
+                entity.UserId = await NormalizeUserRefAsync(entity.UserId);
 
                 // if incoming DTO provides an action label, keep it
                 if (!string.IsNullOrEmpty(requestDto.Action))
                     entity.Action = requestDto.Action;
 
-                entity.CreateAudit(currentUser.UserName);
+                entity.CreateAudit(currentUser?.UserName ?? "system");
                 _inboxRepository.Insert(entity);
                 await _unitOfWork.CommitAsync();
                 response.Data = _mapper.Map<InboxItemResponseDto>(entity);
@@ -177,12 +207,29 @@ namespace Rokys.Audit.Services.Services
 
                 var currentUser = _httpContextAccessor.CurrentUser();
                 entity = _mapper.Map(requestDto, entity);
-                // preserve who updated/registered action if provided
-                if (currentUser != null)
-                    entity.UserId = currentUser.UserId;
+                // resolve and normalize user-related ids: UserId, PrevUserId, NextUserId, ApproverId
+                if (requestDto.UserId.HasValue)
+                {
+                    var actorRef = await _userReferenceRepository.GetByUserIdAsync(requestDto.UserId.Value);
+                    if (actorRef != null)
+                        entity.UserId = actorRef.UserReferenceId;
+                    else
+                        entity.UserId = await NormalizeUserRefAsync(requestDto.UserId);
+                }
+                else if (currentUser != null)
+                {
+                    var actorRef = await _userReferenceRepository.GetByUserIdAsync(currentUser.UserId);
+                    if (actorRef != null)
+                        entity.UserId = actorRef.UserReferenceId;
+                    else
+                        entity.UserId = await NormalizeUserRefAsync(currentUser.UserId);
+                }
+                entity.PrevUserId = await NormalizeUserRefAsync(entity.PrevUserId);
+                entity.NextUserId = await NormalizeUserRefAsync(entity.NextUserId);
+                entity.ApproverId = await NormalizeUserRefAsync(entity.ApproverId);
                 if (!string.IsNullOrEmpty(requestDto.Action))
                     entity.Action = requestDto.Action;
-                entity.UpdateAudit(currentUser.UserName);
+                entity.UpdateAudit(currentUser?.UserName ?? "system");
                 _inboxRepository.Update(entity);
                 await _unitOfWork.CommitAsync();
                 response.Data = _mapper.Map<InboxItemResponseDto>(entity);
@@ -193,6 +240,20 @@ namespace Rokys.Audit.Services.Services
                 response = ResponseDto.Error<InboxItemResponseDto>(ex.Message);
             }
             return response;
+        }
+
+        private async Task<Guid?> NormalizeUserRefAsync(Guid? possibleUserId)
+        {
+            if (!possibleUserId.HasValue) return null;
+            var systemId = possibleUserId.Value;
+            // Try to find by system user id
+            var bySystem = await _userReferenceRepository.GetByUserIdAsync(systemId);
+            if (bySystem != null) return bySystem.UserReferenceId;
+            // Maybe the provided id is already a UserReferenceId
+            var byRef = await _userReferenceRepository.GetFirstOrDefaultAsync(x => x.UserReferenceId == systemId && x.IsActive);
+            if (byRef != null) return byRef.UserReferenceId;
+            _logger.LogWarning("InboxItemsService: User reference not found for id {Id}, clearing to avoid FK error.", systemId);
+            return null;
         }
     }
 }
