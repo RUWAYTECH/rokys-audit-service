@@ -497,6 +497,7 @@ CREATE TABLE PeriodAuditTableScaleTemplateResult (
     CONSTRAINT CK_PeriodAuditTableScaleTemplateResult_Orientation
     CHECK (Orientation IN ('H', 'V') OR Orientation IS NULL),
 	TemplateData NVARCHAR(MAX) NULL, -- JSON almacenado como texto
+    SortOrder INT DEFAULT 0,
     IsActive BIT DEFAULT 1, -- Está Activo
     CreatedBy VARCHAR(120) NULL, -- Creado Por
     CreationDate DATETIME2 DEFAULT GETDATE(), -- Fecha de Creación
@@ -524,6 +525,7 @@ CREATE TABLE PeriodAuditFieldValues (
     CHECK (AcumulationType IN ('SUM', 'COUNT') OR AcumulationType IS NULL), -- Tipo de Acumulación: 'sum', 'average', 'max', 'min', 'count'
     FieldOptions NVARCHAR(MAX), -- Opciones para campos tipo 'select' (JSON)
     TableDataHorizontal NVARCHAR(MAX), -- Datos de la tabla si es plantilla horizontal (JSON)
+    SortOrder INT DEFAULT 0,
 
     
     -- ⚠️ VALORES CAPTURADOS - Descomenta estas líneas
