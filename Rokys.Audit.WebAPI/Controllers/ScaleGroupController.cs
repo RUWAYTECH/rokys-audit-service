@@ -56,7 +56,8 @@ namespace Rokys.Audit.WebAPI.Controllers
         }
         
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] ScaleGroupRequestDto requestDto)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> Update([FromRoute] Guid id, [FromForm] ScaleGroupRequestDto requestDto)
         {
             var response = await _scaleGroupService.Update(id, requestDto);
             if (response.IsValid)

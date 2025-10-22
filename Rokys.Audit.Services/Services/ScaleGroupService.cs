@@ -247,7 +247,7 @@ namespace Rokys.Audit.Services.Services
                     return response;
                 }
 
-                var entity = await _scaleGroupRepository.GetFirstOrDefaultAsync(x => x.ScaleGroupId == id && x.IsActive);
+                var entity = await _scaleGroupRepository.GetFirstOrDefaultAsync(filter: x => x.ScaleGroupId == id && x.IsActive);
                 if (entity == null)
                     return ResponseDto.Error<ScaleGroupResponseDto>("No se encontró el grupo de escala.");
 
@@ -260,6 +260,10 @@ namespace Rokys.Audit.Services.Services
                     });
                     return response;
                 }
+                var currentUser = _httpContextAccessor.CurrentUser();
+                _mapper.Map(requestDto, entity);
+                entity.UpdateAudit(currentUser.UserName);
+                _scaleGroupRepository.Update(entity);
 
                 if (requestDto.HasSourceData == true && requestDto.File == null)
                 {
@@ -270,15 +274,8 @@ namespace Rokys.Audit.Services.Services
                     });
                     return response;
                 }
-
-                var currentUser = _httpContextAccessor.CurrentUser();
-                
                 if (requestDto.File?.Length > 0)
-                    await SaveOrReplaceFileAsync(id, entity, requestDto, currentUser.UserName);
-
-                _mapper.Map(requestDto, entity);
-                entity.UpdateAudit(currentUser.UserName);
-                _scaleGroupRepository.Update(entity);
+                    await SaveOrReplaceFileAsync(id,  entity.Name, requestDto, currentUser.UserName);
                 await _unitOfWork.CommitAsync();
 
                 response.Data = _mapper.Map<ScaleGroupResponseDto>(entity);
@@ -291,7 +288,7 @@ namespace Rokys.Audit.Services.Services
 
             return response;
         }
-        private async Task SaveOrReplaceFileAsync(Guid entityId, ScaleGroup entity, ScaleGroupRequestDto requestDto, string userName)
+        private async Task SaveOrReplaceFileAsync(Guid entityId, string entityName, ScaleGroupRequestDto requestDto, string userName)
         {
             var existingFile = await _storageFilesRepository.GetFirstOrDefaultAsync(x => x.EntityId == entityId && x.IsActive);
 
@@ -304,9 +301,9 @@ namespace Rokys.Audit.Services.Services
                 OriginalName = requestDto.File.FileName,
                 FileName = filePath,
                 FileUrl = filePath,
-                EntityId = entity.ScaleGroupId,
+                EntityId = entityId,
                 FileType = Path.GetExtension(requestDto.File.FileName).ToLower(),
-                EntityName = entity.Name,
+                EntityName = entityName,
                 ClassificationType = "Data source template",
                 UploadDate = DateTime.Now,
                 UploadedBy = userName
@@ -314,7 +311,6 @@ namespace Rokys.Audit.Services.Services
             newFile.CreateAudit(userName);
             _storageFilesRepository.Insert(newFile);
 
-            requestDto.HasSourceData = true;
         }
         private async Task<(string fileName, string filePath)> SaveMemoFileAsync(IFormFile file)
         {

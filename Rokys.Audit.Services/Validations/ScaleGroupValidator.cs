@@ -1,6 +1,7 @@
 using FluentValidation;
 using Rokys.Audit.DTOs.Requests.ScaleGroup;
 using Rokys.Audit.Infrastructure.Repositories;
+using System.Security.Cryptography;
 
 namespace Rokys.Audit.Services.Validations
 {
@@ -15,11 +16,12 @@ namespace Rokys.Audit.Services.Validations
             RuleFor(x => x.Code)
                 .NotEmpty().WithMessage("El código es requerido.")
                 .MaximumLength(10).WithMessage("El código acepta como máximo 10 caracteres.")
-                .MustAsync(async (dto, code, cancellation) =>
+                .MustAsync(async (dto, code, _) =>
                 {
-                    return !await _scaleGroupRepository.GetValidatorByGroupIdAsync(code, dto.GroupId, id);
+                    var exists = await _scaleGroupRepository.GetValidatorByGroupIdAsync(code, dto.GroupId, id);
+                    return !exists;
                 })
-            .WithMessage("El código ya existe.");
+                .WithMessage("Ya existe un grupo de escala con este código.");
             RuleFor(x => x.Name)
                 .NotEmpty().WithMessage("El nombre es requerido.")
                 .MaximumLength(200).WithMessage("El nombre acepta como máximo 200 caracteres.");

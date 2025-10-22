@@ -35,6 +35,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
         public async Task<bool> GetValidatorByGroupIdAsync(string code, Guid groupId, Guid? excludeId)
         {
             var group = await _context.ScaleGroups
+                .AsNoTracking()
                 .Include(x => x.Group.Enterprise)
                 .FirstOrDefaultAsync(x => x.GroupId == groupId && x.IsActive);
 
@@ -46,7 +47,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
             var exists = await _context.ScaleGroups
                 .AnyAsync(x => x.Group.EnterpriseId == group.Group.EnterpriseId &&
                                x.Code.ToLower() == normalizedCode &&
-                               x.ScaleGroupId != excludeId &&
+                               (excludeId == null || x.ScaleGroupId != excludeId) &&
                                x.IsActive);
 
             return exists;
