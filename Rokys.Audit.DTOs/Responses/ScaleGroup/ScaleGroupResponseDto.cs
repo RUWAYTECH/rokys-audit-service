@@ -10,5 +10,7 @@ namespace Rokys.Audit.DTOs.Responses.ScaleGroup
         public string? UpdatedBy { get; set; }
         public DateTime? UpdateDate { get; set; }
         public bool IsActive { get; set; }
+        public string? StorageFileName { get; set; }
+        public Guid? SotrageFileId { get; set; }
     }
 }

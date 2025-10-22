@@ -84,7 +84,7 @@ namespace Rokys.Audit.Services.Services
                 }
                 if (requestDto.File != null && requestDto.File.Length > 0)
                 {
-                    requestDto.HasSourceData = false;
+                    requestDto.HasSourceData = true;
                     var (originalName, filePath) = await SaveMemoFileAsync(requestDto.File);
                     storageFile.OriginalName = requestDto.File.FileName;
                     storageFile.FileName = originalName;
@@ -184,12 +184,22 @@ namespace Rokys.Audit.Services.Services
                     filter: x => x.ScaleGroupId == id && x.IsActive,
                    includeProperties: [a => a.Group]
                 );
+                var storageFiles = await _storageFilesRepository.GetFirstOrDefaultAsync(
+                    filter: x => x.EntityId == id && x.IsActive
+                );
                 if (entity == null)
                 {
                     response = ResponseDto.Error<ScaleGroupResponseDto>("No se encontró el grupo de escala.");
                     return response;
                 }
-                response.Data = _mapper.Map<ScaleGroupResponseDto>(entity);
+                var mapData = _mapper.Map<ScaleGroupResponseDto>(entity);
+                if (storageFiles != null)
+                {
+                    mapData.StorageFileName = storageFiles?.FileName;
+                    mapData.SotrageFileId = storageFiles?.StorageFileId;
+                }
+                    
+                response.Data = mapData;
             }
             catch (Exception ex)
             {
@@ -222,44 +232,89 @@ namespace Rokys.Audit.Services.Services
         public async Task<ResponseDto<ScaleGroupResponseDto>> Update(Guid id, ScaleGroupRequestDto requestDto)
         {
             var response = ResponseDto.Create<ScaleGroupResponseDto>();
+
             try
             {
                 var validator = new ScaleGroupValidator(_scaleGroupRepository, id);
                 var validate = await validator.ValidateAsync(requestDto);
                 if (!validate.IsValid)
                 {
-                    response.Messages.AddRange(validate.Errors.Select(e => new ApplicationMessage { Message = e.ErrorMessage, MessageType = ApplicationMessageType.Error }));
+                    response.Messages.AddRange(validate.Errors.Select(e => new ApplicationMessage
+                    {
+                        Message = e.ErrorMessage,
+                        MessageType = ApplicationMessageType.Error
+                    }));
                     return response;
                 }
 
-                var entity = await _scaleGroupRepository.GetFirstOrDefaultAsync(filter: x => x.ScaleGroupId == id && x.IsActive);
+                var entity = await _scaleGroupRepository.GetFirstOrDefaultAsync(x => x.ScaleGroupId == id && x.IsActive);
                 if (entity == null)
+                    return ResponseDto.Error<ScaleGroupResponseDto>("No se encontró el grupo de escala.");
+
+                if (await _scaleGroupRepository.ExistsByCodeAsync(requestDto.Code, id))
                 {
-                    response = ResponseDto.Error<ScaleGroupResponseDto>("No se encontró el grupo de escala.");
+                    response.Messages.Add(new ApplicationMessage
+                    {
+                        Message = "Ya existe un grupo de escala con este código.",
+                        MessageType = ApplicationMessageType.Error
+                    });
                     return response;
                 }
 
-                // Verificar si ya existe un código duplicado (excluyendo el actual)
-                var existsByCode = await _scaleGroupRepository.ExistsByCodeAsync(requestDto.Code, id);
-                if (existsByCode)
+                if (requestDto.HasSourceData == true && requestDto.File == null)
                 {
-                    response.Messages.Add(new ApplicationMessage { Message = "Ya existe un grupo de escala con este código.", MessageType = ApplicationMessageType.Error });
+                    response.Messages.Add(new ApplicationMessage
+                    {
+                        Message = "Si seleccionó que es con archivo, debe subir un archivo.",
+                        MessageType = ApplicationMessageType.Error
+                    });
                     return response;
                 }
 
                 var currentUser = _httpContextAccessor.CurrentUser();
-                entity = _mapper.Map(requestDto, entity);
+                
+                if (requestDto.File?.Length > 0)
+                    await SaveOrReplaceFileAsync(id, entity, requestDto, currentUser.UserName);
+
+                _mapper.Map(requestDto, entity);
                 entity.UpdateAudit(currentUser.UserName);
                 _scaleGroupRepository.Update(entity);
                 await _unitOfWork.CommitAsync();
+
                 response.Data = _mapper.Map<ScaleGroupResponseDto>(entity);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, ex.Message);
                 response = ResponseDto.Error<ScaleGroupResponseDto>(ex.Message);
             }
+
             return response;
+        }
+        private async Task SaveOrReplaceFileAsync(Guid entityId, ScaleGroup entity, ScaleGroupRequestDto requestDto, string userName)
+        {
+            var existingFile = await _storageFilesRepository.GetFirstOrDefaultAsync(x => x.EntityId == entityId && x.IsActive);
+
+            if (existingFile != null)
+                _storageFilesRepository.Delete(existingFile);
+
+            var (originalName, filePath) = await SaveMemoFileAsync(requestDto.File);
+            var newFile = new StorageFiles
+            {
+                OriginalName = requestDto.File.FileName,
+                FileName = filePath,
+                FileUrl = filePath,
+                EntityId = entity.ScaleGroupId,
+                FileType = Path.GetExtension(requestDto.File.FileName).ToLower(),
+                EntityName = entity.Name,
+                ClassificationType = "Data source template",
+                UploadDate = DateTime.Now,
+                UploadedBy = userName
+            };
+            newFile.CreateAudit(userName);
+            _storageFilesRepository.Insert(newFile);
+
+            requestDto.HasSourceData = true;
         }
         private async Task<(string fileName, string filePath)> SaveMemoFileAsync(IFormFile file)
         {
@@ -276,5 +331,6 @@ namespace Rokys.Audit.Services.Services
             }
             return (file.FileName, fileName);
         }
+
     }
 }
