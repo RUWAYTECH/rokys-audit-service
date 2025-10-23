@@ -10,6 +10,7 @@ namespace Rokys.Audit.DTOs.Responses.PeriodAuditTableScaleTemplateResult
         public string Code { get; set; }
         public string Name { get; set; }
         public string Orientation { get; set; }
+        public int? SortOrder { get; set; }
         public List<PeriodAuditFieldValuesListResponseDto> PeriodAuditFieldValues { get; set; } = new List<PeriodAuditFieldValuesListResponseDto>();
     }
 }

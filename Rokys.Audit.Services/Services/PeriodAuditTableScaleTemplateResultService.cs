@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -199,27 +199,32 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<List<PeriodAuditTableScaleTemplateResultListResponseDto>>();
             try
             {
-                var entities = await _repository.GetByPeriodAuditScaleResultId(periodAuditScaleResultId);
-                if (entities == null)
+                var entities = (await _repository.GetByPeriodAuditScaleResultId(periodAuditScaleResultId))
+                                ?.OrderBy(e => e.SortOrder)
+                                .ToList();
+
+                if (entities == null || !entities.Any())
                 {
-                    response.WithMessage("No se encontro resultados", null, ApplicationMessageType.Error);
+                    response.WithMessage("No se encontró resultados", null, ApplicationMessageType.Error);
                     return response;
                 }
+
                 var periodAuditTableScaleTemplateIds = entities
                     .Select(e => e.PeriodAuditTableScaleTemplateResultId)
                     .ToList();
 
+                // 2️⃣ Traer y ordenar los campos hijos
                 var periodAuditFieldValues = await _fieldValuesRepository.GetAsync(
-                                                x => periodAuditTableScaleTemplateIds.Contains(x.PeriodAuditTableScaleTemplateResultId),
-                                                orderBy: q => q
-                                                    .OrderBy(d => d.PeriodAuditTableScaleTemplateResult.SortOrder)
-                                                    .ThenBy(d => d.SortOrder) // o el campo interno que quieras usar
-                                            );
+                    x => periodAuditTableScaleTemplateIds.Contains(x.PeriodAuditTableScaleTemplateResultId),
+                    orderBy: q => q.OrderBy(d => d.SortOrder)
+                );
 
+                // 3️⃣ Asociar campos hijos a cada tabla (también ordenados)
                 foreach (var entity in entities)
                 {
                     entity.PeriodAuditFieldValues = periodAuditFieldValues
                         .Where(fv => fv.PeriodAuditTableScaleTemplateResultId == entity.PeriodAuditTableScaleTemplateResultId)
+                        .OrderBy(fv => fv.SortOrder)
                         .ToList();
                 }
                 response.Data = _mapper.Map<List<PeriodAuditTableScaleTemplateResultListResponseDto>>(entities);
