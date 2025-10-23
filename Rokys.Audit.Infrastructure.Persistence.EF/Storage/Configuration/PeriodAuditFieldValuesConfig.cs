@@ -47,6 +47,9 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.Property(x => x.FieldOptions)
                 .HasColumnType("nvarchar(max)");
 
+            builder.Property(x => x.TableDataHorizontal)
+                .HasColumnType("nvarchar(max)");
+
             // VALORES CAPTURADOS
             builder.Property(x => x.TextValue)
                 .HasColumnType("nvarchar(max)");

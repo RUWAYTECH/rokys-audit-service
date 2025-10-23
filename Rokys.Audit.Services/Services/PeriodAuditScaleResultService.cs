@@ -14,6 +14,7 @@ using Rokys.Audit.Infrastructure.Repositories;
 using Rokys.Audit.Model.Tables;
 using Rokys.Audit.Services.Interfaces;
 using System.Linq.Expressions;
+using System.Text.Json;
 
 namespace Rokys.Audit.Services.Services
 {
@@ -345,6 +346,7 @@ namespace Rokys.Audit.Services.Services
                     if (fieldValueEntity == null)
                         continue;
                     _mapper.Map(fieldValueDto, fieldValueEntity);
+                    JsonSerializer.Serialize(fieldValueEntity.TableDataHorizontal);
                     _fieldValuesRepository.Update(fieldValueEntity);
                 }
 
