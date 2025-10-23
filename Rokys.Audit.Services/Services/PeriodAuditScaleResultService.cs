@@ -340,7 +340,8 @@ namespace Rokys.Audit.Services.Services
                 {
                     var fieldValueEntity = periodAuditFieldValues
                         .FirstOrDefault(fv => fv.PeriodAuditFieldValueId == fieldValueDto.PeriodAuditFieldValueId);
-
+                    fieldValueDto.SortOrder = fieldValueEntity.SortOrder;
+                    fieldValueDto.DefaultValue = fieldValueEntity.DefaultValue;
                     if (fieldValueEntity == null)
                         continue;
                     _mapper.Map(fieldValueDto, fieldValueEntity);

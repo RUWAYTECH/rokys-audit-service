@@ -531,6 +531,7 @@ CREATE TABLE PeriodAuditFieldValues (
     -- ⚠️ VALORES CAPTURADOS - Descomenta estas líneas
     TextValue NVARCHAR(MAX),
     NumericValue DECIMAL(18,4),
+    DefaultValue VARCHAR(250),
     DateValue DATETIME2,
     BooleanValue BIT,
     ImageUrl NVARCHAR(500), -- Para almacenar URL o path de imagen

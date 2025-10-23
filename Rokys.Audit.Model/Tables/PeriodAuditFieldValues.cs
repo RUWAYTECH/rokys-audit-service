@@ -18,6 +18,7 @@ namespace Rokys.Audit.Model.Tables
         // VALORES CAPTURADOS
         public string? TextValue { get; set; }
         public decimal? NumericValue { get; set; }
+        public string? DefaultValue { get; set; }
         public DateTime? DateValue { get; set; }
         public bool? BooleanValue { get; set; }
         public string? ImageUrl { get; set; } // Para almacenar URL o path de imagen
