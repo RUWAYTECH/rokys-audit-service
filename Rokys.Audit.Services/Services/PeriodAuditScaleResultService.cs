@@ -193,7 +193,7 @@ namespace Rokys.Audit.Services.Services
                     filter = filter.AndAlso(x => (x.Observations != null && x.Observations.Contains(filterRequestDto.Filter)));
                 }
 
-                Func<IQueryable<PeriodAuditScaleResult>, IOrderedQueryable<PeriodAuditScaleResult>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
+                Func<IQueryable<PeriodAuditScaleResult>, IOrderedQueryable<PeriodAuditScaleResult>> orderBy = q => q.OrderBy(x => x.SortOrder);
                 var entities = await _repository.GetPagedAsync(
                     filter: filter,
                     orderBy: orderBy,

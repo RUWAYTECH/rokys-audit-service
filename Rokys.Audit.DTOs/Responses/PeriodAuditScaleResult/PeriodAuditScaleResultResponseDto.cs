@@ -10,6 +10,7 @@ namespace Rokys.Audit.DTOs.Responses.PeriodAuditScaleResult
         public Guid PeriodAuditScaleResultId { get; set; }
         public ScaleGroupResponseDto? ScaleGroup { get; set; }
         public bool IsActive { get; set; }
+        public int SortOrder { get; set; }
         public string CreatedBy { get; set; }
         public DateTime CreationDate { get; set; }
         public string? UpdatedBy { get; set; }

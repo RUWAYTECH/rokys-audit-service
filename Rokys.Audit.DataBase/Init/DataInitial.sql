@@ -472,7 +472,7 @@ CREATE TABLE PeriodAuditScaleResult
     ScoreValue DECIMAL(10,2) NOT NULL, -- Valor Total
 
     AppliedWeighting DECIMAL(5,2) NOT NULL, -- Ponderación
-
+    SortOrder INT DEFAULT 0,
 
     Observations NVARCHAR(MAX) NULL, -- Observaciones
 

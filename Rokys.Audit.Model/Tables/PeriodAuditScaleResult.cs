@@ -8,6 +8,7 @@ namespace Rokys.Audit.Model.Tables
 
         // Calculation data at the time of audit
         public decimal ScoreValue { get; set; }
+        public int SortOrder { get; set; }
 
         // Historical weighting and thresholds
         public decimal AppliedWeighting { get; set; }
