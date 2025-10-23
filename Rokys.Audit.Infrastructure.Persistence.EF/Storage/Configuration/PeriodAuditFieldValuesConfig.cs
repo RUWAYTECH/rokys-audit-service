@@ -54,6 +54,9 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.Property(x => x.NumericValue)
                 .HasColumnType("decimal(18,4)");
 
+            builder.Property(x => x.DefaultValue)
+                .HasMaxLength(255);
+
             builder.Property(x => x.DateValue)
                 .HasColumnType("datetime2");
 

@@ -17,6 +17,7 @@ namespace Rokys.Audit.DTOs.Common
         public JsonArray? TableDataHorizontal { get; set; }
         public string? TextValue { get; set; }
         public decimal? NumericValue { get; set; }
+        public string? DefaultValue { get; set; }
         public DateTime? DateValue { get; set; }
         public bool? BooleanValue { get; set; }
         public string? ImageUrl { get; set; }

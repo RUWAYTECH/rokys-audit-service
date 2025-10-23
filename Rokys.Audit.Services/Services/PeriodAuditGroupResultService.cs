@@ -157,7 +157,8 @@ namespace Rokys.Audit.Services.Services
                                         CalculationFormula = field.CalculationFormula,
                                         AcumulationType = field.AcumulationType,
                                         FieldOptions = field.FieldOptions,
-                                        SortOrder = field.SortOrder
+                                        SortOrder = field.SortOrder,
+                                        DefaultValue = field.DefaultValue
                                     };
                                     periodAuditFieldValue.CreateAudit(currentUser.UserName);
                                     _periodAuditFieldValuesRepository.Insert(periodAuditFieldValue);
