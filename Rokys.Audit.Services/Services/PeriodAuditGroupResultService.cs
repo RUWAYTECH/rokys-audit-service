@@ -230,23 +230,68 @@ namespace Rokys.Audit.Services.Services
             try
             {
                 var entity = await _repository.GetFirstOrDefaultAsync(
-                    filter: x => x.PeriodAuditGroupResultId == id && x.IsActive,
-                    includeProperties: [x => x.Group, y => y.PeriodAudit]);
+                    filter: x => x.PeriodAuditGroupResultId == id && x.IsActive);
+
                 if (entity == null)
+                    return ResponseDto.Error("No se encontró el registro.");
+
+                if (entity.ScoreValue > 0)
+                    return ResponseDto.Error("No se puede eliminar un resultado de grupo de auditoría que ya tiene una puntuación asignada.");
+
+                var scaleResults = await _periodAuditScaleResultRepository.GetAsync(x => x.PeriodAuditGroupResultId == entity.PeriodAuditGroupResultId && x.IsActive);
+                foreach (var scaleResult in scaleResults)
                 {
-                    response = ResponseDto.Error("No se encontró el registro.");
-                    return response;
+                    var tableResults = await _periodAuditTableScaleTemplateResultRepository.GetAsync(x => x.PeriodAuditScaleResultId == scaleResult.PeriodAuditScaleResultId && x.IsActive);
+                    foreach (var tableResult in tableResults)
+                    {
+                        var fieldValues = await _periodAuditFieldValuesRepository.GetAsync(x => x.PeriodAuditTableScaleTemplateResultId == tableResult.PeriodAuditTableScaleTemplateResultId && x.IsActive);
+                        foreach (var fieldValue in fieldValues)
+                        {
+                            fieldValue.IsActive = false;
+                            fieldValue.UpdateDate = DateTime.Now;
+                            _periodAuditFieldValuesRepository.Update(fieldValue);
+                        }
+
+                        tableResult.IsActive = false;
+                        tableResult.UpdateDate = DateTime.Now;
+                        _periodAuditTableScaleTemplateResultRepository.Update(tableResult);
+                    }
+
+                    var subResults = await _periodAuditScaleSubResultRepository.GetAsync(x => x.PeriodAuditScaleResultId == scaleResult.PeriodAuditScaleResultId && x.IsActive);
+                    foreach (var subResult in subResults)
+                    {
+                        subResult.IsActive = false;
+                        subResult.UpdateDate = DateTime.Now;
+                        _periodAuditScaleSubResultRepository.Update(subResult);
+                    }
+
+                    var scoringResults = await _periodAuditScoringCriteriaResultRepository.GetAsync(x => x.PeriodAuditScaleResultId == scaleResult.PeriodAuditScaleResultId && x.IsActive);
+                    foreach (var scoringResult in scoringResults)
+                    {
+                        scoringResult.IsActive = false;
+                        scoringResult.UpdateDate = DateTime.Now;
+                        _periodAuditScoringCriteriaResultRepository.Update(scoringResult);
+                    }
+
+                    scaleResult.IsActive = false;
+                    scaleResult.UpdateDate = DateTime.Now;
+                    _periodAuditScaleResultRepository.Update(scaleResult);
                 }
+
+                // Finalmente desactivar el GroupResult principal
                 entity.IsActive = false;
-                entity.UpdateDate = DateTime.UtcNow;
+                entity.UpdateDate = DateTime.Now;
                 _repository.Update(entity);
+
                 await _unitOfWork.CommitAsync();
+                response.WithMessage("El grupo de resultados y sus dependencias fueron eliminados correctamente.");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
                 response = ResponseDto.Error(ex.Message);
             }
+
             return response;
         }
 
@@ -499,21 +544,6 @@ namespace Rokys.Audit.Services.Services
                 response = ResponseDto.Error<bool>(ex.Message);
             }
             return response;
-        }
-        private async Task<(string fileName, string filePath)> SaveMemoFileAsync(IFormFile file)
-        {
-            if (file == null || file.Length == 0)
-                return (null, null);
-            var uploadsFolder = Path.Combine(_fileSettings.Path, FileDirectories.Uploads);
-            if (!Directory.Exists(uploadsFolder))
-                Directory.CreateDirectory(uploadsFolder);
-            var fileName = $"{Guid.NewGuid()}_{file.FileName}";
-            var filePath = Path.Combine(uploadsFolder, fileName);
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
-            }
-            return (file.FileName, fileName);
         }
     }
 }

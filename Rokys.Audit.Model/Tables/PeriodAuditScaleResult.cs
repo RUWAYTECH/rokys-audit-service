@@ -16,6 +16,7 @@ namespace Rokys.Audit.Model.Tables
         public string? Observations { get; set; }
         public string? ScaleDescription { get; set; }
         public string? ScaleColor { get; set; }
+        public int? SortOrder { get; set; }
         public bool IsActive { get; set; } = true;
 
         // Navigation properties

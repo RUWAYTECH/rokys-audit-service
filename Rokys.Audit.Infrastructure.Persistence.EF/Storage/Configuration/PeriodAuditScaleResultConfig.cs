@@ -48,6 +48,8 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .HasMaxLength(20)
                 .IsRequired(false);
 
+            builder.Property(x => x.SortOrder);
+
             builder.Property(x => x.IsActive)
                 .HasColumnName("IsActive")
                 .HasDefaultValue(true)
