@@ -22,12 +22,24 @@ namespace Rokys.Audit.WebAPI.Controllers
         [HttpGet("dashboards/evolutions/{year:int}")]
         public async Task<IActionResult> GetDashboardEvolutionsData([FromRoute] int year)
         {
-           
+
             var response = await _reportsService.GetDashboardEvolutionsDataAsync(year);
-            
+
             if (response.IsValid)
                 return Ok(response);
-            
+
+            return BadRequest(response);
+        }
+
+        [HttpGet("dashboards/supervisors/{year:int}")]
+        public async Task<IActionResult> GetDashboardSupervisorsData([FromRoute] int year, [FromQuery] Guid[] supervisorIds)
+        {
+
+            var response = await _reportsService.GetDashboardSupervisorsDataAsync(year, supervisorIds);
+
+            if (response.IsValid)
+                return Ok(response);
+
             return BadRequest(response);
         }
     }

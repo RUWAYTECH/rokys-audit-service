@@ -42,6 +42,11 @@ namespace Rokys.Audit.DTOs.Responses.Reports
         public string Color { get; set; } = string.Empty;
 
         /// <summary>
+        /// Estilo de línea (Solid, ShortDot, Dash, ShortDash, etc.)
+        /// </summary>
+        public string? DashStyle { get; set; }
+
+        /// <summary>
         /// Eje Y para la serie (opcional, para múltiples ejes)
         /// </summary>
         public int? YAxis { get; set; }

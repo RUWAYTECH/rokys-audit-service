@@ -1,8 +1,13 @@
+using System.Linq.Expressions;
 using Microsoft.Extensions.Logging;
+using Rokys.Audit.Common.Constant;
+using Rokys.Audit.Common.Helpers;
 using Rokys.Audit.DTOs.Responses.Common;
 using Rokys.Audit.DTOs.Responses.Reports;
 using Rokys.Audit.Infrastructure.Repositories;
+using Rokys.Audit.Model.Tables;
 using Rokys.Audit.Services.Interfaces;
+using Rokys.Audit.Common.Extensions;
 
 namespace Rokys.Audit.Services.Services
 {
@@ -32,7 +37,7 @@ namespace Rokys.Audit.Services.Services
                 var endDate = new DateTime(year, 12, 31, 23, 59, 59);
 
                 var periodAudits = await _periodAuditRepository.GetAsync(
-                    filter: x => x.CreationDate >= startDate && x.CreationDate <= endDate && x.IsActive && x.AuditStatus.Code == "FIN");
+                    filter: x => x.CreationDate >= startDate && x.CreationDate <= endDate && x.IsActive && x.AuditStatus != null && x.AuditStatus.Code == AuditStatusCode.Completed);
 
                 // Crear las categorías (meses)
                 var categories = new List<string>
@@ -130,5 +135,99 @@ namespace Rokys.Audit.Services.Services
             }
             return data;
         }
+
+        public async Task<ResponseDto<DashboardDataResponseDto>> GetDashboardSupervisorsDataAsync(int year, Guid[] supervisorIds)
+        {
+            var response = ResponseDto.Create<DashboardDataResponseDto>();
+            try
+            {
+                // Obtener auditorías del año especificado y filtradas por supervisores
+                var startDate = new DateTime(year, 1, 1);
+                var endDate = new DateTime(year, 12, 31, 23, 59, 59);
+                Expression<Func<PeriodAudit, bool>> filter = x => x.CreationDate >= startDate &&
+                                                                                             x.CreationDate <= endDate &&
+                                                                                             x.IsActive &&
+                                                                                             x.AuditStatus != null &&
+                                                                                             x.AuditStatus.Code == AuditStatusCode.Completed;
+
+                if(supervisorIds != null && supervisorIds.Length > 0)
+                {
+                    filter = filter.AndAlso(x => supervisorIds.Contains(x.SupervisorId ?? Guid.Empty));
+                }
+
+                var periodAudits = await _periodAuditRepository.GetAsync(
+                    filter: filter, 
+                    includeProperties: [a => a.Supervisor!]);
+
+                // Crear las categorías (meses)
+                var categories = new List<string>
+                {
+                    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+                    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+                };
+
+                // Agrupar auditorías por supervisor
+                var auditsBySupervisor = periodAudits
+                    .Where(x => x.Supervisor != null)
+                    .GroupBy(x => x.SupervisorId!)
+                    .ToList();
+
+                // Crear series dinámicamente por supervisor
+                var series = new List<DashboardSeriesDto>();
+                var dashStyles = new[] { "ShortDot", "Dash", "ShortDash", "LongDash", "DashDot" };
+
+                var supervisorIndex = 0;
+                foreach (var supervisorGroup in auditsBySupervisor)
+                {
+                    var supervisor = supervisorGroup.Key;
+                    
+                    // Calcular datos por mes para este supervisor (contar auditorías)
+                    var monthlyData = new List<decimal>();
+                    for (int month = 1; month <= 12; month++)
+                    {
+                        // Contar auditorías por mes
+                        var countForMonth = supervisorGroup.Count(x => x.CreationDate.Month == month);
+                        monthlyData.Add(countForMonth);
+                    }
+
+                    // Generar color único para cada supervisor
+                    var color = supervisorIndex < Constants.ColorPalette.Palette.Length
+                        ? Constants.ColorPalette.Palette[supervisorIndex]
+                        : GenerateColor.GenerateColorFromIndex(supervisorIndex);
+
+                    // Crear serie para este supervisor
+                    var seriesDto = new DashboardSeriesDto
+                    {
+                        Name = $"{supervisorGroup.First().Supervisor!.FirstName} {supervisorGroup.First().Supervisor!.LastName}",
+                        Type = "spline",
+                        Data = monthlyData,
+                        Color = color,
+                        DashStyle = supervisorIndex == 0 ? null : dashStyles[(supervisorIndex - 1) % dashStyles.Length]
+                    };
+
+                    series.Add(seriesDto);
+                    supervisorIndex++;
+                }
+
+                var dashboardData = new DashboardDataResponseDto
+                {
+                    Categories = categories,
+                    Series = series
+                };
+
+                response.Data = dashboardData;
+
+                _logger.LogInformation($"Dashboard supervisors data generated successfully for year {year} with {supervisorIds.Length} supervisors");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error generating dashboard supervisors data for year {year}: {ex.Message}");
+                response = ResponseDto.Error<DashboardDataResponseDto>(ex.Message);
+            }
+
+            return response;
+        }
+
+       
     }
 }

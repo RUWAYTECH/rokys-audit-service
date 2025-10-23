@@ -30,5 +30,22 @@
         {
             public const string Uploads = "Uploads";
         }
+
+        public struct ColorPalette
+        {
+            public static readonly string[] Palette = new string[]
+            {
+                "#7cb5ec", // Azul
+                "#434348", // Gris oscuro
+                "#90ed7d", // Verde claro
+                "#f7a35c", // Naranja
+                "#8085e9", // Púrpura
+                "#f15c80", // Rosa
+                "#e4d354", // Amarillo
+                "#2b908f", // Verde azulado
+                "#f45b5b", // Rojo
+                "#91e8e1"  // Cian claro
+            };
+        }
     }
 }

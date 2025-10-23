@@ -14,5 +14,6 @@ namespace Rokys.Audit.Services.Interfaces
         /// <param name="year">Año para el cual obtener los datos</param>
         /// <returns>Datos estructurados para el dashboard</returns>
         Task<ResponseDto<DashboardDataResponseDto>> GetDashboardEvolutionsDataAsync(int year);
+        Task<ResponseDto<DashboardDataResponseDto>> GetDashboardSupervisorsDataAsync(int year, Guid[] supervisorIds);
     }
 }
