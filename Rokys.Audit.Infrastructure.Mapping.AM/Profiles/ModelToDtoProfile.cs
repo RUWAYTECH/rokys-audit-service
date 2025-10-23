@@ -24,6 +24,8 @@ using Rokys.Audit.DTOs.Responses.PeriodAuditTableScaleTemplateResult;
 using Rokys.Audit.DTOs.Responses.PeriodAuditScoringCriteriaResult;
 using Rokys.Audit.DTOs.Responses.PeriodAuditScaleSubResult;
 using Rokys.Audit.DTOs.Responses.InboxItems;
+using System.Text.Json;
+using Rokys.Audit.Common.Constant;
 
 namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
 {
@@ -116,6 +118,13 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
             CreateMap<UserReference, UserReferenceResponseDto>();
             CreateMap<EmployeeStore, EmployeeStoreResponseDto>();
             CreateMap<PeriodAuditTableScaleTemplateResult, PeriodAuditTableScaleTemplateResultResponseDto>();
+            CreateMap<PeriodAuditTableScaleTemplateResult, PeriodAuditTableScaleTemplateResultResponseDto>()
+                .ForMember(dest => dest.TemplateData,
+                    opt => opt.MapFrom((src, dest) =>
+                        string.IsNullOrEmpty(src.TemplateData)
+                            ? null
+                            : JsonSerializer.Deserialize<TemplateDataHorizontal>(src.TemplateData)));
+
             CreateMap<PeriodAuditTableScaleTemplateResult, PeriodAuditTableScaleTemplateResultListResponseDto>();
             CreateMap<StorageFiles, StorageFileResponseDto>();
             CreateMap<StorageFiles, StorageFileListResponseDto>();
