@@ -18,6 +18,9 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.Property(g => g.HasSourceData)
                 .IsRequired(false)
                 .HasDefaultValue(false);
+            builder.Property(g => g.SortOrder)
+                .IsRequired()
+                .HasDefaultValue(0);
             builder.Property(a => a.IsActive).HasDefaultValue(true);
             builder.Property(a => a.CreatedBy).HasMaxLength(120);
             builder.Property(a => a.CreationDate).HasDefaultValueSql("GETDATE()");

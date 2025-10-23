@@ -7,6 +7,7 @@ namespace Rokys.Audit.Model.Tables
         public string Code { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public bool? HasSourceData { get; set; }
+    public int SortOrder { get; set; } = 0;
         public decimal Weighting { get; set; }
         public bool IsActive { get; set; } = true;
 

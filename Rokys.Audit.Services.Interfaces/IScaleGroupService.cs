@@ -9,5 +9,6 @@ namespace Rokys.Audit.Services.Interfaces
     {
         Task<ResponseDto<PaginationResponseDto<ScaleGroupResponseDto>>> GetPaged(ScaleGroupFilterRequestDto requestDto);
         Task<ResponseDto<IEnumerable<ScaleGroupResponseDto>>> GetByGroupId(Guid groupId);
+        Task<ResponseDto<bool>> ChangeOrder(Guid groupId, int currentPosition, int newPosition);
     }
 }

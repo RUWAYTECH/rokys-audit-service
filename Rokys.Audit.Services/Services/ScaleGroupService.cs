@@ -70,7 +70,13 @@ namespace Rokys.Audit.Services.Services
                 }
                 var currentUser = _httpContextAccessor.CurrentUser();
                 var entity = _mapper.Map<ScaleGroup>(requestDto);
-                entity.CreateAudit(currentUser.UserName);
+
+                // Assign SortOrder server-side grouped by GroupId
+                var existingSortOrders = (await _scaleGroupRepository.GetAsync(filter: x => x.GroupId == requestDto.GroupId && x.IsActive))
+                    .Select(x => x.SortOrder);
+                entity.SortOrder = Rokys.Audit.Common.Helpers.SortOrderHelper.GetNextSortOrder(existingSortOrders);
+
+                entity.CreateAudit(currentUser?.UserName ?? "system");
                 _scaleGroupRepository.Insert(entity);
                 var storageFile = new StorageFiles();
                 if (requestDto.HasSourceData == true && requestDto.File == null)
@@ -87,16 +93,16 @@ namespace Rokys.Audit.Services.Services
                     requestDto.HasSourceData = true;
                     var (originalName, filePath) = await SaveMemoFileAsync(requestDto.File);
                     storageFile.OriginalName = requestDto.File.FileName;
-                    storageFile.FileName = originalName;
-                    storageFile.FileUrl = filePath;
+                    storageFile.FileName = originalName ?? string.Empty;
+                    storageFile.FileUrl = filePath ?? string.Empty;
                     storageFile.EntityId = entity.ScaleGroupId;
                     storageFile.FileType = Path.GetExtension(requestDto.File.FileName).ToLower();
                     storageFile.EntityName = entity.Name;
                     storageFile.ClassificationType = "Data source template";
                     storageFile.UploadDate = DateTime.Now;
-                    storageFile.UploadedBy = currentUser.UserName;
+                    storageFile.UploadedBy = currentUser?.UserName ?? "system";
                 }
-                storageFile.CreateAudit(currentUser.UserName);
+                storageFile.CreateAudit(currentUser?.UserName ?? "system");
                 _storageFilesRepository.Insert(storageFile);
                 await _unitOfWork.CommitAsync();
                 response.Data = _mapper.Map<ScaleGroupResponseDto>(entity);
@@ -122,7 +128,7 @@ namespace Rokys.Audit.Services.Services
                 }
                 entity.IsActive = false;
                 var currentUser = _httpContextAccessor.CurrentUser();
-                entity.UpdateAudit(currentUser.UserName);
+                entity.UpdateAudit(currentUser?.UserName ?? "system");
                 _scaleGroupRepository.Update(entity);
                 await _unitOfWork.CommitAsync();
             }
@@ -141,7 +147,8 @@ namespace Rokys.Audit.Services.Services
             {
                 Expression<Func<ScaleGroup, bool>> filter = x => x.IsActive;
 
-                Func<IQueryable<ScaleGroup>, IOrderedQueryable<ScaleGroup>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
+                // Order by SortOrder by default for stable ordering within a Group
+                Func<IQueryable<ScaleGroup>, IOrderedQueryable<ScaleGroup>> orderBy = q => q.OrderBy(x => x.SortOrder);
 
                 if (!string.IsNullOrEmpty(paginationRequestDto.Filter))
                     filter = filter.AndAlso(x => x.Code.Contains(paginationRequestDto.Filter) || x.Name.Contains(paginationRequestDto.Filter));
@@ -216,7 +223,7 @@ namespace Rokys.Audit.Services.Services
             {
                 var entities = await _scaleGroupRepository.GetAsync(
                     filter: x => x.GroupId == groupId && x.IsActive,
-                    orderBy: q => q.OrderBy(x => x.Name),
+                    orderBy: q => q.OrderBy(x => x.SortOrder),
                     includeProperties: [a => a.Group]
                 );
                 response.Data = _mapper.Map<IEnumerable<ScaleGroupResponseDto>>(entities);
@@ -225,6 +232,43 @@ namespace Rokys.Audit.Services.Services
             {
                 _logger.LogError(ex.Message);
                 response = ResponseDto.Error<IEnumerable<ScaleGroupResponseDto>>(ex.Message);
+            }
+            return response;
+        }
+
+        public async Task<ResponseDto<bool>> ChangeOrder(Guid groupId, int currentPosition, int newPosition)
+        {
+            var response = ResponseDto.Create<bool>();
+            try
+            {
+                var items = (await _scaleGroupRepository.GetAsync(filter: x => x.GroupId == groupId && x.IsActive))
+                    .OrderBy(x => x.SortOrder)
+                    .ToList();
+
+                var currentIndex = items.FindIndex(x => x.SortOrder == currentPosition);
+                var newIndex = items.FindIndex(x => x.SortOrder == newPosition);
+                if (currentIndex < 0 || newIndex < 0)
+                {
+                    response = ResponseDto.Error<bool>("SortOrder no encontrado en el grupo.");
+                    return response;
+                }
+
+                var item = items[currentIndex];
+                items.RemoveAt(currentIndex);
+                items.Insert(newIndex, item);
+
+                for (int i = 0; i < items.Count; i++)
+                {
+                    items[i].SortOrder = i + 1;
+                    _scaleGroupRepository.Update(items[i]);
+                }
+                await _unitOfWork.CommitAsync();
+                response.Data = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response = ResponseDto.Error<bool>(ex.Message);
             }
             return response;
         }
@@ -262,7 +306,7 @@ namespace Rokys.Audit.Services.Services
                 }
                 var currentUser = _httpContextAccessor.CurrentUser();
                 _mapper.Map(requestDto, entity);
-                entity.UpdateAudit(currentUser.UserName);
+                entity.UpdateAudit(currentUser?.UserName ?? "system");
                 _scaleGroupRepository.Update(entity);
 
                 if (requestDto.HasSourceData == true && requestDto.File == null)
@@ -275,7 +319,7 @@ namespace Rokys.Audit.Services.Services
                     return response;
                 }
                 if (requestDto.File?.Length > 0 || requestDto.HasSourceData == false)
-                    await SaveOrReplaceFileAsync(id,  entity.Name, requestDto, currentUser.UserName);
+                    await SaveOrReplaceFileAsync(id,  entity.Name, requestDto, currentUser?.UserName ?? "system");
                 await _unitOfWork.CommitAsync();
 
                 response.Data = _mapper.Map<ScaleGroupResponseDto>(entity);
@@ -301,14 +345,14 @@ namespace Rokys.Audit.Services.Services
                 _storageFilesRepository.Delete(existingFile);
             }
 
-            if (requestDto.HasSourceData == true && requestDto.File.Length > 0)
+            if (requestDto.HasSourceData == true && requestDto.File != null && requestDto.File.Length > 0)
             {
                 var (originalName, filePath) = await SaveMemoFileAsync(requestDto.File);
                 var newFile = new StorageFiles
                 {
                     OriginalName = requestDto.File.FileName,
-                    FileName = filePath,
-                    FileUrl = filePath,
+                    FileName = filePath ?? string.Empty,
+                    FileUrl = filePath ?? string.Empty,
                     EntityId = entityId,
                     FileType = Path.GetExtension(requestDto.File.FileName).ToLower(),
                     EntityName = entityName,
@@ -320,7 +364,7 @@ namespace Rokys.Audit.Services.Services
                 _storageFilesRepository.Insert(newFile);
             }
         }
-        private async Task<(string fileName, string filePath)> SaveMemoFileAsync(IFormFile file)
+        private async Task<(string? fileName, string? filePath)> SaveMemoFileAsync(IFormFile file)
         {
             if (file == null || file.Length == 0)
                 return (null, null);

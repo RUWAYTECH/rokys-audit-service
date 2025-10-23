@@ -119,6 +119,7 @@ CREATE TABLE ScaleGroup
     Name NVARCHAR(200) NOT NULL, -- Nombre
     
     HasSourceData BIT DEFAULT 0, -- Tiene Datos Fuente
+    SortOrder INT DEFAULT 0,
 
     -- Group weighting
     Weighting DECIMAL(5,2) NOT NULL, -- Ponderación

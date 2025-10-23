@@ -55,6 +55,15 @@ namespace Rokys.Audit.WebAPI.Controllers
             return BadRequest(response);
         }
         
+        [HttpPut("change-order")]
+        public async Task<IActionResult> ChangeOrder([FromBody] Rokys.Audit.DTOs.Requests.ScaleGroup.ChangeScaleGroupOrderRequestDto request)
+        {
+            var response = await _scaleGroupService.ChangeOrder(request.GroupId, request.CurrentPosition, request.NewPosition);
+            if (response.IsValid)
+                return Ok(response);
+            return BadRequest(response);
+        }
+        
         [HttpPut("{id}")]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromForm] ScaleGroupRequestDto requestDto)
