@@ -346,7 +346,6 @@ namespace Rokys.Audit.Services.Services
                     if (fieldValueEntity == null)
                         continue;
                     _mapper.Map(fieldValueDto, fieldValueEntity);
-                    JsonSerializer.Serialize(fieldValueEntity.TableDataHorizontal);
                     _fieldValuesRepository.Update(fieldValueEntity);
                 }
 
