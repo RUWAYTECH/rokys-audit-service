@@ -14,6 +14,7 @@ using Rokys.Audit.Infrastructure.Repositories;
 using Rokys.Audit.Model.Tables;
 using Rokys.Audit.Services.Interfaces;
 using System.Linq.Expressions;
+using System.Text.Json;
 
 namespace Rokys.Audit.Services.Services
 {

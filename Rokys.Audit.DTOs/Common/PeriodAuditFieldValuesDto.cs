@@ -14,7 +14,7 @@ namespace Rokys.Audit.DTOs.Common
         public string? CalculationFormula { get; set; }
         public string? AcumulationType { get; set; }
         public string? FieldOptions { get; set; }
-        public JsonArray? TableDataHorizontal { get; set; }
+        public string? TableDataHorizontal { get; set; }
         public string? TextValue { get; set; }
         public decimal? NumericValue { get; set; }
         public string? DefaultValue { get; set; }

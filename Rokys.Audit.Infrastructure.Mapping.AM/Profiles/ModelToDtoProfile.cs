@@ -118,12 +118,6 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
             CreateMap<UserReference, UserReferenceResponseDto>();
             CreateMap<EmployeeStore, EmployeeStoreResponseDto>();
             CreateMap<PeriodAuditTableScaleTemplateResult, PeriodAuditTableScaleTemplateResultResponseDto>();
-            CreateMap<PeriodAuditTableScaleTemplateResult, PeriodAuditTableScaleTemplateResultResponseDto>()
-                .ForMember(dest => dest.TemplateData,
-                    opt => opt.MapFrom((src, dest) =>
-                        string.IsNullOrEmpty(src.TemplateData)
-                            ? null
-                            : JsonSerializer.Deserialize<TemplateDataHorizontal>(src.TemplateData)));
 
             CreateMap<PeriodAuditTableScaleTemplateResult, PeriodAuditTableScaleTemplateResultListResponseDto>();
             CreateMap<StorageFiles, StorageFileResponseDto>();

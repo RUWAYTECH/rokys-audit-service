@@ -1,3 +1,5 @@
+using System.Text.Json.Nodes;
+
 namespace Rokys.Audit.Model.Tables
 {
     public class PeriodAuditFieldValues : AuditEntity
@@ -14,7 +16,9 @@ namespace Rokys.Audit.Model.Tables
         public string? CalculationFormula { get; set; } // Fórmula para calcular el valor (si es calculado)
         public string? AcumulationType { get; set; } // Tipo de Acumulación: 'NA', 'SUM', 'AVERAGE', 'MAX', 'MIN', 'COUNT'
         public string? FieldOptions { get; set; } // Opciones para campos tipo 'select' (JSON)
-        
+
+        public string? TableDataHorizontal { get; set; }
+
         // VALORES CAPTURADOS
         public string? TextValue { get; set; }
         public decimal? NumericValue { get; set; }
