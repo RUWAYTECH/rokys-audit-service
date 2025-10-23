@@ -16,8 +16,7 @@ namespace Rokys.Audit.Services.Validations
                 .NotEmpty().WithMessage("La descripción es requerida");
             RuleFor(x => x.Weighting)
                 .NotEmpty().WithMessage("El ponderador es requerido.")
-                .NotNull().WithMessage("El ponderador es requerido.")
-                .GreaterThan(0).WithMessage("El ponderador debe ser mayor a 0.");
+                .NotNull().WithMessage("El ponderador es requerido.");
         }
     }
 }
