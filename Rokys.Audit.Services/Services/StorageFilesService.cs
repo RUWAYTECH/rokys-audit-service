@@ -158,6 +158,8 @@ namespace Rokys.Audit.Services.Services
                     filter = filter.AndAlso(x => x.EntityId == requestDto.EntityId.Value);
                 if (!string.IsNullOrEmpty(requestDto.FileName))
                     filter = filter.AndAlso(x => x.FileName.Contains(requestDto.FileName));
+                if (!string.IsNullOrEmpty(requestDto.ClassificationType))
+                    filter = filter.AndAlso(x => x.ClassificationType == requestDto.ClassificationType);
 
                 Func<IQueryable<StorageFiles>, IOrderedQueryable<StorageFiles>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 
