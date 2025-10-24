@@ -97,6 +97,51 @@ namespace Rokys.Audit.Services.Services
                     response = ResponseDto.Error("No se encontró el grupo.");
                     return response;
                 }
+                var scaleGroups = await _scaleGroupRepository.GetAsync(filter: x => x.GroupId == id && x.IsActive);
+                if (scaleGroups != null)
+                {
+                    foreach (var scaleGroup in scaleGroups)
+                    {
+                        var criteriaSubResult = await _criteriaSubResultRepository.GetAsync(filter: x => x.ScaleGroupId == scaleGroup.ScaleGroupId && x.IsActive);
+                        if (criteriaSubResult != null)
+                        {
+                            foreach (var criteria in criteriaSubResult)
+                            {
+                                criteria.IsActive = false;
+                                _criteriaSubResultRepository.Update(criteria);
+                            }
+                        }
+                        var scoringCriterias = await _scoringCriteriaRepository.GetAsync(filter: x => x.ScaleGroupId == scaleGroup.ScaleGroupId && x.IsActive);
+                        if (scoringCriterias != null)
+                        {
+                            foreach (var scoring in scoringCriterias)
+                            {
+                                scoring.IsActive = false;
+                                _scoringCriteriaRepository.Update(scoring);
+                            }
+                        }
+                        var tableScaleTemplates = await _tableScaleTemplateRepository.GetAsync(filter: x => x.ScaleGroupId == scaleGroup.ScaleGroupId && x.IsActive);
+                        if (tableScaleTemplates != null)
+                        {
+                            foreach (var template in tableScaleTemplates)
+                            {
+                                var auditTemplateFields = await _auditTemplateFieldRepository.GetAsync(filter: x => x.TableScaleTemplateId == template.TableScaleTemplateId && x.IsActive);
+                                if (auditTemplateFields != null)
+                                {
+                                    foreach (var field in auditTemplateFields)
+                                    {
+                                        field.IsActive = false;
+                                        _auditTemplateFieldRepository.Update(field);
+                                    }
+                                }
+                                template.IsActive = false;
+                                _tableScaleTemplateRepository.Update(template);
+                            }
+                        }
+                        scaleGroup.IsActive = false;
+                        _scaleGroupRepository.Update(scaleGroup);
+                    }
+                }
                 entity.IsActive = false;
                 _groupRepository.Update(entity);
                 await _unitOfWork.CommitAsync();

@@ -97,11 +97,21 @@ namespace Rokys.Audit.Services.Services
                 try
                 {
                     // Build InboxItemRequestDto and reuse the inbox service to handle creation (sequence number, user mapping, audit fields)
+                    //var currentUserReference = await _userReferenceRepository.GetByUserIdAsync(currentUser?.UserId ?? Guid.Empty);
+                    //if (currentUserReference != null) 
+                    //{
+                    //    response.Messages.Add(new ApplicationMessage
+                    //    {
+                    //        Message = "No se encontro al usuario que esta creando",
+                    //        MessageType = ApplicationMessageType.Error,
+                    //    });
+                    //}
                     var inboxDto = new Rokys.Audit.DTOs.Requests.InboxItems.InboxItemRequestDto
                     {
                         PeriodAuditId = entity.PeriodAuditId,
                         PrevStatusId = (await _auditStatusRepository.GetFirstOrDefaultAsync(f => f.Code == AuditStatusCode.Pending && f.IsActive))?.AuditStatusId,
                         NextStatusId = (await _auditStatusRepository.GetFirstOrDefaultAsync(f => f.Code == AuditStatusCode.InProgress && f.IsActive))?.AuditStatusId,
+                        //UserId = currentUserReference?.UserReferenceId ?? null,
                         Comments = "Auditoría creada",
                         Action = "Creado",
                         IsActive = true

@@ -9,5 +9,6 @@ namespace Rokys.Audit.DTOs.Common
         public string? Observations { get; set; }
         public string? ScaleDescription { get; set; }
         public string? ScaleColor { get; set; }
+        public int? SortOrder { get; set; }
     }
 }
