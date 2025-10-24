@@ -167,7 +167,7 @@ CREATE TABLE AuditTemplateFields (
     FieldName NVARCHAR(255) NOT NULL,
     FieldType NVARCHAR(50) NOT NULL, -- numeric, text, date, boolean, select, image
     IsCalculated VARCHAR(50), -- Si es un campo calculado
-    CalculationFormula NVARCHAR(500), -- Fórmula para calcular el valor (si es calculado)
+    CalculationFormula NVARCHAR(2000), -- Fórmula para calcular el valor (si es calculado)
     AcumulationType NVARCHAR(50) NULL, -- Tipo de Acumulación: 'NA', 'SUM', 'AVERAGE', 'MAX', 'MIN', 'COUNT'
     CONSTRAINT CK_AuditTemplateFields_AcumulationType 
     CHECK (AcumulationType IN ('SUM', 'COUNT') OR AcumulationType IS NULL), -- Tipo de Acumulación: 'sum', 'average', 'max', 'min', 'count'
@@ -239,7 +239,7 @@ CREATE TABLE ScoringCriteria (
     
     
     -- Fórmula y Evaluación
-    ResultFormula NVARCHAR(500), -- Fórmula para calcular resultado del campo
+    ResultFormula NVARCHAR(2000), -- Fórmula para calcular resultado del campo
     ComparisonOperator NVARCHAR(20) NOT NULL, -- Operador: '=', '!=', '>', '<', '>=', '<=', 'BETWEEN', 'IN', 'CONTAINS'
     ExpectedValue NVARCHAR(255) NOT NULL, -- Valor esperado
     
@@ -271,7 +271,7 @@ CREATE TABLE CriteriaSubResult (
     CriteriaName NVARCHAR(255) NOT NULL, -- Nombre del Criterio
     CriteriaCode NVARCHAR(10), -- AUTO GENERATE PREFIX CSR-{4 DIGITS}
     -- Fórmula y Evaluación
-    ResultFormula NVARCHAR(500), -- Fórmula para calcular resultado del campo
+    ResultFormula NVARCHAR(2000), -- Fórmula para calcular resultado del campo
     ColorCode NVARCHAR(20) NOT NULL, -- Código de color para la evaluación
 
   
@@ -520,7 +520,7 @@ CREATE TABLE PeriodAuditFieldValues (
     FieldName NVARCHAR(255) NOT NULL,
     FieldType NVARCHAR(50) NOT NULL, -- numeric, text, date, boolean, select, image
     IsCalculated BIT DEFAULT 0, -- Si es un campo calculado
-    CalculationFormula NVARCHAR(500), -- Fórmula para calcular el valor (si es calculado)
+    CalculationFormula NVARCHAR(2000), -- Fórmula para calcular el valor (si es calculado)
     AcumulationType NVARCHAR(50) NULL, -- Tipo de Acumulación: 'NA', 'SUM', 'AVERAGE', 'MAX', 'MIN', 'COUNT'
     CONSTRAINT CK_AuditTemplateFields_AcumulationTypeResult 
     CHECK (AcumulationType IN ('SUM', 'COUNT') OR AcumulationType IS NULL), -- Tipo de Acumulación: 'sum', 'average', 'max', 'min', 'count'
@@ -567,7 +567,7 @@ CREATE TABLE PeriodAuditScoringCriteriaResult (
     
     
     -- Fórmula y Evaluación
-    ResultFormula NVARCHAR(500), -- Fórmula para calcular resultado del campo
+    ResultFormula NVARCHAR(2000), -- Fórmula para calcular resultado del campo
     ComparisonOperator NVARCHAR(20) NOT NULL, -- Operador: '=', '!=', '>', '<', '>=', '<=', 'BETWEEN', 'IN', 'CONTAINS'
     ExpectedValue NVARCHAR(255) NOT NULL, -- Valor esperado
     
@@ -604,7 +604,7 @@ CREATE TABLE PeriodAuditScaleSubResult (
     -- Valores evaluados
     EvaluatedValue NVARCHAR(255), -- Valor que se evaluó
     CalculatedResult NVARCHAR(255), -- Resultado de aplicar la fórmula
-    AppliedFormula NVARCHAR(500), -- Fórmula que se aplicó (histórico)
+    AppliedFormula NVARCHAR(2000), -- Fórmula que se aplicó (histórico)
     
     -- Resultado de la evaluación
     ScoreObtained DECIMAL(10,2) NULL, -- Puntaje obtenido
