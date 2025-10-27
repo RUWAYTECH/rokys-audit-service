@@ -98,7 +98,7 @@ namespace Rokys.Audit.Services.Services
                     storageFile.EntityId = entity.ScaleGroupId;
                     storageFile.FileType = Path.GetExtension(requestDto.File.FileName).ToLower();
                     storageFile.EntityName = entity.Name;
-                    storageFile.ClassificationType = "Data source template";
+                    storageFile.ClassificationType = "data_source_template";
                     storageFile.UploadDate = DateTime.Now;
                     storageFile.UploadedBy = currentUser?.UserName ?? "system";
                 }
@@ -202,7 +202,7 @@ namespace Rokys.Audit.Services.Services
                 var mapData = _mapper.Map<ScaleGroupResponseDto>(entity);
                 if (storageFiles != null)
                 {
-                    mapData.StorageFileName = storageFiles?.FileName;
+                    mapData.StorageFileName = storageFiles?.OriginalName;
                     mapData.SotrageFileId = storageFiles?.StorageFileId;
                 }
                     
@@ -347,7 +347,7 @@ namespace Rokys.Audit.Services.Services
                     EntityId = entityId,
                     FileType = Path.GetExtension(requestDto.File.FileName).ToLower(),
                     EntityName = entityName,
-                    ClassificationType = "Data source template",
+                    ClassificationType = "data_source_template",
                     UploadDate = DateTime.Now,
                     UploadedBy = userName
                 };
