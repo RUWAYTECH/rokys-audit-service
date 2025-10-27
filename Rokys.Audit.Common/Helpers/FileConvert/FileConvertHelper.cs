@@ -43,8 +43,6 @@ namespace Rokys.Audit.Common.Helpers.FileConvert
             return extension switch
             {
                 "pdf" => "application/pdf",
-                "doc" => "application/msword",
-                "docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 "jpg" => "image/jpeg",
                 "jpeg" => "image/jpeg",
                 "png" => "image/png",
@@ -71,21 +69,30 @@ namespace Rokys.Audit.Common.Helpers.FileConvert
                 return null;
 
             var cleanBase64 = base64File.Contains(",") ? base64File.Split(',')[1] : base64File;
-
             var fileBytes = Convert.FromBase64String(cleanBase64);
 
             string extension;
             string mimeType;
 
-            if (fileBytes.Length >= 4 && fileBytes[0] == 0xD0 && fileBytes[1] == 0xCF && fileBytes[2] == 0x11 && fileBytes[3] == 0xE0)
+            // Firma mágica para archivos XLS (formato binario antiguo)
+            if (fileBytes.Length >= 4 &&
+                fileBytes[0] == 0xD0 && fileBytes[1] == 0xCF && fileBytes[2] == 0x11 && fileBytes[3] == 0xE0)
             {
-                extension = "doc";
-                mimeType = "application/msword";
+                extension = "xls";
+                mimeType = "application/vnd.ms-excel";
+            }
+            // Firma para archivos XLSX (OpenXML moderno)
+            else if (fileBytes.Length >= 4 &&
+                     fileBytes[0] == 0x50 && fileBytes[1] == 0x4B && fileBytes[2] == 0x03 && fileBytes[3] == 0x04)
+            {
+                extension = "xlsx";
+                mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
             }
             else
             {
-                extension = "docx";
-                mimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                // Tipo desconocido
+                extension = "bin";
+                mimeType = "application/octet-stream";
             }
 
             return new FileBase64Result

@@ -148,7 +148,6 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                         SupervisorId = src.PeriodAuditGroupResult?.PeriodAudit?.SupervisorId ?? Guid.Empty,
                         SupervisorName = ($"{src.PeriodAuditGroupResult?.PeriodAudit?.Supervisor?.FirstName} {src.PeriodAuditGroupResult?.PeriodAudit?.Supervisor?.LastName}").Trim() ?? string.Empty,
                         StatusId = src.PeriodAuditGroupResult?.PeriodAudit?.StatusId ?? Guid.Empty,
-                        StatusName = src.PeriodAuditGroupResult?.PeriodAudit?.AuditStatus?.Name ?? string.Empty,
                         StartDate = src.PeriodAuditGroupResult?.PeriodAudit?.StartDate ?? default,
                         EndDate = src.PeriodAuditGroupResult?.PeriodAudit?.EndDate ?? default,
                         ReportDate = src.PeriodAuditGroupResult?.PeriodAudit?.ReportDate,
