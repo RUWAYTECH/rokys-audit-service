@@ -233,6 +233,7 @@ namespace Rokys.Audit.Services.Services
                         ra => ra.PeriodAuditGroupResult.PeriodAudit.ResponsibleAuditor,
                         asi => asi.PeriodAuditGroupResult.PeriodAudit.Assistant,
                         su => su.PeriodAuditGroupResult.PeriodAudit.Supervisor,
+                        st => st.PeriodAuditGroupResult.PeriodAudit.AuditStatus,
                         pas => pas.PeriodAuditScaleSubResults,
                         pasc => pasc.PeriodAuditScoringCriteriaResults]);
                 if (entity == null)

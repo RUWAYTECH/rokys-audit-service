@@ -309,15 +309,6 @@ namespace Rokys.Audit.Services.Services
                 entity.UpdateAudit(currentUser?.UserName ?? "system");
                 _scaleGroupRepository.Update(entity);
 
-                if (requestDto.HasSourceData == true && requestDto.File == null)
-                {
-                    response.Messages.Add(new ApplicationMessage
-                    {
-                        Message = "Si seleccionó que es con archivo, debe subir un archivo.",
-                        MessageType = ApplicationMessageType.Error
-                    });
-                    return response;
-                }
                 if (requestDto.File?.Length > 0 || requestDto.HasSourceData == false)
                     await SaveOrReplaceFileAsync(id,  entity.Name, requestDto, currentUser?.UserName ?? "system");
                 await _unitOfWork.CommitAsync();
