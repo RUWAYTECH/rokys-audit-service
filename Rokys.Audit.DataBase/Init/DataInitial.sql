@@ -393,7 +393,6 @@ CREATE TABLE [PeriodAudit]
     ScoreValue DECIMAL(10,2) NOT NULL,
     ScaleCode NVARCHAR(10) NOT NULL, -- Código de la Escala
     ScaleName NVARCHAR(100) NOT NULL, -- Nombre de la Escala
-    ScaleIcon NVARCHAR(20) NOT NULL, -- Icon de la Escala
     ScaleColor NVARCHAR(10) NOT NULL, -- Valor de la Escala
     ScaleMinValue DECIMAL(10,2) NOT NULL, -- Valor Mínimo de la Escala
     ScaleMaxValue DECIMAL(10,2) NOT NULL, -- Valor Máximo de la Escala
@@ -628,7 +627,7 @@ CREATE TABLE PeriodAuditScaleSubResult (
 -- Índice compuesto principal para ScaleCode con columnas de filtrado frecuente
 CREATE NONCLUSTERED INDEX IX_PeriodAudit_ScaleCode_Optimized 
 ON PeriodAudit (ScaleCode, IsActive, StoreId, CreationDate)
-INCLUDE (ScaleName, ScaleColor, ScaleIcon, ScoreValue, ScaleMinValue, ScaleMaxValue, StatusId)
+INCLUDE (ScaleName, ScaleColor, ScoreValue, ScaleMinValue, ScaleMaxValue, StatusId)
 WITH (
     PAD_INDEX = OFF,
     STATISTICS_NORECOMPUTE = OFF,
