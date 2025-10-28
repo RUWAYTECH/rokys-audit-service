@@ -79,7 +79,10 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .HasMaxLength(50)
                 .IsRequired(false);
 
-
+            builder.Property(x => x.ScaleCode)
+                .HasColumnName("ScaleCode")
+                .HasMaxLength(10)
+                .IsRequired(false);
 
             builder.Property(x => x.IsActive)
                 .HasDefaultValue(true)

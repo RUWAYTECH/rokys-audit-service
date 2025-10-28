@@ -381,6 +381,7 @@ namespace Rokys.Audit.Services.Services
                     if (acumulatedScore >= scale.MinValue && acumulatedScore <= scale.MaxValue)
                     {
                         entity.ScaleName = scale.Name;
+                        entity.ScaleCode = scale.Code;
                         entity.ScaleColor = scale.ColorCode;
                         scaleFound = true;
                         break;
@@ -496,6 +497,10 @@ namespace Rokys.Audit.Services.Services
                         {
                             newStatusId = statusInReview?.AuditStatusId ?? ent.StatusId ?? Guid.Empty;
                             nextStatusId = statusInReview?.AuditStatusId;
+                            if (newStatusId == statusInReview?.AuditStatusId && string.IsNullOrEmpty(ent.ScaleName))
+                            {
+                                return ResponseDto.Error("No se puede aprobar para revisión una auditoría sin puntuación.");
+                            }
                             if (ent.AdministratorId.HasValue)
                             {
                                 var adminRef = await _userReferenceRepository.GetFirstOrDefaultAsync(f => f.UserReferenceId == ent.AdministratorId.Value && f.IsActive);

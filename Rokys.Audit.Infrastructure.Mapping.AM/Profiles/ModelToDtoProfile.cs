@@ -24,8 +24,6 @@ using Rokys.Audit.DTOs.Responses.PeriodAuditTableScaleTemplateResult;
 using Rokys.Audit.DTOs.Responses.PeriodAuditScoringCriteriaResult;
 using Rokys.Audit.DTOs.Responses.PeriodAuditScaleSubResult;
 using Rokys.Audit.DTOs.Responses.InboxItems;
-using System.Text.Json;
-using Rokys.Audit.Common.Constant;
 
 namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
 {
@@ -97,6 +95,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                 dest.EnterpriseName = src.Store?.Enterprise?.Name ?? string.Empty;
                 dest.EnterpriseId = src.Store?.EnterpriseId ?? Guid.Empty;
                 dest.StoreName = src.Store?.Name ?? string.Empty;
+                dest.ScaleCode = src.ScaleCode ?? string.Empty;
 
                 if (src.AuditStatus != null)
                 {
@@ -151,6 +150,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                         StartDate = src.PeriodAuditGroupResult?.PeriodAudit?.StartDate ?? default,
                         EndDate = src.PeriodAuditGroupResult?.PeriodAudit?.EndDate ?? default,
                         ReportDate = src.PeriodAuditGroupResult?.PeriodAudit?.ReportDate,
+                        ScaleCode = src.PeriodAuditGroupResult?.PeriodAudit?.ScaleCode ?? string.Empty,
                         AuditStatus = src.PeriodAuditGroupResult.PeriodAudit.AuditStatus == null
                                         ? null
                                         : new AuditStatusResponseDto

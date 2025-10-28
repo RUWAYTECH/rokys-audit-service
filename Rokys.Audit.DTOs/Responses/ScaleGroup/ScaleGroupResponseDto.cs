@@ -1,4 +1,5 @@
-﻿using Rokys.Audit.DTOs.Common;
+﻿using Rokys.Audit.Common.Helpers.FileConvert;
+using Rokys.Audit.DTOs.Common;
 
 namespace Rokys.Audit.DTOs.Responses.ScaleGroup
 {
@@ -12,5 +13,6 @@ namespace Rokys.Audit.DTOs.Responses.ScaleGroup
         public bool IsActive { get; set; }
         public string? StorageFileName { get; set; }
         public Guid? SotrageFileId { get; set; }
+        public FileBase64Result? FileBase64Result { get; set; }
     }
 }

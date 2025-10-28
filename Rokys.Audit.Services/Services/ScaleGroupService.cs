@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Reatil.Services.Services;
 using Rokys.Audit.Common.Extensions;
+using Rokys.Audit.Common.Helpers.FileConvert;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.ScaleGroup;
 using Rokys.Audit.DTOs.Responses.Common;
@@ -204,6 +205,18 @@ namespace Rokys.Audit.Services.Services
                 {
                     mapData.StorageFileName = storageFiles?.OriginalName;
                     mapData.SotrageFileId = storageFiles?.StorageFileId;
+                    byte[] excelBytes = Array.Empty<byte>();
+                    if (!string.IsNullOrEmpty(storageFiles.FileUrl))
+                    {
+                        var filePath = Path.Combine(_fileSettings.Path, FileDirectories.Uploads, storageFiles.FileUrl);
+                        if (File.Exists(filePath))
+                        {
+                            excelBytes = File.ReadAllBytes(filePath);
+                        }
+                    }
+                    var base64File = Convert.ToBase64String(excelBytes);
+                    var fileInfo = FileConvertHelper.FileBase64Result(base64File);
+                    mapData.FileBase64Result = fileInfo;
                 }
                     
                 response.Data = mapData;
