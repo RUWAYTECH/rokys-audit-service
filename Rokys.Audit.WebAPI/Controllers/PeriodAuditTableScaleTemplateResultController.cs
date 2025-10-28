@@ -25,7 +25,9 @@ namespace Rokys.Audit.WebAPI.Controllers
         public async Task<IActionResult> GetAll()
         {
             var result = await _service.GetAll();
-            return Ok(result);
+            if (result.IsValid)
+                return Ok(result);
+            return BadRequest(result);
         }
 
         [HttpGet]
@@ -33,8 +35,9 @@ namespace Rokys.Audit.WebAPI.Controllers
         public async Task<IActionResult> GetById(Guid id)
         {
             var result = await _service.GetById(id);
-            if (result.Data == null) return NotFound(result);
-            return Ok(result);
+            if (result.IsValid)
+                return Ok(result);
+            return BadRequest(result);
         }
 
         [HttpPost]
@@ -42,7 +45,9 @@ namespace Rokys.Audit.WebAPI.Controllers
         public async Task<IActionResult> Filter([FromBody] PeriodAuditTableScaleTemplateResultFilterRequestDto filter)
         {
             var result = await _service.Filter(filter);
-            return Ok(result);
+            if (result.IsValid)
+                return Ok(result);
+            return BadRequest(result);
         }
 
         [HttpPost]
@@ -50,7 +55,9 @@ namespace Rokys.Audit.WebAPI.Controllers
         public async Task<IActionResult> Create([FromBody] PeriodAuditTableScaleTemplateResultRequestDto request)
         {
             var result = await _service.Create(request);
-            return Ok(result);
+            if (result.IsValid)
+                return Ok(result);
+            return BadRequest(result);
         }
 
         [HttpPut]
@@ -58,7 +65,9 @@ namespace Rokys.Audit.WebAPI.Controllers
         public async Task<IActionResult> Update(Guid id, [FromBody] PeriodAuditTableScaleTemplateResultRequestDto request)
         {
             var result = await _service.Update(id, request);
-            return Ok(result);
+            if (result.IsValid)
+                return Ok(result);
+            return BadRequest(result);
         }
 
         [HttpDelete]
@@ -66,16 +75,18 @@ namespace Rokys.Audit.WebAPI.Controllers
         public async Task<IActionResult> Delete(Guid id)
         {
             var result = await _service.Delete(id);
-            if (!result.Data) return NotFound(result);
-            return Ok(result);
+            if (result.IsValid)
+                return Ok(result);
+            return BadRequest(result);
         }
 
         [HttpGet("getbyperiodauditscaleresult/{periodAuditScaleResultId}")]
         public async Task<IActionResult> GetByPeriodAuditScaleResult([FromRoute]Guid periodAuditScaleResultId)
         {
             var result = await _service.GetByPeriodAuditScaleResult(periodAuditScaleResultId);
-            if (result.Data == null) return NotFound(result);
-            return Ok(result);
+            if (result.IsValid)
+                return Ok(result);
+            return BadRequest(result);
         }
     }
 }

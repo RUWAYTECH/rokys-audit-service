@@ -5,6 +5,7 @@ using Reatil.Services.Services;
 using Rokys.Audit.Common.Extensions;
 using Rokys.Audit.Common.Helpers.FileConvert;
 using Rokys.Audit.DTOs.Common;
+using Rokys.Audit.DTOs.Requests.ScaleGroup;
 using Rokys.Audit.DTOs.Requests.StorageFiles;
 using Rokys.Audit.DTOs.Responses.Common;
 using Rokys.Audit.DTOs.Responses.StorageFiles;
@@ -157,6 +158,8 @@ namespace Rokys.Audit.Services.Services
                     filter = filter.AndAlso(x => x.EntityId == requestDto.EntityId.Value);
                 if (!string.IsNullOrEmpty(requestDto.FileName))
                     filter = filter.AndAlso(x => x.FileName.Contains(requestDto.FileName));
+                if (!string.IsNullOrEmpty(requestDto.ClassificationType))
+                    filter = filter.AndAlso(x => x.ClassificationType == requestDto.ClassificationType);
 
                 Func<IQueryable<StorageFiles>, IOrderedQueryable<StorageFiles>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 
@@ -188,32 +191,52 @@ namespace Rokys.Audit.Services.Services
         public async Task<ResponseDto<StorageFileResponseDto>> Update(Guid id, StorageFileRequestDto requestDto)
         {
             var response = ResponseDto.Create<StorageFileResponseDto>();
+
             try
             {
+                // 1️⃣ Validar DTO
                 var validate = _validator.Validate(requestDto);
                 if (!validate.IsValid)
                 {
-                    response.Messages.AddRange(validate.Errors.Select(e => new ApplicationMessage { Message = e.ErrorMessage, MessageType = ApplicationMessageType.Error }));
+                    response.Messages.AddRange(validate.Errors.Select(e =>
+                        new ApplicationMessage { Message = e.ErrorMessage, MessageType = ApplicationMessageType.Error }));
                     return response;
                 }
-                var entity = await _storageFilesRepository.GetFirstOrDefaultAsync(filter: x => x.StorageFileId == id && x.IsActive);
+
+                // 2️⃣ Buscar entidad activa
+                var entity = await _storageFilesRepository.GetFirstOrDefaultAsync(
+                    filter: x => x.StorageFileId == id && x.IsActive
+                );
+
                 if (entity == null)
-                {
-                    response = ResponseDto.Error<StorageFileResponseDto>("No se encontró el registro.");
-                    return response;
-                }
+                    return ResponseDto.Error<StorageFileResponseDto>("No se encontró el registro.");
+
+                var oldFilePath = Path.Combine(_fileSettings.Path, FileDirectories.Uploads, entity.FileUrl ?? string.Empty);
+                if (File.Exists(oldFilePath))
+                    File.Delete(oldFilePath);
+
+                var (originalName, relativePath) = await SaveMemoFileAsync(requestDto.File);
+
                 var currentUser = _httpContextAccessor.CurrentUser();
-                entity = _mapper.Map(requestDto, entity);
+
+                _mapper.Map(requestDto, entity);
+                entity.OriginalName = requestDto.File.FileName;
+                entity.FileName = originalName;
+                entity.FileUrl = relativePath;
+                entity.FileType = Path.GetExtension(originalName).ToLower();
                 entity.UpdateAudit(currentUser.UserName);
+
                 _storageFilesRepository.Update(entity);
                 await _unitOfWork.CommitAsync();
+
                 response.Data = _mapper.Map<StorageFileResponseDto>(entity);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
-                response = ResponseDto.Error<StorageFileResponseDto>(ex.Message);
+                _logger.LogError(ex, "Error al actualizar el archivo con ID {FileId}", id);
+                response = ResponseDto.Error<StorageFileResponseDto>("Ocurrió un error al actualizar el archivo.");
             }
+
             return response;
         }
         public async Task<ResponseDto<StorageFileResponseDto>> GetExcelFile(Guid? id, Guid? entityId)

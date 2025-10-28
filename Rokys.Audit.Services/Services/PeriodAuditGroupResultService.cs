@@ -13,6 +13,7 @@ using Rokys.Audit.Infrastructure.Persistence.Abstract;
 using Rokys.Audit.Infrastructure.Repositories;
 using Rokys.Audit.Model.Tables;
 using Rokys.Audit.Services.Interfaces;
+using Rokys.Audit.Services.Validations;
 using System.Linq.Expressions;
 using static Rokys.Audit.Common.Constant.Constants;
 
@@ -89,7 +90,7 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<PeriodAuditGroupResultResponseDto>();
             try
             {
-                var validate = _validator.Validate(requestDto);
+                var validate = await _validator.ValidateAsync(requestDto);
                 if (!validate.IsValid)
                 {
                     response.Messages.AddRange(validate.Errors.Select(e => new ApplicationMessage { Message = e.ErrorMessage, MessageType = ApplicationMessageType.Error }));
@@ -323,22 +324,22 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<PeriodAuditGroupResultResponseDto>();
             try
             {
-                var validate = _validator.Validate(requestDto);
+                var validator = new PeriodAuditGroupResultValidator(_repository, id);
+                var validate = await validator.ValidateAsync(requestDto);
                 if (!validate.IsValid)
                 {
                     response.Messages.AddRange(validate.Errors.Select(e => new ApplicationMessage { Message = e.ErrorMessage, MessageType = ApplicationMessageType.Error }));
                     return response;
                 }
                 var entity = await _repository.GetFirstOrDefaultAsync(
-                    filter: x => x.PeriodAuditGroupResultId == id && x.IsActive, 
-                    includeProperties: [ x => x.Group, y => y.PeriodAudit ]);
+                    filter: x => x.PeriodAuditGroupResultId == id && x.IsActive);
                 if (entity == null)
                 {
                     response = ResponseDto.Error<PeriodAuditGroupResultResponseDto>("No se encontró el registro.");
                     return response;
                 }
                 var currentUser = _httpContextAccessor.CurrentUser();
-                entity = _mapper.Map(requestDto, entity);
+                _mapper.Map(requestDto, entity);
                 entity.UpdateAudit(currentUser.UserName);
                 _repository.Update(entity);
 

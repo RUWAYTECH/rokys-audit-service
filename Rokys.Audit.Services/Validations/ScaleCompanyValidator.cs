@@ -19,8 +19,6 @@ namespace Rokys.Audit.Services.Validations
                 .NotNull().WithMessage("El valor máximo es requerido.");
             RuleFor(x => x.ColorCode)
                 .MaximumLength(20).WithMessage("El código de color acepta como máximo 20 caracteres.");
-            RuleFor(x => x.Icon)
-                .MaximumLength(100).WithMessage("El icono acepta como máximo 100 caracteres.");
         }
     }
 }

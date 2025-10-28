@@ -24,8 +24,6 @@ using Rokys.Audit.DTOs.Responses.PeriodAuditTableScaleTemplateResult;
 using Rokys.Audit.DTOs.Responses.PeriodAuditScoringCriteriaResult;
 using Rokys.Audit.DTOs.Responses.PeriodAuditScaleSubResult;
 using Rokys.Audit.DTOs.Responses.InboxItems;
-using System.Text.Json;
-using Rokys.Audit.Common.Constant;
 
 namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
 {
@@ -97,6 +95,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                 dest.EnterpriseName = src.Store?.Enterprise?.Name ?? string.Empty;
                 dest.EnterpriseId = src.Store?.EnterpriseId ?? Guid.Empty;
                 dest.StoreName = src.Store?.Name ?? string.Empty;
+                dest.ScaleCode = src.ScaleCode ?? string.Empty;
 
                 if (src.AuditStatus != null)
                 {
@@ -148,10 +147,20 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                         SupervisorId = src.PeriodAuditGroupResult?.PeriodAudit?.SupervisorId ?? Guid.Empty,
                         SupervisorName = ($"{src.PeriodAuditGroupResult?.PeriodAudit?.Supervisor?.FirstName} {src.PeriodAuditGroupResult?.PeriodAudit?.Supervisor?.LastName}").Trim() ?? string.Empty,
                         StatusId = src.PeriodAuditGroupResult?.PeriodAudit?.StatusId ?? Guid.Empty,
-                        StatusName = src.PeriodAuditGroupResult?.PeriodAudit?.AuditStatus?.Name ?? string.Empty,
                         StartDate = src.PeriodAuditGroupResult?.PeriodAudit?.StartDate ?? default,
                         EndDate = src.PeriodAuditGroupResult?.PeriodAudit?.EndDate ?? default,
                         ReportDate = src.PeriodAuditGroupResult?.PeriodAudit?.ReportDate,
+                        ScaleCode = src.PeriodAuditGroupResult?.PeriodAudit?.ScaleCode ?? string.Empty,
+                        AuditStatus = src.PeriodAuditGroupResult.PeriodAudit.AuditStatus == null
+                                        ? null
+                                        : new AuditStatusResponseDto
+                                        {
+                                            AuditStatusId = src.PeriodAuditGroupResult.PeriodAudit.AuditStatus.AuditStatusId,
+                                            Name = src.PeriodAuditGroupResult.PeriodAudit.AuditStatus.Name,
+                                            Code = src.PeriodAuditGroupResult.PeriodAudit.AuditStatus.Code,
+                                            ColorCode = src.PeriodAuditGroupResult.PeriodAudit.AuditStatus.ColorCode,
+                                            IsActive = src.PeriodAuditGroupResult.PeriodAudit.AuditStatus.IsActive
+                                        },
                         IsActive = src.PeriodAuditGroupResult?.PeriodAudit?.IsActive ?? false,
                     };
                     dest.ScaleCompany = src.PeriodAuditGroupResult?.PeriodAudit?.Store?.Enterprise?.ScaleCompanies
@@ -165,7 +174,6 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                             MinValue = sc.MinValue,
                             MaxValue = sc.MaxValue,
                             ColorCode = sc.ColorCode,
-                            Icon = sc.Icon,
                             EnterpriseId = sc.EnterpriseId,
                             IsActive = sc.IsActive,
                             CreationDate = sc.CreationDate,
@@ -178,6 +186,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                         GroupId = src.ScaleGroup.GroupId,
                         Name = src.ScaleGroup.Name,
                         Code = src.ScaleGroup.Code,
+                        HasSourceData = src.ScaleGroup.HasSourceData,
                         Weighting = src.ScaleGroup.Weighting,
                         IsActive = src.ScaleGroup.IsActive,
                     };

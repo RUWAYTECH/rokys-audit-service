@@ -43,9 +43,9 @@ namespace Rokys.Audit.Common.Helpers.FileConvert
             return extension switch
             {
                 "pdf" => "application/pdf",
-                "doc" => "application/msword",
-                "docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 "jpg" => "image/jpeg",
+                "xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "xls" => "application/vnd.ms-excel",
                 "jpeg" => "image/jpeg",
                 "png" => "image/png",
                 "gif" => "image/gif",
@@ -71,21 +71,36 @@ namespace Rokys.Audit.Common.Helpers.FileConvert
                 return null;
 
             var cleanBase64 = base64File.Contains(",") ? base64File.Split(',')[1] : base64File;
-
             var fileBytes = Convert.FromBase64String(cleanBase64);
 
             string extension;
             string mimeType;
 
-            if (fileBytes.Length >= 4 && fileBytes[0] == 0xD0 && fileBytes[1] == 0xCF && fileBytes[2] == 0x11 && fileBytes[3] == 0xE0)
+            // Detectar XLS (formato binario antiguo)
+            if (fileBytes.Length >= 4 &&
+                fileBytes[0] == 0xD0 && fileBytes[1] == 0xCF && fileBytes[2] == 0x11 && fileBytes[3] == 0xE0)
             {
-                extension = "doc";
-                mimeType = "application/msword";
+                extension = "xls";
+                mimeType = "application/vnd.ms-excel";
+            }
+            // Detectar XLSX (ZIP structure, puede variar pero siempre empieza con PK)
+            else if (fileBytes.Length >= 2 &&
+                     fileBytes[0] == 0x50 && fileBytes[1] == 0x4B)
+            {
+                extension = "xlsx";
+                mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            }
+            // Detectar DOC / DOCX (opcional)
+            else if (fileBytes.Length >= 4 &&
+                     fileBytes[0] == 0x25 && fileBytes[1] == 0x50) // PDF
+            {
+                extension = "pdf";
+                mimeType = "application/pdf";
             }
             else
             {
-                extension = "docx";
-                mimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                extension = "bin";
+                mimeType = "application/octet-stream";
             }
 
             return new FileBase64Result
@@ -95,6 +110,7 @@ namespace Rokys.Audit.Common.Helpers.FileConvert
                 MimeType = mimeType
             };
         }
+
 
     }
 }

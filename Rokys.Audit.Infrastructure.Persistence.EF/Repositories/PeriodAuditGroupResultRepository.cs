@@ -18,5 +18,16 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
                 .Where(pagr => pagr.PeriodAuditId == periodAuditId && pagr.IsActive)
                 .ToListAsync();
         }
+        public async Task<bool> GetValidatorByGroupIdAsync(Guid periodAuditId, Guid groupId, Guid? id = null)
+        {
+            return await _context.PeriodAuditGroupResults
+                .AsNoTracking()
+                .AnyAsync(pagr =>
+                    pagr.PeriodAuditId == periodAuditId &&
+                    pagr.GroupId == groupId &&
+                    pagr.IsActive &&
+                    (id == null || pagr.PeriodAuditGroupResultId != id)
+                );
+        }
     }
 }

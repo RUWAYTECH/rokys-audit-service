@@ -7,6 +7,5 @@
         public decimal MinValue { get; set; }
         public decimal MaxValue { get; set; }
         public string? ColorCode { get; set; }
-        public string? Icon { get; set; }
     }
 }

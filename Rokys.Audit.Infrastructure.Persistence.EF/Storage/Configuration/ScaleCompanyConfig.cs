@@ -16,7 +16,6 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.Property(x => x.MinValue).IsRequired().HasColumnType("decimal(10,2)");
             builder.Property(x => x.MaxValue).IsRequired().HasColumnType("decimal(10,2)");
             builder.Property(x => x.ColorCode).HasMaxLength(20);
-            builder.Property(x => x.Icon).HasMaxLength(100);
             builder.Property(x => x.SortOrder).IsRequired();
             builder.Property(x => x.IsActive).HasDefaultValue(true);
             builder.Property(x => x.CreationDate).IsRequired();

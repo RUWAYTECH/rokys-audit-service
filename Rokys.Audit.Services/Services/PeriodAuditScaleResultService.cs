@@ -3,11 +3,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Reatil.Services.Services;
 using Rokys.Audit.Common.Extensions;
+using Rokys.Audit.Common.Helpers.FileConvert;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.PeriodAuditFieldValues;
 using Rokys.Audit.DTOs.Requests.PeriodAuditScaleResult;
 using Rokys.Audit.DTOs.Responses.Common;
 using Rokys.Audit.DTOs.Responses.PeriodAuditScaleResult;
+using Rokys.Audit.DTOs.Responses.ScaleGroup;
 using Rokys.Audit.Infrastructure.IMapping;
 using Rokys.Audit.Infrastructure.Persistence.Abstract;
 using Rokys.Audit.Infrastructure.Repositories;
@@ -15,6 +17,7 @@ using Rokys.Audit.Model.Tables;
 using Rokys.Audit.Services.Interfaces;
 using System.Linq.Expressions;
 using System.Text.Json;
+using static Rokys.Audit.Common.Constant.Constants;
 
 namespace Rokys.Audit.Services.Services
 {
@@ -33,6 +36,8 @@ namespace Rokys.Audit.Services.Services
         private readonly IPeriodAuditScoringCriteriaResultRepository _periodAuditScoringCriteriaResultRepository;
         private readonly IPeriodAuditScaleSubResultRepository _periodAuditScaleSubResultRepository;
         private readonly IPeriodAuditGroupResultService _periodAuditGroupResultService;
+        private readonly IStorageFilesRepository _storageFilesRepository;
+        private readonly IStorageFilesService _storageFilesService;
 
         public PeriodAuditScaleResultService(
             IPeriodAuditScaleResultRepository repository,
@@ -47,7 +52,9 @@ namespace Rokys.Audit.Services.Services
             IScaleCompanyRepository scaleCompanyRepository,
             IPeriodAuditScoringCriteriaResultRepository periodAuditScoringCriteriaResultRepository,
             IPeriodAuditScaleSubResultRepository periodAuditScaleSubResultRepository,
-            IPeriodAuditGroupResultService periodAuditGroupResultService)
+            IPeriodAuditGroupResultService periodAuditGroupResultService,
+            IStorageFilesRepository storageFilesRepository,
+            IStorageFilesService storageFilesService)
         {
             _repository = repository;
             _validator = validator;
@@ -62,6 +69,8 @@ namespace Rokys.Audit.Services.Services
             _periodAuditScoringCriteriaResultRepository = periodAuditScoringCriteriaResultRepository;
             _periodAuditScaleSubResultRepository = periodAuditScaleSubResultRepository;
             _periodAuditGroupResultService = periodAuditGroupResultService;
+            _storageFilesRepository = storageFilesRepository;
+            _storageFilesService = storageFilesService;
         }
 
         public async Task<ResponseDto<PeriodAuditScaleResultResponseDto>> Create(PeriodAuditScaleResultRequestDto requestDto)
@@ -233,6 +242,7 @@ namespace Rokys.Audit.Services.Services
                         ra => ra.PeriodAuditGroupResult.PeriodAudit.ResponsibleAuditor,
                         asi => asi.PeriodAuditGroupResult.PeriodAudit.Assistant,
                         su => su.PeriodAuditGroupResult.PeriodAudit.Supervisor,
+                        st => st.PeriodAuditGroupResult.PeriodAudit.AuditStatus,
                         pas => pas.PeriodAuditScaleSubResults,
                         pasc => pasc.PeriodAuditScoringCriteriaResults]);
                 if (entity == null)
@@ -240,8 +250,57 @@ namespace Rokys.Audit.Services.Services
                     response.Messages.Add(new ApplicationMessage { Message = "No se encontro la entidad", MessageType = ApplicationMessageType.Error });
                     return response;
                 }
+                var fileDataSourceTemplate = (DataSourceFiles?)null;
+                var fileDataSource = (DataSourceFiles?)null;
+                if (entity.ScaleGroup.HasSourceData == true)
+                {
+                    var storageFileSourceTemplate = await _storageFilesRepository.GetFirstOrDefaultAsync(
+                        filter: x => x.EntityId == entity.ScaleGroupId
+                                  && x.ClassificationType == "data_source_template"
+                                  && x.IsActive);
 
+                    var storageFileSource = await _storageFilesRepository.GetFirstOrDefaultAsync(
+                        filter: x => x.EntityId == entity.PeriodAuditScaleResultId
+                                  && x.ClassificationType == "data_source"
+                                  && x.IsActive);
+
+                    if (storageFileSourceTemplate != null)
+                    {
+                        var dataSourceTemplate = await _storageFilesService.GetExcelFile(
+                            id: storageFileSourceTemplate.StorageFileId,
+                            entityId: null);
+
+                        if (dataSourceTemplate.Data != null)
+                        {
+                            fileDataSourceTemplate = new DataSourceFiles
+                            {
+                                FileName = dataSourceTemplate.Data.OriginalName,
+                                ClassificationType = dataSourceTemplate.Data.ClassificationType,
+                                DataSourceFile = dataSourceTemplate.Data.Base64Result
+                            };
+                        }
+                    }
+
+                    if (storageFileSource != null)
+                    {
+                        var dataSource = await _storageFilesService.GetExcelFile(
+                            id: storageFileSource.StorageFileId,
+                            entityId: null);
+
+                        if (dataSource.Data != null)
+                        {
+                            fileDataSource = new DataSourceFiles
+                            {
+                                FileName = dataSource.Data.OriginalName,
+                                ClassificationType = dataSource.Data.ClassificationType,
+                                DataSourceFile = dataSource.Data.Base64Result
+                            };
+                        }
+                    }
+                }
                 var customDto = _mapper.Map<PeriodAuditScaleResultCustomResponseDto>(entity);
+                customDto.ScaleGroup.DataSourceTemplate = fileDataSourceTemplate;
+                customDto.ScaleGroup.DataSource = fileDataSource;
                 response.Data = customDto;
             }
             catch (Exception ex)

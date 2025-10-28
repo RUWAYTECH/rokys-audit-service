@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Reatil.Services.Services;
 using Rokys.Audit.Common.Extensions;
+using Rokys.Audit.Common.Helpers.FileConvert;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.ScaleGroup;
 using Rokys.Audit.DTOs.Responses.Common;
@@ -98,7 +99,7 @@ namespace Rokys.Audit.Services.Services
                     storageFile.EntityId = entity.ScaleGroupId;
                     storageFile.FileType = Path.GetExtension(requestDto.File.FileName).ToLower();
                     storageFile.EntityName = entity.Name;
-                    storageFile.ClassificationType = "Data source template";
+                    storageFile.ClassificationType = "data_source_template";
                     storageFile.UploadDate = DateTime.Now;
                     storageFile.UploadedBy = currentUser?.UserName ?? "system";
                 }
@@ -202,8 +203,20 @@ namespace Rokys.Audit.Services.Services
                 var mapData = _mapper.Map<ScaleGroupResponseDto>(entity);
                 if (storageFiles != null)
                 {
-                    mapData.StorageFileName = storageFiles?.FileName;
+                    mapData.StorageFileName = storageFiles?.OriginalName;
                     mapData.SotrageFileId = storageFiles?.StorageFileId;
+                    byte[] excelBytes = Array.Empty<byte>();
+                    if (!string.IsNullOrEmpty(storageFiles.FileUrl))
+                    {
+                        var filePath = Path.Combine(_fileSettings.Path, FileDirectories.Uploads, storageFiles.FileUrl);
+                        if (File.Exists(filePath))
+                        {
+                            excelBytes = File.ReadAllBytes(filePath);
+                        }
+                    }
+                    var base64File = Convert.ToBase64String(excelBytes);
+                    var fileInfo = FileConvertHelper.FileBase64Result(base64File);
+                    mapData.FileBase64Result = fileInfo;
                 }
                     
                 response.Data = mapData;
@@ -309,15 +322,6 @@ namespace Rokys.Audit.Services.Services
                 entity.UpdateAudit(currentUser?.UserName ?? "system");
                 _scaleGroupRepository.Update(entity);
 
-                if (requestDto.HasSourceData == true && requestDto.File == null)
-                {
-                    response.Messages.Add(new ApplicationMessage
-                    {
-                        Message = "Si seleccionó que es con archivo, debe subir un archivo.",
-                        MessageType = ApplicationMessageType.Error
-                    });
-                    return response;
-                }
                 if (requestDto.File?.Length > 0 || requestDto.HasSourceData == false)
                     await SaveOrReplaceFileAsync(id,  entity.Name, requestDto, currentUser?.UserName ?? "system");
                 await _unitOfWork.CommitAsync();
@@ -356,7 +360,7 @@ namespace Rokys.Audit.Services.Services
                     EntityId = entityId,
                     FileType = Path.GetExtension(requestDto.File.FileName).ToLower(),
                     EntityName = entityName,
-                    ClassificationType = "Data source template",
+                    ClassificationType = "data_source_template",
                     UploadDate = DateTime.Now,
                     UploadedBy = userName
                 };

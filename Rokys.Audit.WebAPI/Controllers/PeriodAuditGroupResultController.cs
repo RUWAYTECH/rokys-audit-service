@@ -21,28 +21,36 @@ namespace Rokys.Audit.WebAPI.Controllers
         public async Task<IActionResult> Create([FromBody] PeriodAuditGroupResultRequestDto dto)
         {
             var result = await _service.Create(dto);
-            return Ok(result);
+            if (result.IsValid)
+                return Ok(result);
+            return BadRequest(result);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] PeriodAuditGroupResultRequestDto dto)
         {
             var result = await _service.Update(id, dto);
-            return Ok(result);
+            if (result.IsValid)
+                return Ok(result);
+            return BadRequest(result);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
             var result = await _service.Delete(id);
-            return Ok(result);
+            if (result.IsValid)
+                return Ok(result);
+            return BadRequest(result);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
             var result = await _service.GetById(id);
-            return Ok(result);
+            if (result.IsValid)
+                return Ok(result);
+            return BadRequest(result);
         }
 
         [HttpGet]
