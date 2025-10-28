@@ -45,7 +45,6 @@ CREATE TABLE [ScaleCompany](
     MinValue DECIMAL(10,2) NOT NULL, -- Valor Mínimo
     MaxValue DECIMAL(10,2) NOT NULL, -- Valor Máximo
     ColorCode NVARCHAR(20) NULL, -- Código de Color (Hexadecimal o nombre)
-    Icon NVARCHAR(100) NULL, -- Icono asociado a la escala
     SortOrder INT DEFAULT 0, -- Orden de la Escala
 
     -- Auditoría    
