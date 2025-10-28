@@ -14,5 +14,7 @@ namespace Rokys.Audit.DTOs.Responses.ScaleGroup
         public string? StorageFileName { get; set; }
         public Guid? SotrageFileId { get; set; }
         public FileBase64Result? FileBase64Result { get; set; }
+        public int SortOrder { get; set; } = 0;
+
     }
 }

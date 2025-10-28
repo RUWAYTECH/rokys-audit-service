@@ -9,7 +9,6 @@ namespace Rokys.Audit.DTOs.Responses.ScaleGroup
         public bool IsActive { get; set; }
         public DataSourceFiles? DataSourceTemplate { get; set; }
         public DataSourceFiles? DataSource { get; set; }
-
     }
     public class DataSourceFiles
     {
