@@ -30,8 +30,13 @@ namespace Rokys.Audit.Services.Services
         private readonly IPeriodAuditGroupResultRepository _periodAuditGroupResultRepository;
         private readonly IScaleCompanyRepository _scaleCompanyRepository;
         private readonly IInboxItemsRepository _inboxItemsRepository;
-    private readonly IInboxItemsService _inboxItemsService;
+        private readonly IInboxItemsService _inboxItemsService;
         private readonly IUserReferenceRepository _userReferenceRepository;
+        private readonly IPeriodAuditScaleResultRepository _periodAuditScaleResultRepository;
+        private readonly IPeriodAuditTableScaleTemplateResultRepository _periodAuditTableScaleTemplateResultRepository;
+        private readonly IPeriodAuditFieldValuesRepository _periodAuditFieldValuesRepository;
+        private readonly IPeriodAuditScaleSubResultRepository _periodAuditScaleSubResultRepository;
+        private readonly IPeriodAuditScoringCriteriaResultRepository _periodAuditScoringCriteriaResultRepository;
 
         public PeriodAuditService(
             IRepository<PeriodAudit> repository,
@@ -45,7 +50,12 @@ namespace Rokys.Audit.Services.Services
             IScaleCompanyRepository scaleCompanyRepository,
             IInboxItemsRepository inboxItemsRepository,
             IInboxItemsService inboxItemsService,
-            IUserReferenceRepository userReferenceRepository)
+            IUserReferenceRepository userReferenceRepository,
+            IPeriodAuditScaleResultRepository periodAuditScaleResultRepository,
+            IPeriodAuditTableScaleTemplateResultRepository periodAuditTableScaleTemplateResultRepository,
+            IPeriodAuditFieldValuesRepository periodAuditFieldValuesRepository,
+            IPeriodAuditScaleSubResultRepository periodAuditScaleSubResultRepository,
+            IPeriodAuditScoringCriteriaResultRepository periodAuditScoringCriteriaResultRepository)
         {
             _repository = repository;
             _validator = validator;
@@ -59,6 +69,11 @@ namespace Rokys.Audit.Services.Services
             _inboxItemsRepository = inboxItemsRepository;
             _inboxItemsService = inboxItemsService;
             _userReferenceRepository = userReferenceRepository;
+            _periodAuditScaleResultRepository = periodAuditScaleResultRepository;
+            _periodAuditTableScaleTemplateResultRepository = periodAuditTableScaleTemplateResultRepository;
+            _periodAuditFieldValuesRepository = periodAuditFieldValuesRepository;
+            _periodAuditScaleSubResultRepository = periodAuditScaleSubResultRepository;
+            _periodAuditScoringCriteriaResultRepository = periodAuditScoringCriteriaResultRepository;
         }
 
         public async Task<ResponseDto<PeriodAuditResponseDto>> Create(PeriodAuditRequestDto requestDto)
@@ -153,6 +168,51 @@ namespace Rokys.Audit.Services.Services
                 {
                     response = ResponseDto.Error("No se encontró el registro.");
                     return response;
+                }
+                var periodAuditGroupResults = await _periodAuditGroupResultRepository.GetAsync(filter: x => x.PeriodAuditId == id && x.IsActive);
+                foreach (var groupResult in periodAuditGroupResults)
+                {
+                    var scaleResults = await _periodAuditScaleResultRepository.GetAsync(x => x.PeriodAuditGroupResultId == groupResult.PeriodAuditGroupResultId && x.IsActive);
+                    foreach (var scaleResult in scaleResults)
+                    {
+                        var tableResults = await _periodAuditTableScaleTemplateResultRepository.GetAsync(x => x.PeriodAuditScaleResultId == scaleResult.PeriodAuditScaleResultId && x.IsActive);
+                        foreach (var tableResult in tableResults)
+                        {
+                            var fieldValues = await _periodAuditFieldValuesRepository.GetAsync(x => x.PeriodAuditTableScaleTemplateResultId == tableResult.PeriodAuditTableScaleTemplateResultId && x.IsActive);
+                            foreach (var fieldValue in fieldValues)
+                            {
+                                fieldValue.IsActive = false;
+                                fieldValue.UpdateDate = DateTime.Now;
+                                _periodAuditFieldValuesRepository.Update(fieldValue);
+                            }
+
+                            tableResult.IsActive = false;
+                            tableResult.UpdateDate = DateTime.Now;
+                            _periodAuditTableScaleTemplateResultRepository.Update(tableResult);
+                        }
+
+                        var subResults = await _periodAuditScaleSubResultRepository.GetAsync(x => x.PeriodAuditScaleResultId == scaleResult.PeriodAuditScaleResultId && x.IsActive);
+                        foreach (var subResult in subResults)
+                        {
+                            subResult.IsActive = false;
+                            subResult.UpdateDate = DateTime.Now;
+                            _periodAuditScaleSubResultRepository.Update(subResult);
+                        }
+
+                        var scoringResults = await _periodAuditScoringCriteriaResultRepository.GetAsync(x => x.PeriodAuditScaleResultId == scaleResult.PeriodAuditScaleResultId && x.IsActive);
+                        foreach (var scoringResult in scoringResults)
+                        {
+                            scoringResult.IsActive = false;
+                            scoringResult.UpdateDate = DateTime.Now;
+                            _periodAuditScoringCriteriaResultRepository.Update(scoringResult);
+                        }
+
+                        scaleResult.IsActive = false;
+                        scaleResult.UpdateDate = DateTime.Now;
+                        _periodAuditScaleResultRepository.Update(scaleResult);
+                    }
+                    groupResult.IsActive = false;
+                    _periodAuditGroupResultRepository.Update(groupResult);
                 }
                 entity.IsActive = false;
                 _repository.Update(entity);
@@ -321,7 +381,6 @@ namespace Rokys.Audit.Services.Services
                     if (acumulatedScore >= scale.MinValue && acumulatedScore <= scale.MaxValue)
                     {
                         entity.ScaleName = scale.Name;
-                        entity.ScaleIcon = scale.Icon;
                         entity.ScaleColor = scale.ColorCode;
                         scaleFound = true;
                         break;

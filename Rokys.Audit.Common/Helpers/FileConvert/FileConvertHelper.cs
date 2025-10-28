@@ -44,6 +44,8 @@ namespace Rokys.Audit.Common.Helpers.FileConvert
             {
                 "pdf" => "application/pdf",
                 "jpg" => "image/jpeg",
+                "xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "xls" => "application/vnd.ms-excel",
                 "jpeg" => "image/jpeg",
                 "png" => "image/png",
                 "gif" => "image/gif",
@@ -74,23 +76,29 @@ namespace Rokys.Audit.Common.Helpers.FileConvert
             string extension;
             string mimeType;
 
-            // Firma mágica para archivos XLS (formato binario antiguo)
+            // Detectar XLS (formato binario antiguo)
             if (fileBytes.Length >= 4 &&
                 fileBytes[0] == 0xD0 && fileBytes[1] == 0xCF && fileBytes[2] == 0x11 && fileBytes[3] == 0xE0)
             {
                 extension = "xls";
                 mimeType = "application/vnd.ms-excel";
             }
-            // Firma para archivos XLSX (OpenXML moderno)
-            else if (fileBytes.Length >= 4 &&
-                     fileBytes[0] == 0x50 && fileBytes[1] == 0x4B && fileBytes[2] == 0x03 && fileBytes[3] == 0x04)
+            // Detectar XLSX (ZIP structure, puede variar pero siempre empieza con PK)
+            else if (fileBytes.Length >= 2 &&
+                     fileBytes[0] == 0x50 && fileBytes[1] == 0x4B)
             {
                 extension = "xlsx";
                 mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
             }
+            // Detectar DOC / DOCX (opcional)
+            else if (fileBytes.Length >= 4 &&
+                     fileBytes[0] == 0x25 && fileBytes[1] == 0x50) // PDF
+            {
+                extension = "pdf";
+                mimeType = "application/pdf";
+            }
             else
             {
-                // Tipo desconocido
                 extension = "bin";
                 mimeType = "application/octet-stream";
             }
@@ -102,6 +110,7 @@ namespace Rokys.Audit.Common.Helpers.FileConvert
                 MimeType = mimeType
             };
         }
+
 
     }
 }

@@ -174,7 +174,6 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                             MinValue = sc.MinValue,
                             MaxValue = sc.MaxValue,
                             ColorCode = sc.ColorCode,
-                            Icon = sc.Icon,
                             EnterpriseId = sc.EnterpriseId,
                             IsActive = sc.IsActive,
                             CreationDate = sc.CreationDate,
