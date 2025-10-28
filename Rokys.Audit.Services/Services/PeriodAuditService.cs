@@ -459,7 +459,19 @@ namespace Rokys.Audit.Services.Services
                 if (invalids.Any())
                     return ResponseDto.Error($"La acción no es aplicable a los siguientes PeriodAuditIds: {string.Join(',', invalids)}");
 
-                // All good — process each sequentially (one transaction)
+                // Additional validation: Check for ScaleName requirement BEFORE making any changes
+                if (action == "approve")
+                {
+                    foreach (var ent in entities)
+                    {
+                        if (ent.StatusId == statusInProgress?.AuditStatusId && string.IsNullOrEmpty(ent.ScaleName))
+                        {
+                            return ResponseDto.Error($"No se puede aprobar para revisión la auditoría {ent.CorrelativeNumber} sin puntuación.");
+                        }
+                    }
+                }
+
+                // All validations passed - process each entity (one transaction)
                 foreach (var ent in entities)
                 {
                     // reuse the previous behavior for a single entity: compute nextStatusId, nextUserId, prevUserId, actionText
@@ -497,10 +509,7 @@ namespace Rokys.Audit.Services.Services
                         {
                             newStatusId = statusInReview?.AuditStatusId ?? ent.StatusId ?? Guid.Empty;
                             nextStatusId = statusInReview?.AuditStatusId;
-                            if (newStatusId == statusInReview?.AuditStatusId && string.IsNullOrEmpty(ent.ScaleName))
-                            {
-                                return ResponseDto.Error("No se puede aprobar para revisión una auditoría sin puntuación.");
-                            }
+                            // ScaleName validation already done above before any changes
                             if (ent.AdministratorId.HasValue)
                             {
                                 var adminRef = await _userReferenceRepository.GetFirstOrDefaultAsync(f => f.UserReferenceId == ent.AdministratorId.Value && f.IsActive);
