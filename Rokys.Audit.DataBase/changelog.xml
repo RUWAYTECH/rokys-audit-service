@@ -10,6 +10,7 @@
 <!-- INIT -->
 <include file="./Init/DataInitial.sql" relativeToChangelogFile="true"/>
 
-<include file="./Inserts/InsertAuditStatus.sql" relativeToChangelogFile="true"/>
+<include file="./Inserts/20251101000000-InsertAuditStatus.sql" relativeToChangelogFile="true"/>
+<include file="./Inserts/20251128090000-config-forms.sql" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>
