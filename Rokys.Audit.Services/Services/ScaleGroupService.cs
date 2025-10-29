@@ -308,15 +308,6 @@ namespace Rokys.Audit.Services.Services
                 if (entity == null)
                     return ResponseDto.Error<ScaleGroupResponseDto>("No se encontró el grupo de escala.");
 
-                if (await _scaleGroupRepository.ExistsByCodeAsync(requestDto.Code, id))
-                {
-                    response.Messages.Add(new ApplicationMessage
-                    {
-                        Message = "Ya existe un grupo de escala con este código.",
-                        MessageType = ApplicationMessageType.Error
-                    });
-                    return response;
-                }
                 var currentUser = _httpContextAccessor.CurrentUser();
                 _mapper.Map(requestDto, entity);
                 entity.UpdateAudit(currentUser?.UserName ?? "system");
