@@ -132,7 +132,9 @@ WHERE NOT EXISTS (
     AND ua.ApplicationId = '0DAF922E-C54B-448F-90F2-31A70E378565'
 ); */
 
-select * from [DBSecurityQAV2].[dbo].[Users]
+
+
+--select * from [DBSecurityQAV2].[dbo].[Users]
 -- Insertar todos los usuarios en la aplicación MEMOS
 INSERT INTO [DBSecurityQAV2].[dbo].[UserApplications] 
 ([UserId], [ApplicationId], [IsActive], [AssignedAt], [CreatedAt], [UpdatedAt])
@@ -151,6 +153,7 @@ WHERE NOT EXISTS (
 ); 
 
 -- Insertar todos los usuarios en la aplicación MEMOS
+
 
 -- PASO 2: Migrar roles masivamente usando el RoleId original
 -- Ahora sí migrar los roles (tu script original)
