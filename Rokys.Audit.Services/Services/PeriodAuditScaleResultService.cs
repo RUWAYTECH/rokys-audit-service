@@ -250,6 +250,15 @@ namespace Rokys.Audit.Services.Services
                     response.Messages.Add(new ApplicationMessage { Message = "No se encontro la entidad", MessageType = ApplicationMessageType.Error });
                     return response;
                 }
+                if (entity.PeriodAuditGroupResult.PeriodAudit.Store.Enterprise.ScaleCompanies == null ||
+                    !entity.PeriodAuditGroupResult.PeriodAudit.Store.Enterprise.ScaleCompanies.Any())
+                {
+                    var defaultScaleCompanies = await _scaleCompanyRepository.GetAsync(filter: e => e.EnterpriseId == null);
+                    if (defaultScaleCompanies != null && defaultScaleCompanies.Any())
+                    {
+                        entity.PeriodAuditGroupResult.PeriodAudit.Store.Enterprise.ScaleCompanies = defaultScaleCompanies.ToList();
+                    }
+                }
                 var fileDataSourceTemplate = (DataSourceFiles?)null;
                 var fileDataSource = (DataSourceFiles?)null;
                 if (entity.ScaleGroup.HasSourceData == true)
@@ -358,6 +367,15 @@ namespace Rokys.Audit.Services.Services
 
                 var customResponse = await this.GetByIdCustomData(periodAuditScaleResultId);
                 var scaleCompany = await _scaleCompanyRepository.GetAsync(x => x.EnterpriseId == customResponse.Data.PeriodAudit.EnterpriseId && x.IsActive);
+                if (scaleCompany == null || !scaleCompany.Any())
+                {
+                    scaleCompany = await _scaleCompanyRepository.GetAsync(filter: e => e.EnterpriseId == null);
+                    if (scaleCompany == null || !scaleCompany.Any())
+                    {
+                        response = ResponseDto.Error<bool>("No se encontró la escala asociada a la empresa ni la escala por defecto.");
+                        return response;
+                    }
+                }
 
                 periodAuditScaleResults.ScoreValue = scoringCriteriaResult.Score;
                 // Actualizar color y descripción de la escala según el nuevo puntaje

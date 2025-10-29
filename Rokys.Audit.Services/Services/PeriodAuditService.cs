@@ -369,10 +369,15 @@ namespace Rokys.Audit.Services.Services
                     acumulatedScore += score;
                 }
                 var scaleCompany = await _scaleCompanyRepository.GetByEnterpriseIdAsync(entity.Store!.EnterpriseId);
-                if (scaleCompany == null)
+                if (scaleCompany == null || !scaleCompany.Any())
                 {
-                    response = ResponseDto.Error<bool>($"No se encontró la escala asociada a la empresa.");
-                    return response;
+                    scaleCompany = await _scaleCompanyRepository.GetAsync(filter: e => e.EnterpriseId == null);
+
+                    if (scaleCompany == null || !scaleCompany.Any())
+                    {
+                        response = ResponseDto.Error<bool>("No se encontró la escala asociada a la empresa ni la escala por defecto.");
+                        return response;
+                    }
                 }
 
                 bool scaleFound = false;
@@ -467,6 +472,14 @@ namespace Rokys.Audit.Services.Services
                         if (ent.StatusId == statusInProgress?.AuditStatusId && string.IsNullOrEmpty(ent.ScaleName))
                         {
                             return ResponseDto.Error($"No se puede aprobar para revisión la auditoría {ent.CorrelativeNumber} sin puntuación.");
+                        }
+                        if (ent.StatusId == statusPending?.AuditStatusId)
+                        {
+                            var periodAuditGroupResults = await _periodAuditGroupResultRepository.GetByPeriodAuditIdAsync(ent.PeriodAuditId);
+                            if (!periodAuditGroupResults.Any())
+                            {
+                                return ResponseDto.Error($"No se puede aprobar para revisión la auditoría {ent.CorrelativeNumber} sin la configuración correspondiente.");
+                            }
                         }
                     }
                 }

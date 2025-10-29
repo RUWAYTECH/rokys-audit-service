@@ -97,51 +97,66 @@ namespace Rokys.Audit.Services.Services
                     response = ResponseDto.Error("No se encontró el grupo.");
                     return response;
                 }
+
                 var scaleGroups = await _scaleGroupRepository.GetAsync(filter: x => x.GroupId == id && x.IsActive);
-                if (scaleGroups != null)
+                if (scaleGroups != null && scaleGroups.Any())
                 {
                     foreach (var scaleGroup in scaleGroups)
                     {
-                        var criteriaSubResult = await _criteriaSubResultRepository.GetAsync(filter: x => x.ScaleGroupId == scaleGroup.ScaleGroupId && x.IsActive);
-                        if (criteriaSubResult != null)
+                        var criteriaSubResults = await _criteriaSubResultRepository.GetAsync(
+                            filter: x => x.ScaleGroupId == scaleGroup.ScaleGroupId && x.IsActive);
+                        if (criteriaSubResults.Any())
                         {
-                            foreach (var criteria in criteriaSubResult)
+                            foreach (var criteria in criteriaSubResults)
                             {
                                 criteria.IsActive = false;
                                 _criteriaSubResultRepository.Update(criteria);
                             }
+                            await _unitOfWork.CommitAsync();
                         }
-                        var scoringCriterias = await _scoringCriteriaRepository.GetAsync(filter: x => x.ScaleGroupId == scaleGroup.ScaleGroupId && x.IsActive);
-                        if (scoringCriterias != null)
+
+                        var scoringCriterias = await _scoringCriteriaRepository.GetAsync(
+                            filter: x => x.ScaleGroupId == scaleGroup.ScaleGroupId && x.IsActive);
+                        if (scoringCriterias.Any())
                         {
                             foreach (var scoring in scoringCriterias)
                             {
                                 scoring.IsActive = false;
                                 _scoringCriteriaRepository.Update(scoring);
                             }
+                            await _unitOfWork.CommitAsync();
                         }
-                        var tableScaleTemplates = await _tableScaleTemplateRepository.GetAsync(filter: x => x.ScaleGroupId == scaleGroup.ScaleGroupId && x.IsActive);
-                        if (tableScaleTemplates != null)
+
+                        var tableScaleTemplates = await _tableScaleTemplateRepository.GetAsync(
+                            filter: x => x.ScaleGroupId == scaleGroup.ScaleGroupId && x.IsActive);
+                        if (tableScaleTemplates.Any())
                         {
                             foreach (var template in tableScaleTemplates)
                             {
-                                var auditTemplateFields = await _auditTemplateFieldRepository.GetAsync(filter: x => x.TableScaleTemplateId == template.TableScaleTemplateId && x.IsActive);
-                                if (auditTemplateFields != null)
+                                var auditTemplateFields = await _auditTemplateFieldRepository.GetAsync(
+                                    filter: x => x.TableScaleTemplateId == template.TableScaleTemplateId && x.IsActive);
+                                if (auditTemplateFields.Any())
                                 {
                                     foreach (var field in auditTemplateFields)
                                     {
                                         field.IsActive = false;
                                         _auditTemplateFieldRepository.Update(field);
                                     }
+                                    await _unitOfWork.CommitAsync();
                                 }
+
                                 template.IsActive = false;
                                 _tableScaleTemplateRepository.Update(template);
                             }
+                            await _unitOfWork.CommitAsync();
                         }
+
                         scaleGroup.IsActive = false;
                         _scaleGroupRepository.Update(scaleGroup);
+                        await _unitOfWork.CommitAsync();
                     }
                 }
+
                 entity.IsActive = false;
                 _groupRepository.Update(entity);
                 await _unitOfWork.CommitAsync();
@@ -149,7 +164,7 @@ namespace Rokys.Audit.Services.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                response = ResponseDto.Error(ex.Message);
+                response = ResponseDto.Error("Ocurrio un error al tratar de eliminar el Grupo");
             }
             return response;
         }

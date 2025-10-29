@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Rokys.Audit.DTOs.Common;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Rokys.Audit.DTOs.Requests.ScaleCompany;
 using Rokys.Audit.Services.Interfaces;
 
 namespace Rokys.Audit.WebAPI.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/scale-companies")]
     public class ScaleCompanyController : ControllerBase

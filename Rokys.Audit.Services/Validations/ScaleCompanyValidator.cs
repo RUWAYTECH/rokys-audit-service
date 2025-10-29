@@ -7,9 +7,7 @@ namespace Rokys.Audit.Services.Validations
     {
         public ScaleCompanyValidator() 
         {
-            RuleFor(x => x.EnterpriseId)
-                .NotEmpty().WithMessage("La empresa es requerida.")
-                .NotNull().WithMessage("La empresa es requerida.");
+            RuleFor(x => x.EnterpriseId);
             RuleFor(x => x.Name)
                 .NotEmpty().WithMessage("El nombre es requerido.")
                 .MaximumLength(100).WithMessage("El nombre acepta como máximo 100 caracteres.");

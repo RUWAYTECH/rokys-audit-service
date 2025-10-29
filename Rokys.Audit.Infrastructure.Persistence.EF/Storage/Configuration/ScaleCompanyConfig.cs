@@ -10,7 +10,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
         {
             builder.ToTable("ScaleCompany");
             builder.HasKey(x => x.ScaleCompanyId);
-            builder.Property(x => x.EnterpriseId).IsRequired();
+            builder.Property(x => x.EnterpriseId).IsRequired(false);
             builder.Property(x => x.Code).IsRequired().HasMaxLength(50);
             builder.Property(x => x.Name).IsRequired().HasMaxLength(100);
             builder.Property(x => x.MinValue).IsRequired().HasColumnType("decimal(10,2)");

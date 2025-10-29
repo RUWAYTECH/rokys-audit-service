@@ -499,13 +499,18 @@ namespace Rokys.Audit.Services.Services
                     var scaleScore = (scaleResult.AppliedWeighting / 100) *  scaleResult.ScoreValue;
                     acumulatedScore += scaleScore;
                 }
-                var scaleCompany = await _scaleCompanyRepository.GetByEnterpriseIdAsync(entity.PeriodAudit.Store!.EnterpriseId);
-                if (scaleCompany == null)
-                {
-                    response = ResponseDto.Error<bool>("No se encontró la escala asociada a la empresa.");
-                    return response;
-                }
 
+                var scaleCompany = await _scaleCompanyRepository.GetByEnterpriseIdAsync(entity.PeriodAudit.Store!.EnterpriseId);
+                if (scaleCompany == null || !scaleCompany.Any())
+                {
+                    scaleCompany = await _scaleCompanyRepository.GetAsync(filter: e => e.EnterpriseId == null);
+
+                    if (scaleCompany == null || !scaleCompany.Any())
+                    {
+                        response = ResponseDto.Error<bool>("No se encontró la escala asociada a la empresa ni la escala por defecto.");
+                        return response;
+                    }
+                }
                 bool scaleFound = false;
                 foreach (var scale in scaleCompany)
                 {
@@ -517,12 +522,12 @@ namespace Rokys.Audit.Services.Services
                         break;
                     }
                 }
-
                 if (!scaleFound)
                 {
-                    response = ResponseDto.Error<bool>("No se encontró una escala válida para la puntuación calculada.");
+                    response = ResponseDto.Error<bool>("No se encontró una escala que coincida con el puntaje obtenido.");
                     return response;
                 }
+
                 entity.ScoreValue = acumulatedScore;
                 _repository.Update(entity);
 

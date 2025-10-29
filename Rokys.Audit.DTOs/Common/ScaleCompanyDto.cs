@@ -2,7 +2,7 @@
 {
     public class ScaleCompanyDto
     {
-        public Guid EnterpriseId { get; set; }
+        public Guid? EnterpriseId { get; set; }
         public string Name { get; set; } = string.Empty;
         public decimal MinValue { get; set; }
         public decimal MaxValue { get; set; }

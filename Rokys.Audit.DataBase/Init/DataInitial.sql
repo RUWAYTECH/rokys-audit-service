@@ -38,7 +38,7 @@ CREATE TABLE Stores (
 
 CREATE TABLE [ScaleCompany](
     ScaleCompanyId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(), -- ID de la Escala por Empresa
-    EnterpriseId UNIQUEIDENTIFIER NOT NULL REFERENCES Enterprise(EnterpriseId), -- Nombre de la Empresa
+    EnterpriseId UNIQUEIDENTIFIER NULL REFERENCES Enterprise(EnterpriseId), -- Nombre de la Empresa
     Code NVARCHAR(10)  NOT NULL, -- Código de la Escala
     Name NVARCHAR(200) NOT NULL, -- Nombre
 
