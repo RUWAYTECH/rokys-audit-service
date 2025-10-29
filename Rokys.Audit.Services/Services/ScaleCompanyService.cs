@@ -121,7 +121,18 @@ namespace Rokys.Audit.Services.Services
                     filter = filter.AndAlso(x => x.Name.Contains(paginationRequestDto.Filter));
 
                 if (paginationRequestDto.EnterpriseId.HasValue)
-                    filter = filter.AndAlso(x => x.EnterpriseId == paginationRequestDto.EnterpriseId.Value);
+                {
+                    if (paginationRequestDto.EnterpriseId == new Guid("11111111-1111-1111-1111-111111111111"))
+                    {
+                        filter = filter.AndAlso(x => x.EnterpriseId == null);
+                    }
+                    else
+                    {
+                        filter = filter.AndAlso(x => x.EnterpriseId == paginationRequestDto.EnterpriseId.Value);
+                    }
+                }
+                    
+
 
                 Func<IQueryable<ScaleCompany>, IOrderedQueryable<ScaleCompany>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 
