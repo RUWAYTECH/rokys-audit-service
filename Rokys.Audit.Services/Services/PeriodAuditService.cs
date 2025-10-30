@@ -112,21 +112,21 @@ namespace Rokys.Audit.Services.Services
                 try
                 {
                     // Build InboxItemRequestDto and reuse the inbox service to handle creation (sequence number, user mapping, audit fields)
-                    //var currentUserReference = await _userReferenceRepository.GetByUserIdAsync(currentUser?.UserId ?? Guid.Empty);
-                    //if (currentUserReference != null) 
-                    //{
-                    //    response.Messages.Add(new ApplicationMessage
-                    //    {
-                    //        Message = "No se encontro al usuario que esta creando",
-                    //        MessageType = ApplicationMessageType.Error,
-                    //    });
-                    //}
+                    var currentUserReference = await _userReferenceRepository.GetByUserIdAsync(currentUser?.UserId ?? Guid.Empty);
+                    if (currentUserReference != null)
+                    {
+                        response.Messages.Add(new ApplicationMessage
+                        {
+                            Message = "No se encontro al usuario que esta creando",
+                            MessageType = ApplicationMessageType.Error,
+                        });
+                    }
                     var inboxDto = new Rokys.Audit.DTOs.Requests.InboxItems.InboxItemRequestDto
                     {
                         PeriodAuditId = entity.PeriodAuditId,
                         PrevStatusId = (await _auditStatusRepository.GetFirstOrDefaultAsync(f => f.Code == AuditStatusCode.Pending && f.IsActive))?.AuditStatusId,
                         NextStatusId = (await _auditStatusRepository.GetFirstOrDefaultAsync(f => f.Code == AuditStatusCode.InProgress && f.IsActive))?.AuditStatusId,
-                        //UserId = currentUserReference?.UserReferenceId ?? null,
+                        UserId = currentUserReference?.UserReferenceId ?? null,
                         Comments = "Auditoría creada",
                         Action = "Creado",
                         IsActive = true
@@ -329,7 +329,8 @@ namespace Rokys.Audit.Services.Services
                 // For the paged items, load inbox items in batch and attach them to each response DTO
                 var itemsList = pagedResult.Items.ToList();
                 var periodIds = entities.Items.Select(i => i.PeriodAuditId).ToList();
-                var inboxForPeriods = await _inboxItemsRepository.GetAsync(filter: x => periodIds.Contains(x.PeriodAuditId!.Value) && x.IsActive);
+                var inboxForPeriods = await _inboxItemsRepository.GetAsync(filter: x => periodIds.Contains(x.PeriodAuditId!.Value) && x.IsActive, 
+                    includeProperties: [ x => x.User]);
                 var inboxMapped = _mapper.Map<IEnumerable<Rokys.Audit.DTOs.Responses.InboxItems.InboxItemResponseDto>>(inboxForPeriods ?? new List<InboxItems>());
                 var inboxLookup = inboxMapped.GroupBy(i => i.PeriodAuditId ?? Guid.Empty).ToDictionary(g => g.Key, g => g.OrderBy(x => x.SequenceNumber).ToList());
                 foreach (var it in itemsList)
@@ -535,14 +536,14 @@ namespace Rokys.Audit.Services.Services
                             nextStatusId = statusFinal?.AuditStatusId;
                             nextUserId = null;
                         }
-                        actionText = "Aprobada";
+                        actionText = "Aprobado";
                     }
                     else if (action == "cancel" || action == "cancelar")
                     {
                         newStatusId = statusCanceled?.AuditStatusId ?? ent.StatusId ?? Guid.Empty;
                         nextStatusId = statusCanceled?.AuditStatusId;
                         nextUserId = null;
-                        actionText = "Cancelada";
+                        actionText = "Cancelado";
                     }
                     else if (action == "return")
                     {
@@ -553,7 +554,7 @@ namespace Rokys.Audit.Services.Services
                             var auditorRef = await _userReferenceRepository.GetByUserIdAsync(ent.ResponsibleAuditorId.Value);
                             if (auditorRef != null) nextUserId = auditorRef.UserReferenceId;
                         }
-                        actionText = "Devuelta";
+                        actionText = "Devuelto";
                     }
                     else
                     {

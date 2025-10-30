@@ -11,7 +11,7 @@ namespace Rokys.Audit.Model.Tables
         public Guid? PrevUserId { get; set; }
         public Guid? NextUserId { get; set; }
         public Guid? ApproverId { get; set; }
-    public string? Comments { get; set; }
+        public string? Comments { get; set; }
         // quien registró la acción en este inbox
         public Guid? UserId { get; set; }
         // acción ejecutada: 'Aprobada','Cancelada','Devuelta', etc.
@@ -19,5 +19,6 @@ namespace Rokys.Audit.Model.Tables
         // Secuencia incremental por PeriodAudit para saber el último creado
         public int SequenceNumber { get; set; } = 0;
         public bool IsActive { get; set; } = true;
+        public virtual UserReference User { get; set; }
     }
 }

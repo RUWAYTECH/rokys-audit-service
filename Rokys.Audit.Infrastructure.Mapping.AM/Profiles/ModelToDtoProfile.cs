@@ -225,11 +225,15 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                 });
             CreateMap<PeriodAuditScoringCriteriaResult, PeriodAuditScoringCriteriaResultResponseDto>();
             CreateMap<PeriodAuditScaleSubResult, PeriodAuditScaleSubResultResponseDto>();
-            CreateMap<InboxItems, InboxItemResponseDto>();
+            CreateMap<InboxItems, InboxItemResponseDto>()
+                .AfterMap((src, dest) =>
+                {
+                    dest.UserName = src.User.FirstName + " " + src.User.LastName;
+                });
             CreateMap<InboxItems, InboxItemListResponseDto>();
 
             CreateMap<PeriodAudit, PeriodAuditItemReportResponseDto>().AfterMap((src, dest) =>
-           {
+            {
                dest.AdministratorName = src.Administrator?.FirstName + " " + src.Administrator?.LastName;
                dest.AssistantName = src.Assistant?.FirstName + " " + src.Assistant?.LastName;
                dest.OperationManagerName = src.OperationManager?.FirstName + " " + src.OperationManager?.LastName;
@@ -255,7 +259,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                        UpdateDate = src.AuditStatus.UpdateDate
                    };
                }
-           });
+            });
             
         }
     }

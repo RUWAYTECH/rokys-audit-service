@@ -90,5 +90,7 @@ namespace Rokys.Audit.Model.Tables
 
         // Navegación - Stores asignadas
         public virtual ICollection<EmployeeStore>? EmployeeStores { get; set; }
+
+        public virtual ICollection<InboxItems>? InboxItems { get; set; }
     }
 }

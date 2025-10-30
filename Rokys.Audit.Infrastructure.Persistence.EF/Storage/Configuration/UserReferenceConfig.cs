@@ -101,6 +101,11 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .HasForeignKey(es => es.UserReferenceId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            builder.HasMany(es => es.InboxItems)
+                .WithOne(ii => ii.User)
+                .HasForeignKey(ii => ii.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             // Índices
             builder.HasIndex(ur => ur.UserId)
                 .HasDatabaseName("IX_UserReference_UserId");
