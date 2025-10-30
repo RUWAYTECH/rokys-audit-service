@@ -50,11 +50,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.Property(x => x.UpdateDate)
                 .HasColumnType("datetime2");
 
-            // Relationships
-            builder.HasOne(x => x.User)
-                .WithMany()
-                .HasForeignKey(x => x.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
+            // Relationships are configured in UserReferenceConfig.cs
         }
     }
 }
