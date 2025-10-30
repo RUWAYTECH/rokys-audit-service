@@ -236,11 +236,9 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                dest.FloatingAdministratorName = src.FloatingAdministrator?.FirstName + " " + src.FloatingAdministrator?.LastName;
                dest.ResponsibleAuditorName = src.ResponsibleAuditor?.FirstName + " " + src.ResponsibleAuditor?.LastName;
                dest.SupervisorName = src.Supervisor?.FirstName + " " + src.Supervisor?.LastName;
-               dest.StatusName = src.AuditStatus?.Name;
                dest.EnterpriseName = src.Store?.Enterprise?.Name ?? string.Empty;
                dest.EnterpriseId = src.Store?.EnterpriseId ?? Guid.Empty;
                dest.StoreName = src.Store?.Name ?? string.Empty;
-               dest.ScaleCode = src.ScaleCode ?? string.Empty;
 
                if (src.AuditStatus != null)
                {

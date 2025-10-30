@@ -6,9 +6,8 @@ using Rokys.Audit.DTOs.Common;
 
 namespace Rokys.Audit.DTOs.Requests.Reports
 {
-    public class ReportSearchFilterRequestDto: PaginationRequestDto
+    public class ReportSearchFilterRequestDto
     {
-        public string Filter { get; set; }
         public Guid? EnterpriseId { get; set; }
         public Guid? StoreId { get; set; }
         public Guid? SupervisorId { get; set; }

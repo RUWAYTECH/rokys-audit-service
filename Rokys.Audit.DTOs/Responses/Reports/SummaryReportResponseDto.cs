@@ -8,7 +8,7 @@ namespace Rokys.Audit.DTOs.Responses.Reports
     public class SummaryReportResponseDto
     {
         public float Ranking { get; set; }
-        public string ResultByMonth { get; set; }
+        public decimal ResultByMonth { get; set; }
         public string Risk { get; set; }
         public int QuantityAudit { get; set; }
     }
