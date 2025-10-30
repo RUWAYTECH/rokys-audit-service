@@ -8,6 +8,9 @@ using Rokys.Audit.Infrastructure.Repositories;
 using Rokys.Audit.Model.Tables;
 using Rokys.Audit.Services.Interfaces;
 using Rokys.Audit.Common.Extensions;
+using Rokys.Audit.DTOs.Requests.Reports;
+using Rokys.Audit.DTOs.Common;
+using Rokys.Audit.Infrastructure.IMapping;
 
 namespace Rokys.Audit.Services.Services
 {
@@ -19,15 +22,19 @@ namespace Rokys.Audit.Services.Services
         private readonly IPeriodAuditRepository _periodAuditRepository;
         private readonly ILogger<ReportsService> _logger;
 
+        private readonly IAMapper _mapper;
+
         public ReportsService(
             IPeriodAuditRepository periodAuditRepository,
-            ILogger<ReportsService> logger)
+            ILogger<ReportsService> logger,
+            IAMapper mapper)
         {
             _periodAuditRepository = periodAuditRepository;
             _logger = logger;
+            _mapper = mapper;
         }
 
-        public async Task<ResponseDto<DashboardDataResponseDto>> GetDashboardEvolutionsDataAsync(int year)
+        public async Task<ResponseDto<DashboardDataResponseDto>> GetDashboardEvolutionsDataAsync(int year, Guid enterpriseId)
         {
             var response = ResponseDto.Create<DashboardDataResponseDto>();
             try
@@ -37,7 +44,10 @@ namespace Rokys.Audit.Services.Services
                 var endDate = new DateTime(year, 12, 31, 23, 59, 59);
 
                 var periodAudits = await _periodAuditRepository.GetAsync(
-                    filter: x => x.CreationDate >= startDate && x.CreationDate <= endDate && x.IsActive && x.AuditStatus != null && x.AuditStatus.Code == AuditStatusCode.Completed);
+                    filter: x => x.CreationDate >= startDate &&
+                    x.CreationDate <= endDate && x.IsActive &&
+                    x.Store.EnterpriseId == enterpriseId
+                    && x.AuditStatus != null && x.AuditStatus.Code == AuditStatusCode.Completed);
 
                 // Crear las categorías (meses)
                 var categories = new List<string>
@@ -58,7 +68,7 @@ namespace Rokys.Audit.Services.Services
                 foreach (var scaleGroup in auditsByScaleAndMonth)
                 {
                     var monthlyData = new List<decimal>();
-                    
+
                     // Calcular datos por mes para esta escala
                     for (int month = 1; month <= 12; month++)
                     {
@@ -97,7 +107,7 @@ namespace Rokys.Audit.Services.Services
                         Tooltip = new DashboardTooltipDto { ValueSuffix = " pts" }
                     });
                 }
-              
+
 
                 var dashboardData = new DashboardDataResponseDto
                 {
@@ -125,7 +135,7 @@ namespace Rokys.Audit.Services.Services
         {
             var data = new List<decimal>();
             var baseScore = 400m;
-            
+
             for (int month = 1; month <= 12; month++)
             {
                 var totalAudits = auditsByMonth[month];
@@ -136,7 +146,7 @@ namespace Rokys.Audit.Services.Services
             return data;
         }
 
-        public async Task<ResponseDto<DashboardDataResponseDto>> GetDashboardSupervisorsDataAsync(int year, Guid[] supervisorIds)
+        public async Task<ResponseDto<DashboardDataResponseDto>> GetDashboardSupervisorsDataAsync(int year, Guid enterpriseId, Guid[] supervisorIds)
         {
             var response = ResponseDto.Create<DashboardDataResponseDto>();
             try
@@ -147,16 +157,17 @@ namespace Rokys.Audit.Services.Services
                 Expression<Func<PeriodAudit, bool>> filter = x => x.CreationDate >= startDate &&
                                                                                              x.CreationDate <= endDate &&
                                                                                              x.IsActive &&
+                                                                                             x.Store.EnterpriseId == enterpriseId &&
                                                                                              x.AuditStatus != null &&
                                                                                              x.AuditStatus.Code == AuditStatusCode.Completed;
 
-                if(supervisorIds != null && supervisorIds.Length > 0)
+                if (supervisorIds != null && supervisorIds.Length > 0)
                 {
                     filter = filter.AndAlso(x => supervisorIds.Contains(x.SupervisorId ?? Guid.Empty));
                 }
 
                 var periodAudits = await _periodAuditRepository.GetAsync(
-                    filter: filter, 
+                    filter: filter,
                     includeProperties: [a => a.Supervisor!]);
 
                 // Crear las categorías (meses)
@@ -180,7 +191,7 @@ namespace Rokys.Audit.Services.Services
                 foreach (var supervisorGroup in auditsBySupervisor)
                 {
                     var supervisor = supervisorGroup.Key;
-                    
+
                     // Calcular datos por mes para este supervisor (contar auditorías)
                     var monthlyData = new List<decimal>();
                     for (int month = 1; month <= 12; month++)
@@ -228,6 +239,58 @@ namespace Rokys.Audit.Services.Services
             return response;
         }
 
-       
+        public async Task<ResponseDto<PeriodAuditReportResponseDto>> GetReportSearchAsync(ReportSearchFilterRequestDto reportSearchFilterRequestDto)
+        {
+            var response = ResponseDto.Create<PeriodAuditReportResponseDto>();
+            try
+            {
+                Expression<Func<PeriodAudit, bool>> filter = x => x.IsActive;
+                if (!string.IsNullOrEmpty(reportSearchFilterRequestDto.Filter))
+                    filter = filter.AndAlso(x => x.CorrelativeNumber.Contains(reportSearchFilterRequestDto.Filter) && x.IsActive);
+
+                if (reportSearchFilterRequestDto.StoreId.HasValue)
+                    filter = filter.AndAlso(x => x.StoreId == reportSearchFilterRequestDto.StoreId.Value && x.IsActive);
+
+                if (reportSearchFilterRequestDto.EnterpriseId.HasValue)
+                    filter = filter.AndAlso(x => x.Store.EnterpriseId == reportSearchFilterRequestDto.EnterpriseId.Value && x.IsActive);
+
+                if (reportSearchFilterRequestDto.ResponsibleAuditorId.HasValue)
+                    filter = filter.AndAlso(x => x.ResponsibleAuditorId == reportSearchFilterRequestDto.ResponsibleAuditorId.Value && x.IsActive);
+
+                if (reportSearchFilterRequestDto.ReportDate.HasValue)
+                    filter = filter.AndAlso(x => x.CreationDate.Date == reportSearchFilterRequestDto.ReportDate.Value.Date && x.IsActive);
+
+                Func<IQueryable<PeriodAudit>, IOrderedQueryable<PeriodAudit>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
+
+                var entities = await _periodAuditRepository.GetAsync(
+                    filter: filter,
+                    orderBy: orderBy,
+                    includeProperties: [x => x.Store.Enterprise, x => x.Administrator, x => x.Assistant, x => x.OperationManager, x => x.FloatingAdministrator, x => x.ResponsibleAuditor, x => x.AuditStatus, su => su.Supervisor]
+                );
+
+                var dataResult = new PeriodAuditReportResponseDto
+                {
+                    Items = _mapper.Map<List<PeriodAuditItemReportResponseDto>>(entities),
+
+                    Summaries = new List<SummaryReportResponseDto>{ new SummaryReportResponseDto
+                    {
+                        Ranking = entities.Count,
+                        ResultByMonth = "",
+                        Risk = "",
+                        QuantityAudit = entities.Count
+                    } }
+
+                };
+
+
+                response.Data = dataResult;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response = ResponseDto.Error<PeriodAuditReportResponseDto>(ex.Message);
+            }
+            return response;
+        }
     }
 }

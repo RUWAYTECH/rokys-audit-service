@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Rokys.Audit.DTOs.Requests.Reports;
 using Rokys.Audit.Services.Interfaces;
 
 namespace Rokys.Audit.WebAPI.Controllers
@@ -19,11 +20,11 @@ namespace Rokys.Audit.WebAPI.Controllers
             _reportsService = reportsService;
         }
 
-        [HttpGet("dashboards/evolutions/{year:int}")]
-        public async Task<IActionResult> GetDashboardEvolutionsData([FromRoute] int year)
+        [HttpGet("dashboards/evolutions/{year:int}/{enterpriseId:guid}")]
+        public async Task<IActionResult> GetDashboardEvolutionsData([FromRoute] int year, [FromRoute] Guid enterpriseId)
         {
 
-            var response = await _reportsService.GetDashboardEvolutionsDataAsync(year);
+            var response = await _reportsService.GetDashboardEvolutionsDataAsync(year, enterpriseId);
 
             if (response.IsValid)
                 return Ok(response);
@@ -31,11 +32,23 @@ namespace Rokys.Audit.WebAPI.Controllers
             return BadRequest(response);
         }
 
-        [HttpGet("dashboards/supervisors/{year:int}")]
-        public async Task<IActionResult> GetDashboardSupervisorsData([FromRoute] int year, [FromQuery] Guid[] supervisorIds)
+        [HttpGet("dashboards/supervisors/{year:int}/{enterpriseId:guid}")]
+        public async Task<IActionResult> GetDashboardSupervisorsData([FromRoute] int year, [FromRoute] Guid enterpriseId, [FromQuery] Guid[] supervisorIds)
         {
 
-            var response = await _reportsService.GetDashboardSupervisorsDataAsync(year, supervisorIds);
+            var response = await _reportsService.GetDashboardSupervisorsDataAsync(year, enterpriseId, supervisorIds);
+
+            if (response.IsValid)
+                return Ok(response);
+
+            return BadRequest(response);
+        }
+
+         [HttpGet("search")]
+        public async Task<IActionResult> GetReportSearch([FromQuery] ReportSearchFilterRequestDto reportSearchFilterRequestDto)
+        {
+
+            var response = await _reportsService.GetReportSearchAsync(reportSearchFilterRequestDto);
 
             if (response.IsValid)
                 return Ok(response);

@@ -24,6 +24,7 @@ using Rokys.Audit.DTOs.Responses.PeriodAuditTableScaleTemplateResult;
 using Rokys.Audit.DTOs.Responses.PeriodAuditScoringCriteriaResult;
 using Rokys.Audit.DTOs.Responses.PeriodAuditScaleSubResult;
 using Rokys.Audit.DTOs.Responses.InboxItems;
+using Rokys.Audit.DTOs.Responses.Reports;
 
 namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
 {
@@ -226,6 +227,38 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
             CreateMap<PeriodAuditScaleSubResult, PeriodAuditScaleSubResultResponseDto>();
             CreateMap<InboxItems, InboxItemResponseDto>();
             CreateMap<InboxItems, InboxItemListResponseDto>();
+
+            CreateMap<PeriodAudit, PeriodAuditItemReportResponseDto>().AfterMap((src, dest) =>
+           {
+               dest.AdministratorName = src.Administrator?.FirstName + " " + src.Administrator?.LastName;
+               dest.AssistantName = src.Assistant?.FirstName + " " + src.Assistant?.LastName;
+               dest.OperationManagerName = src.OperationManager?.FirstName + " " + src.OperationManager?.LastName;
+               dest.FloatingAdministratorName = src.FloatingAdministrator?.FirstName + " " + src.FloatingAdministrator?.LastName;
+               dest.ResponsibleAuditorName = src.ResponsibleAuditor?.FirstName + " " + src.ResponsibleAuditor?.LastName;
+               dest.SupervisorName = src.Supervisor?.FirstName + " " + src.Supervisor?.LastName;
+               dest.StatusName = src.AuditStatus?.Name;
+               dest.EnterpriseName = src.Store?.Enterprise?.Name ?? string.Empty;
+               dest.EnterpriseId = src.Store?.EnterpriseId ?? Guid.Empty;
+               dest.StoreName = src.Store?.Name ?? string.Empty;
+               dest.ScaleCode = src.ScaleCode ?? string.Empty;
+
+               if (src.AuditStatus != null)
+               {
+                   dest.AuditStatus = new AuditStatusResponseDto
+                   {
+                       AuditStatusId = src.AuditStatus.AuditStatusId,
+                       Name = src.AuditStatus.Name,
+                       ColorCode = src.AuditStatus.ColorCode,
+                       Code = src.AuditStatus.Code,
+                       IsActive = src.AuditStatus.IsActive,
+                       CreatedBy = src.AuditStatus.CreatedBy,
+                       CreationDate = src.AuditStatus.CreationDate,
+                       UpdatedBy = src.AuditStatus.UpdatedBy,
+                       UpdateDate = src.AuditStatus.UpdateDate
+                   };
+               }
+           });
+            
         }
     }
 }
