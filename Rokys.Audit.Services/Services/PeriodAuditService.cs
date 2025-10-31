@@ -317,7 +317,6 @@ namespace Rokys.Audit.Services.Services
                     pageSize: paginationRequestDto.PageSize,
                     includeProperties: [x => x.Store.Enterprise, x => x.Administrator, x => x.Assistant, x => x.OperationManager, x => x.FloatingAdministrator, x => x.ResponsibleAuditor, x => x.AuditStatus, su => su.Supervisor]
                 );
-
                 var pagedResult = new PaginationResponseDto<PeriodAuditResponseDto>
                 {
                     Items = _mapper.Map<IEnumerable<PeriodAuditResponseDto>>(entities.Items),
@@ -325,7 +324,7 @@ namespace Rokys.Audit.Services.Services
                     PageNumber = paginationRequestDto.PageNumber,
                     PageSize = paginationRequestDto.PageSize
                 };
-
+                
                 // For the paged items, load inbox items in batch and attach them to each response DTO
                 var itemsList = pagedResult.Items.ToList();
                 var periodIds = entities.Items.Select(i => i.PeriodAuditId).ToList();

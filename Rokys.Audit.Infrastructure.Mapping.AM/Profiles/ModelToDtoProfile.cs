@@ -228,7 +228,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
             CreateMap<InboxItems, InboxItemResponseDto>()
                 .AfterMap((src, dest) =>
                 {
-                    dest.UserName = src.User.FirstName + " " + src.User.LastName;
+                    dest.UserName = src.User?.FirstName + " " + src.User?.LastName;
                 });
             CreateMap<InboxItems, InboxItemListResponseDto>();
 
