@@ -343,7 +343,7 @@ namespace Rokys.Audit.Services.Services
                 var itemsList = pagedResult.Items.ToList();
                 var periodIds = entities.Items.Select(i => i.PeriodAuditId).ToList();
                 var inboxForPeriods = await _inboxItemsRepository.GetAsync(filter: x => periodIds.Contains(x.PeriodAuditId!.Value) && x.IsActive, 
-                    includeProperties: [ x => x.User]);
+                    includeProperties: [ x => x.User, y => y.NextStatus]);
                 var inboxMapped = _mapper.Map<IEnumerable<Rokys.Audit.DTOs.Responses.InboxItems.InboxItemResponseDto>>(inboxForPeriods ?? new List<InboxItems>());
                 var inboxLookup = inboxMapped.GroupBy(i => i.PeriodAuditId ?? Guid.Empty).ToDictionary(g => g.Key, g => g.OrderBy(x => x.SequenceNumber).ToList());
                 foreach (var it in itemsList)

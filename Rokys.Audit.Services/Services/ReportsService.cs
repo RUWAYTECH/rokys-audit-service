@@ -265,7 +265,19 @@ namespace Rokys.Audit.Services.Services
                     filter = filter.AndAlso(x => x.SupervisorId == reportSearchFilterRequestDto.SupervisorId.Value && x.IsActive);
 
                 if (reportSearchFilterRequestDto.ReportDate.HasValue)
-                    filter = filter.AndAlso(x => x.CreationDate.Date == reportSearchFilterRequestDto.ReportDate.Value.Date && x.IsActive);
+                {
+                    var date = reportSearchFilterRequestDto.ReportDate.Value;
+
+                    var startDate = new DateTime(date.Year, date.Month, 1, 0, 0, 0);
+
+                    var endDate = startDate.AddMonths(1).AddTicks(-1);
+
+                    filter = filter.AndAlso(x =>
+                        x.CreationDate >= startDate &&
+                        x.CreationDate <= endDate &&
+                        x.IsActive
+                    );
+                }
 
                 filter = filter.AndAlso(x => x.AuditStatus.Code == AuditStatusCode.Completed);
 

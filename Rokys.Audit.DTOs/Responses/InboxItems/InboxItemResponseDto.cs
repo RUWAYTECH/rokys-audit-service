@@ -1,4 +1,5 @@
 using Rokys.Audit.DTOs.Common;
+using Rokys.Audit.DTOs.Responses.AuditStatus;
 
 namespace Rokys.Audit.DTOs.Responses.InboxItems
 {
