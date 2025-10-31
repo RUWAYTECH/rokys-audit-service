@@ -10,5 +10,11 @@ namespace Rokys.Audit.Model.Tables
 
         // Navigation properties
         public virtual ICollection<PeriodAudit> PeriodAudits { get; set; } = new List<PeriodAudit>();
+
+        // InboxItems where this status was the previous status
+        public virtual ICollection<InboxItems> PrevInboxItems { get; set; } = new List<InboxItems>();
+
+        // InboxItems where this status is the next status
+        public virtual ICollection<InboxItems> NextInboxItems { get; set; } = new List<InboxItems>();
     }
 }

@@ -56,6 +56,18 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .WithOne(pa => pa.AuditStatus)
                 .HasForeignKey(pa => pa.StatusId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // InboxItems: previous status
+            builder.HasMany(x => x.PrevInboxItems)
+                .WithOne(ii => ii.PrevStatus)
+                .HasForeignKey(ii => ii.PrevStatusId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // InboxItems: next status
+            builder.HasMany(x => x.NextInboxItems)
+                .WithOne(ii => ii.NextStatus)
+                .HasForeignKey(ii => ii.NextStatusId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

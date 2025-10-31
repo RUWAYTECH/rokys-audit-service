@@ -20,5 +20,9 @@ namespace Rokys.Audit.Model.Tables
         public int SequenceNumber { get; set; } = 0;
         public bool IsActive { get; set; } = true;
         public virtual UserReference User { get; set; }
+
+        // Navigation to status snapshots (previous/next) — configured in AuditStatusConfig
+        public virtual AuditStatus? PrevStatus { get; set; }
+        public virtual AuditStatus? NextStatus { get; set; }
     }
 }
