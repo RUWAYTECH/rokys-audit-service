@@ -2,6 +2,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Reatil.Services.Services;
+using Rokys.Audit.Common.Constant;
 using Rokys.Audit.Common.Extensions;
 using Rokys.Audit.Common.Helpers.FileConvert;
 using Rokys.Audit.DTOs.Common;
@@ -38,6 +39,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IPeriodAuditGroupResultService _periodAuditGroupResultService;
         private readonly IStorageFilesRepository _storageFilesRepository;
         private readonly IStorageFilesService _storageFilesService;
+        private readonly IUserReferenceRepository _userReferenceRepository;
 
         public PeriodAuditScaleResultService(
             IPeriodAuditScaleResultRepository repository,
@@ -54,7 +56,8 @@ namespace Rokys.Audit.Services.Services
             IPeriodAuditScaleSubResultRepository periodAuditScaleSubResultRepository,
             IPeriodAuditGroupResultService periodAuditGroupResultService,
             IStorageFilesRepository storageFilesRepository,
-            IStorageFilesService storageFilesService)
+            IStorageFilesService storageFilesService,
+            IUserReferenceRepository userReferenceRepository)
         {
             _repository = repository;
             _validator = validator;
@@ -71,6 +74,7 @@ namespace Rokys.Audit.Services.Services
             _periodAuditGroupResultService = periodAuditGroupResultService;
             _storageFilesRepository = storageFilesRepository;
             _storageFilesService = storageFilesService;
+            _userReferenceRepository = userReferenceRepository;
         }
 
         public async Task<ResponseDto<PeriodAuditScaleResultResponseDto>> Create(PeriodAuditScaleResultRequestDto requestDto)
@@ -310,6 +314,16 @@ namespace Rokys.Audit.Services.Services
                 var customDto = _mapper.Map<PeriodAuditScaleResultCustomResponseDto>(entity);
                 customDto.ScaleGroup.DataSourceTemplate = fileDataSourceTemplate;
                 customDto.ScaleGroup.DataSource = fileDataSource;
+                var currentUser = _httpContextAccessor.CurrentUser();
+                var userReference = await _userReferenceRepository.GetFirstOrDefaultAsync(filter: x => x.UserId == currentUser.UserId);
+                if (entity.PeriodAuditGroupResult.PeriodAudit.ResponsibleAuditorId.HasValue && entity.PeriodAuditGroupResult.PeriodAudit.ResponsibleAuditorId == userReference.UserReferenceId)
+                {
+                    customDto.PeriodAudit.IAmAuditor = true;
+                }
+                else
+                {
+                    customDto.PeriodAudit.IAmAuditor = false;
+                }
                 response.Data = customDto;
             }
             catch (Exception ex)
@@ -340,10 +354,15 @@ namespace Rokys.Audit.Services.Services
                     return response;
                 }
 
-                var periodAuditScaleResults = await _repository.GetFirstOrDefaultAsync(x => x.PeriodAuditScaleResultId == periodAuditScaleResultId && x.IsActive);
+                var periodAuditScaleResults = await _repository.GetFirstOrDefaultAsync(x => x.PeriodAuditScaleResultId == periodAuditScaleResultId && x.IsActive, includeProperties: [x=>x.PeriodAuditGroupResult.PeriodAudit.AuditStatus]);
                 if (periodAuditScaleResults == null)
                 {
                     response.WithMessage("No se encontró el resultado del grupo de auditoría para el ID proporcionado", null, ApplicationMessageType.Error);
+                    return response;
+                }
+                if (periodAuditScaleResults.PeriodAuditGroupResult.PeriodAudit.AuditStatus.Code == AuditStatusCode.Pending)
+                {
+                    response.WithMessage("No se pueden actualizar los valores de campo para una auditoría en estado Pendiente", null, ApplicationMessageType.Error);
                     return response;
                 }
                 // Guardar el PeriodAuditScoringCriteriaResult

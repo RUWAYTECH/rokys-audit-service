@@ -24,6 +24,7 @@ namespace Rokys.Audit.DTOs.Responses.PeriodAudit
         public decimal ScaleMaxValue { get; set; }
         public decimal TotalWeighting { get; set; }
         public string? GlobalObservations { get; set; } = string.Empty;
+        public bool? IAmAuditor { get; set; } = false;
         public bool IsActive { get; set; }
         public AuditStatusResponseDto? AuditStatus { get; set; }
     }

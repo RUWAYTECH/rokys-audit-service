@@ -324,7 +324,21 @@ namespace Rokys.Audit.Services.Services
                     PageNumber = paginationRequestDto.PageNumber,
                     PageSize = paginationRequestDto.PageSize
                 };
-                
+
+
+                var currentUser = _httpContextAccessor.CurrentUser();
+                var userReference = await _userReferenceRepository.GetFirstOrDefaultAsync(filter: x => x.UserId == currentUser.UserId);
+                foreach (var ent in pagedResult.Items)
+                {
+                    if (ent.ResponsibleAuditorId.HasValue && ent.ResponsibleAuditorId == userReference.UserReferenceId)
+                    {
+                        ent.IAmAuditor = true;
+                    } else
+                    {
+                        ent.IAmAuditor = false;
+                    }
+                }
+
                 // For the paged items, load inbox items in batch and attach them to each response DTO
                 var itemsList = pagedResult.Items.ToList();
                 var periodIds = entities.Items.Select(i => i.PeriodAuditId).ToList();
