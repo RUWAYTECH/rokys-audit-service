@@ -12,6 +12,8 @@ using Rokys.Audit.DTOs.Requests.Reports;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.Infrastructure.IMapping;
 using Rokys.Audit.DTOs.Responses.AuditStatus;
+using DocumentFormat.OpenXml.Spreadsheet;
+using Rokys.Audit.Services.Services.ReportUtils;
 
 namespace Rokys.Audit.Services.Services
 {
@@ -353,6 +355,7 @@ namespace Rokys.Audit.Services.Services
                         FloatingAdministratorName = storeEntity.FloatingAdministrator?.FullName,
                         ResponsibleAuditorName = storeEntity.ResponsibleAuditor?.FullName,
                         SupervisorName = storeEntity.Supervisor?.FullName,
+                        AuditedQuantityPerStore = totalAudits,
                         Ranking = null, // se puede calcular luego si hay un ranking general
                         MothlyScore = averageScore,
                         LevelRisk = riskLevel,
@@ -398,6 +401,33 @@ namespace Rokys.Audit.Services.Services
             {
                 _logger.LogError(ex.Message);
                 response = ResponseDto.Error<PeriodAuditReportResponseDto>(ex.Message);
+            }
+            return response;
+        }
+
+        public async Task<ResponseDto<ExportReportResultDto>> ExportReport(ReportSearchFilterRequestDto reportSearchFilterRequestDto)
+        {
+            var response = ResponseDto.Create<ExportReportResultDto>();
+            try
+            {
+                var reportDataResponse = await GetReportSearchAsync(reportSearchFilterRequestDto);
+                if (!reportDataResponse.IsValid || reportDataResponse.Data == null)
+                {
+                    return ResponseDto.Error<ExportReportResultDto>("No se pudieron obtener los datos del reporte para exportar.");
+                }
+                // Aquí se implementaría la lógica de exportación, por ejemplo a Excel o PDF.
+                // Por simplicidad, asumiremos que se genera un archivo y se devuelve su ruta o contenido.
+                var resultExport = new ExportReportResultDto();
+                var fileBase64 = ReportExcelGenerator.GenerateExcelReport(reportDataResponse.Data.Items.ToList());
+                resultExport.FileBase64 = fileBase64;
+                resultExport.FileName = $"Reporte-memos-{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+                resultExport.MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                response.Data = resultExport;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error exportando el reporte: {ex.Message}");
+                response = ResponseDto.Error<ExportReportResultDto>(ex.Message);
             }
             return response;
         }

@@ -241,7 +241,7 @@ namespace Rokys.Audit.Services.Services
                 }
                 response.Data = _mapper.Map<PeriodAuditResponseDto>(entity);
                 // Load related inbox items and map them
-                var inboxEntities = await _inboxItemsRepository.GetAsync(filter: x => x.PeriodAuditId == entity.PeriodAuditId && x.IsActive, orderBy: q => q.OrderBy(s => s.SequenceNumber));
+                var inboxEntities = await _inboxItemsRepository.GetAsync(filter: x => x.PeriodAuditId == entity.PeriodAuditId && x.IsActive, includeProperties: [x => x.NextStatus, t => t.User], orderBy: q => q.OrderBy(s => s.SequenceNumber));
                 var inboxDtos = _mapper.Map<IEnumerable<Rokys.Audit.DTOs.Responses.InboxItems.InboxItemResponseDto>>(inboxEntities ?? new List<InboxItems>());
                 response.Data!.InboxItems = inboxDtos.ToList();
             }
@@ -307,6 +307,9 @@ namespace Rokys.Audit.Services.Services
 
                 if (paginationRequestDto.StartDate.HasValue && paginationRequestDto.EndDate.HasValue)
                     filter = filter.AndAlso(x => x.CreationDate >= paginationRequestDto.StartDate.Value && x.CreationDate <= paginationRequestDto.EndDate.Value && x.IsActive);
+
+                if (paginationRequestDto.AuditStatusId.HasValue)
+                    filter = filter.AndAlso(x => x.StatusId == paginationRequestDto.AuditStatusId.Value && x.IsActive);
 
                 Func<IQueryable<PeriodAudit>, IOrderedQueryable<PeriodAudit>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 

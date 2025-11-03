@@ -229,6 +229,21 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                 .AfterMap((src, dest) =>
                 {
                     dest.UserName = src.User?.FirstName + " " + src.User?.LastName;
+                    if (src.NextStatus != null)
+                    {
+                        dest.NextStatus = new AuditStatusResponseDto
+                        {
+                            AuditStatusId = src.NextStatus.AuditStatusId,
+                            Name = src.NextStatus.Name,
+                            ColorCode = src.NextStatus.ColorCode,
+                            Code = src.NextStatus.Code,
+                            IsActive = src.NextStatus.IsActive,
+                            CreatedBy = src.NextStatus.CreatedBy,
+                            CreationDate = src.NextStatus.CreationDate,
+                            UpdatedBy = src.NextStatus.UpdatedBy,
+                            UpdateDate = src.NextStatus.UpdateDate
+                        };
+                    }
                 });
             CreateMap<InboxItems, InboxItemListResponseDto>();
 
