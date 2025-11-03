@@ -106,6 +106,13 @@ namespace Rokys.Audit.Services.Services
                 _repository.Insert(entity);
 
                 var scaleGroupByGroupId = await _scaleGroupRepository.GetByGroupIdAsync(requestDto.GroupId);
+                var currentPeriodAuditGroupResult = await _repository.GetByPeriodAuditIdAsync(requestDto.PeriodAuditId);
+                var currentWeighting = currentPeriodAuditGroupResult.Sum(x => x.TotalWeighting);
+                if(currentWeighting + requestDto.TotalWeighting > 100)
+                {
+                    response = ResponseDto.Error<PeriodAuditGroupResultResponseDto>($"Ya tiene asignado {currentWeighting}% de ponderación, no se puede asignar una ponderación total de {requestDto.TotalWeighting + currentWeighting}%.");
+                    return response;
+                }
                 if (scaleGroupByGroupId == null)
                 {
                     response = ResponseDto.Error<PeriodAuditGroupResultResponseDto>("No se encontró el grupo de escala asociado al grupo.");
