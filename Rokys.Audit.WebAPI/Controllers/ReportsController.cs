@@ -44,7 +44,7 @@ namespace Rokys.Audit.WebAPI.Controllers
             return BadRequest(response);
         }
 
-         [HttpGet("search")]
+        [HttpGet("search")]
         public async Task<IActionResult> GetReportSearch([FromQuery] ReportSearchFilterRequestDto reportSearchFilterRequestDto)
         {
 
@@ -53,6 +53,15 @@ namespace Rokys.Audit.WebAPI.Controllers
             if (response.IsValid)
                 return Ok(response);
 
+            return BadRequest(response);
+        }
+
+        [HttpGet("export")]
+        public async Task<IActionResult> ExportReport([FromQuery] ReportSearchFilterRequestDto reportSearchFilterRequestDto)
+        {
+            var response = await _reportsService.ExportReport(reportSearchFilterRequestDto);
+            if (response.IsValid)
+                return Ok(response);
             return BadRequest(response);
         }
     }

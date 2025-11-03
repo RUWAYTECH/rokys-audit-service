@@ -17,6 +17,7 @@ namespace Rokys.Audit.DTOs.Responses.Reports
         public string? SupervisorName { get; set; }
         public int? Ranking { get; set; }
         public decimal MothlyScore { get; set; }
+        public int AuditedQuantityPerStore { get; set; }
         public string LevelRisk { get; set; }
         public AuditStatusResponseDto? AuditStatus { get; set; }
         // fin Audit Info

@@ -18,5 +18,6 @@ namespace Rokys.Audit.Services.Interfaces
         Task<ResponseDto<DashboardDataResponseDto>> GetDashboardEvolutionsDataAsync(int year, Guid enterpriseId);
         Task<ResponseDto<DashboardDataResponseDto>> GetDashboardSupervisorsDataAsync(int year, Guid enterpriseId, Guid[] supervisorIds);
         Task<ResponseDto<PeriodAuditReportResponseDto>> GetReportSearchAsync(ReportSearchFilterRequestDto reportSearchFilterRequestDto);
+        Task<ResponseDto<ExportReportResultDto>> ExportReport(ReportSearchFilterRequestDto reportSearchFilterRequestDto);
     }
 }
