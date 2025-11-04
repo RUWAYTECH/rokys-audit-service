@@ -391,7 +391,7 @@ CREATE TABLE [PeriodAudit]
 
     -- Puntuación
     ScoreValue DECIMAL(10,2) NOT NULL,
-    ScaleCode NVARCHAR(10) NOT NULL, -- Código de la Escala
+    ScaleCode NVARCHAR(10) NULL, -- Código de la Escala
     ScaleName NVARCHAR(100) NOT NULL, -- Nombre de la Escala
     ScaleColor NVARCHAR(10) NOT NULL, -- Valor de la Escala
     ScaleMinValue DECIMAL(10,2) NOT NULL, -- Valor Mínimo de la Escala
@@ -517,7 +517,7 @@ CREATE TABLE PeriodAuditFieldValues (
     FieldCode NVARCHAR(100) NOT NULL,
     FieldName NVARCHAR(255) NOT NULL,
     FieldType NVARCHAR(50) NOT NULL, -- numeric, text, date, boolean, select, image
-    IsCalculated BIT DEFAULT 0, -- Si es un campo calculado
+    IsCalculated NVARCHAR(50) NULL, -- Si es un campo calculado
     CalculationFormula NVARCHAR(2000), -- Fórmula para calcular el valor (si es calculado)
     AcumulationType NVARCHAR(50) NULL, -- Tipo de Acumulación: 'NA', 'SUM', 'AVERAGE', 'MAX', 'MIN', 'COUNT'
     CONSTRAINT CK_AuditTemplateFields_AcumulationTypeResult 
