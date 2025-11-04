@@ -31,7 +31,6 @@ namespace Rokys.Audit.Model.Tables
         public decimal ScoreValue { get; set; }
         public string? ScaleCode { get; set; } = string.Empty;
         public string ScaleName { get; set; } = string.Empty; // Nombre de la Escala
-        public string ScaleIcon { get; set; } = string.Empty; // Icon de la Escala
         public string ScaleColor { get; set; } = string.Empty; // Color de la Escala
         public decimal ScaleMinValue { get; set; } // Valor Mínimo de la Escala
         public decimal ScaleMaxValue { get; set; } // Valor Máximo de la Escala

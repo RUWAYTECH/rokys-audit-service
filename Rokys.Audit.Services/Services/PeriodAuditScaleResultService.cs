@@ -1,5 +1,6 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Reatil.Services.Services;
 using Rokys.Audit.Common.Constant;
@@ -40,6 +41,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IStorageFilesRepository _storageFilesRepository;
         private readonly IStorageFilesService _storageFilesService;
         private readonly IUserReferenceRepository _userReferenceRepository;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
 
         public PeriodAuditScaleResultService(
             IPeriodAuditScaleResultRepository repository,
@@ -57,7 +59,8 @@ namespace Rokys.Audit.Services.Services
             IPeriodAuditGroupResultService periodAuditGroupResultService,
             IStorageFilesRepository storageFilesRepository,
             IStorageFilesService storageFilesService,
-            IUserReferenceRepository userReferenceRepository)
+            IUserReferenceRepository userReferenceRepository,
+            IServiceScopeFactory serviceScopeFactory)
         {
             _repository = repository;
             _validator = validator;
@@ -75,6 +78,7 @@ namespace Rokys.Audit.Services.Services
             _storageFilesRepository = storageFilesRepository;
             _storageFilesService = storageFilesService;
             _userReferenceRepository = userReferenceRepository;
+            _serviceScopeFactory = serviceScopeFactory;
         }
 
         public async Task<ResponseDto<PeriodAuditScaleResultResponseDto>> Create(PeriodAuditScaleResultRequestDto requestDto)
@@ -444,10 +448,13 @@ namespace Rokys.Audit.Services.Services
                     _mapper.Map(fieldValueDto, fieldValueEntity);
                     _fieldValuesRepository.Update(fieldValueEntity);
                 }
-
                 await _unitOfWork.CommitAsync();
 
-                await _periodAuditGroupResultService.Recalculate(periodAuditScaleResults.PeriodAuditGroupResultId);
+                await using (var scope = _serviceScopeFactory.CreateAsyncScope())
+                {
+                    var groupResultService = scope.ServiceProvider.GetRequiredService<IPeriodAuditGroupResultService>();
+                    await groupResultService.Recalculate(periodAuditScaleResults.PeriodAuditGroupResultId);
+                }
 
                 response.Data = true;
                 response.WithMessage("Actualización completada correctamente.", null, ApplicationMessageType.Success);
