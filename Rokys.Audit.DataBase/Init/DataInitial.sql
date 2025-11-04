@@ -75,39 +75,6 @@ CREATE TABLE [Group]
     UpdateDate DATETIME2 NULL -- Fecha de Actualización
 );
 
--- =============================================
--- INBOX: Bandeja de auditorías
--- =============================================
-CREATE TABLE InboxItems (
-    InboxItemId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    PeriodAuditId UNIQUEIDENTIFIER NULL
-        FOREIGN KEY REFERENCES PeriodAudit(PeriodAuditId) ON DELETE CASCADE,
-    PrevStatusId UNIQUEIDENTIFIER NULL
-        FOREIGN KEY REFERENCES AuditStatus(AuditStatusId),
-    NextStatusId UNIQUEIDENTIFIER NULL
-        FOREIGN KEY REFERENCES AuditStatus(AuditStatusId),
-    PrevUserId UNIQUEIDENTIFIER NULL
-        FOREIGN KEY REFERENCES UserReference(UserReferenceId),
-    NextUserId UNIQUEIDENTIFIER NULL
-        FOREIGN KEY REFERENCES UserReference(UserReferenceId),
-    ApproverId UNIQUEIDENTIFIER NULL
-        FOREIGN KEY REFERENCES UserReference(UserReferenceId),
-    Comments NVARCHAR(MAX) NULL,
-    UserId UNIQUEIDENTIFIER NULL
-        FOREIGN KEY REFERENCES UserReference(UserReferenceId), -- quien registró la acción
-    Action NVARCHAR(100) NULL, -- acción realizada: 'Aprobada','Cancelada','Devuelta', etc.
-    SequenceNumber INT NOT NULL DEFAULT 0, -- número secuencial por PeriodAudit para identificar el último creado
-
-    -- Auditoría común
-    IsActive BIT DEFAULT 1,
-    CreatedBy VARCHAR(120) NULL,
-    CreationDate DATETIME2 DEFAULT GETDATE(),
-    UpdatedBy VARCHAR(120) NULL,
-    UpdateDate DATETIME2 NULL
-);
-
-CREATE INDEX IX_InboxItems_PeriodAuditId ON InboxItems(PeriodAuditId);
-CREATE INDEX IX_InboxItems_NextStatusId ON InboxItems(NextStatusId);
 
 CREATE TABLE ScaleGroup
 (
@@ -409,6 +376,39 @@ CREATE TABLE [PeriodAudit]
 
 
 
+-- =============================================
+-- INBOX: Bandeja de auditorías
+-- =============================================
+CREATE TABLE InboxItems (
+    InboxItemId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    PeriodAuditId UNIQUEIDENTIFIER NULL
+        FOREIGN KEY REFERENCES PeriodAudit(PeriodAuditId) ON DELETE CASCADE,
+    PrevStatusId UNIQUEIDENTIFIER NULL
+        FOREIGN KEY REFERENCES AuditStatus(AuditStatusId),
+    NextStatusId UNIQUEIDENTIFIER NULL
+        FOREIGN KEY REFERENCES AuditStatus(AuditStatusId),
+    PrevUserId UNIQUEIDENTIFIER NULL
+        FOREIGN KEY REFERENCES UserReference(UserReferenceId),
+    NextUserId UNIQUEIDENTIFIER NULL
+        FOREIGN KEY REFERENCES UserReference(UserReferenceId),
+    ApproverId UNIQUEIDENTIFIER NULL
+        FOREIGN KEY REFERENCES UserReference(UserReferenceId),
+    Comments NVARCHAR(MAX) NULL,
+    UserId UNIQUEIDENTIFIER NULL
+        FOREIGN KEY REFERENCES UserReference(UserReferenceId), -- quien registró la acción
+    Action NVARCHAR(100) NULL, -- acción realizada: 'Aprobada','Cancelada','Devuelta', etc.
+    SequenceNumber INT NOT NULL DEFAULT 0, -- número secuencial por PeriodAudit para identificar el último creado
+
+    -- Auditoría común
+    IsActive BIT DEFAULT 1,
+    CreatedBy VARCHAR(120) NULL,
+    CreationDate DATETIME2 DEFAULT GETDATE(),
+    UpdatedBy VARCHAR(120) NULL,
+    UpdateDate DATETIME2 NULL
+);
+
+CREATE INDEX IX_InboxItems_PeriodAuditId ON InboxItems(PeriodAuditId);
+CREATE INDEX IX_InboxItems_NextStatusId ON InboxItems(NextStatusId);
 
 
 -- Table: Result

@@ -182,7 +182,7 @@ WHERE u_orig.[IsActive] = 1
 --select * from Roles
 --where ApplicationId= (select top 1 ApplicationId from Applications where code ='MEMOS') 
 -- SCRIPT FOR AUDIT
-INSERT INTO [DBAuditQA].[dbo].[Enterprise]
+INSERT INTO [DBAuditQAV2].[dbo].[Enterprise]
 (
     [EnterpriseId],
     [Name],
@@ -207,12 +207,12 @@ SELECT
 FROM [DBMemoQAV2].[dbo].[Enterprise] a
 WHERE NOT EXISTS (
     SELECT 1
-    FROM [DBAuditQA].[dbo].[Enterprise] b
+    FROM [DBAuditQAV2].[dbo].[Enterprise] b
     WHERE b.[Code] = a.[Code]
 );
 
 
-INSERT INTO [DBAuditQA].[dbo].[Stores]
+INSERT INTO [DBAuditQAV2].[dbo].[Stores]
 (
     [StoreId],
     [Name],
@@ -239,6 +239,6 @@ SELECT
 FROM [DBMemoQAV2].[dbo].[Stores] a
 WHERE NOT EXISTS (
     SELECT 1
-    FROM [DBAuditQA].[dbo].[Stores] b
+    FROM [DBAuditQAV2].[dbo].[Stores] b
     WHERE b.[Code] = a.[Code]
 );
