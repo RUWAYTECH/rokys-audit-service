@@ -134,7 +134,7 @@ namespace Rokys.Audit.Services.Services
                     
 
 
-                Func<IQueryable<ScaleCompany>, IOrderedQueryable<ScaleCompany>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
+                Func<IQueryable<ScaleCompany>, IOrderedQueryable<ScaleCompany>> orderBy = q => q.OrderByDescending(x => x.EnterpriseId).ThenByDescending(x => x.Code);
 
                 var entities = await _scaleCompanyRepository.GetPagedAsync(
                     filter: filter,

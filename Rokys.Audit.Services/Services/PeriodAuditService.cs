@@ -124,8 +124,8 @@ namespace Rokys.Audit.Services.Services
                     var inboxDto = new Rokys.Audit.DTOs.Requests.InboxItems.InboxItemRequestDto
                     {
                         PeriodAuditId = entity.PeriodAuditId,
-                        PrevStatusId = (await _auditStatusRepository.GetFirstOrDefaultAsync(f => f.Code == AuditStatusCode.Pending && f.IsActive))?.AuditStatusId,
-                        NextStatusId = (await _auditStatusRepository.GetFirstOrDefaultAsync(f => f.Code == AuditStatusCode.InProgress && f.IsActive))?.AuditStatusId,
+                        PrevStatusId = null,
+                        NextStatusId = (await _auditStatusRepository.GetFirstOrDefaultAsync(f => f.Code == AuditStatusCode.Pending && f.IsActive))?.AuditStatusId,
                         UserId = currentUserReference?.UserReferenceId ?? null,
                         Comments = "Auditoría creada",
                         Action = "Creado",
@@ -522,50 +522,56 @@ namespace Rokys.Audit.Services.Services
                     }
 
                     Guid? nextStatusId = null;
-                    Guid newStatusId;
+                    Guid? newStatusId = null;
                     string actionText = string.Empty;
                     if (action == "approve")
                     {
                         if (ent.StatusId == statusPending?.AuditStatusId)
                         {
                             newStatusId = statusInProgress?.AuditStatusId ?? ent.StatusId ?? Guid.Empty;
-                            nextStatusId = statusInReview?.AuditStatusId;
+                            nextStatusId = statusInProgress?.AuditStatusId;
                             if (ent.ResponsibleAuditorId.HasValue)
                             {
                                 var auditorRef = await _userReferenceRepository.GetFirstOrDefaultAsync(f => f.UserReferenceId == ent.ResponsibleAuditorId.Value && f.IsActive);
                                 if (auditorRef != null) nextUserId = auditorRef.UserReferenceId;
                             }
+                            actionText = "Aprobado";
                         }
-                        else if (ent.StatusId == statusInProgress?.AuditStatusId)
+                        if (ent.StatusId == statusInProgress?.AuditStatusId)
                         {
                             newStatusId = statusInReview?.AuditStatusId ?? ent.StatusId ?? Guid.Empty;
-                            nextStatusId = statusFinal?.AuditStatusId;
+                            nextStatusId = statusInReview?.AuditStatusId;
                             // ScaleName validation already done above before any changes
+                            if (ent.ResponsibleAuditorId.HasValue)
+                            {
+                                var auditorRef = await _userReferenceRepository.GetFirstOrDefaultAsync(f => f.UserReferenceId == ent.ResponsibleAuditorId.Value && f.IsActive);
+                                if (auditorRef != null) nextUserId = auditorRef.UserReferenceId;
+                            }
+                            actionText = "Enviado a revisión";
+                        }
+                        else if (ent.StatusId == statusInReview?.AuditStatusId)
+                        {
+                            newStatusId = statusFinal?.AuditStatusId ?? ent.StatusId ?? Guid.Empty;
+                            nextStatusId = statusFinal?.AuditStatusId;
                             if (ent.AdministratorId.HasValue)
                             {
                                 var adminRef = await _userReferenceRepository.GetFirstOrDefaultAsync(f => f.UserReferenceId == ent.AdministratorId.Value && f.IsActive);
                                 if (adminRef != null) nextUserId = adminRef.UserReferenceId;
                             }
+                            actionText = "Finalizado";
                         }
-                        else // in review -> finalize
-                        {
-                            newStatusId = statusFinal?.AuditStatusId ?? ent.StatusId ?? Guid.Empty;
-                            nextStatusId = null;
-                            nextUserId = null;
-                        }
-                        actionText = "Aprobado";
                     }
                     else if (action == "cancel" || action == "cancelar")
                     {
                         newStatusId = statusCanceled?.AuditStatusId ?? ent.StatusId ?? Guid.Empty;
-                        nextStatusId = null;
+                        nextStatusId = statusCanceled?.AuditStatusId;
                         nextUserId = null;
                         actionText = "Cancelado";
                     }
                     else if (action == "return")
                     {
                         newStatusId = statusInProgress?.AuditStatusId ?? ent.StatusId ?? Guid.Empty;
-                        nextStatusId = statusInReview?.AuditStatusId;
+                        nextStatusId = statusInProgress?.AuditStatusId;
                         if (ent.ResponsibleAuditorId.HasValue)
                         {
                             var auditorRef = await _userReferenceRepository.GetByUserIdAsync(ent.ResponsibleAuditorId.Value);
