@@ -33,7 +33,6 @@ INSERT INTO dbo.ScaleGroup (ScaleGroupId,GroupId,Code,Name,Weighting,IsActive,Cr
 	 (N'74E60725-492E-40CA-B99A-9B177A96A3C4',N'663F6B67-5A08-4669-660D-08DE122F9350',N'CBO-1',N'Aprobación de venta a precio costo',40.00,1,N'admin','2025-10-23 21:25:01.2395929',N'admin','2025-10-23 21:25:01.2395933',0,1),
 	 (N'87A40461-5D99-472E-B86C-9E801F7173B7',N'4A55ADC7-CFBA-4979-660A-08DE122F9350',N'DN-4',N'Cuenta Corriente - Liquidaciones Tienda',15.00,1,N'admin','2025-10-23 07:37:00.6436335',N'admin','2025-10-23 07:37:00.6436340',1,4),
 	 (N'0FE32FE6-F6D7-4113-B775-A8B36743047A',N'4412D98D-E6D2-42EB-660B-08DE122F9350',N'INV-8',N'Diferencia Real de Lechuga',8.00,1,N'admin','2025-10-24 11:09:50.9134373',N'admin','2025-10-24 11:09:50.9134380',0,8),
-	 (N'3CA958C1-6DC2-4C4E-B370-A962DFAFEEBF',N'4412D98D-E6D2-42EB-660B-08DE122F9350',N'dwd',N'dwdwd',1.00,1,N'admin','2025-10-24 20:26:59.3170593',N'admin','2025-10-24 20:26:59.3170600',1,11),
 	 (N'40FED23C-B2F7-40C0-B36E-B21B1874E779',N'4412D98D-E6D2-42EB-660B-08DE122F9350',N'INV-7',N'Diferencia Real de Papa',8.00,1,N'admin','2025-10-24 11:09:26.6771443',N'admin','2025-10-24 11:09:26.6771451',0,7),
 	 (N'64266FFA-ABC7-4237-907C-B2C71191B0FB',N'4412D98D-E6D2-42EB-660B-08DE122F9350',N'INV-2',N'Dif. Valorizada en AREAS - Fisico Vs Sistema',15.00,1,N'admin','2025-10-24 11:02:44.0204619',N'admin','2025-10-24 11:02:44.0204628',0,2),
 	 (N'B3498FFE-0342-4172-9865-BA5B191A7AF7',N'663F6B67-5A08-4669-660D-08DE122F9350',N'CBO-3',N'Venta de Aceite Quemado',30.00,1,N'admin','2025-10-23 21:25:58.1507121',N'admin','2025-10-23 21:25:58.1507125',0,3),
@@ -224,14 +223,12 @@ INSERT INTO dbo.TableScaleTemplate (TableScaleTemplateId,ScaleGroupId,Code,Name,
 	 (N'D09F6B29-3BA7-47EC-8F02-CAAB9A8C0A63',N'16DBC1C4-B916-440C-866D-E5B10608DD4A',N'rev_nivel_dife_real_sazon',N'Revision de nivel de diferencias reales de Sazon - Var% sobre VTA',N'H',N'{}',1,N'admin','2025-10-27 17:31:34.5488630',N'admin','2025-10-27 17:31:34.5488642',1),
 	 (N'BB05A45A-54AF-47F3-83FF-CE474D0D4CC3',N'77AEB317-256B-4F47-9BF1-BFE2A3AD3EF2',N'dif_real',N'Revision de nivel de diferencias reales de Aji - Var% sobre VTA',N'H',N'{}',1,N'admin','2025-10-27 17:03:20.5980828',N'admin','2025-10-27 17:03:20.5980844',1);
 INSERT INTO dbo.TableScaleTemplate (TableScaleTemplateId,ScaleGroupId,Code,Name,Orientation,TemplateData,IsActive,CreatedBy,CreationDate,UpdatedBy,UpdateDate,SortOrder) VALUES
-	 (N'42A5F1EC-981A-4BDC-ACFE-D163A2B2EA4D',N'64266FFA-ABC7-4237-907C-B2C71191B0FB',N'rank_neto',N'Ranking neto en S/',N'H',N'{}',1,N'admin','2025-10-24 16:59:11.1997201',N'admin','2025-10-24 16:59:11.1997206',4),
 	 (N'BEF36B90-3A98-4E5E-B082-D5A06CECBD56',N'B3498FFE-0342-4172-9865-BA5B191A7AF7',N'cump_norm',N'Revision de Cumplimiento de Proceso de Venta de Aceite Quemado',N'H',N'{}',1,N'admin','2025-10-23 21:41:33.5992041',N'admin','2025-10-23 21:41:33.5992046',1),
 	 (N'B6661C01-045D-484B-8EA1-D689518C081F',N'2A73C0B1-6DD3-4EF8-A2EA-76142909BDFE',N'arqueo_tienda',N'Arqueo Tienda/Restaurante',N'V',N'{}',1,N'admin','2025-10-23 17:18:50.1879313',N'admin','2025-10-23 17:18:50.1879319',2),
 	 (N'E6195349-5BFD-4E6C-A55F-E0A8C447CF35',N'62E6BB4B-9112-485B-B331-C736E4C832E3',N'revisio_cumplimiento',N'Revision de cumplimiento de procedimientos depósitos de dinero',N'H',N'{}',1,N'admin','2025-10-23 08:06:55.1412837',N'admin','2025-10-23 08:06:55.1412841',1),
 	 (N'A0C80AE0-4FA2-45C4-B995-E4EAFE551D5B',N'9C959014-5A7A-4F59-B2A5-61E2334EE9E4',N'inv',N'Resultado de diferencias de Inventarios aplicados como descuentos',N'H',N'{}',1,N'admin','2025-10-27 17:40:05.0017784',N'admin','2025-10-27 17:40:05.0017794',1),
 	 (N'EDD3492C-AE56-44DE-9E9C-E5D64CF6BC8F',N'64266FFA-ABC7-4237-907C-B2C71191B0FB',N'diferencias',N'Resultado de diferencias de Inventarios en Areas (Fisico Vs Sistema)',N'H',N'{}',1,N'admin','2025-10-24 16:42:43.1765986',N'admin','2025-10-24 16:42:43.1765997',1),
-	 (N'5B6E23ED-0F56-47A1-AD07-EEE718CA61A5',N'0A3BB7EB-3CC8-4D11-B9E2-EE7EE119DCB2',N'rev_cump',N'Revision de cumplimiento de procedimientos de elaboracion de Hoja de Liquidación Diaria de Ventas',N'H',N'{}',1,N'admin','2025-10-23 20:55:13.3241864',N'admin','2025-10-23 20:55:13.3242018',1),
-	 (N'C77A1F96-DBDC-42E7-A4E9-F2D76936AEB3',N'437C3B1B-ED05-4C48-8499-076C88618BD6',N'faltantes_s',N'Ranking faltantes en S/',N'H',N'{}',1,N'admin','2025-10-24 13:36:54.9222504',N'admin','2025-10-24 16:32:16.8317988',2);
+	 (N'5B6E23ED-0F56-47A1-AD07-EEE718CA61A5',N'0A3BB7EB-3CC8-4D11-B9E2-EE7EE119DCB2',N'rev_cump',N'Revision de cumplimiento de procedimientos de elaboracion de Hoja de Liquidación Diaria de Ventas',N'H',N'{}',1,N'admin','2025-10-23 20:55:13.3241864',N'admin','2025-10-23 20:55:13.3242018',1);
 
 --AUDIT_TEMPLATE_FIELDS
 
