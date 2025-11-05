@@ -323,6 +323,7 @@ namespace Rokys.Audit.Services.Services
                         Code = originalScaleGroup.Code,
                         Name = originalScaleGroup.Name,
                         Weighting = originalScaleGroup.Weighting,
+                        SortOrder = originalScaleGroup.SortOrder,
                         IsActive = originalScaleGroup.IsActive
                     };
                     clonedScaleGroup.CreateAudit(currentUser.UserName);
@@ -348,6 +349,7 @@ namespace Rokys.Audit.Services.Services
                         Name = originalTemplate.Name,
                         Orientation = originalTemplate.Orientation,
                         TemplateData = originalTemplate.TemplateData,
+                        SortOrder = originalTemplate.SortOrder,
                         IsActive = originalTemplate.IsActive
                     };
                     clonedTemplate.CreateAudit(currentUser.UserName);
@@ -375,6 +377,7 @@ namespace Rokys.Audit.Services.Services
                         AcumulationType = originalField.AcumulationType,
                         FieldOptions = originalField.FieldOptions,
                         DefaultValue = originalField.DefaultValue,
+                        SortOrder = originalField.SortOrder,
                         IsActive = originalField.IsActive
                     };
                     clonedField.CreateAudit(currentUser.UserName);

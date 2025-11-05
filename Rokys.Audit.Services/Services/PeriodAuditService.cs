@@ -113,7 +113,7 @@ namespace Rokys.Audit.Services.Services
                 {
                     // Build InboxItemRequestDto and reuse the inbox service to handle creation (sequence number, user mapping, audit fields)
                     var currentUserReference = await _userReferenceRepository.GetByUserIdAsync(currentUser?.UserId ?? Guid.Empty);
-                    if (currentUserReference != null)
+                    if (currentUserReference == null)
                     {
                         response.Messages.Add(new ApplicationMessage
                         {
@@ -124,8 +124,8 @@ namespace Rokys.Audit.Services.Services
                     var inboxDto = new Rokys.Audit.DTOs.Requests.InboxItems.InboxItemRequestDto
                     {
                         PeriodAuditId = entity.PeriodAuditId,
-                        PrevStatusId = (await _auditStatusRepository.GetFirstOrDefaultAsync(f => f.Code == AuditStatusCode.Pending && f.IsActive))?.AuditStatusId,
-                        NextStatusId = (await _auditStatusRepository.GetFirstOrDefaultAsync(f => f.Code == AuditStatusCode.InProgress && f.IsActive))?.AuditStatusId,
+                        PrevStatusId = null,
+                        NextStatusId = (await _auditStatusRepository.GetFirstOrDefaultAsync(f => f.Code == AuditStatusCode.Pending && f.IsActive))?.AuditStatusId,
                         UserId = currentUserReference?.UserReferenceId ?? null,
                         Comments = "Auditoría creada",
                         Action = "Creado",
@@ -241,7 +241,7 @@ namespace Rokys.Audit.Services.Services
                 }
                 response.Data = _mapper.Map<PeriodAuditResponseDto>(entity);
                 // Load related inbox items and map them
-                var inboxEntities = await _inboxItemsRepository.GetAsync(filter: x => x.PeriodAuditId == entity.PeriodAuditId && x.IsActive, includeProperties: [x => x.NextStatus, t => t.User], orderBy: q => q.OrderBy(s => s.SequenceNumber));
+                var inboxEntities = await _inboxItemsRepository.GetAsync(filter: x => x.PeriodAuditId == entity.PeriodAuditId && x.IsActive, includeProperties: [x => x.NextStatus, t => t.User, p => p.PrevStatus], orderBy: q => q.OrderBy(s => s.SequenceNumber));
                 var inboxDtos = _mapper.Map<IEnumerable<Rokys.Audit.DTOs.Responses.InboxItems.InboxItemResponseDto>>(inboxEntities ?? new List<InboxItems>());
                 response.Data!.InboxItems = inboxDtos.ToList();
             }
@@ -336,7 +336,8 @@ namespace Rokys.Audit.Services.Services
                     if (ent.ResponsibleAuditorId.HasValue && ent.ResponsibleAuditorId == userReference.UserReferenceId)
                     {
                         ent.IAmAuditor = true;
-                    } else
+                    }
+                    else
                     {
                         ent.IAmAuditor = false;
                     }
@@ -345,8 +346,8 @@ namespace Rokys.Audit.Services.Services
                 // For the paged items, load inbox items in batch and attach them to each response DTO
                 var itemsList = pagedResult.Items.ToList();
                 var periodIds = entities.Items.Select(i => i.PeriodAuditId).ToList();
-                var inboxForPeriods = await _inboxItemsRepository.GetAsync(filter: x => periodIds.Contains(x.PeriodAuditId!.Value) && x.IsActive, 
-                    includeProperties: [ x => x.User, y => y.NextStatus]);
+                var inboxForPeriods = await _inboxItemsRepository.GetAsync(filter: x => periodIds.Contains(x.PeriodAuditId!.Value) && x.IsActive,
+                    includeProperties: [x => x.User, y => y.NextStatus, p => p.PrevStatus]);
                 var inboxMapped = _mapper.Map<IEnumerable<Rokys.Audit.DTOs.Responses.InboxItems.InboxItemResponseDto>>(inboxForPeriods ?? new List<InboxItems>());
                 var inboxLookup = inboxMapped.GroupBy(i => i.PeriodAuditId ?? Guid.Empty).ToDictionary(g => g.Key, g => g.OrderBy(x => x.SequenceNumber).ToList());
                 foreach (var it in itemsList)
@@ -472,7 +473,7 @@ namespace Rokys.Audit.Services.Services
                     bool ok = action switch
                     {
                         "approve" => ent.StatusId == statusPending?.AuditStatusId || ent.StatusId == statusInProgress?.AuditStatusId || ent.StatusId == statusInReview?.AuditStatusId,
-                        "cancel" => ent.StatusId == statusInProgress?.AuditStatusId || ent.StatusId == statusPending?.AuditStatusId,
+                        "cancel" => ent.StatusId == statusInProgress?.AuditStatusId || ent.StatusId == statusPending?.AuditStatusId || ent.StatusId == statusInReview?.AuditStatusId,
                         "return" => ent.StatusId == statusInReview?.AuditStatusId,
                         _ => false
                     };
@@ -521,7 +522,7 @@ namespace Rokys.Audit.Services.Services
                     }
 
                     Guid? nextStatusId = null;
-                    Guid newStatusId;
+                    Guid? newStatusId = null;
                     string actionText = string.Empty;
                     if (action == "approve")
                     {
@@ -534,25 +535,31 @@ namespace Rokys.Audit.Services.Services
                                 var auditorRef = await _userReferenceRepository.GetFirstOrDefaultAsync(f => f.UserReferenceId == ent.ResponsibleAuditorId.Value && f.IsActive);
                                 if (auditorRef != null) nextUserId = auditorRef.UserReferenceId;
                             }
+                            actionText = "Aprobado";
                         }
-                        else if (ent.StatusId == statusInProgress?.AuditStatusId)
+                        if (ent.StatusId == statusInProgress?.AuditStatusId)
                         {
                             newStatusId = statusInReview?.AuditStatusId ?? ent.StatusId ?? Guid.Empty;
                             nextStatusId = statusInReview?.AuditStatusId;
                             // ScaleName validation already done above before any changes
+                            if (ent.ResponsibleAuditorId.HasValue)
+                            {
+                                var auditorRef = await _userReferenceRepository.GetFirstOrDefaultAsync(f => f.UserReferenceId == ent.ResponsibleAuditorId.Value && f.IsActive);
+                                if (auditorRef != null) nextUserId = auditorRef.UserReferenceId;
+                            }
+                            actionText = "Enviado a revisión";
+                        }
+                        else if (ent.StatusId == statusInReview?.AuditStatusId)
+                        {
+                            newStatusId = statusFinal?.AuditStatusId ?? ent.StatusId ?? Guid.Empty;
+                            nextStatusId = statusFinal?.AuditStatusId;
                             if (ent.AdministratorId.HasValue)
                             {
                                 var adminRef = await _userReferenceRepository.GetFirstOrDefaultAsync(f => f.UserReferenceId == ent.AdministratorId.Value && f.IsActive);
                                 if (adminRef != null) nextUserId = adminRef.UserReferenceId;
                             }
+                            actionText = "Finalizado";
                         }
-                        else // in review -> finalize
-                        {
-                            newStatusId = statusFinal?.AuditStatusId ?? ent.StatusId ?? Guid.Empty;
-                            nextStatusId = statusFinal?.AuditStatusId;
-                            nextUserId = null;
-                        }
-                        actionText = "Aprobado";
                     }
                     else if (action == "cancel" || action == "cancelar")
                     {

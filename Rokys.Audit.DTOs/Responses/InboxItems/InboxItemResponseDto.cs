@@ -8,5 +8,6 @@ namespace Rokys.Audit.DTOs.Responses.InboxItems
         public Guid InboxItemId { get; set; }
         public string? UserName { get; set; }
         public AuditStatusResponseDto? NextStatus { get; set; }
+        public AuditStatusResponseDto? PrevStatus { get; set; }
     }
 }
