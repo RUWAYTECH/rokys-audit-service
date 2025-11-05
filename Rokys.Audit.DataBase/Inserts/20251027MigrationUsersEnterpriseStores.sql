@@ -5,9 +5,13 @@
 
 --CREATE DATABASE DBSecurityQAV2
 
-USE [DBSecurityQAV2]
+USE [DBSecurityQAV3]
 GO
 
+
+update DBMemoQAV2.dbo.Roles
+set Code='APPADMIN'
+where Code='R005'
 --select * from [dbo].[Users]
 
 -- Script para migrar usuarios de DBMemoQAV2 a DBSecurityQA
@@ -136,7 +140,7 @@ WHERE NOT EXISTS (
 
 --select * from [DBSecurityQAV2].[dbo].[Users]
 -- Insertar todos los usuarios en la aplicación MEMOS
-INSERT INTO [DBSecurityQAV2].[dbo].[UserApplications] 
+INSERT INTO [dbo].[UserApplications] 
 ([UserId], [ApplicationId], [IsActive], [AssignedAt], [CreatedAt], [UpdatedAt])
 SELECT 
     u.[UserId],
@@ -145,9 +149,9 @@ SELECT
     GETDATE() AS AssignedAt,
     GETDATE() AS CreatedAt,
     GETDATE() AS UpdatedAt
-FROM [DBSecurityQAV2].[dbo].[Users] u
+FROM [dbo].[Users] u
 WHERE NOT EXISTS (
-    SELECT 1 FROM [DBSecurityQAV2].[dbo].[UserApplications] ua 
+    SELECT 1 FROM [dbo].[UserApplications] ua 
     WHERE ua.UserId = u.UserId 
     AND ua.ApplicationId = (select top 1 ApplicationId from Applications where code ='MEMOS') 
 ); 
@@ -157,32 +161,33 @@ WHERE NOT EXISTS (
 
 -- PASO 2: Migrar roles masivamente usando el RoleId original
 -- Ahora sí migrar los roles (tu script original)
-INSERT INTO [DBSecurityQAV2].[dbo].[UserRoles]
+INSERT INTO [dbo].[UserRoles]
 ([UserId], [RoleId], [AssignedAt], [CreatedAt], [UpdatedAt])
 SELECT 
     u_dest.[UserId],
-    (SELECT RoleId FROM [DBSecurityQAV2].[dbo].[Roles] WHERE Code=r.Code 
-     AND ApplicationId=(SELECT TOP 1 ApplicationId FROM [DBSecurityQAV2].[dbo].[Applications] WHERE Code = 'MEMOS')) AS RoleId,
+    (SELECT RoleId FROM [Roles] WHERE Code=r.Code 
+     AND ApplicationId=(SELECT TOP 1 ApplicationId FROM [Applications] WHERE Code = 'MEMOS')) AS RoleId,
     GETDATE() AS AssignedAt,
     GETDATE() AS CreatedAt,
     GETDATE() AS UpdatedAt
 FROM [DBMemoQAV2].[dbo].[Users] u_orig
 INNER JOIN [DBMemoQAV2].[dbo].[Roles] r ON u_orig.RoleId = r.Id
-INNER JOIN [DBSecurityQAV2].[dbo].[Users] u_dest ON u_orig.[Id] = u_dest.[UserId]
+INNER JOIN [dbo].[Users] u_dest ON u_orig.[Id] = u_dest.[UserId]
 WHERE u_orig.[IsActive] = 1
     AND u_orig.Id != 'eeeeeeee-1111-1111-1111-111111111111'
     AND u_orig.[RoleId] IS NOT NULL
     AND NOT EXISTS (
-        SELECT 1 FROM [DBSecurityQAV2].[dbo].[UserRoles] ur 
+        SELECT 1 FROM [dbo].[UserRoles] ur 
         WHERE ur.UserId = u_dest.UserId
     );
 
 
 
+USE DBAuditQAV2
 --select * from Roles
 --where ApplicationId= (select top 1 ApplicationId from Applications where code ='MEMOS') 
 -- SCRIPT FOR AUDIT
-INSERT INTO [DBAuditQAV2].[dbo].[Enterprise]
+INSERT INTO [dbo].[Enterprise]
 (
     [EnterpriseId],
     [Name],
@@ -207,12 +212,12 @@ SELECT
 FROM [DBMemoQAV2].[dbo].[Enterprise] a
 WHERE NOT EXISTS (
     SELECT 1
-    FROM [DBAuditQAV2].[dbo].[Enterprise] b
+    FROM [dbo].[Enterprise] b
     WHERE b.[Code] = a.[Code]
 );
 
 
-INSERT INTO [DBAuditQAV2].[dbo].[Stores]
+INSERT INTO [dbo].[Stores]
 (
     [StoreId],
     [Name],
@@ -239,6 +244,6 @@ SELECT
 FROM [DBMemoQAV2].[dbo].[Stores] a
 WHERE NOT EXISTS (
     SELECT 1
-    FROM [DBAuditQAV2].[dbo].[Stores] b
+    FROM [dbo].[Stores] b
     WHERE b.[Code] = a.[Code]
 );
