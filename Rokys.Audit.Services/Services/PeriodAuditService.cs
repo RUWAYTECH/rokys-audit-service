@@ -271,7 +271,19 @@ namespace Rokys.Audit.Services.Services
                 }
 
                 var currentUser = _httpContextAccessor.CurrentUser();
-                _mapper.Map(requestDto, entity);
+
+                entity.AdministratorId = requestDto.AdministratorId;
+                entity.AssistantId = requestDto.AssistantId;
+                entity.SupervisorId = requestDto.SupervisorId;
+                entity.OperationManagersId = requestDto.OperationManagersId;
+                entity.FloatingAdministratorId = requestDto.FloatingAdministratorId;
+                entity.ResponsibleAuditorId = requestDto.ResponsibleAuditorId;
+                entity.StoreId = requestDto.StoreId;                
+                entity.EndDate = requestDto.EndDate;
+                entity.AuditedDays = requestDto.AuditedDays;
+                entity.ReportDate = requestDto.ReportDate;
+                entity.StartDate = requestDto.StartDate;
+
                 entity.UpdateAudit(currentUser.UserName);
                 _repository.Update(entity);
                 await _unitOfWork.CommitAsync();             

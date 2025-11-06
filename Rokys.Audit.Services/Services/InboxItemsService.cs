@@ -146,7 +146,9 @@ namespace Rokys.Audit.Services.Services
 
                 Func<IQueryable<InboxItems>, IOrderedQueryable<InboxItems>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 
-                var entities = await _inboxRepository.GetPagedAsync(filter: filter, orderBy: orderBy, pageNumber: filterRequest.PageNumber, pageSize: filterRequest.PageSize);
+                var entities = await _inboxRepository.GetPagedAsync(filter: filter, orderBy: orderBy, pageNumber: filterRequest.PageNumber, pageSize: filterRequest.PageSize,
+
+                includeProperties: [x => x.User, y => y.NextStatus, p => p.PrevStatus]);
 
                 var pagedResult = new PaginationResponseDto<InboxItemResponseDto>
                 {
