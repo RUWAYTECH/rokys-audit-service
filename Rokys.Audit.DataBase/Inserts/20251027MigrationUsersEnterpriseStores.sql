@@ -59,6 +59,10 @@ WHERE u.[IsActive] = 1                                    -- Solo usuarios activ
 GO
 
 
+
+update [DBMemoQAV2].[dbo].[Users] 
+set SecurityUserId = Id
+
 -- =====================================================================
 -- VERIFICACIÓN DE LA MIGRACIÓN
 -- =====================================================================
