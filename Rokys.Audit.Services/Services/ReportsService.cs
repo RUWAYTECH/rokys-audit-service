@@ -377,7 +377,7 @@ namespace Rokys.Audit.Services.Services
                     Summaries = new List<SummaryReportResponseDto>{ new SummaryReportResponseDto
                     {
                         Ranking = entities.Count,
-                        ResultByMonth = Math.Round(globalAverage),
+                        ResultByMonth = Math.Round(globalAverage,2),
                         Risk = globalRiskLevel,
                         QuantityAudit = entities.Count
                     } }
