@@ -340,7 +340,7 @@ namespace Rokys.Audit.Services.Services
 
 
                 var currentUser = _httpContextAccessor.CurrentUser();
-                var userReference = await _userReferenceRepository.GetFirstOrDefaultAsync(filter: x => x.UserId == currentUser.UserId);
+                var userReference = await _userReferenceRepository.GetFirstOrDefaultAsync(filter: x => x.UserReferenceId == currentUser.UserReferenceId);
                 foreach (var ent in pagedResult.Items)
                 {
                     if (ent.ResponsibleAuditorId.HasValue && ent.ResponsibleAuditorId == userReference.UserReferenceId)
