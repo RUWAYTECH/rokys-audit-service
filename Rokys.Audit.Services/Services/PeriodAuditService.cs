@@ -105,9 +105,7 @@ namespace Rokys.Audit.Services.Services
                 entity.CreateAudit(currentUserName);
                 _repository.Insert(entity);
                 await _unitOfWork.CommitAsync();
-                var entityCreate = await _repository.GetFirstOrDefaultAsync(
-                    filter: x => x.PeriodAuditId == entity.PeriodAuditId && x.IsActive,
-                    includeProperties: [x => x.Store.Enterprise, x => x.Administrator, x => x.Assistant, x => x.OperationManager, x => x.FloatingAdministrator, x => x.ResponsibleAuditor, x => x.AuditStatus, su => su.Supervisor]);
+              
                 // Crear registro en InboxItems: prev user = administrador, next user = auditor responsable
                 try
                 {
@@ -148,7 +146,7 @@ namespace Rokys.Audit.Services.Services
                     _logger.LogError($"Error creando InboxItem: {exInbox.Message}");
                     // No fallamos la creación del PeriodAudit si falla el inbox
                 }
-                response.Data = _mapper.Map<PeriodAuditResponseDto>(entityCreate);
+                response.Data = _mapper.Map<PeriodAuditResponseDto>(entity);
             }
             catch (Exception ex)
             {
@@ -264,19 +262,19 @@ namespace Rokys.Audit.Services.Services
                     response.Messages.AddRange(validate.Errors.Select(e => new ApplicationMessage { Message = e.ErrorMessage, MessageType = ApplicationMessageType.Error }));
                     return response;
                 }
-                var entity = await _repository.GetFirstOrDefaultAsync(
-                    filter: x => x.PeriodAuditId == id && x.IsActive,
-                    includeProperties: [x => x.Store.Enterprise, x => x.Administrator, x => x.Assistant, x => x.OperationManager, x => x.FloatingAdministrator, x => x.ResponsibleAuditor, x => x.AuditStatus, su => su.Supervisor]);
+
+                var entity = await _repository.GetFirstOrDefaultAsync(filter: x => x.PeriodAuditId == id && x.IsActive);
                 if (entity == null)
                 {
                     response = ResponseDto.Error<PeriodAuditResponseDto>("No se encontró el registro.");
                     return response;
                 }
+
                 var currentUser = _httpContextAccessor.CurrentUser();
-                entity = _mapper.Map(requestDto, entity);
+                _mapper.Map(requestDto, entity);
                 entity.UpdateAudit(currentUser.UserName);
                 _repository.Update(entity);
-                await _unitOfWork.CommitAsync();
+                await _unitOfWork.CommitAsync();             
                 response.Data = _mapper.Map<PeriodAuditResponseDto>(entity);
             }
             catch (Exception ex)
@@ -344,20 +342,7 @@ namespace Rokys.Audit.Services.Services
                 }
 
                 // For the paged items, load inbox items in batch and attach them to each response DTO
-                var itemsList = pagedResult.Items.ToList();
-                var periodIds = entities.Items.Select(i => i.PeriodAuditId).ToList();
-                var inboxForPeriods = await _inboxItemsRepository.GetAsync(filter: x => periodIds.Contains(x.PeriodAuditId!.Value) && x.IsActive,
-                    includeProperties: [x => x.User, y => y.NextStatus, p => p.PrevStatus]);
-                var inboxMapped = _mapper.Map<IEnumerable<Rokys.Audit.DTOs.Responses.InboxItems.InboxItemResponseDto>>(inboxForPeriods ?? new List<InboxItems>());
-                var inboxLookup = inboxMapped.GroupBy(i => i.PeriodAuditId ?? Guid.Empty).ToDictionary(g => g.Key, g => g.OrderBy(x => x.SequenceNumber).ToList());
-                foreach (var it in itemsList)
-                {
-                    var key = it.PeriodAuditId;
-                    if (key != Guid.Empty && inboxLookup.TryGetValue(key, out var list))
-                        it.InboxItems = list;
-                }
-
-                pagedResult.Items = itemsList;
+             
                 response.Data = pagedResult;
             }
             catch (Exception ex)
@@ -435,6 +420,7 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create();
             try
             {
+                
                 var ids = requestDto.PeriodAuditIds?.Distinct().ToList() ?? new List<Guid>();
                 if (!ids.Any())
                     return ResponseDto.Error("No se proporcionaron PeriodAuditIds.");
@@ -448,12 +434,13 @@ namespace Rokys.Audit.Services.Services
                     return ResponseDto.Error("Usuario no autenticado.");
                 var currentUserName = currentUser?.UserName ?? "system";
 
+                var allStatus = await _auditStatusRepository.GetAsync(a=>a.IsActive);
                 // Preload status codes once
-                var statusPending = await _auditStatusRepository.GetFirstOrDefaultAsync(f => f.Code == AuditStatusCode.Pending && f.IsActive);
-                var statusInProgress = await _auditStatusRepository.GetFirstOrDefaultAsync(f => f.Code == AuditStatusCode.InProgress && f.IsActive);
-                var statusInReview = await _auditStatusRepository.GetFirstOrDefaultAsync(f => f.Code == AuditStatusCode.InReview && f.IsActive);
-                var statusFinal = await _auditStatusRepository.GetFirstOrDefaultAsync(f => f.Code == AuditStatusCode.Completed && f.IsActive);
-                var statusCanceled = await _auditStatusRepository.GetFirstOrDefaultAsync(f => f.Code == AuditStatusCode.Canceled && f.IsActive);
+                var statusPending = allStatus.FirstOrDefault(f => f.Code == AuditStatusCode.Pending);
+                var statusInProgress = allStatus.FirstOrDefault(f => f.Code == AuditStatusCode.InProgress);
+                var statusInReview = allStatus.FirstOrDefault(f => f.Code == AuditStatusCode.InReview);
+                var statusFinal = allStatus.FirstOrDefault(f => f.Code == AuditStatusCode.Completed);
+                var statusCanceled = allStatus.FirstOrDefault(f => f.Code == AuditStatusCode.Canceled);
 
                 // Load all period audits
                 var entities = new List<PeriodAudit>();
@@ -483,7 +470,7 @@ namespace Rokys.Audit.Services.Services
                     return ResponseDto.Error($"La acción no es aplicable a los siguientes PeriodAuditIds: {string.Join(',', invalids)}");
 
                 // Additional validation: Check for ScaleName requirement BEFORE making any changes
-                if (action == "approve")
+                if (action == "approve") //TODO cambiar a constantes
                 {
                     foreach (var ent in entities)
                     {
@@ -628,7 +615,7 @@ namespace Rokys.Audit.Services.Services
             {
                 var entity = await _repository.GetFirstOrDefaultAsync(
                     filter: x => x.StoreId == storeId && x.IsActive,
-                    orderBy: q => q.OrderByDescending(x => x.EndDate)
+                    orderBy: q => q.OrderByDescending(x => x.ReportDate)
                 );
                 if (entity == null)
                 {
@@ -638,7 +625,7 @@ namespace Rokys.Audit.Services.Services
                 }
                 var lastAudit = new LastAuditByStoreIdResponseDto
                 {
-                    LastAuditDate = entity?.EndDate
+                    LastAuditDate = entity?.ReportDate
                 };
                 response.Data = lastAudit;
             }
