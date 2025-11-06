@@ -310,6 +310,7 @@ namespace Rokys.Audit.Services.Services
                     var storeEntity = group.FirstOrDefault();
                     if (storeEntity == null)
                         continue;
+                      
 
                     var totalAudits = group.Count();
                     var totalScore = group.Sum(x => x.ScoreValue);
@@ -319,15 +320,8 @@ namespace Rokys.Audit.Services.Services
                     if (currentScales == null || !currentScales.Any())
                     {
                         currentScales = await _scaleCompanyRepository.GetAsync(
-                            filter: x => x.EnterpriseId == storeEntity.Store.EnterpriseId && x.IsActive
+                            filter: x => x.EnterpriseId == storeEntity.Store.EnterpriseId || x.EnterpriseId == null && x.IsActive
                         );
-
-                        if (!currentScales.Any())
-                        {
-                            currentScales = await _scaleCompanyRepository.GetAsync(
-                                filter: x => x.EnterpriseId == null && x.IsActive
-                            );
-                        }
                     }
                     string riskLevel = "Sin Escala";
                     foreach (var scale in currentScales)
@@ -338,10 +332,6 @@ namespace Rokys.Audit.Services.Services
                             break;
                         }
                     }
-
-                    var auditStatus = await _auditStatus.GetFirstOrDefaultAsync(
-                        filter: x => x.Code == AuditStatusCode.Completed
-                    );
 
                     var dto = new PeriodAuditItemReportResponseDto
                     {
@@ -359,7 +349,7 @@ namespace Rokys.Audit.Services.Services
                         Ranking = null, // se puede calcular luego si hay un ranking general
                         MothlyScore = averageScore,
                         LevelRisk = riskLevel,
-                        AuditStatus = _mapper.Map<AuditStatusResponseDto>(auditStatus)
+                        AuditStatus = _mapper.Map<AuditStatusResponseDto>(storeEntity.AuditStatus)
                     };
 
                     itemDtos.Add(dto);
