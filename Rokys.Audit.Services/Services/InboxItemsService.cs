@@ -141,7 +141,7 @@ namespace Rokys.Audit.Services.Services
                 if (!string.IsNullOrEmpty(filterRequest.Filter))
                     filter = filter.AndAlso(x => x.Comments != null && x.Comments.Contains(filterRequest.Filter) && x.IsActive);
 
-                Func<IQueryable<InboxItems>, IOrderedQueryable<InboxItems>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
+                Func<IQueryable<InboxItems>, IOrderedQueryable<InboxItems>> orderBy = q => q.OrderBy(x => x.SequenceNumber);
 
                 var entities = await _inboxRepository.GetPagedAsync(filter: filter, orderBy: orderBy, pageNumber: filterRequest.PageNumber, pageSize: filterRequest.PageSize,
 

@@ -347,7 +347,7 @@ namespace Rokys.Audit.Services.Services
                         SupervisorName = storeEntity.Supervisor?.FullName,
                         AuditedQuantityPerStore = totalAudits,
                         Ranking = null, // se puede calcular luego si hay un ranking general
-                        MothlyScore = averageScore,
+                        MothlyScore = Math.Round(averageScore, 2),
                         LevelRisk = riskLevel,
                         AuditStatus = _mapper.Map<AuditStatusResponseDto>(storeEntity.AuditStatus)
                     };
