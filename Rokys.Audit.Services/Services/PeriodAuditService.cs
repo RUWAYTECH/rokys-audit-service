@@ -110,8 +110,8 @@ namespace Rokys.Audit.Services.Services
                 try
                 {
                     // Build InboxItemRequestDto and reuse the inbox service to handle creation (sequence number, user mapping, audit fields)
-                    var currentUserReference = await _userReferenceRepository.GetByUserIdAsync(currentUser?.UserId ?? Guid.Empty);
-                    if (currentUserReference == null)
+                    var currentUserReferenceId = currentUser?.UserReferenceId;
+                    if (currentUserReferenceId == null || currentUserReferenceId.Equals(Guid.Empty))
                     {
                         response.Messages.Add(new ApplicationMessage
                         {
@@ -119,12 +119,12 @@ namespace Rokys.Audit.Services.Services
                             MessageType = ApplicationMessageType.Error,
                         });
                     }
-                    var inboxDto = new Rokys.Audit.DTOs.Requests.InboxItems.InboxItemRequestDto
+                    var inboxDto = new DTOs.Requests.InboxItems.InboxItemRequestDto
                     {
                         PeriodAuditId = entity.PeriodAuditId,
                         PrevStatusId = null,
                         NextStatusId = (await _auditStatusRepository.GetFirstOrDefaultAsync(f => f.Code == AuditStatusCode.Pending && f.IsActive))?.AuditStatusId,
-                        UserId = currentUserReference?.UserReferenceId ?? null,
+                        UserId = currentUserReferenceId,
                         Comments = "Auditoría creada",
                         Action = "Creado",
                         IsActive = true
@@ -441,6 +441,10 @@ namespace Rokys.Audit.Services.Services
                 if (string.IsNullOrEmpty(action))
                     return ResponseDto.Error("Acción no válida.");
 
+                // Validate that the action is one of the supported actions
+                if (action != PeriodAuditAction.Approve && action != PeriodAuditAction.Cancel && action != PeriodAuditAction.Return)
+                    return ResponseDto.Error($"Acción '{requestDto.Action}' no es válida. Acciones permitidas: {PeriodAuditAction.Approve}, {PeriodAuditAction.Cancel}, {PeriodAuditAction.Return}.");
+
                 var currentUser = _httpContextAccessor.CurrentUser();
                 if (currentUser == null)
                     return ResponseDto.Error("Usuario no autenticado.");
@@ -453,6 +457,12 @@ namespace Rokys.Audit.Services.Services
                 var statusInReview = allStatus.FirstOrDefault(f => f.Code == AuditStatusCode.InReview);
                 var statusFinal = allStatus.FirstOrDefault(f => f.Code == AuditStatusCode.Completed);
                 var statusCanceled = allStatus.FirstOrDefault(f => f.Code == AuditStatusCode.Canceled);
+
+                // Validate that all required statuses are available
+                if (statusPending == null || statusInProgress == null || statusInReview == null || statusFinal == null || statusCanceled == null)
+                {
+                    return ResponseDto.Error("Los estados de auditoría no están configurados correctamente. Faltan estados requeridos en la base de datos.");
+                }
 
                 // Load all period audits
                 var entities = new List<PeriodAudit>();
@@ -471,9 +481,9 @@ namespace Rokys.Audit.Services.Services
                 {
                     bool ok = action switch
                     {
-                        "approve" => ent.StatusId == statusPending?.AuditStatusId || ent.StatusId == statusInProgress?.AuditStatusId || ent.StatusId == statusInReview?.AuditStatusId,
-                        "cancel" => ent.StatusId == statusInProgress?.AuditStatusId || ent.StatusId == statusPending?.AuditStatusId || ent.StatusId == statusInReview?.AuditStatusId,
-                        "return" => ent.StatusId == statusInReview?.AuditStatusId,
+                        PeriodAuditAction.Approve => ent.StatusId == statusPending?.AuditStatusId || ent.StatusId == statusInProgress?.AuditStatusId || ent.StatusId == statusInReview?.AuditStatusId,
+                        PeriodAuditAction.Cancel => ent.StatusId == statusInProgress?.AuditStatusId || ent.StatusId == statusPending?.AuditStatusId || ent.StatusId == statusInReview?.AuditStatusId,
+                        PeriodAuditAction.Return => ent.StatusId == statusInReview?.AuditStatusId,
                         _ => false
                     };
                     if (!ok) invalids.Add(ent.PeriodAuditId.ToString());
@@ -482,7 +492,7 @@ namespace Rokys.Audit.Services.Services
                     return ResponseDto.Error($"La acción no es aplicable a los siguientes PeriodAuditIds: {string.Join(',', invalids)}");
 
                 // Additional validation: Check for ScaleName requirement BEFORE making any changes
-                if (action == "approve") //TODO cambiar a constantes
+                if (action == PeriodAuditAction.Approve)
                 {
                     foreach (var ent in entities)
                     {
@@ -506,33 +516,34 @@ namespace Rokys.Audit.Services.Services
                 {
                     // reuse the previous behavior for a single entity: compute nextStatusId, nextUserId, prevUserId, actionText
                     // (extract core logic inline to avoid duplicating heavy refactor)
-                    // Prev user
+                    
+                    // Get PrevUserId from the last inbox item's NextUserId for this audit
                     Guid? prevUserId = null;
+                    var lastInboxItem = await _inboxItemsRepository.GetFirstOrDefaultAsync(
+                        filter: x => x.PeriodAuditId == ent.PeriodAuditId && x.IsActive,
+                        orderBy: q => q.OrderByDescending(x => x.SequenceNumber)
+                    );
+                    if (lastInboxItem != null)
+                    {
+                        prevUserId = lastInboxItem.NextUserId;
+                    }
+
+                    // Initialize NextUserId - will be set based on the action and target status
                     Guid? nextUserId = null;
-                    if (ent.ResponsibleAuditorId.HasValue)
-                    {
-                        var auditorRef = await _userReferenceRepository.GetFirstOrDefaultAsync(f => f.UserReferenceId == ent.ResponsibleAuditorId.Value && f.IsActive);
-                        if (auditorRef != null) prevUserId = auditorRef.UserReferenceId;
-                    }
-                    if (prevUserId == null && ent.AdministratorId.HasValue)
-                    {
-                        var adminRef = await _userReferenceRepository.GetFirstOrDefaultAsync(f => f.UserReferenceId == ent.AdministratorId.Value && f.IsActive);
-                        if (adminRef != null) prevUserId = adminRef.UserReferenceId;
-                    }
 
                     Guid? nextStatusId = null;
                     Guid? newStatusId = null;
                     string actionText = string.Empty;
-                    if (action == "approve")
+                    if (action == PeriodAuditAction.Approve)
                     {
                         if (ent.StatusId == statusPending?.AuditStatusId)
                         {
                             newStatusId = statusInProgress?.AuditStatusId ?? ent.StatusId ?? Guid.Empty;
                             nextStatusId = statusInProgress?.AuditStatusId;
+                            // Pending → InProgress: NextUser = Auditor
                             if (ent.ResponsibleAuditorId.HasValue)
                             {
-                                var auditorRef = await _userReferenceRepository.GetFirstOrDefaultAsync(f => f.UserReferenceId == ent.ResponsibleAuditorId.Value && f.IsActive);
-                                if (auditorRef != null) nextUserId = auditorRef.UserReferenceId;
+                                nextUserId = ent.ResponsibleAuditorId.Value;
                             }
                             actionText = "Aprobado";
                         }
@@ -540,11 +551,10 @@ namespace Rokys.Audit.Services.Services
                         {
                             newStatusId = statusInReview?.AuditStatusId ?? ent.StatusId ?? Guid.Empty;
                             nextStatusId = statusInReview?.AuditStatusId;
-                            // ScaleName validation already done above before any changes
-                            if (ent.ResponsibleAuditorId.HasValue)
+                            // InProgress → InReview: NextUser = Administrator (en revisión)
+                            if (ent.AdministratorId.HasValue)
                             {
-                                var auditorRef = await _userReferenceRepository.GetFirstOrDefaultAsync(f => f.UserReferenceId == ent.ResponsibleAuditorId.Value && f.IsActive);
-                                if (auditorRef != null) nextUserId = auditorRef.UserReferenceId;
+                                nextUserId = ent.AdministratorId.Value;
                             }
                             actionText = "Enviado a revisión";
                         }
@@ -552,35 +562,37 @@ namespace Rokys.Audit.Services.Services
                         {
                             newStatusId = statusFinal?.AuditStatusId ?? ent.StatusId ?? Guid.Empty;
                             nextStatusId = statusFinal?.AuditStatusId;
+                            // InReview → Final: NextUser = Administrator (finalizó)
                             if (ent.AdministratorId.HasValue)
                             {
-                                var adminRef = await _userReferenceRepository.GetFirstOrDefaultAsync(f => f.UserReferenceId == ent.AdministratorId.Value && f.IsActive);
-                                if (adminRef != null) nextUserId = adminRef.UserReferenceId;
+                                nextUserId = ent.AdministratorId.Value;
                             }
                             actionText = "Finalizado";
                         }
                     }
-                    else if (action == "cancel" || action == "cancelar")
+                    else if (action == PeriodAuditAction.Cancel)
                     {
                         newStatusId = statusCanceled?.AuditStatusId ?? ent.StatusId ?? Guid.Empty;
                         nextStatusId = statusCanceled?.AuditStatusId;
                         nextUserId = null;
                         actionText = "Cancelado";
                     }
-                    else if (action == "return")
+                    else if (action == PeriodAuditAction.Return)
                     {
                         newStatusId = statusInProgress?.AuditStatusId ?? ent.StatusId ?? Guid.Empty;
                         nextStatusId = statusInProgress?.AuditStatusId;
+                        // Return to InProgress: NextUser = Auditor
                         if (ent.ResponsibleAuditorId.HasValue)
                         {
-                            var auditorRef = await _userReferenceRepository.GetByUserIdAsync(ent.ResponsibleAuditorId.Value);
-                            if (auditorRef != null) nextUserId = auditorRef.UserReferenceId;
+                            nextUserId = ent.ResponsibleAuditorId.Value;
                         }
                         actionText = "Devuelto";
                     }
-                    else
+
+                    // Validate that we have a valid status transition
+                    if (newStatusId == null || newStatusId == Guid.Empty)
                     {
-                        return ResponseDto.Error("Acción no válida.");
+                        return ResponseDto.Error($"No se pudo determinar el estado de transición para la auditoría {ent.CorrelativeNumber}. Verifique que los estados de auditoría estén configurados correctamente.");
                     }
 
                     // Build inbox dto and update period audit status
