@@ -122,7 +122,7 @@ namespace Rokys.Audit.Services.Services
              var response = ResponseDto.Create<UserReferenceResponseDto>();
             try
             {
-                var entity = await _userReferenceRepository.GetFirstOrDefaultAsync(x => x.UserReferenceId == userReferenceId);
+                var entity = await _userReferenceRepository.GetByKeyAsync(userReferenceId);
                 if (entity == null)
                 {
                     response.Messages.Add(new ApplicationMessage

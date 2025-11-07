@@ -347,7 +347,7 @@ namespace Rokys.Audit.Services.Services
                         SupervisorName = storeEntity.Supervisor?.FullName,
                         AuditedQuantityPerStore = totalAudits,
                         Ranking = null, // se puede calcular luego si hay un ranking general
-                        MothlyScore = averageScore,
+                        MothlyScore = Math.Round(averageScore, 2),
                         LevelRisk = riskLevel,
                         AuditStatus = _mapper.Map<AuditStatusResponseDto>(storeEntity.AuditStatus)
                     };
@@ -377,7 +377,7 @@ namespace Rokys.Audit.Services.Services
                     Summaries = new List<SummaryReportResponseDto>{ new SummaryReportResponseDto
                     {
                         Ranking = entities.Count,
-                        ResultByMonth = globalAverage,
+                        ResultByMonth = Math.Round(globalAverage,2),
                         Risk = globalRiskLevel,
                         QuantityAudit = entities.Count
                     } }
@@ -410,7 +410,7 @@ namespace Rokys.Audit.Services.Services
                 var resultExport = new ExportReportResultDto();
                 var fileBase64 = ReportExcelGenerator.GenerateExcelReport(reportDataResponse.Data.Items.ToList());
                 resultExport.FileBase64 = fileBase64;
-                resultExport.FileName = $"Reporte-memos-{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+                resultExport.FileName = $"Reporte-{DateTime.Now:yyyyMMddHHmmss}.xlsx";
                 resultExport.MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                 response.Data = resultExport;
             }
