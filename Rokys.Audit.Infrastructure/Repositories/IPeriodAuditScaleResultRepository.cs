@@ -6,5 +6,6 @@ namespace Rokys.Audit.Infrastructure.Repositories
     public interface IPeriodAuditScaleResultRepository : IRepository<PeriodAuditScaleResult>
     {
         Task<List<PeriodAuditScaleResult>> GetByPeriodAuditGroupResultId(Guid periodAuditGroupResultId);
+        Task<bool> GetValidatorByScaleGroupIdAsync(Guid periodAuditGroupResultId, Guid scaleGroupId, Guid? excludeId = null);
     }
 }

@@ -30,7 +30,7 @@ namespace Rokys.Audit.WebAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] PeriodAuditScaleResultRequestDto dto)
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdatePeriodAuditScaleResultRequestDto dto)
         {
             var result = await _service.Update(id, dto);
             if (result.IsValid)

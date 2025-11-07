@@ -38,9 +38,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IPeriodAuditScoringCriteriaResultRepository _periodAuditScoringCriteriaResultRepository;
         private readonly IScoringCriteriaRepository _scoringCriteriaRepository;
         private readonly IScaleCompanyRepository _scaleCompanyRepository;
-        private readonly IPeriodAuditService _periodAuditService;
         private readonly IServiceScopeFactory _serviceScopeFactory;
-        private readonly FileSettings _fileSettings;
 
         public PeriodAuditGroupResultService(
             IPeriodAuditGroupResultRepository repository,
@@ -60,9 +58,7 @@ namespace Rokys.Audit.Services.Services
             IPeriodAuditScoringCriteriaResultRepository periodAuditScoringCriteriaResultRepository,
             IScoringCriteriaRepository scoringCriteriaRepository,
             IScaleCompanyRepository scaleCompanyRepository,
-            IPeriodAuditService periodAuditService,
-            IServiceScopeFactory serviceScopeFactory,
-            FileSettings fileSettings)
+            IServiceScopeFactory serviceScopeFactory)
         {
             _repository = repository;
             _validator = validator;
@@ -81,11 +77,9 @@ namespace Rokys.Audit.Services.Services
             _periodAuditScoringCriteriaResultRepository = periodAuditScoringCriteriaResultRepository;
             _scoringCriteriaRepository = scoringCriteriaRepository;
             _scaleCompanyRepository = scaleCompanyRepository;
-            _periodAuditService = periodAuditService;
             _serviceScopeFactory = serviceScopeFactory;
-            _fileSettings = fileSettings;
         }
-        public async Task<ResponseDto<PeriodAuditGroupResultResponseDto>> Create(PeriodAuditGroupResultRequestDto requestDto)
+        public async Task<ResponseDto<PeriodAuditGroupResultResponseDto>> Create(PeriodAuditGroupResultRequestDto requestDto, bool isTrasacction = false)
         {
             var response = ResponseDto.Create<PeriodAuditGroupResultResponseDto>();
             try
@@ -105,7 +99,7 @@ namespace Rokys.Audit.Services.Services
                 entity.IsActive = true;
                 _repository.Insert(entity);
 
-                var scaleGroupByGroupId = await _scaleGroupRepository.GetByGroupIdAsync(requestDto.GroupId);
+                var scaleGroups = await _scaleGroupRepository.GetByGroupIdAsync(requestDto.GroupId);
                 var currentPeriodAuditGroupResult = await _repository.GetByPeriodAuditIdAsync(requestDto.PeriodAuditId);
                 var currentWeighting = currentPeriodAuditGroupResult.Sum(x => x.TotalWeighting);
                 if(currentWeighting + requestDto.TotalWeighting > 100)
@@ -113,13 +107,13 @@ namespace Rokys.Audit.Services.Services
                     response = ResponseDto.Error<PeriodAuditGroupResultResponseDto>($"Ya tiene asignado {currentWeighting}% de ponderación, no se puede asignar una ponderación total de {requestDto.TotalWeighting + currentWeighting}%.");
                     return response;
                 }
-                if (scaleGroupByGroupId == null)
+                if (scaleGroups == null)
                 {
                     response = ResponseDto.Error<PeriodAuditGroupResultResponseDto>("No se encontró el grupo de escala asociado al grupo.");
                     return response;
                 }
 
-                foreach (var scale in scaleGroupByGroupId)
+                foreach (var scale in scaleGroups)
                 {
                     var periodAuditScaleResult = new PeriodAuditScaleResult
                     {
@@ -217,8 +211,9 @@ namespace Rokys.Audit.Services.Services
                         }
                     }
                 }
+                if (!isTrasacction)
+                    await _unitOfWork.CommitAsync();
 
-                await _unitOfWork.CommitAsync();
                 var createdEntity = await _repository.GetFirstOrDefaultAsync(
                     filter: x => x.PeriodAuditGroupResultId == entity.PeriodAuditGroupResultId && x.IsActive,
                     includeProperties: [x => x.Group, y => y.PeriodAudit]);
@@ -326,18 +321,11 @@ namespace Rokys.Audit.Services.Services
             return response;
         }
 
-        public async Task<ResponseDto<PeriodAuditGroupResultResponseDto>> Update(Guid id, PeriodAuditGroupResultRequestDto requestDto)
+        public async Task<ResponseDto<PeriodAuditGroupResultResponseDto>> Update(Guid id, UpdatePeriodAuditGroupResultRequestDto requestDto)
         {
             var response = ResponseDto.Create<PeriodAuditGroupResultResponseDto>();
             try
             {
-                var validator = new PeriodAuditGroupResultValidator(_repository, id);
-                var validate = await validator.ValidateAsync(requestDto);
-                if (!validate.IsValid)
-                {
-                    response.Messages.AddRange(validate.Errors.Select(e => new ApplicationMessage { Message = e.ErrorMessage, MessageType = ApplicationMessageType.Error }));
-                    return response;
-                }
                 var entity = await _repository.GetFirstOrDefaultAsync(
                     filter: x => x.PeriodAuditGroupResultId == id && x.IsActive);
                 if (entity == null)
@@ -345,95 +333,18 @@ namespace Rokys.Audit.Services.Services
                     response = ResponseDto.Error<PeriodAuditGroupResultResponseDto>("No se encontró el registro.");
                     return response;
                 }
-                var currentUser = _httpContextAccessor.CurrentUser();
-                _mapper.Map(requestDto, entity);
-                entity.UpdateAudit(currentUser.UserName);
-                _repository.Update(entity);
-
-                var scaleGroupByGroupId = await _scaleGroupRepository.GetByGroupIdAsync(requestDto.GroupId);
-
-                if (scaleGroupByGroupId == null)
+                var currentPeriodAuditGroupResult = await _repository.GetByPeriodAuditIdAsync(entity.PeriodAuditId);
+                var currentWeighting = currentPeriodAuditGroupResult.Sum(x => x.TotalWeighting);
+                if (currentWeighting + requestDto.TotalWeighting > 100)
                 {
-                    response = ResponseDto.Error<PeriodAuditGroupResultResponseDto>("No se encontró el grupo de escala asociado al grupo.");
+                    response = ResponseDto.Error<PeriodAuditGroupResultResponseDto>($"Ya tiene asignado {currentWeighting}% de ponderación, no se puede asignar una ponderación total de {requestDto.TotalWeighting + currentWeighting}%.");
                     return response;
                 }
-
-                var periodAuditScaleResults = await _periodAuditScaleResultRepository.GetByPeriodAuditGroupResultId(entity.PeriodAuditGroupResultId);
-
-                if (periodAuditScaleResults != null && periodAuditScaleResults.Any())
-                {
-                    if (periodAuditScaleResults.Any(x => x.ScaleGroup.GroupId != entity.GroupId))
-                    {
-                        foreach (var item in periodAuditScaleResults)
-                        {
-                            _periodAuditScaleResultRepository.Delete(item);
-                        }
-
-                        foreach (var scale in scaleGroupByGroupId)
-                        {
-                            var newScaleResult = new PeriodAuditScaleResult
-                            {
-                                PeriodAuditGroupResultId = entity.PeriodAuditGroupResultId,
-                                ScaleGroupId = scale.ScaleGroupId,
-                                AppliedWeighting = scale.Weighting,
-                                IsActive = true
-                            };
-                            newScaleResult.CreateAudit(currentUser.UserName);
-                            _periodAuditScaleResultRepository.Insert(newScaleResult);
-                        }
-                    }
-                    else
-                    {
-                        foreach (var scale in scaleGroupByGroupId)
-                        {
-                            var existing = periodAuditScaleResults.FirstOrDefault(x => x.ScaleGroupId == scale.ScaleGroupId);
-
-                            if (existing != null)
-                            {
-                                existing.AppliedWeighting = scale.Weighting;
-                                existing.UpdateAudit(currentUser.UserName);
-                                _periodAuditScaleResultRepository.Update(existing);
-                            }
-                            else
-                            {
-                                var newScaleResult = new PeriodAuditScaleResult
-                                {
-                                    PeriodAuditGroupResultId = entity.PeriodAuditGroupResultId,
-                                    ScaleGroupId = scale.ScaleGroupId,
-                                    AppliedWeighting = scale.Weighting,
-                                    IsActive = true
-                                };
-                                newScaleResult.CreateAudit(currentUser.UserName);
-                                _periodAuditScaleResultRepository.Insert(newScaleResult);
-                            }
-                        }
-
-                        var obsolete = periodAuditScaleResults
-                            .Where(x => !scaleGroupByGroupId.Any(s => s.ScaleGroupId == x.ScaleGroupId))
-                            .ToList();
-
-                        foreach (var item in obsolete)
-                        {
-                            _periodAuditScaleResultRepository.Delete(item);
-                        }
-                    }
-                }
-                else
-                {
-                    foreach (var scale in scaleGroupByGroupId)
-                    {
-                        var newScaleResult = new PeriodAuditScaleResult
-                        {
-                            PeriodAuditGroupResultId = entity.PeriodAuditGroupResultId,
-                            ScaleGroupId = scale.ScaleGroupId,
-                            AppliedWeighting = scale.Weighting,
-                            IsActive = true
-                        };
-                        newScaleResult.CreateAudit(currentUser.UserName);
-                        _periodAuditScaleResultRepository.Insert(newScaleResult);
-                    }
-                }
-
+                var currentUser = _httpContextAccessor.CurrentUser();
+                entity.TotalWeighting = requestDto.TotalWeighting;
+                entity.UpdateAudit(currentUser.UserName);
+                _repository.Update(entity);
+                
                 await _unitOfWork.CommitAsync();
                 response.Data = _mapper.Map<PeriodAuditGroupResultResponseDto>(entity);
             }

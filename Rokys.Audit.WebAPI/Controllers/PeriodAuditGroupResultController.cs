@@ -27,7 +27,7 @@ namespace Rokys.Audit.WebAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] PeriodAuditGroupResultRequestDto dto)
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdatePeriodAuditGroupResultRequestDto dto)
         {
             var result = await _service.Update(id, dto);
             if (result.IsValid)

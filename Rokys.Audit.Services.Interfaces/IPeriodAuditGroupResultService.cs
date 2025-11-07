@@ -7,7 +7,9 @@ namespace Rokys.Audit.Services.Interfaces
 {
     public interface IPeriodAuditGroupResultService : IBaseService<PeriodAuditGroupResultRequestDto, PeriodAuditGroupResultResponseDto>
     {
+        public Task<ResponseDto<PeriodAuditGroupResultResponseDto>> Create(PeriodAuditGroupResultRequestDto requestDto, bool isTrasacction = false);
         Task<ResponseDto<PaginationResponseDto<PeriodAuditGroupResultResponseDto>>> GetPaged(PeriodAuditGroupResultFilterRequestDto filterRequestDto);
         Task<ResponseDto<bool>> Recalculate(Guid periodAuditGroupResultId);
+        Task<ResponseDto<PeriodAuditGroupResultResponseDto>> Update(Guid id, UpdatePeriodAuditGroupResultRequestDto requestDto);
     }
 }

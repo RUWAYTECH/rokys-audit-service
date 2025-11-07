@@ -161,7 +161,7 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<List<PeriodAuditTableScaleTemplateResultResponseDto>>();
             try
             {
-                var entities = await _repository.GetAsync();
+                var entities = await _repository.GetAsync(filter: x => x.IsActive);
                 response.Data = _mapper.Map<List<PeriodAuditTableScaleTemplateResultResponseDto>>(entities);
             }
             catch (Exception ex)

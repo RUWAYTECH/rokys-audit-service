@@ -11,5 +11,6 @@ namespace Rokys.Audit.Services.Interfaces
         Task<ResponseDto<PaginationResponseDto<PeriodAuditScaleResultResponseDto>>> GetPaged(PeriodAuditScaleResultFilterRequestDto filter);
         Task<ResponseDto<PeriodAuditScaleResultCustomResponseDto>> GetByIdCustomData(Guid id);
         Task<ResponseDto<bool>> UpdateAllFieldValues(Guid periodAuditGroupResultId, PeriodAuditFieldValuesUpdateAllValuesRequestDto periodAuditFieldValuesUpdateAllValuesRequestDto);
+        public Task<ResponseDto<PeriodAuditScaleResultResponseDto>> Update(Guid id, UpdatePeriodAuditScaleResultRequestDto requestDto);
     }
 }

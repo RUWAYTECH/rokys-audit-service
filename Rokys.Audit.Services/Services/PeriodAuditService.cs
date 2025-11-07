@@ -7,6 +7,7 @@ using Rokys.Audit.Common.Extensions;
 using Rokys.Audit.Common.Helpers;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.PeriodAudit;
+using Rokys.Audit.DTOs.Requests.PeriodAuditGroupResult;
 using Rokys.Audit.DTOs.Responses.Common;
 using Rokys.Audit.DTOs.Responses.PeriodAudit;
 using Rokys.Audit.Infrastructure.IMapping;
@@ -37,6 +38,10 @@ namespace Rokys.Audit.Services.Services
         private readonly IPeriodAuditFieldValuesRepository _periodAuditFieldValuesRepository;
         private readonly IPeriodAuditScaleSubResultRepository _periodAuditScaleSubResultRepository;
         private readonly IPeriodAuditScoringCriteriaResultRepository _periodAuditScoringCriteriaResultRepository;
+        private readonly IGroupRepository _groupRepository;
+        private readonly IEnterpriseRepository _enterpriseRepository;
+        private readonly IPeriodAuditGroupResultService _periodAuditGroupResultService;
+        private readonly IStoreRepository _storeRepository;
 
         public PeriodAuditService(
             IRepository<PeriodAudit> repository,
@@ -55,7 +60,10 @@ namespace Rokys.Audit.Services.Services
             IPeriodAuditTableScaleTemplateResultRepository periodAuditTableScaleTemplateResultRepository,
             IPeriodAuditFieldValuesRepository periodAuditFieldValuesRepository,
             IPeriodAuditScaleSubResultRepository periodAuditScaleSubResultRepository,
-            IPeriodAuditScoringCriteriaResultRepository periodAuditScoringCriteriaResultRepository)
+            IPeriodAuditScoringCriteriaResultRepository periodAuditScoringCriteriaResultRepository,
+            IGroupRepository groupRepository,
+            IPeriodAuditGroupResultService periodAuditGroupResultService,
+            IStoreRepository storeRepository)
         {
             _repository = repository;
             _validator = validator;
@@ -74,6 +82,9 @@ namespace Rokys.Audit.Services.Services
             _periodAuditFieldValuesRepository = periodAuditFieldValuesRepository;
             _periodAuditScaleSubResultRepository = periodAuditScaleSubResultRepository;
             _periodAuditScoringCriteriaResultRepository = periodAuditScoringCriteriaResultRepository;
+            _groupRepository = groupRepository;
+            _periodAuditGroupResultService = periodAuditGroupResultService;
+            _storeRepository = storeRepository;
         }
 
         public async Task<ResponseDto<PeriodAuditResponseDto>> Create(PeriodAuditRequestDto requestDto)
@@ -104,6 +115,22 @@ namespace Rokys.Audit.Services.Services
                 entity.StatusId = auditStatus.AuditStatusId;
                 entity.CreateAudit(currentUserName);
                 _repository.Insert(entity);
+
+                var store = await _storeRepository.GetFirstOrDefaultAsync(filter: x => x.StoreId == entity.StoreId && x.IsActive);
+                var group = await _groupRepository.GetAsync(filter: x => x.EnterpriseId == store.EnterpriseId && x.IsActive);
+                // Crear resultados de grupo de auditoría asociados a la nueva auditoría
+                foreach (var grp in group)
+                {
+                    var newPeriodAuditGroupResult = new PeriodAuditGroupResultRequestDto
+                    {
+                        PeriodAuditId = entity.PeriodAuditId,
+                        GroupId = grp.GroupId,
+                        ScoreValue = 0,
+                        TotalWeighting = grp.Weighting,
+                    };
+                    await _periodAuditGroupResultService.Create(newPeriodAuditGroupResult, true);
+                }
+
                 await _unitOfWork.CommitAsync();
               
                 // Crear registro en InboxItems: prev user = administrador, next user = auditor responsable
