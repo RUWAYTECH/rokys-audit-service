@@ -118,94 +118,12 @@ namespace Rokys.Audit.Services.Services
                 var entity = _mapper.Map<PeriodAuditScaleResult>(requestDto);
                 entity.CreateAudit(currentUser.UserName);
                 entity.IsActive = true;
-                entity.AppliedWeighting = scaleGroup.Weighting;
+                entity.AppliedWeighting = requestDto.AppliedWeighting.HasValue && requestDto.AppliedWeighting >= 0 ? requestDto.AppliedWeighting.Value : scaleGroup.Weighting;
                 entity.SortOrder = periodAuditScaleResult != null ? periodAuditScaleResult.SortOrder + 1 : 1 ;
                 _repository.Insert(entity);
-                var tableScaleTemplates = await _tableScaleTemplateRepository.GetByScaleGroupId(entity.ScaleGroupId);
-                if (tableScaleTemplates != null && tableScaleTemplates.Any())
-                {
-                    foreach (var template in tableScaleTemplates)
-                    {
-                        var periodAuditTableScaleTemplateResult = new PeriodAuditTableScaleTemplateResult
-                        {
-                            PeriodAuditScaleResultId = entity.PeriodAuditScaleResultId,
-                            TableScaleTemplateId = template.TableScaleTemplateId,
-                            Code = template.Code,
-                            Name = template.Name,
-                            Orientation = template.Orientation,
-                            TemplateData = template.TemplateData,
-                            SortOrder = template.SortOrder
-                        };
-                        periodAuditTableScaleTemplateResult.CreateAudit(currentUser.UserName);
-                        _periodAuditTableScaleTemplateResultRepository.Insert(periodAuditTableScaleTemplateResult);
-
-                        var auditTemplateField = await _auditTemplateFieldRepository.GetByTemplateId(template.TableScaleTemplateId);
-                        if (auditTemplateField != null && auditTemplateField.Any())
-                        {
-                            foreach (var field in auditTemplateField)
-                            {
-                                var periodAuditFieldValue = new PeriodAuditFieldValues
-                                {
-                                    PeriodAuditTableScaleTemplateResultId = periodAuditTableScaleTemplateResult.PeriodAuditTableScaleTemplateResultId,
-                                    AuditTemplateFieldId = field.AuditTemplateFieldId,
-                                    FieldCode = field.FieldCode,
-                                    FieldName = field.FieldName,
-                                    FieldType = field.FieldType,
-                                    IsCalculated = field.IsCalculated,
-                                    CalculationFormula = field.CalculationFormula,
-                                    AcumulationType = field.AcumulationType,
-                                    FieldOptions = field.FieldOptions,
-                                    SortOrder = field.SortOrder,
-                                    DefaultValue = field.DefaultValue
-                                };
-                                periodAuditFieldValue.CreateAudit(currentUser.UserName);
-                                _periodAuditFieldValuesRepository.Insert(periodAuditFieldValue);
-                            }
-                        }
-                    }
-                }
-                var criteriaSubResults = await _criteriaSubResultRepository.GetByScaleGroupIdAsync(entity.ScaleGroupId);
-                if (criteriaSubResults != null && criteriaSubResults.Any())
-                {
-                    foreach (var criteriaSubResult in criteriaSubResults)
-                    {
-                        var periodAuditScaleSubResult = new PeriodAuditScaleSubResult
-                        {
-                            PeriodAuditScaleResultId = entity.PeriodAuditScaleResultId,
-                            CriteriaSubResultId = criteriaSubResult.CriteriaSubResultId,
-                            CriteriaName = criteriaSubResult.CriteriaName,
-                            CriteriaCode = criteriaSubResult.CriteriaCode,
-                            ColorCode = criteriaSubResult.ColorCode,
-                            AppliedFormula = criteriaSubResult.ResultFormula,
-                            ScoreObtained = 0,
-                        };
-                        periodAuditScaleSubResult.CreateAudit(currentUser.UserName);
-                        _periodAuditScaleSubResultRepository.Insert(periodAuditScaleSubResult);
-                    }
-                }
-
-                var scoringCriterias = await _scoringCriteriaRepository.GetByScaleGroupIdAsync(entity.ScaleGroupId);
-                if (scoringCriterias != null && scoringCriterias.Any())
-                {
-                    foreach (var scoringCriteria in scoringCriterias)
-                    {
-                        var periodAuditScoringCriteriaResult = new PeriodAuditScoringCriteriaResult
-                        {
-                            PeriodAuditScaleResultId = entity.PeriodAuditScaleResultId,
-                            CriteriaName = scoringCriteria.CriteriaName,
-                            CriteriaCode = scoringCriteria.CriteriaCode,
-                            ResultFormula = scoringCriteria.ResultFormula,
-                            ComparisonOperator = scoringCriteria.ComparisonOperator,
-                            ExpectedValue = scoringCriteria.ExpectedValue,
-                            Score = scoringCriteria.Score,
-                            SortOrder = scoringCriteria.SortOrder,
-                            ResultObtained = null,
-                        };
-                        periodAuditScoringCriteriaResult.CreateAudit(currentUser.UserName);
-                        _periodAuditScoringCriteriaResultRepository.Insert(periodAuditScoringCriteriaResult);
-                    }
-                }
-
+                var scaleGroupResponse = _mapper.Map<ScaleGroupResponseDto>(scaleGroup);
+                var periodAuditScaleResultResponse = _mapper.Map<PeriodAuditScaleResultResponseDto>(periodAuditScaleResult);
+                await _periodAuditGroupResultService.CreateTableScaleTemplateResults(scaleGroupResponse, periodAuditScaleResultResponse);
                 await _unitOfWork.CommitAsync();
                 var createdEntity = await _repository.GetFirstOrDefaultAsync(
                     filter: x => x.PeriodAuditScaleResultId == entity.PeriodAuditScaleResultId && x.IsActive,

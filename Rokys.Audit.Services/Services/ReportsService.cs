@@ -324,11 +324,13 @@ namespace Rokys.Audit.Services.Services
                         );
                     }
                     string riskLevel = "Sin Escala";
+                    string riskColor = "#FFFFFF";
                     foreach (var scale in currentScales)
                     {
                         if (averageScore >= scale.MinValue && averageScore <= scale.MaxValue)
                         {
                             riskLevel = scale.Name;
+                            riskColor = scale.ColorCode ?? "#FFFFFF";
                             break;
                         }
                     }
@@ -349,6 +351,7 @@ namespace Rokys.Audit.Services.Services
                         Ranking = null, // se puede calcular luego si hay un ranking general
                         MothlyScore = Math.Round(averageScore, 2),
                         LevelRisk = riskLevel,
+                        RiskColor = riskColor,
                         AuditStatus = _mapper.Map<AuditStatusResponseDto>(storeEntity.AuditStatus)
                     };
 
@@ -362,11 +365,13 @@ namespace Rokys.Audit.Services.Services
                 }
                 var globalAverage = itemDtos.Any() ? itemDtos.Average(x => x.MothlyScore) : 0m;
                 string globalRiskLevel = "Sin Escala";
+                string globalRiskColor = "#FFFFFF";
                 foreach (var scale in scaleCompanies)
                 {
                     if (globalAverage >= scale.MinValue && globalAverage <= scale.MaxValue)
                     {
                         globalRiskLevel = scale.Name;
+                        globalRiskColor = scale.ColorCode ?? "#FFFFFF";
                         break;
                     }
                 }
@@ -379,6 +384,7 @@ namespace Rokys.Audit.Services.Services
                         Ranking = entities.Count,
                         ResultByMonth = Math.Round(globalAverage,2),
                         Risk = globalRiskLevel,
+                        RiskColor = globalRiskColor,
                         QuantityAudit = entities.Count
                     } }
 

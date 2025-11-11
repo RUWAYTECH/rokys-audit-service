@@ -12,10 +12,10 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
         {
             _context = context;
         }
-        public async Task<List<PeriodAuditGroupResult>> GetByPeriodAuditIdAsync(Guid periodAuditId)
+        public async Task<List<PeriodAuditGroupResult>> GetByPeriodAuditIdAsync(Guid periodAuditId, Guid? id = null)
         {
             return await _context.PeriodAuditGroupResults
-                .Where(pagr => pagr.PeriodAuditId == periodAuditId && pagr.IsActive)
+                .Where(pagr => pagr.PeriodAuditId == periodAuditId && pagr.IsActive && (id == null || pagr.PeriodAuditGroupResultId != id))
                 .ToListAsync();
         }
         public async Task<bool> GetValidatorByGroupIdAsync(Guid periodAuditId, Guid groupId, Guid? id = null)

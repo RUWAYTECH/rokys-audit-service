@@ -8,14 +8,14 @@ using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.PeriodAuditGroupResult;
 using Rokys.Audit.DTOs.Responses.Common;
 using Rokys.Audit.DTOs.Responses.PeriodAuditGroupResult;
+using Rokys.Audit.DTOs.Responses.PeriodAuditScaleResult;
+using Rokys.Audit.DTOs.Responses.ScaleGroup;
 using Rokys.Audit.Infrastructure.IMapping;
 using Rokys.Audit.Infrastructure.Persistence.Abstract;
 using Rokys.Audit.Infrastructure.Repositories;
 using Rokys.Audit.Model.Tables;
 using Rokys.Audit.Services.Interfaces;
-using Rokys.Audit.Services.Validations;
 using System.Linq.Expressions;
-using static Rokys.Audit.Common.Constant.Constants;
 
 namespace Rokys.Audit.Services.Services
 {
@@ -126,90 +126,9 @@ namespace Rokys.Audit.Services.Services
                     periodAuditScaleResult.CreateAudit(currentUser.UserName);
                     _periodAuditScaleResultRepository.Insert(periodAuditScaleResult);
 
-                    var tableScaleTemplates = await _tableScaleTemplateRepository.GetByScaleGroupId(periodAuditScaleResult.ScaleGroupId);
-                    if (tableScaleTemplates != null && tableScaleTemplates.Any())
-                    {
-                        foreach (var template in tableScaleTemplates)
-                        {
-                            var periodAuditTableScaleTemplateResult = new PeriodAuditTableScaleTemplateResult
-                            {
-                                PeriodAuditScaleResultId = periodAuditScaleResult.PeriodAuditScaleResultId,
-                                TableScaleTemplateId = template.TableScaleTemplateId,
-                                Code = template.Code,
-                                Name = template.Name,
-                                Orientation = template.Orientation,
-                                TemplateData = template.TemplateData,
-                                SortOrder = template.SortOrder
-                            };
-                            periodAuditTableScaleTemplateResult.CreateAudit(currentUser.UserName);
-                            _periodAuditTableScaleTemplateResultRepository.Insert(periodAuditTableScaleTemplateResult);
-
-                            var auditTemplateField = await _auditTemplateFieldRepository.GetByTemplateId(template.TableScaleTemplateId);
-                            if (auditTemplateField != null && auditTemplateField.Any())
-                            {
-                                foreach (var field in auditTemplateField)
-                                {
-                                    var periodAuditFieldValue = new PeriodAuditFieldValues
-                                    {
-                                        PeriodAuditTableScaleTemplateResultId = periodAuditTableScaleTemplateResult.PeriodAuditTableScaleTemplateResultId,
-                                        AuditTemplateFieldId = field.AuditTemplateFieldId,
-                                        FieldCode = field.FieldCode,
-                                        FieldName = field.FieldName,
-                                        FieldType = field.FieldType,
-                                        IsCalculated = field.IsCalculated,
-                                        CalculationFormula = field.CalculationFormula,
-                                        AcumulationType = field.AcumulationType,
-                                        FieldOptions = field.FieldOptions,
-                                        SortOrder = field.SortOrder,
-                                        DefaultValue = field.DefaultValue
-                                    };
-                                    periodAuditFieldValue.CreateAudit(currentUser.UserName);
-                                    _periodAuditFieldValuesRepository.Insert(periodAuditFieldValue);
-                                }
-                            }
-                        }
-                    }
-                    var criteriaSubResults = await _criteriaSubResultRepository.GetByScaleGroupIdAsync(scale.ScaleGroupId);
-                    if (criteriaSubResults != null && criteriaSubResults.Any())
-                    {
-                        foreach (var criteriaSubResult in criteriaSubResults)
-                        {
-                            var periodAuditScaleSubResult = new PeriodAuditScaleSubResult
-                            {
-                                PeriodAuditScaleResultId = periodAuditScaleResult.PeriodAuditScaleResultId,
-                                CriteriaSubResultId = criteriaSubResult.CriteriaSubResultId,
-                                CriteriaName = criteriaSubResult.CriteriaName,
-                                CriteriaCode = criteriaSubResult.CriteriaCode,
-                                ColorCode = criteriaSubResult.ColorCode,
-                                AppliedFormula = criteriaSubResult.ResultFormula,
-                                ScoreObtained = 0,
-                            };
-                            periodAuditScaleSubResult.CreateAudit(currentUser.UserName);
-                            _periodAuditScaleSubResultRepository.Insert(periodAuditScaleSubResult);
-                        }
-                    }
-
-                    var scoringCriterias = await _scoringCriteriaRepository.GetByScaleGroupIdAsync(scale.ScaleGroupId);
-                    if (scoringCriterias != null && scoringCriterias.Any())
-                    {
-                        foreach (var scoringCriteria in scoringCriterias)
-                        {
-                            var periodAuditScoringCriteriaResult = new PeriodAuditScoringCriteriaResult
-                            {
-                                PeriodAuditScaleResultId = periodAuditScaleResult.PeriodAuditScaleResultId,
-                                CriteriaName = scoringCriteria.CriteriaName,
-                                CriteriaCode = scoringCriteria.CriteriaCode,
-                                ResultFormula = scoringCriteria.ResultFormula,
-                                ComparisonOperator = scoringCriteria.ComparisonOperator,
-                                ExpectedValue = scoringCriteria.ExpectedValue,
-                                Score = scoringCriteria.Score,
-                                SortOrder = scoringCriteria.SortOrder,
-                                ResultObtained = null,
-                            };
-                            periodAuditScoringCriteriaResult.CreateAudit(currentUser.UserName);
-                            _periodAuditScoringCriteriaResultRepository.Insert(periodAuditScoringCriteriaResult);
-                        }
-                    }
+                    var scaleResponse = _mapper.Map<ScaleGroupResponseDto>(scale);
+                    var periodAuditScaleResultResponse = _mapper.Map<PeriodAuditScaleResultResponseDto>(periodAuditScaleResult);
+                    await CreateTableScaleTemplateResults(scaleResponse, periodAuditScaleResultResponse);
                 }
                 if (!isTrasacction)
                     await _unitOfWork.CommitAsync();
@@ -333,8 +252,8 @@ namespace Rokys.Audit.Services.Services
                     response = ResponseDto.Error<PeriodAuditGroupResultResponseDto>("No se encontró el registro.");
                     return response;
                 }
-                var currentPeriodAuditGroupResult = await _repository.GetByPeriodAuditIdAsync(entity.PeriodAuditId);
-                var currentWeighting = currentPeriodAuditGroupResult.Sum(x => x.TotalWeighting);
+                var currentPeriodAuditGroupResult = await _repository.GetByPeriodAuditIdAsync(entity.PeriodAuditId, id);
+                var currentWeighting = currentPeriodAuditGroupResult.Sum(x => x.PeriodAuditGroupResultId == id ? 0 : x.TotalWeighting);
                 if (currentWeighting + requestDto.TotalWeighting > 100)
                 {
                     response = ResponseDto.Error<PeriodAuditGroupResultResponseDto>($"Ya tiene asignado {currentWeighting}% de ponderación, no se puede asignar una ponderación total de {requestDto.TotalWeighting + currentWeighting}%.");
@@ -468,6 +387,95 @@ namespace Rokys.Audit.Services.Services
                 response = ResponseDto.Error<bool>(ex.Message);
             }
             return response;
+        }
+
+        public async Task CreateTableScaleTemplateResults(ScaleGroupResponseDto scale, PeriodAuditScaleResultResponseDto periodAuditScaleResult)
+        {
+            var currentUser = _httpContextAccessor.CurrentUser();
+            var tableScaleTemplates = await _tableScaleTemplateRepository.GetByScaleGroupId(periodAuditScaleResult.ScaleGroupId);
+            if (tableScaleTemplates != null && tableScaleTemplates.Any())
+            {
+                foreach (var template in tableScaleTemplates)
+                {
+                    var periodAuditTableScaleTemplateResult = new PeriodAuditTableScaleTemplateResult
+                    {
+                        PeriodAuditScaleResultId = periodAuditScaleResult.PeriodAuditScaleResultId,
+                        TableScaleTemplateId = template.TableScaleTemplateId,
+                        Code = template.Code,
+                        Name = template.Name,
+                        Orientation = template.Orientation,
+                        TemplateData = template.TemplateData,
+                        SortOrder = template.SortOrder
+                    };
+                    periodAuditTableScaleTemplateResult.CreateAudit(currentUser.UserName);
+                    _periodAuditTableScaleTemplateResultRepository.Insert(periodAuditTableScaleTemplateResult);
+
+                    var auditTemplateField = await _auditTemplateFieldRepository.GetByTemplateId(template.TableScaleTemplateId);
+                    if (auditTemplateField != null && auditTemplateField.Any())
+                    {
+                        foreach (var field in auditTemplateField)
+                        {
+                            var periodAuditFieldValue = new PeriodAuditFieldValues
+                            {
+                                PeriodAuditTableScaleTemplateResultId = periodAuditTableScaleTemplateResult.PeriodAuditTableScaleTemplateResultId,
+                                AuditTemplateFieldId = field.AuditTemplateFieldId,
+                                FieldCode = field.FieldCode,
+                                FieldName = field.FieldName,
+                                FieldType = field.FieldType,
+                                IsCalculated = field.IsCalculated,
+                                CalculationFormula = field.CalculationFormula,
+                                AcumulationType = field.AcumulationType,
+                                FieldOptions = field.FieldOptions,
+                                SortOrder = field.SortOrder,
+                                DefaultValue = field.DefaultValue
+                            };
+                            periodAuditFieldValue.CreateAudit(currentUser.UserName);
+                            _periodAuditFieldValuesRepository.Insert(periodAuditFieldValue);
+                        }
+                    }
+                }
+            }
+            var criteriaSubResults = await _criteriaSubResultRepository.GetByScaleGroupIdAsync(scale.ScaleGroupId);
+            if (criteriaSubResults != null && criteriaSubResults.Any())
+            {
+                foreach (var criteriaSubResult in criteriaSubResults)
+                {
+                    var periodAuditScaleSubResult = new PeriodAuditScaleSubResult
+                    {
+                        PeriodAuditScaleResultId = periodAuditScaleResult.PeriodAuditScaleResultId,
+                        CriteriaSubResultId = criteriaSubResult.CriteriaSubResultId,
+                        CriteriaName = criteriaSubResult.CriteriaName,
+                        CriteriaCode = criteriaSubResult.CriteriaCode,
+                        ColorCode = criteriaSubResult.ColorCode,
+                        AppliedFormula = criteriaSubResult.ResultFormula,
+                        ScoreObtained = 0,
+                    };
+                    periodAuditScaleSubResult.CreateAudit(currentUser.UserName);
+                    _periodAuditScaleSubResultRepository.Insert(periodAuditScaleSubResult);
+                }
+            }
+
+            var scoringCriterias = await _scoringCriteriaRepository.GetByScaleGroupIdAsync(scale.ScaleGroupId);
+            if (scoringCriterias != null && scoringCriterias.Any())
+            {
+                foreach (var scoringCriteria in scoringCriterias)
+                {
+                    var periodAuditScoringCriteriaResult = new PeriodAuditScoringCriteriaResult
+                    {
+                        PeriodAuditScaleResultId = periodAuditScaleResult.PeriodAuditScaleResultId,
+                        CriteriaName = scoringCriteria.CriteriaName,
+                        CriteriaCode = scoringCriteria.CriteriaCode,
+                        ResultFormula = scoringCriteria.ResultFormula,
+                        ComparisonOperator = scoringCriteria.ComparisonOperator,
+                        ExpectedValue = scoringCriteria.ExpectedValue,
+                        Score = scoringCriteria.Score,
+                        SortOrder = scoringCriteria.SortOrder,
+                        ResultObtained = null,
+                    };
+                    periodAuditScoringCriteriaResult.CreateAudit(currentUser.UserName);
+                    _periodAuditScoringCriteriaResultRepository.Insert(periodAuditScoringCriteriaResult);
+                }
+            }
         }
     }
 }

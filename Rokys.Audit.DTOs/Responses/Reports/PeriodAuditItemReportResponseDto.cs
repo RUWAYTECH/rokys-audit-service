@@ -19,6 +19,7 @@ namespace Rokys.Audit.DTOs.Responses.Reports
         public decimal MothlyScore { get; set; }
         public int AuditedQuantityPerStore { get; set; }
         public string LevelRisk { get; set; }
+        public string RiskColor { get; set; }
         public AuditStatusResponseDto? AuditStatus { get; set; }
         // fin Audit Info
     }
