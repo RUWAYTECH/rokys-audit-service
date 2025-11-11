@@ -1,0 +1,82 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Confirmación de Auditoria</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f6f6f6;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 2px 8px rgba(45, 140, 53, 0.08);
+            padding: 32px 28px;
+            border-top: 2px solid #2D8C35;
+        }
+
+        .header {
+            color: #2D8C35;
+            font-size: 1.6em;
+            font-weight: bold;
+            margin-bottom: 18px;
+        }
+
+        .info {
+            margin-bottom: 18px;
+        }
+
+        .label {
+            color: #2D8C35;
+            font-weight: 600;
+        }
+
+        .value {
+            color: #333;
+        }
+
+        .footer {
+            font-size: 0.95em;
+            color: #888;
+            margin-top: 28px;
+            text-align: center;
+        }
+
+        .button {
+            display: inline-block;
+            background: #2D8C35;
+            color: #fff;
+            padding: 10px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">Notificación de Auditoría, pendiente de aprobar</div>
+        <div class="info">
+            <p style="margin-bottom: 18px; font-size: 1.08em; color: #333;">
+                Estimado/a <span class="label">{{ AdministratorFullName }}</span>,<br><br>
+                Te informamos que debe aprobar la auditoría con el número <span class="label">{{ CorrelativeNumber }}</span>. Para la tienda {{ StoreName }}<br><br>
+                Participantes:<br>
+                <b>Supervisor:</b> <span class="value">{{ SupervisorFullName }}</span>.<br>
+                <b>Auditor:</b> <span class="value">{{ AuditorFullName }}</span>.<br><br>
+                Para tu comodidad, puedes realizar la revisión de la auditoría directamente en el Sistema de Auditoría.
+            </p>
+        </div>
+        <div class="footer">
+            Si tienes alguna consulta o necesitas asistencia, no dudes en contactar al área de TI.<br>
+            Este mensaje fue generado automáticamente por el sistema de Auditoría.
+        </div>
+    </div>
+</body>
+</html>

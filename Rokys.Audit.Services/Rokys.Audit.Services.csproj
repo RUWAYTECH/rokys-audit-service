@@ -10,6 +10,7 @@
     <PackageReference Include="ClosedXML" Version="0.105.0" />
     <PackageReference Include="FluentValidation" Version="11.4.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
+    <PackageReference Include="Scriban" Version="6.2.1" />
   </ItemGroup>
 
   <ItemGroup>

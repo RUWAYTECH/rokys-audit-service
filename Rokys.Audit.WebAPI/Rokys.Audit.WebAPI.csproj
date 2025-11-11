@@ -62,6 +62,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Template\Mail\NotificationSupervisor.NewAudit.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Template\Mail\Operaciones.Confirmacion.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Rokys.Audit.DTOs.Requests.Email;
 using Rokys.Audit.Infrastructure.Mapping.AM;
 using Rokys.Audit.Infrastructure.Persistence.Dp;
 using Rokys.Audit.Infrastructure.Persistence.EF.Storage;
@@ -70,7 +71,7 @@ namespace Rokys.Audit.WebAPI
             {
                 return new SqlConnection(connectionString);
             });
-
+            services.Configure<EmailSettings>(Configuration.GetSection("Email"));
             // Add HttpClient factory
             services.AddHttpClient();
 

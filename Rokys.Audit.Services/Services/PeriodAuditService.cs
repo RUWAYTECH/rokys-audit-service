@@ -1,3 +1,5 @@
+using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
+using DocumentFormat.OpenXml.Vml.Office;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -10,11 +12,13 @@ using Rokys.Audit.DTOs.Requests.PeriodAudit;
 using Rokys.Audit.DTOs.Requests.PeriodAuditGroupResult;
 using Rokys.Audit.DTOs.Responses.Common;
 using Rokys.Audit.DTOs.Responses.PeriodAudit;
+using Rokys.Audit.External.Services;
 using Rokys.Audit.Infrastructure.IMapping;
 using Rokys.Audit.Infrastructure.Persistence.Abstract;
 using Rokys.Audit.Infrastructure.Repositories;
 using Rokys.Audit.Model.Tables;
 using Rokys.Audit.Services.Interfaces;
+using Rokys.Audit.Services.Services.Emails;
 using System.Linq.Expressions;
 
 namespace Rokys.Audit.Services.Services
@@ -42,6 +46,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IEnterpriseRepository _enterpriseRepository;
         private readonly IPeriodAuditGroupResultService _periodAuditGroupResultService;
         private readonly IStoreRepository _storeRepository;
+        private readonly IEmailService _emailService;
 
         public PeriodAuditService(
             IRepository<PeriodAudit> repository,
@@ -63,7 +68,8 @@ namespace Rokys.Audit.Services.Services
             IPeriodAuditScoringCriteriaResultRepository periodAuditScoringCriteriaResultRepository,
             IGroupRepository groupRepository,
             IPeriodAuditGroupResultService periodAuditGroupResultService,
-            IStoreRepository storeRepository)
+            IStoreRepository storeRepository,
+            IEmailService emailService)
         {
             _repository = repository;
             _validator = validator;
@@ -85,6 +91,7 @@ namespace Rokys.Audit.Services.Services
             _groupRepository = groupRepository;
             _periodAuditGroupResultService = periodAuditGroupResultService;
             _storeRepository = storeRepository;
+            _emailService = emailService;
         }
 
         public async Task<ResponseDto<PeriodAuditResponseDto>> Create(PeriodAuditRequestDto requestDto)
@@ -130,9 +137,8 @@ namespace Rokys.Audit.Services.Services
                     };
                     await _periodAuditGroupResultService.Create(newPeriodAuditGroupResult, true);
                 }
-
+                
                 await _unitOfWork.CommitAsync();
-              
                 // Crear registro en InboxItems: prev user = administrador, next user = auditor responsable
                 try
                 {
@@ -646,8 +652,17 @@ namespace Rokys.Audit.Services.Services
                     if (!inboxCreateResponse.IsValid)
                         _logger.LogWarning("Inbox item creation during batch ProcessAction returned non-valid for {Id}: {Messages}", ent.PeriodAuditId, string.Join(';', inboxCreateResponse.Messages.Select(m => m.Message)));
                 }
-
                 await _unitOfWork.CommitAsync();
+
+                foreach ( var ent in entities)
+                {
+                    var periodAuditUpdate = await _repository.GetFirstOrDefaultAsync(filter: x => x.PeriodAuditId == ent.PeriodAuditId && x.IsActive,
+                    includeProperties: [at => at.ResponsibleAuditor, s => s.Supervisor, a => a.Administrator, t => t.Store]);
+                    if (periodAuditUpdate.StatusId == statusInReview?.AuditStatusId)
+                    {
+                        await BuildSendEmail.NotifySupervisorOfNewAudit(_emailService, periodAuditUpdate);
+                    }
+                }
 
                 response = ResponseDto.Create(new ApplicationMessage[] { });
             }
