@@ -126,6 +126,11 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .HasForeignKey(par => par.PeriodAuditId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            builder.HasMany(x => x.PeriodAuditParticipants)
+                .WithOne(p => p.PeriodAudit)
+                .HasForeignKey(p => p.PeriodAuditId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // Indexes
             builder.HasIndex(x => x.StoreId)
                 .HasDatabaseName("IX_PeriodAudit_Store");

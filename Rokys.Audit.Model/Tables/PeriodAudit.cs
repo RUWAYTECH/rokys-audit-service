@@ -52,6 +52,9 @@ namespace Rokys.Audit.Model.Tables
         public virtual UserReference? Supervisor { get; set; }
 
         public virtual ICollection<PeriodAuditResult> PeriodAuditResults { get; set; } = new List<PeriodAuditResult>();
-    public virtual ICollection<PeriodAuditGroupResult> PeriodAuditGroupResults { get; set; } = new List<PeriodAuditGroupResult>();
+        public virtual ICollection<PeriodAuditGroupResult> PeriodAuditGroupResults { get; set; } = new List<PeriodAuditGroupResult>();
+        
+        // Participantes en la auditoría
+        public virtual ICollection<PeriodAuditParticipant> PeriodAuditParticipants { get; set; } = new List<PeriodAuditParticipant>();
     }
 }

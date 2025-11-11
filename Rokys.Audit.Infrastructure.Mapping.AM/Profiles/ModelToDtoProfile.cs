@@ -26,6 +26,8 @@ using Rokys.Audit.DTOs.Responses.PeriodAuditScaleSubResult;
 using Rokys.Audit.DTOs.Responses.InboxItems;
 using Rokys.Audit.DTOs.Responses.Reports;
 using Rokys.Audit.DTOs.Responses.AuditRoleConfiguration;
+using Rokys.Audit.DTOs.Responses.PeriodAuditParticipant;
+using Rokys.Audit.DTOs.Common;
 
 namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
 {
@@ -72,6 +74,13 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                 });
             CreateMap<Enterprise, EnterpriseResponseDto>();
             CreateMap<AuditRoleConfiguration, AuditRoleConfigurationResponseDto>();
+            CreateMap<PeriodAuditParticipant, PeriodAuditParticipantDto>();
+            CreateMap<PeriodAuditParticipant, PeriodAuditParticipantResponseDto>()
+                .AfterMap((src, dest) =>
+                {
+                    dest.UserFullName = $"{src.UserReference?.FirstName} {src.UserReference?.LastName}".Trim();
+                    dest.UserEmail = src.UserReference?.Email;
+                });
             CreateMap<Stores, StoreResponseDto>();
             CreateMap<AuditTemplateFields, AuditTemplateFieldResponseDto>()
                 .AfterMap((src, dest) =>
@@ -114,6 +123,19 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                         UpdatedBy = src.AuditStatus.UpdatedBy,
                         UpdateDate = src.AuditStatus.UpdateDate
                     };
+                }
+
+                // Map participants
+                if (src.PeriodAuditParticipants != null)
+                {
+                    dest.Participants = src.PeriodAuditParticipants.Where(p => p.IsActive)
+                        .Select(p => new PeriodAuditParticipantDto
+                        {
+                            UserReferenceId = p.UserReferenceId,
+                            RoleCodeSnapshot = p.RoleCodeSnapshot,
+                            RoleNameSnapshot = p.RoleNameSnapshot,
+                            Comments = p.Comments
+                        }).ToList();
                 }
             });
             CreateMap<AuditStatus, AuditStatusResponseDto>();

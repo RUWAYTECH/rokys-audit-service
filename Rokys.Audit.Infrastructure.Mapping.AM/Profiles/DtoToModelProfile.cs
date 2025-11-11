@@ -23,7 +23,7 @@ using Rokys.Audit.DTOs.Requests.EmployeeStore;
 using Rokys.Audit.DTOs.Requests.PeriodAuditScaleResult;
 using Rokys.Audit.DTOs.Requests.StorageFiles;
 using Rokys.Audit.DTOs.Requests.InboxItems;
-using Rokys.Audit.DTOs.Requests.InboxItems;
+using Rokys.Audit.DTOs.Common;
 
 namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
 {
@@ -55,6 +55,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
             CreateMap<UpdatePeriodAuditFieldValuesRequestDto, PeriodAuditFieldValues>();
             CreateMap<StorageFileRequestDto, StorageFiles>();
             CreateMap<InboxItemRequestDto, InboxItems>();
+            CreateMap<PeriodAuditParticipantDto, PeriodAuditParticipant>();
         }
     }
 }

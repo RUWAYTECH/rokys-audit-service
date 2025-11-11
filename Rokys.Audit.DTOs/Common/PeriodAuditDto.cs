@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Rokys.Audit.DTOs.Common
 {
@@ -17,5 +18,8 @@ namespace Rokys.Audit.DTOs.Common
         public int? AuditedDays { get; set; }
         public Guid? StatusId { get; set; }
         public string? ScaleCode { get; set; }
+        
+        // Lista de participantes en la auditoría
+        public List<PeriodAuditParticipantDto> Participants { get; set; } = new List<PeriodAuditParticipantDto>();
     }
 }
