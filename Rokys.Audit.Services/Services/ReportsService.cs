@@ -357,6 +357,20 @@ namespace Rokys.Audit.Services.Services
 
                     itemDtos.Add(dto);
                 }
+
+                var rankedItems = itemDtos
+                    .OrderByDescending(x => x.MothlyScore)
+                    .ThenBy(x => x.StoreName)
+                    .ToList();
+                int rank = 1;
+                foreach (var item in rankedItems)
+                {
+                    item.Ranking = rank++;
+                }
+
+                // Reasignar la lista ordenada
+                itemDtos = rankedItems;
+
                 if (!scaleCompanies.Any())
                 {
                     scaleCompanies = await _scaleCompanyRepository.GetAsync(
@@ -375,13 +389,32 @@ namespace Rokys.Audit.Services.Services
                         break;
                     }
                 }
+
+                int globalRank = 0;
+                if (itemDtos.Any())
+                {
+                    var ordered = itemDtos.OrderByDescending(x => x.MothlyScore).ToList();
+
+                    for (int i = 0; i < ordered.Count; i++)
+                    {
+                        var score = ordered[i].MothlyScore;
+                        if (globalAverage >= score)
+                        {
+                            globalRank = i;
+                            break;
+                        }
+                    }
+                    if (globalRank == 0)
+                        globalRank = ordered.Count;
+                }
+
                 var dataResult = new PeriodAuditReportResponseDto
                 {
                     Items = itemDtos,
 
                     Summaries = new List<SummaryReportResponseDto>{ new SummaryReportResponseDto
                     {
-                        Ranking = entities.Count,
+                        Ranking = globalRank,
                         ResultByMonth = Math.Round(globalAverage,2),
                         Risk = globalRiskLevel,
                         RiskColor = globalRiskColor,
