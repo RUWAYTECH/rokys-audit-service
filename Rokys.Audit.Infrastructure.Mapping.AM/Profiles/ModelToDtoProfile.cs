@@ -122,14 +122,25 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                 // Map participants
                 if (src.PeriodAuditParticipants != null)
                 {
-                    dest.Participants = src.PeriodAuditParticipants.Where(p => p.IsActive)
-                        .Select(p => new PeriodAuditParticipantDto
+                    dest.Participants = src.PeriodAuditParticipants?
+                        .Where(p => p.IsActive)
+                        .Select(p => new PeriodAuditParticipantResponseDto
                         {
+                            PeriodAuditParticipantId = p.PeriodAuditParticipantId,
+                            PeriodAuditId = p.PeriodAuditId,
+                            UserFullName = p.UserReference?.FullName ?? "",
+                            UserEmail = p.UserReference?.Email ?? "",
                             UserReferenceId = p.UserReferenceId,
                             RoleCodeSnapshot = p.RoleCodeSnapshot,
                             RoleNameSnapshot = p.RoleNameSnapshot,
-                            Comments = p.Comments
-                        }).ToList();
+                            Comments = p.Comments,
+                            IsActive = p.IsActive,
+                            CreatedBy = p.CreatedBy,
+                            CreationDate = p.CreationDate,
+                            UpdatedBy = p.UpdatedBy,
+                            UpdateDate = p.UpdateDate
+                        })
+                        .ToList() ?? new List<PeriodAuditParticipantResponseDto>();
                 }
             });
             CreateMap<AuditStatus, AuditStatusResponseDto>();

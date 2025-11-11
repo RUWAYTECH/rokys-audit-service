@@ -47,6 +47,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IPeriodAuditGroupResultService _periodAuditGroupResultService;
         private readonly IStoreRepository _storeRepository;
         private readonly IEmailService _emailService;
+        private readonly IPeriodAuditParticipantRepository _periodAuditParticipantRepository;
 
         public PeriodAuditService(
             IPeriodAuditRepository periodAuditRepository,
@@ -69,7 +70,8 @@ namespace Rokys.Audit.Services.Services
             IGroupRepository groupRepository,
             IPeriodAuditGroupResultService periodAuditGroupResultService,
             IStoreRepository storeRepository,
-            IEmailService emailService)
+            IEmailService emailService,
+            IPeriodAuditParticipantRepository periodAuditParticipantRepository)
         {
             _periodAuditRepository = periodAuditRepository;
             _validator = validator;
@@ -92,6 +94,7 @@ namespace Rokys.Audit.Services.Services
             _periodAuditGroupResultService = periodAuditGroupResultService;
             _storeRepository = storeRepository;
             _emailService = emailService;
+            _periodAuditParticipantRepository = periodAuditParticipantRepository;
         }
 
         public async Task<ResponseDto<PeriodAuditResponseDto>> Create(PeriodAuditRequestDto requestDto)
@@ -125,6 +128,7 @@ namespace Rokys.Audit.Services.Services
                 {
                     var newParticipant = _mapper.Map<PeriodAuditParticipant>(detail);
                     newParticipant.CreateAudit(currentUserName);
+                    newParticipant.IsActive = true;
                     entity.PeriodAuditParticipants.Add(newParticipant);
                 }
                 _periodAuditRepository.Insert(entity);
@@ -305,14 +309,19 @@ namespace Rokys.Audit.Services.Services
 
                 var currentUser = _httpContextAccessor.CurrentUser();
 
-                foreach (var participant in entity.PeriodAuditParticipants)
+                foreach (var participant in entity.PeriodAuditParticipants.ToList())
                 {
-                    _periodAuditRepository.Delete(participant);
+                    var existing = await _periodAuditParticipantRepository
+                        .GetFirstOrDefaultAsync(p => p.PeriodAuditParticipantId == participant.PeriodAuditParticipantId);
+
+                    if (existing != null)
+                        _periodAuditParticipantRepository.Delete(existing);
                 }
                 foreach (var detail in requestDto.Participants)
                 {
                     var newParticipant = _mapper.Map<PeriodAuditParticipant>(detail);
                     newParticipant.CreateAudit(currentUser.UserName);
+                    newParticipant.IsActive = true;
                     entity.PeriodAuditParticipants.Add(newParticipant);
                 }
 

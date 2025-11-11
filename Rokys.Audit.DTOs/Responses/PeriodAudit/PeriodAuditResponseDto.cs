@@ -1,6 +1,7 @@
 using System;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Responses.AuditStatus;
+using Rokys.Audit.DTOs.Responses.PeriodAuditParticipant;
 
 namespace Rokys.Audit.DTOs.Responses.PeriodAudit
 {
@@ -30,5 +31,6 @@ namespace Rokys.Audit.DTOs.Responses.PeriodAudit
         public AuditStatusResponseDto? AuditStatus { get; set; }
         // Nested inbox items related to this period audit
         public List<Rokys.Audit.DTOs.Responses.InboxItems.InboxItemResponseDto>? InboxItems { get; set; }
+        public List<PeriodAuditParticipantResponseDto>? Participants { get; set; }
     }
 }
