@@ -25,6 +25,7 @@ using Rokys.Audit.DTOs.Responses.PeriodAuditScoringCriteriaResult;
 using Rokys.Audit.DTOs.Responses.PeriodAuditScaleSubResult;
 using Rokys.Audit.DTOs.Responses.InboxItems;
 using Rokys.Audit.DTOs.Responses.Reports;
+using Rokys.Audit.DTOs.Responses.AuditRoleConfiguration;
 
 namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
 {
@@ -70,6 +71,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                     dest.ScaleGroupName = src.ScaleGroup.Name;
                 });
             CreateMap<Enterprise, EnterpriseResponseDto>();
+            CreateMap<AuditRoleConfiguration, AuditRoleConfigurationResponseDto>();
             CreateMap<Stores, StoreResponseDto>();
             CreateMap<AuditTemplateFields, AuditTemplateFieldResponseDto>()
                 .AfterMap((src, dest) =>
