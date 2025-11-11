@@ -651,3 +651,52 @@ CREATE NONCLUSTERED INDEX IX_PeriodAudit_ScaleCode_Statistics
 ON PeriodAudit (ScaleCode, StatusId, IsActive)
 INCLUDE (ScoreValue, StoreId, CreationDate)
 WITH (FILLFACTOR = 90);
+
+
+CREATE TABLE AuditRoleConfiguration (
+    AuditRoleConfigurationId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    RoleCode NVARCHAR(10) NOT NULL, -- Referencia al RoleCode de UserReference
+    RoleName NVARCHAR(100) NOT NULL, -- Referencia al RoleCode de UserReference
+    IsRequired BIT DEFAULT 1,
+    AllowMultiple BIT DEFAULT 0,
+    SequenceOrder INT,
+    IsActive BIT NOT NULL DEFAULT 1,
+    CreatedBy NVARCHAR(100) NULL,
+    CreationDate DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    UpdatedBy NVARCHAR(100) NULL,
+    UpdateDate DATETIME2 NULL,
+    CONSTRAINT UQ_AuditRoleConfiguration_RoleCode UNIQUE (RoleCode)
+);
+
+-- Participantes asignados a un período de auditoría específico
+CREATE TABLE PeriodAuditParticipant (
+    PeriodAuditParticipantId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    PeriodAuditId UNIQUEIDENTIFIER NOT NULL,
+    UserReferenceId UNIQUEIDENTIFIER NOT NULL, -- Mantengo UNIQUEIDENTIFIER porque viene de UserReference
+    
+    -- Capturar rol en el momento de asignación
+    RoleCodeSnapshot NVARCHAR(10) NOT NULL,
+    RoleNameSnapshot NVARCHAR(100) NOT NULL,
+    
+    Comments NVARCHAR(500),
+    
+    IsActive BIT NOT NULL DEFAULT 1,
+    CreatedBy NVARCHAR(100) NULL,
+    CreationDate DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    UpdatedBy NVARCHAR(100) NULL,
+    UpdateDate DATETIME2 NULL,
+    
+    FOREIGN KEY (PeriodAuditId) REFERENCES PeriodAudit(PeriodAuditId),
+    FOREIGN KEY (UserReferenceId) REFERENCES UserReference(UserReferenceId),
+    CONSTRAINT UQ_PeriodAudit_UserReference UNIQUE (PeriodAuditId, UserReferenceId)
+);
+
+-- Índices recomendados
+CREATE INDEX IX_PeriodAuditParticipant_PeriodAuditId 
+    ON PeriodAuditParticipant(PeriodAuditId);
+
+CREATE INDEX IX_PeriodAuditParticipant_UserReferenceId 
+    ON PeriodAuditParticipant(UserReferenceId);
+
+CREATE INDEX IX_AuditRoleConfiguration_RoleCode 
+    ON AuditRoleConfiguration(RoleCode);
