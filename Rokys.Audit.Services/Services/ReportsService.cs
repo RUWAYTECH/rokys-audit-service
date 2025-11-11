@@ -353,12 +353,27 @@ namespace Rokys.Audit.Services.Services
 
                     itemDtos.Add(dto);
                 }
+
+                var rankedItems = itemDtos
+                    .OrderByDescending(x => x.MothlyScore)
+                    .ThenBy(x => x.StoreName)
+                    .ToList();
+                int rank = 1;
+                foreach (var item in rankedItems)
+                {
+                    item.Ranking = rank++;
+                }
+
+                // Reasignar la lista ordenada
+                itemDtos = rankedItems;
+
                 if (!scaleCompanies.Any())
                 {
                     scaleCompanies = await _scaleCompanyRepository.GetAsync(
                                 filter: x => x.EnterpriseId == null && x.IsActive
                     );
                 }
+
                 var globalAverage = itemDtos.Any() ? itemDtos.Average(x => x.MothlyScore) : 0m;
                 string globalRiskLevel = "Sin Escala";
                 string globalRiskColor = "#FFFFFF";
@@ -371,13 +386,32 @@ namespace Rokys.Audit.Services.Services
                         break;
                     }
                 }
+
+                int globalRank = 0;
+                if (itemDtos.Any())
+                {
+                    var ordered = itemDtos.OrderByDescending(x => x.MothlyScore).ToList();
+
+                    for (int i = 0; i < ordered.Count; i++)
+                    {
+                        var score = ordered[i].MothlyScore;
+                        if (globalAverage >= score)
+                        {
+                            globalRank = i;
+                            break;
+                        }
+                    }
+                    if (globalRank == 0)
+                        globalRank = ordered.Count;
+                }
+
                 var dataResult = new PeriodAuditReportResponseDto
                 {
                     Items = itemDtos,
 
                     Summaries = new List<SummaryReportResponseDto>{ new SummaryReportResponseDto
                     {
-                        Ranking = entities.Count,
+                        Ranking = globalRank,
                         ResultByMonth = Math.Round(globalAverage,2),
                         Risk = globalRiskLevel,
                         RiskColor = globalRiskColor,
@@ -407,6 +441,7 @@ namespace Rokys.Audit.Services.Services
                 {
                     return ResponseDto.Error<ExportReportResultDto>("No se pudieron obtener los datos del reporte para exportar.");
                 }
+
                 // Aquí se implementaría la lógica de exportación, por ejemplo a Excel o PDF.
                 // Por simplicidad, asumiremos que se genera un archivo y se devuelve su ruta o contenido.
                 var resultExport = new ExportReportResultDto();
