@@ -70,24 +70,6 @@ namespace Rokys.Audit.Model.Tables
         /// </summary>
         public string FullName => $"{FirstName} {LastName}".Trim();
 
-        // Navegación - Auditorías donde es Administrador
-        public virtual ICollection<PeriodAudit>? AdministratorAudits { get; set; }
-
-        // Navegación - Auditorías donde es Asistente
-        public virtual ICollection<PeriodAudit>? AssistantAudits { get; set; }
-
-        // Navegación - Auditorías donde es Gerente de Operación
-        public virtual ICollection<PeriodAudit>? OperationManagerAudits { get; set; }
-
-        // Navegación - Auditorías donde es Administrador Suplente
-        public virtual ICollection<PeriodAudit>? FloatingAdministratorAudits { get; set; }
-
-        // Navegación - Auditorías donde es Auditor Responsable
-        public virtual ICollection<PeriodAudit>? ResponsibleAuditorAudits { get; set; }
-
-        // Navegación - Auditorías donde es Supervisor
-        public virtual ICollection<PeriodAudit>? SupervisorAudits { get; set; }
-
         // Navegación - Stores asignadas
         public virtual ICollection<EmployeeStore>? EmployeeStores { get; set; }
 

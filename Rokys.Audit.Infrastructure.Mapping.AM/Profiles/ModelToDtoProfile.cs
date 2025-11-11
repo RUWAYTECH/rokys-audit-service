@@ -97,12 +97,6 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
             CreateMap<MaintenanceDetailTable, MaintenanceDetailTableResponseDto>();
             CreateMap<PeriodAudit, PeriodAuditResponseDto>().AfterMap((src, dest) =>
             {
-                dest.AdministratorName = src.Administrator?.FirstName + " " + src.Administrator?.LastName;
-                dest.AssistantName = src.Assistant?.FirstName + " " + src.Assistant?.LastName;
-                dest.OperationManagerName = src.OperationManager?.FirstName + " " + src.OperationManager?.LastName;
-                dest.FloatingAdministratorName = src.FloatingAdministrator?.FirstName + " " + src.FloatingAdministrator?.LastName;
-                dest.ResponsibleAuditorName = src.ResponsibleAuditor?.FirstName + " " + src.ResponsibleAuditor?.LastName;
-                dest.SupervisorName = src.Supervisor?.FirstName + " " + src.Supervisor?.LastName;
                 dest.StatusName = src.AuditStatus?.Name;
                 dest.EnterpriseName = src.Store?.Enterprise?.Name ?? string.Empty;
                 dest.EnterpriseId = src.Store?.EnterpriseId ?? Guid.Empty;
@@ -159,18 +153,6 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                         StoreName = src.PeriodAuditGroupResult?.PeriodAudit?.Store?.Name ?? string.Empty,
                         EnterpriseId = src.PeriodAuditGroupResult?.PeriodAudit?.Store?.EnterpriseId ?? Guid.Empty,
                         EnterpriseName = src.PeriodAuditGroupResult?.PeriodAudit?.Store?.Enterprise?.Name ?? string.Empty,
-                        AdministratorId = src.PeriodAuditGroupResult?.PeriodAudit?.AdministratorId ?? Guid.Empty,
-                        AdministratorName = ($"{src.PeriodAuditGroupResult?.PeriodAudit?.Administrator?.FirstName} {src.PeriodAuditGroupResult?.PeriodAudit?.Administrator?.LastName}").Trim() ?? string.Empty,
-                        AssistantId = src.PeriodAuditGroupResult?.PeriodAudit?.AssistantId ?? Guid.Empty,
-                        AssistantName = ($"{src.PeriodAuditGroupResult?.PeriodAudit?.Assistant?.FirstName} {src.PeriodAuditGroupResult?.PeriodAudit?.Assistant?.LastName}").Trim() ?? string.Empty,
-                        OperationManagersId = src.PeriodAuditGroupResult?.PeriodAudit?.OperationManagersId ?? Guid.Empty,
-                        OperationManagerName = ($"{src.PeriodAuditGroupResult?.PeriodAudit?.OperationManager?.FirstName} {src.PeriodAuditGroupResult?.PeriodAudit?.OperationManager?.LastName}").Trim() ?? string.Empty,
-                        FloatingAdministratorId = src.PeriodAuditGroupResult?.PeriodAudit?.FloatingAdministratorId ?? Guid.Empty,
-                        FloatingAdministratorName = ($"{src.PeriodAuditGroupResult?.PeriodAudit?.FloatingAdministrator?.FirstName} {src.PeriodAuditGroupResult?.PeriodAudit?.FloatingAdministrator?.LastName}").Trim() ?? string.Empty,
-                        ResponsibleAuditorId = src.PeriodAuditGroupResult?.PeriodAudit?.ResponsibleAuditorId ?? Guid.Empty,
-                        ResponsibleAuditorName = ($"{src.PeriodAuditGroupResult?.PeriodAudit?.ResponsibleAuditor?.FirstName} {src.PeriodAuditGroupResult?.PeriodAudit?.ResponsibleAuditor?.LastName}").Trim() ?? string.Empty,
-                        SupervisorId = src.PeriodAuditGroupResult?.PeriodAudit?.SupervisorId ?? Guid.Empty,
-                        SupervisorName = ($"{src.PeriodAuditGroupResult?.PeriodAudit?.Supervisor?.FirstName} {src.PeriodAuditGroupResult?.PeriodAudit?.Supervisor?.LastName}").Trim() ?? string.Empty,
                         StatusId = src.PeriodAuditGroupResult?.PeriodAudit?.StatusId ?? Guid.Empty,
                         StartDate = src.PeriodAuditGroupResult?.PeriodAudit?.StartDate ?? default,
                         EndDate = src.PeriodAuditGroupResult?.PeriodAudit?.EndDate ?? default,
@@ -273,12 +255,6 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
 
             CreateMap<PeriodAudit, PeriodAuditItemReportResponseDto>().AfterMap((src, dest) =>
             {
-               dest.AdministratorName = src.Administrator?.FirstName + " " + src.Administrator?.LastName;
-               dest.AssistantName = src.Assistant?.FirstName + " " + src.Assistant?.LastName;
-               dest.OperationManagerName = src.OperationManager?.FirstName + " " + src.OperationManager?.LastName;
-               dest.FloatingAdministratorName = src.FloatingAdministrator?.FirstName + " " + src.FloatingAdministrator?.LastName;
-               dest.ResponsibleAuditorName = src.ResponsibleAuditor?.FirstName + " " + src.ResponsibleAuditor?.LastName;
-               dest.SupervisorName = src.Supervisor?.FirstName + " " + src.Supervisor?.LastName;
                dest.EnterpriseName = src.Store?.Enterprise?.Name ?? string.Empty;
                dest.EnterpriseId = src.Store?.EnterpriseId ?? Guid.Empty;
                dest.StoreName = src.Store?.Name ?? string.Empty;

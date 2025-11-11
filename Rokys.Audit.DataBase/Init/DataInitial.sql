@@ -320,27 +320,6 @@ CREATE TABLE [PeriodAudit]
     -- Store / audit identification
     StoreId UNIQUEIDENTIFIER REFERENCES Stores(StoreId), -- ID de Tienda
 
-    -- Participants with FK to UserReference
-    AdministratorId UNIQUEIDENTIFIER NULL 
-        CONSTRAINT FK_PeriodAudit_Administrator 
-        FOREIGN KEY REFERENCES UserReference(UserReferenceId), -- Administrador
-    AssistantId UNIQUEIDENTIFIER NULL 
-        CONSTRAINT FK_PeriodAudit_Assistant 
-        FOREIGN KEY REFERENCES UserReference(UserReferenceId), -- Asistente
-    OperationManagersId UNIQUEIDENTIFIER NULL 
-        CONSTRAINT FK_PeriodAudit_OperationManagers 
-        FOREIGN KEY REFERENCES UserReference(UserReferenceId), -- Gerentes de Operación
-    FloatingAdministratorId UNIQUEIDENTIFIER NULL 
-        CONSTRAINT FK_PeriodAudit_FloatingAdministrator 
-        FOREIGN KEY REFERENCES UserReference(UserReferenceId), -- Administrador Suplente
-    ResponsibleAuditorId UNIQUEIDENTIFIER NULL 
-        CONSTRAINT FK_PeriodAudit_ResponsibleAuditor 
-        FOREIGN KEY REFERENCES UserReference(UserReferenceId), -- Auditor Responsable
-    SupervisorId UNIQUEIDENTIFIER NULL 
-        CONSTRAINT FK_PeriodAudit_Supervisor 
-        FOREIGN KEY REFERENCES UserReference(UserReferenceId), -- Supervisor
-
-
     -- Dates
     StartDate DATE NOT NULL, -- Fecha de Inicio
     EndDate DATE NOT NULL, -- Fecha de Fin

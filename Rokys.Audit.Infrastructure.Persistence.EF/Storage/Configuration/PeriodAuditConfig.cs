@@ -20,30 +20,6 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.Property(x => x.StoreId)
                 .IsRequired(false);
 
-            builder.Property(x => x.AdministratorId)
-                .HasColumnName("AdministratorId")
-                .IsRequired(false);
-
-            builder.Property(x => x.AssistantId)
-                .HasColumnName("AssistantId")
-                .IsRequired(false);
-
-            builder.Property(x => x.OperationManagersId)
-                .HasColumnName("OperationManagersId")
-                .IsRequired(false);
-
-            builder.Property(x => x.FloatingAdministratorId)
-                .HasColumnName("FloatingAdministratorId")
-                .IsRequired(false);
-
-            builder.Property(x => x.ResponsibleAuditorId)
-                .HasColumnName("ResponsibleAuditorId")
-                .IsRequired(false);
-
-            builder.Property(x => x.SupervisorId)
-                .HasColumnName("SupervisorId")
-                .IsRequired(false);
-
             builder.Property(x => x.StartDate)
                 .HasColumnName("StartDate")
                 .HasColumnType("datetime2(7)")
@@ -137,9 +113,6 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
 
             builder.HasIndex(x => new { x.StartDate, x.EndDate })
                 .HasDatabaseName("IX_PeriodAudit_DateRange");
-
-            builder.HasIndex(x => x.ResponsibleAuditorId)
-                .HasDatabaseName("IX_PeriodAudit_ResponsibleAuditor");
         }
     }
 }

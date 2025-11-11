@@ -316,18 +316,7 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<PeriodAuditScaleResultCustomResponseDto>();
             try
             {
-                var entity = await _repository.GetFirstOrDefaultAsync(filter: x => x.PeriodAuditScaleResultId == id, 
-                    includeProperties: [ e => e.PeriodAuditGroupResult.PeriodAudit.Store.Enterprise.ScaleCompanies,
-                        sg => sg.ScaleGroup,
-                        a => a.PeriodAuditGroupResult.PeriodAudit.Administrator,
-                        op => op.PeriodAuditGroupResult.PeriodAudit.OperationManager,
-                        fa => fa.PeriodAuditGroupResult.PeriodAudit.FloatingAdministrator,
-                        ra => ra.PeriodAuditGroupResult.PeriodAudit.ResponsibleAuditor,
-                        asi => asi.PeriodAuditGroupResult.PeriodAudit.Assistant,
-                        su => su.PeriodAuditGroupResult.PeriodAudit.Supervisor,
-                        st => st.PeriodAuditGroupResult.PeriodAudit.AuditStatus,
-                        pas => pas.PeriodAuditScaleSubResults,
-                        pasc => pasc.PeriodAuditScoringCriteriaResults]);
+                var entity = await _repository.GetCustomByIdAsync(filter: x => x.PeriodAuditScaleResultId == id && x.IsActive);
                 if (entity == null)
                 {
                     response.Messages.Add(new ApplicationMessage { Message = "No se encontro la entidad", MessageType = ApplicationMessageType.Error });
@@ -395,7 +384,7 @@ namespace Rokys.Audit.Services.Services
                 customDto.ScaleGroup.DataSource = fileDataSource;
                 var currentUser = _httpContextAccessor.CurrentUser();
                 var userReference = await _userReferenceRepository.GetFirstOrDefaultAsync(filter: x => x.UserId == currentUser.UserId);
-                if (entity.PeriodAuditGroupResult.PeriodAudit.ResponsibleAuditorId.HasValue && entity.PeriodAuditGroupResult.PeriodAudit.ResponsibleAuditorId == userReference.UserReferenceId)
+                if (entity.PeriodAuditGroupResult.PeriodAudit.PeriodAuditParticipants.Any(p => p.UserReferenceId == userReference.UserReferenceId && p.IsActive && p.RoleCodeSnapshot == RoleCodes.Auditor.ToString()))
                 {
                     customDto.PeriodAudit.IAmAuditor = true;
                 }

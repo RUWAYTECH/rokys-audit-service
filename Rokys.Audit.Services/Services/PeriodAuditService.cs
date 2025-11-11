@@ -25,7 +25,7 @@ namespace Rokys.Audit.Services.Services
 {
     public class PeriodAuditService : IPeriodAuditService
     {
-        private readonly IRepository<PeriodAudit> _repository;
+        private readonly IPeriodAuditRepository _periodAuditRepository;
         private readonly IValidator<PeriodAuditRequestDto> _validator;
         private readonly ILogger<PeriodAuditService> _logger;
         private readonly IUnitOfWork _unitOfWork;
@@ -49,7 +49,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IEmailService _emailService;
 
         public PeriodAuditService(
-            IRepository<PeriodAudit> repository,
+            IPeriodAuditRepository periodAuditRepository,
             IValidator<PeriodAuditRequestDto> validator,
             ILogger<PeriodAuditService> logger,
             IUnitOfWork unitOfWork,
@@ -71,7 +71,7 @@ namespace Rokys.Audit.Services.Services
             IStoreRepository storeRepository,
             IEmailService emailService)
         {
-            _repository = repository;
+            _periodAuditRepository = periodAuditRepository;
             _validator = validator;
             _logger = logger;
             _unitOfWork = unitOfWork;
@@ -112,7 +112,7 @@ namespace Rokys.Audit.Services.Services
                 var currentUserName = currentUser?.UserName ?? "system";
                 var entity = _mapper.Map<PeriodAudit>(requestDto);
                 // Obtener el último código existente
-                var lastCode = _repository.Get()
+                var lastCode = _periodAuditRepository.Get()
                     .OrderByDescending(x => x.CreationDate)
                     .Select(x => x.CorrelativeNumber)
                     .FirstOrDefault();
@@ -121,7 +121,13 @@ namespace Rokys.Audit.Services.Services
                 entity.CorrelativeNumber = nextCode;
                 entity.StatusId = auditStatus.AuditStatusId;
                 entity.CreateAudit(currentUserName);
-                _repository.Insert(entity);
+                foreach (var detail in requestDto.Participants)
+                {
+                    var newParticipant = _mapper.Map<PeriodAuditParticipant>(detail);
+                    newParticipant.CreateAudit(currentUserName);
+                    entity.PeriodAuditParticipants.Add(newParticipant);
+                }
+                _periodAuditRepository.Insert(entity);
 
                 var store = await _storeRepository.GetFirstOrDefaultAsync(filter: x => x.StoreId == entity.StoreId && x.IsActive);
                 var group = await _groupRepository.GetAsync(filter: x => x.EnterpriseId == store.EnterpriseId && x.IsActive);
@@ -137,7 +143,7 @@ namespace Rokys.Audit.Services.Services
                     };
                     await _periodAuditGroupResultService.Create(newPeriodAuditGroupResult, true);
                 }
-                
+
                 await _unitOfWork.CommitAsync();
                 // Crear registro en InboxItems: prev user = administrador, next user = auditor responsable
                 try
@@ -162,12 +168,8 @@ namespace Rokys.Audit.Services.Services
                         Action = "Creado",
                         IsActive = true
                     };
-
-                    // set prev/next users using system user ids -> inbox service will map to UserReference internally
-                    if (entity.AdministratorId.HasValue)
-                        inboxDto.PrevUserId = entity.AdministratorId;
-                    if (entity.ResponsibleAuditorId.HasValue)
-                        inboxDto.NextUserId = entity.ResponsibleAuditorId;
+                    inboxDto.PrevUserId = entity.PeriodAuditParticipants.FirstOrDefault(a => a.RoleCodeSnapshot == RoleCodes.JefeDeArea.ToString())?.UserReferenceId;
+                    inboxDto.NextUserId = entity.PeriodAuditParticipants.FirstOrDefault(a => a.RoleCodeSnapshot == RoleCodes.Auditor.ToString())?.UserReferenceId;
 
                     // let the inbox service decide the SequenceNumber and actor mapping
                     var inboxCreateResponse = await _inboxItemsService.Create(inboxDto);
@@ -194,7 +196,7 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create();
             try
             {
-                var entity = await _repository.GetFirstOrDefaultAsync(filter: x => x.PeriodAuditId == id && x.IsActive);
+                var entity = await _periodAuditRepository.GetFirstOrDefaultAsync(filter: x => x.PeriodAuditId == id && x.IsActive);
                 if (entity == null)
                 {
                     response = ResponseDto.Error("No se encontró el registro.");
@@ -246,7 +248,7 @@ namespace Rokys.Audit.Services.Services
                     _periodAuditGroupResultRepository.Update(groupResult);
                 }
                 entity.IsActive = false;
-                _repository.Update(entity);
+                _periodAuditRepository.Update(entity);
                 await _unitOfWork.CommitAsync();
             }
             catch (Exception ex)
@@ -262,9 +264,7 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<PeriodAuditResponseDto>();
             try
             {
-                var entity = await _repository.GetFirstOrDefaultAsync(
-                    filter: x => x.PeriodAuditId == id && x.IsActive,
-                    includeProperties: [x => x.Store.Enterprise, x => x.Administrator, x => x.Assistant, x => x.OperationManager, x => x.FloatingAdministrator, x => x.ResponsibleAuditor, x => x.AuditStatus, su => su.Supervisor]);
+                var entity = await _periodAuditRepository.GetCustomByIdAsync(filter: x => x.PeriodAuditId == id && x.IsActive);
                 if (entity == null)
                 {
                     response = ResponseDto.Error<PeriodAuditResponseDto>("No se encontró el registro.");
@@ -296,7 +296,7 @@ namespace Rokys.Audit.Services.Services
                     return response;
                 }
 
-                var entity = await _repository.GetFirstOrDefaultAsync(filter: x => x.PeriodAuditId == id && x.IsActive);
+                var entity = await _periodAuditRepository.GetFirstOrDefaultAsync(filter: x => x.PeriodAuditId == id && x.IsActive, includeProperties: [x => x.PeriodAuditParticipants]);
                 if (entity == null)
                 {
                     response = ResponseDto.Error<PeriodAuditResponseDto>("No se encontró el registro.");
@@ -305,21 +305,26 @@ namespace Rokys.Audit.Services.Services
 
                 var currentUser = _httpContextAccessor.CurrentUser();
 
-                entity.AdministratorId = requestDto.AdministratorId;
-                entity.AssistantId = requestDto.AssistantId;
-                entity.SupervisorId = requestDto.SupervisorId;
-                entity.OperationManagersId = requestDto.OperationManagersId;
-                entity.FloatingAdministratorId = requestDto.FloatingAdministratorId;
-                entity.ResponsibleAuditorId = requestDto.ResponsibleAuditorId;
-                entity.StoreId = requestDto.StoreId;                
+                foreach (var participant in entity.PeriodAuditParticipants)
+                {
+                    _periodAuditRepository.Delete(participant);
+                }
+                foreach (var detail in requestDto.Participants)
+                {
+                    var newParticipant = _mapper.Map<PeriodAuditParticipant>(detail);
+                    newParticipant.CreateAudit(currentUser.UserName);
+                    entity.PeriodAuditParticipants.Add(newParticipant);
+                }
+
+                entity.StoreId = requestDto.StoreId;
                 entity.EndDate = requestDto.EndDate;
                 entity.AuditedDays = requestDto.AuditedDays;
                 entity.ReportDate = requestDto.ReportDate;
                 entity.StartDate = requestDto.StartDate;
 
                 entity.UpdateAudit(currentUser.UserName);
-                _repository.Update(entity);
-                await _unitOfWork.CommitAsync();             
+                _periodAuditRepository.Update(entity);
+                await _unitOfWork.CommitAsync();
                 response.Data = _mapper.Map<PeriodAuditResponseDto>(entity);
             }
             catch (Exception ex)
@@ -346,7 +351,7 @@ namespace Rokys.Audit.Services.Services
                     filter = filter.AndAlso(x => x.Store.EnterpriseId == paginationRequestDto.EnterpriseId.Value && x.IsActive);
 
                 if (paginationRequestDto.ResponsibleAuditorId.HasValue)
-                    filter = filter.AndAlso(x => x.ResponsibleAuditorId == paginationRequestDto.ResponsibleAuditorId.Value && x.IsActive);
+                    filter = filter.AndAlso(x => x.PeriodAuditParticipants.Any(a=> a.UserReferenceId == paginationRequestDto.ResponsibleAuditorId.Value && a.RoleCodeSnapshot == RoleCodes.Auditor.ToString()) && x.IsActive);
 
                 if (paginationRequestDto.StartDate.HasValue && paginationRequestDto.EndDate.HasValue)
                     filter = filter.AndAlso(x => x.CreationDate >= paginationRequestDto.StartDate.Value && x.CreationDate <= paginationRequestDto.EndDate.Value && x.IsActive);
@@ -356,12 +361,12 @@ namespace Rokys.Audit.Services.Services
 
                 Func<IQueryable<PeriodAudit>, IOrderedQueryable<PeriodAudit>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 
-                var entities = await _repository.GetPagedAsync(
+                var entities = await _periodAuditRepository.GetPagedAsync(
                     filter: filter,
                     orderBy: orderBy,
                     pageNumber: paginationRequestDto.PageNumber,
                     pageSize: paginationRequestDto.PageSize,
-                    includeProperties: [x => x.Store.Enterprise, x => x.Administrator, x => x.Assistant, x => x.OperationManager, x => x.FloatingAdministrator, x => x.ResponsibleAuditor, x => x.AuditStatus, su => su.Supervisor]
+                    includeProperties: [x => x.Store.Enterprise, x=>x.PeriodAuditParticipants , x => x.AuditStatus]
                 );
                 var pagedResult = new PaginationResponseDto<PeriodAuditResponseDto>
                 {
@@ -376,7 +381,7 @@ namespace Rokys.Audit.Services.Services
                 var userReference = await _userReferenceRepository.GetFirstOrDefaultAsync(filter: x => x.UserReferenceId == currentUser.UserReferenceId);
                 foreach (var ent in pagedResult.Items)
                 {
-                    if (ent.ResponsibleAuditorId.HasValue && ent.ResponsibleAuditorId == userReference.UserReferenceId)
+                    if (ent.Participants.Any(a=>a.UserReferenceId == currentUser.UserReferenceId && a.RoleCodeSnapshot == RoleCodes.Auditor.ToString()))
                     {
                         ent.IAmAuditor = true;
                     }
@@ -387,7 +392,7 @@ namespace Rokys.Audit.Services.Services
                 }
 
                 // For the paged items, load inbox items in batch and attach them to each response DTO
-             
+
                 response.Data = pagedResult;
             }
             catch (Exception ex)
@@ -403,7 +408,7 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<bool>();
             try
             {
-                var entity = await _repository.GetFirstOrDefaultAsync(x => x.PeriodAuditId == periodAuditId && x.IsActive, includeProperties: [x => x.Store]);
+                var entity = await _periodAuditRepository.GetFirstOrDefaultAsync(x => x.PeriodAuditId == periodAuditId && x.IsActive, includeProperties: [x => x.Store]);
                 if (entity == null)
                 {
                     response = ResponseDto.Error<bool>("No se encontró el registro.");
@@ -447,7 +452,7 @@ namespace Rokys.Audit.Services.Services
                 }
 
                 entity.ScoreValue = acumulatedScore;
-                _repository.Update(entity);
+                _periodAuditRepository.Update(entity);
 
                 await _unitOfWork.CommitAsync();
                 response.Data = true;
@@ -465,7 +470,7 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create();
             try
             {
-                
+
                 var ids = requestDto.PeriodAuditIds?.Distinct().ToList() ?? new List<Guid>();
                 if (!ids.Any())
                     return ResponseDto.Error("No se proporcionaron PeriodAuditIds.");
@@ -483,7 +488,7 @@ namespace Rokys.Audit.Services.Services
                     return ResponseDto.Error("Usuario no autenticado.");
                 var currentUserName = currentUser?.UserName ?? "system";
 
-                var allStatus = await _auditStatusRepository.GetAsync(a=>a.IsActive);
+                var allStatus = await _auditStatusRepository.GetAsync(a => a.IsActive);
                 // Preload status codes once
                 var statusPending = allStatus.FirstOrDefault(f => f.Code == AuditStatusCode.Pending);
                 var statusInProgress = allStatus.FirstOrDefault(f => f.Code == AuditStatusCode.InProgress);
@@ -501,8 +506,8 @@ namespace Rokys.Audit.Services.Services
                 var entities = new List<PeriodAudit>();
                 foreach (var id in ids)
                 {
-                    var ent = await _repository.GetFirstOrDefaultAsync(filter: x => x.PeriodAuditId == id && x.IsActive,
-                        includeProperties: [v => v.Administrator, x => x.ResponsibleAuditor, y => y.AuditStatus]);
+                    var ent = await _periodAuditRepository.GetFirstOrDefaultAsync(filter: x => x.PeriodAuditId == id && x.IsActive,
+                        includeProperties: [v => v.PeriodAuditParticipants, y => y.AuditStatus]);
                     if (ent == null)
                         return ResponseDto.Error($"No se encontró el registro PeriodAuditId={id}");
                     entities.Add(ent);
@@ -549,7 +554,7 @@ namespace Rokys.Audit.Services.Services
                 {
                     // reuse the previous behavior for a single entity: compute nextStatusId, nextUserId, prevUserId, actionText
                     // (extract core logic inline to avoid duplicating heavy refactor)
-                    
+
                     // Get PrevUserId from the last inbox item's NextUserId for this audit
                     Guid? prevUserId = null;
                     var lastInboxItem = await _inboxItemsRepository.GetFirstOrDefaultAsync(
@@ -573,22 +578,18 @@ namespace Rokys.Audit.Services.Services
                         {
                             newStatusId = statusInProgress?.AuditStatusId ?? ent.StatusId ?? Guid.Empty;
                             nextStatusId = statusInProgress?.AuditStatusId;
-                            // Pending → InProgress: NextUser = Auditor
-                            if (ent.ResponsibleAuditorId.HasValue)
-                            {
-                                nextUserId = ent.ResponsibleAuditorId.Value;
-                            }
+                        
+                            nextUserId = ent.PeriodAuditParticipants.FirstOrDefault(a => a.RoleCodeSnapshot == RoleCodes.Auditor.ToString())?.UserReferenceId;
+                          
                             actionText = "Aprobado";
                         }
                         if (ent.StatusId == statusInProgress?.AuditStatusId)
                         {
                             newStatusId = statusInReview?.AuditStatusId ?? ent.StatusId ?? Guid.Empty;
                             nextStatusId = statusInReview?.AuditStatusId;
-                            // InProgress → InReview: NextUser = Administrator (en revisión)
-                            if (ent.AdministratorId.HasValue)
-                            {
-                                nextUserId = ent.AdministratorId.Value;
-                            }
+                          
+                            nextUserId = ent.PeriodAuditParticipants.FirstOrDefault(a => a.RoleCodeSnapshot == RoleCodes.JefeDeArea.ToString())?.UserReferenceId;
+                          
                             actionText = "Enviado a revisión";
                         }
                         else if (ent.StatusId == statusInReview?.AuditStatusId)
@@ -596,10 +597,8 @@ namespace Rokys.Audit.Services.Services
                             newStatusId = statusFinal?.AuditStatusId ?? ent.StatusId ?? Guid.Empty;
                             nextStatusId = statusFinal?.AuditStatusId;
                             // InReview → Final: NextUser = Administrator (finalizó)
-                            if (ent.AdministratorId.HasValue)
-                            {
-                                nextUserId = ent.AdministratorId.Value;
-                            }
+                            nextUserId = ent.PeriodAuditParticipants.FirstOrDefault(a => a.RoleCodeSnapshot == RoleCodes.JefeDeArea.ToString())?.UserReferenceId;
+                          
                             actionText = "Finalizado";
                         }
                     }
@@ -615,10 +614,7 @@ namespace Rokys.Audit.Services.Services
                         newStatusId = statusInProgress?.AuditStatusId ?? ent.StatusId ?? Guid.Empty;
                         nextStatusId = statusInProgress?.AuditStatusId;
                         // Return to InProgress: NextUser = Auditor
-                        if (ent.ResponsibleAuditorId.HasValue)
-                        {
-                            nextUserId = ent.ResponsibleAuditorId.Value;
-                        }
+                        nextUserId = ent.PeriodAuditParticipants.FirstOrDefault(a => a.RoleCodeSnapshot == RoleCodes.Auditor.ToString())?.UserReferenceId;
                         actionText = "Devuelto";
                     }
 
@@ -643,10 +639,10 @@ namespace Rokys.Audit.Services.Services
                     };
 
                     // Update period audit entity
-                    var periodAudit = await _repository.GetFirstOrDefaultAsync(f => f.PeriodAuditId == ent.PeriodAuditId && f.IsActive);
+                    var periodAudit = await _periodAuditRepository.GetFirstOrDefaultAsync(f => f.PeriodAuditId == ent.PeriodAuditId && f.IsActive);
                     periodAudit.StatusId = newStatusId;
                     periodAudit.UpdateAudit(currentUserName);
-                    _repository.Update(periodAudit);
+                    _periodAuditRepository.Update(periodAudit);
 
                     var inboxCreateResponse = await _inboxItemsService.Create(inboxDto);
                     if (!inboxCreateResponse.IsValid)
@@ -654,10 +650,9 @@ namespace Rokys.Audit.Services.Services
                 }
                 await _unitOfWork.CommitAsync();
 
-                foreach ( var ent in entities)
+                foreach (var ent in entities)
                 {
-                    var periodAuditUpdate = await _repository.GetFirstOrDefaultAsync(filter: x => x.PeriodAuditId == ent.PeriodAuditId && x.IsActive,
-                    includeProperties: [at => at.ResponsibleAuditor, s => s.Supervisor, a => a.Administrator, t => t.Store]);
+                    var periodAuditUpdate = await _periodAuditRepository.GetCustomByIdAsync(filter: x => x.PeriodAuditId == ent.PeriodAuditId && x.IsActive);
                     if (periodAuditUpdate.StatusId == statusInReview?.AuditStatusId)
                     {
                         await BuildSendEmail.NotifySupervisorOfNewAudit(_emailService, periodAuditUpdate);
@@ -679,7 +674,7 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<LastAuditByStoreIdResponseDto>();
             try
             {
-                var entity = await _repository.GetFirstOrDefaultAsync(
+                var entity = await _periodAuditRepository.GetFirstOrDefaultAsync(
                     filter: x => x.StoreId == storeId && x.IsActive,
                     orderBy: q => q.OrderByDescending(x => x.ReportDate)
                 );

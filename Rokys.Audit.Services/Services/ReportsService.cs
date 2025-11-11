@@ -27,18 +27,21 @@ namespace Rokys.Audit.Services.Services
         private readonly IAuditStatusRepository _auditStatus;
         private readonly IAMapper _mapper;
         private readonly IScaleCompanyRepository _scaleCompanyRepository;
+        private readonly IPeriodAuditParticipantRepository _periodAuditParticipantRepository;
 
         public ReportsService(
             IPeriodAuditRepository periodAuditRepository,
             ILogger<ReportsService> logger,
             IAuditStatusRepository auditStatusRepository,
             IAMapper mapper,
-            IScaleCompanyRepository scaleCompanyRepository)
+            IScaleCompanyRepository scaleCompanyRepository,
+            IPeriodAuditParticipantRepository periodAuditParticipantRepository)
         {
             _periodAuditRepository = periodAuditRepository;
             _logger = logger;
             _auditStatus = auditStatusRepository;
             _mapper = mapper;
+            _periodAuditParticipantRepository = periodAuditParticipantRepository;
             _scaleCompanyRepository = scaleCompanyRepository;
         }
 
@@ -171,12 +174,14 @@ namespace Rokys.Audit.Services.Services
 
                 if (supervisorIds != null && supervisorIds.Length > 0)
                 {
-                    filter = filter.AndAlso(x => supervisorIds.Contains(x.SupervisorId ?? Guid.Empty));
+                    var auditIdsWithSupervisor = await _periodAuditParticipantRepository.GetAsync(
+                            filter: p => p.RoleCodeSnapshot == RoleCodes.JobSupervisor.ToString() && 
+                                        supervisorIds.Contains(p.UserReferenceId)
+                        );
+                    filter = filter.AndAlso(x => auditIdsWithSupervisor.Select(a => a.PeriodAuditId).Contains(x.PeriodAuditId));
                 }
 
-                var periodAudits = await _periodAuditRepository.GetAsync(
-                    filter: filter,
-                    includeProperties: [a => a.Supervisor!]);
+                var periodAudits = await _periodAuditRepository.GetCustomSearchAsync(filter);
 
                 // Crear las categorías (meses)
                 var categories = new List<string>
@@ -187,8 +192,8 @@ namespace Rokys.Audit.Services.Services
 
                 // Agrupar auditorías por supervisor
                 var auditsBySupervisor = periodAudits
-                    .Where(x => x.Supervisor != null)
-                    .GroupBy(x => x.SupervisorId!)
+                    .Where(x => x.PeriodAuditParticipants.Any(p => p.RoleCodeSnapshot == RoleCodes.JobSupervisor.ToString()))
+                    .GroupBy(x => x.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JobSupervisor.ToString())!.UserReferenceId)
                     .ToList();
 
                 // Crear series dinámicamente por supervisor
@@ -217,7 +222,7 @@ namespace Rokys.Audit.Services.Services
                     // Crear serie para este supervisor
                     var seriesDto = new DashboardSeriesDto
                     {
-                        Name = $"{supervisorGroup.First().Supervisor!.FirstName} {supervisorGroup.First().Supervisor!.LastName}",
+                        Name = $"{supervisorGroup.First().PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JobSupervisor.ToString())?.UserReference?.FullName ?? "Supervisor"}",
                         Type = "spline",
                         Data = monthlyData,
                         Color = color,
@@ -261,10 +266,10 @@ namespace Rokys.Audit.Services.Services
                     filter = filter.AndAlso(x => x.Store.EnterpriseId == reportSearchFilterRequestDto.EnterpriseId.Value && x.IsActive);
 
                 if (reportSearchFilterRequestDto.ResponsibleAuditorId.HasValue)
-                    filter = filter.AndAlso(x => x.ResponsibleAuditorId == reportSearchFilterRequestDto.ResponsibleAuditorId.Value && x.IsActive);
+                    filter = filter.AndAlso(x => x.PeriodAuditParticipants.Any(p => p.UserReferenceId == reportSearchFilterRequestDto.ResponsibleAuditorId.Value && p.RoleCodeSnapshot == RoleCodes.Auditor.ToString()) && x.IsActive);
 
                 if (reportSearchFilterRequestDto.SupervisorId.HasValue)
-                    filter = filter.AndAlso(x => x.SupervisorId == reportSearchFilterRequestDto.SupervisorId.Value && x.IsActive);
+                    filter = filter.AndAlso(x => x.PeriodAuditParticipants.Any(p => p.UserReferenceId == reportSearchFilterRequestDto.SupervisorId.Value && p.RoleCodeSnapshot == RoleCodes.JobSupervisor.ToString()) && x.IsActive);
 
                 if (reportSearchFilterRequestDto.ReportDate.HasValue)
                 {
@@ -283,12 +288,9 @@ namespace Rokys.Audit.Services.Services
 
                 filter = filter.AndAlso(x => x.AuditStatus.Code == AuditStatusCode.Completed);
 
-                Func<IQueryable<PeriodAudit>, IOrderedQueryable<PeriodAudit>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
-
-                var entities = await _periodAuditRepository.GetAsync(
-                    filter: filter,
-                    orderBy: orderBy,
-                    includeProperties: [x => x.Store.Enterprise, x => x.Administrator, x => x.Assistant, x => x.OperationManager, x => x.FloatingAdministrator, x => x.ResponsibleAuditor, x => x.AuditStatus, su => su.Supervisor]
+          
+                var entities = await _periodAuditRepository.GetCustomSearchAsync(
+                    filter: filter
                 );
 
                 IEnumerable<ScaleCompany> scaleCompanies = [];
@@ -341,12 +343,6 @@ namespace Rokys.Audit.Services.Services
                         StoreName = storeEntity.Store?.Name ?? string.Empty,
                         EnterpriseId = storeEntity.Store?.EnterpriseId,
                         EnterpriseName = storeEntity.Store?.Enterprise?.Name ?? string.Empty,
-                        AdministratorName = storeEntity.Administrator?.FullName,
-                        AssistantName = storeEntity.Assistant?.FullName,
-                        OperationManagerName = storeEntity.OperationManager?.FullName,
-                        FloatingAdministratorName = storeEntity.FloatingAdministrator?.FullName,
-                        ResponsibleAuditorName = storeEntity.ResponsibleAuditor?.FullName,
-                        SupervisorName = storeEntity.Supervisor?.FullName,
                         AuditedQuantityPerStore = totalAudits,
                         Ranking = null, // se puede calcular luego si hay un ranking general
                         MothlyScore = Math.Round(averageScore, 2),

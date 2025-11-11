@@ -59,41 +59,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
 
             builder.Property(ur => ur.UpdateDate);
 
-            // Navegación - PeriodAudit como Administrador
-            builder.HasMany(ur => ur.AdministratorAudits)
-                .WithOne(pa => pa.Administrator)
-                .HasForeignKey(pa => pa.AdministratorId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Navegación - PeriodAudit como Asistente
-            builder.HasMany(ur => ur.AssistantAudits)
-                .WithOne(pa => pa.Assistant)
-                .HasForeignKey(pa => pa.AssistantId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Navegación - PeriodAudit como Gerente de Operación
-            builder.HasMany(ur => ur.OperationManagerAudits)
-                .WithOne(pa => pa.OperationManager)
-                .HasForeignKey(pa => pa.OperationManagersId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Navegación - PeriodAudit como Administrador Suplente
-            builder.HasMany(ur => ur.FloatingAdministratorAudits)
-                .WithOne(pa => pa.FloatingAdministrator)
-                .HasForeignKey(pa => pa.FloatingAdministratorId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Navegación - PeriodAudit como Auditor Responsable
-            builder.HasMany(ur => ur.ResponsibleAuditorAudits)
-                .WithOne(pa => pa.ResponsibleAuditor)
-                .HasForeignKey(pa => pa.ResponsibleAuditorId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Navegación - Supervisores
-            builder.HasMany(ur => ur.SupervisorAudits)
-                .WithOne(pa => pa.Supervisor)
-                .HasForeignKey(pa => pa.SupervisorId)
-                .OnDelete(DeleteBehavior.Restrict);
+          
 
             // Navegación - EmployeeStores
             builder.HasMany(ur => ur.EmployeeStores)
