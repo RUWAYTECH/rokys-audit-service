@@ -42,6 +42,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
 
         // Audit role configuration
         public DbSet<AuditRoleConfiguration> AuditRoleConfigurations { get; set; }
+        public DbSet<PeriodAuditParticipant> PeriodAuditParticipants { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
@@ -61,6 +62,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
             
             // Audit role configuration
             modelBuilder.ApplyConfiguration(new AuditRoleConfigurationConfig());
+            modelBuilder.ApplyConfiguration(new PeriodAuditParticipantConfig());
             
             // Existing configurations
             modelBuilder.ApplyConfiguration(new ScaleCompanyConfig());
