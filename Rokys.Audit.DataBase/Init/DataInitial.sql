@@ -666,8 +666,7 @@ CREATE TABLE PeriodAuditParticipant (
     UpdateDate DATETIME2 NULL,
     
     FOREIGN KEY (PeriodAuditId) REFERENCES PeriodAudit(PeriodAuditId),
-    FOREIGN KEY (UserReferenceId) REFERENCES UserReference(UserReferenceId),
-    CONSTRAINT UQ_PeriodAudit_UserReference UNIQUE (PeriodAuditId, UserReferenceId)
+    FOREIGN KEY (UserReferenceId) REFERENCES UserReference(UserReferenceId)
 );
 
 -- Índices recomendados

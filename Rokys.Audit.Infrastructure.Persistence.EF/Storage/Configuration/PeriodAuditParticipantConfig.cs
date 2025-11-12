@@ -48,11 +48,6 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .HasForeignKey(p => p.UserReferenceId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Unique constraint for PeriodAuditId and UserReferenceId
-            builder.HasIndex(p => new { p.PeriodAuditId, p.UserReferenceId })
-                .IsUnique()
-                .HasDatabaseName("UQ_PeriodAudit_UserReference");
-
             // Performance indexes
             builder.HasIndex(p => p.PeriodAuditId)
                 .HasDatabaseName("IX_PeriodAuditParticipant_PeriodAuditId");
