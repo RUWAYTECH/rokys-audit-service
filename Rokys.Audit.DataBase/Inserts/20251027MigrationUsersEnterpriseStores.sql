@@ -5,7 +5,7 @@
 
 --CREATE DATABASE DBSecurityQAV2
 
-USE [DBSecurityQAV3]
+USE [DBSecurityQA]
 GO
 
 
@@ -187,7 +187,7 @@ WHERE u_orig.[IsActive] = 1
 
 
 
-USE DBAuditQAV2
+USE DBAuditQAV3
 --select * from Roles
 --where ApplicationId= (select top 1 ApplicationId from Applications where code ='MEMOS') 
 -- SCRIPT FOR AUDIT
