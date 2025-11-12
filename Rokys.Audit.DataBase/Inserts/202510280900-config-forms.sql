@@ -232,17 +232,21 @@ INSERT INTO dbo.TableScaleTemplate (TableScaleTemplateId,ScaleGroupId,Code,Name,
 
 --AUDIT_TEMPLATE_FIELDS
 
+
 INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,FieldCode,FieldName,FieldType,IsCalculated,CalculationFormula,AcumulationType,FieldOptions,DefaultValue,IsActive,CreatedBy,CreationDate,UpdatedBy,UpdateDate,SortOrder) VALUES
 	 (N'37325029-45F7-487E-A5DB-00873B9C04EA',N'03827B06-2E75-4DC5-BA6F-C0CCACD51275',N'monto',N'Monto s/.',N'numeric',N'Excel',N'E:2',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),2),
 	 (N'C97201A8-8A18-454F-B946-0163D93B9AFE',N'EDD3492C-AE56-44DE-9E9C-E5D64CF6BC8F',N'neto_soles',N'Neto S/.',N'numeric',N'Excel',N'A:4',N'SUM',N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),7),
 	 (N'CABCC8E9-8AE5-40B2-8782-0184E73D0698',N'5F5BDC64-F471-464A-B0BC-3A2CF9914A0C',N'causa_invalides',N'Causa Invalidez Doc.',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),3),
 	 (N'5485A196-3AF1-44CF-8953-0196B277D2FD',N'6AED8114-081F-4694-B24C-A26E7929F14A',N'dias_vencer',N'Días por vencer',N'numeric',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),4),
-	 (N'527D3CD1-FC7A-4A00-9495-01E4048F06B2',N'C77A1F96-DBDC-42E7-A4E9-F2D76936AEB3',N'monto',N'Monto s/.',N'numeric',N'Excel',N'K:2',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),2),
+	-- (N'527D3CD1-FC7A-4A00-9495-01E4048F06B2',N'C77A1F96-DBDC-42E7-A4E9-F2D76936AEB3',N'monto',N'Monto s/.',N'numeric',N'Excel',N'K:2',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),2),
 	 (N'1D8BB507-B289-42FF-B626-021D743224A3',N'BB05A45A-54AF-47F3-83FF-CE474D0D4CC3',N'cmt_rlv',N'Comentarios Relevantes',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),7),
 	 (N'A17C6C7A-C00D-47E4-8B66-040761D44B77',N'7AF24E1C-7117-4C57-8E10-4A3D883145CB',N'observaciones',N'Observaciones',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),6),
 	 (N'1B928B66-0C59-496F-B4D7-07A82C347FBB',N'710FA9E3-FD8D-4DBA-85BA-995795E08170',N'al',N'Al',N'date',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),2),
 	 (N'3B5F2C09-01C8-4B4D-83EE-07F140E4D968',N'E6195349-5BFD-4E6C-A55F-E0A8C447CF35',N'comentario',N'Comentario/Sustento',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),7),
 	 (N'956DB21C-84EB-4644-B6BB-08DE0CC67B3C',N'7EFA860D-15ED-4076-AB0E-C8F5FC366321',N'observado',N'Observado',N'select',N'No aplica',N'',N'COUNT',N'["si","excep"]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),4);
+
+
+
 INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,FieldCode,FieldName,FieldType,IsCalculated,CalculationFormula,AcumulationType,FieldOptions,DefaultValue,IsActive,CreatedBy,CreationDate,UpdatedBy,UpdateDate,SortOrder) VALUES
 	 (N'CDFBEFD4-7A84-4886-BA8F-0A51A20F640F',N'639F051C-5AD5-4110-8B7F-0CAB7E346F3C',N'tipo',N'Tipo de Observación',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),1),
 	 (N'6283C2E4-7B62-4F0F-B929-0C12DDCA5C6C',N'788DB008-B705-4CFA-83FE-B8E5E49BC31C',N'detalle',N'Detalle de incumplimiento',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),3),
@@ -254,6 +258,8 @@ INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,F
 	 (N'023E25D0-3B86-4281-A44C-15204CEC18FA',N'EDD3492C-AE56-44DE-9E9C-E5D64CF6BC8F',N'faltantes_cant',N'Faltantes Cant.',N'numeric',N'Excel',N'B:2',N'SUM',N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),2),
 	 (N'AC55CCEB-9764-4F47-92AD-159C9372B4D9',N'6AED8114-081F-4694-B24C-A26E7929F14A',N'insumo',N'Nombe de Insumo',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),1),
 	 (N'4AF3BB0B-664D-4D12-99CF-1B77A219B9B9',N'5B8AB8F3-04A1-48A3-A410-8C36BED23138',N'causa',N'Causa invalidez',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),3);
+
+
 INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,FieldCode,FieldName,FieldType,IsCalculated,CalculationFormula,AcumulationType,FieldOptions,DefaultValue,IsActive,CreatedBy,CreationDate,UpdatedBy,UpdateDate,SortOrder) VALUES
 	 (N'BC12A4AB-AA5D-4B37-9A94-1BB7AB5A5A42',N'C31B3244-2A5C-41AE-9950-B79109D974F5',N'sobrantes_cant',N'Sobrantes Cant',N'numeric',N'Excel',N'E3',N'SUM',N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),4),
 	 (N'1642667A-9AA2-4661-945A-1C1B31EED4CD',N'63F978E1-BB59-44AB-9164-21CBDA4BBD2B',N'tipo',N'Tipo de Observación',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),1),
@@ -265,6 +271,7 @@ INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,F
 	 (N'622FDDF8-FEA9-4353-B8AC-231AF7AAC00B',N'03827B06-2E75-4DC5-BA6F-C0CCACD51275',N'insumo',N'Insumo',N'text',N'Excel',N'F:2',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),1),
 	 (N'F2E320F4-DE28-4042-8FA0-280B79C4E1C1',N'7EFA860D-15ED-4076-AB0E-C8F5FC366321',N'tipo',N'Tipo de Observación',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),1),
 	 (N'499B4F07-6CEF-40F2-9C45-2A854DF7DF48',N'EE26B3CF-385A-4EBC-9396-8C4222BC2354',N'del',N'Del',N'date',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),1);
+
 INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,FieldCode,FieldName,FieldType,IsCalculated,CalculationFormula,AcumulationType,FieldOptions,DefaultValue,IsActive,CreatedBy,CreationDate,UpdatedBy,UpdateDate,SortOrder) VALUES
 	 (N'53EA118E-847D-49E6-814B-2B6D66F60F61',N'E3CEB7C8-8EC6-43C5-8C4A-3204460F6807',N'comentario_preg_dos',N'P2: Comentario/Sustento',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),4),
 	 (N'43B4B015-4845-4781-8F56-2CC7A454BDAD',N'C31B3244-2A5C-41AE-9950-B79109D974F5',N'faltantes_cant',N'Faltantes cant.',N'numeric',N'Excel',N'E2',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),2),
@@ -276,6 +283,7 @@ INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,F
 	 (N'60B3DF68-CE54-4A29-91F1-321BD9CC08A3',N'E3CEB7C8-8EC6-43C5-8C4A-3204460F6807',N'comentario_preg_uno',N'P1: Comentario/Sustento',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),2),
 	 (N'6BD50659-4CD9-45C6-8D66-324BB561E332',N'F81BDC42-E8B1-4CB8-A87F-29F30D4F8583',N'fecha',N'Fecha',N'date',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),1),
 	 (N'56F942A4-A156-402A-8C13-33A6831D7F65',N'BEF36B90-3A98-4E5E-B082-D5A06CECBD56',N'obs',N'Obs',N'select',N'No aplica',N'',N'COUNT',N'["si","excep"]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),6);
+
 INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,FieldCode,FieldName,FieldType,IsCalculated,CalculationFormula,AcumulationType,FieldOptions,DefaultValue,IsActive,CreatedBy,CreationDate,UpdatedBy,UpdateDate,SortOrder) VALUES
 	 (N'342CD7FF-7EA8-4AFD-9115-35DE9A213EFA',N'B975B8B6-F6D0-4D56-BEC7-094C4A788B5F',N'del',N'Del',N'date',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),1),
 	 (N'AE8E0FF7-2331-4FDB-96F1-36866CC4DACF',N'639F051C-5AD5-4110-8B7F-0CAB7E346F3C',N'datos_documento',N'Datos del documento (Nro Doc / Cantidad / Proveedor)',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),2),
@@ -287,6 +295,7 @@ INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,F
 	 (N'0DC151BE-1F33-4F5F-966C-413DA98514FB',N'EE26B3CF-385A-4EBC-9396-8C4222BC2354',N'al',N'Al',N'date',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),2),
 	 (N'AB4ABA0C-A5FC-4809-B51E-4205A473837A',N'46B9E394-42A3-4705-BDE2-0B5E475A02B3',N'coment',N'Cometarios',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),7),
 	 (N'53E30C82-A365-496F-9D3B-44A4D54C894E',N'BEF36B90-3A98-4E5E-B082-D5A06CECBD56',N'motivo',N'Motivo',N'select',N'No aplica',N'',N'COUNT',N'["no_facturado_en_fecha_correcta","no_registro_en_fecha_en_spring","no_coincide_con_formato_control_aq","no_cuenta_con_aprobacion_gg","cantidad_fisica_no_coincide","otros"]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),7);
+
 INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,FieldCode,FieldName,FieldType,IsCalculated,CalculationFormula,AcumulationType,FieldOptions,DefaultValue,IsActive,CreatedBy,CreationDate,UpdatedBy,UpdateDate,SortOrder) VALUES
 	 (N'D2BE3599-4158-4CB5-B827-44B92B26DE80',N'C31B3244-2A5C-41AE-9950-B79109D974F5',N'coment_neto',N'Comentario-Neto',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),9),
 	 (N'1B4B8027-0912-4D4A-909B-45D88A3FA71A',N'188690D7-B460-488D-84C1-B74937FFBDD8',N'firmados',N'Todos los descuentos estan firmados (SI/NO)',N'select',N'No aplica',N'',N'COUNT',N'["si","no"]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),3),
@@ -298,6 +307,7 @@ INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,F
 	 (N'C72440D8-BB2B-4179-9AB5-4B15642ED74B',N'5B6E23ED-0F56-47A1-AD07-EEE718CA61A5',N'hoja_cuadra',N'Hoja de Liquidacion Cuadra?',N'select',N'No aplica',N'',N'COUNT',N'["cuadra","no_cuadra_sobrantes","no_cuadra_no_revelado_en_sc_mrcial","no_cuadra_revelado_sc_mrcial_mayor_a_uno"]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),3),
 	 (N'509D0722-ECFD-46E0-9A64-4BB6FBC7706B',N'6AED8114-081F-4694-B24C-A26E7929F14A',N'comentarios',N'Comentarios',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),6),
 	 (N'07081B94-CE5B-41DE-A815-4C9394EC535F',N'F20556B2-0D00-4DCE-ACAA-1B1021203E0A',N'cant',N'Cant.',N'numeric',N'No aplica',N'',N'SUM',N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),2);
+
 INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,FieldCode,FieldName,FieldType,IsCalculated,CalculationFormula,AcumulationType,FieldOptions,DefaultValue,IsActive,CreatedBy,CreationDate,UpdatedBy,UpdateDate,SortOrder) VALUES
 	 (N'609F7B88-F947-4B2E-B88C-4CA69CC9E213',N'EDD3492C-AE56-44DE-9E9C-E5D64CF6BC8F',N'faltantes_soles',N'Faltantes S/.',N'numeric',N'Excel',N'A:2',N'SUM',N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),1),
 	 (N'FEE22744-47D2-4E4C-9DC6-4DB92E816605',N'D09F6B29-3BA7-47EC-8F02-CAAB9A8C0A63',N'dif_saz_kg',N'Diferencia de Sazon x KG',N'numeric',N'No aplica',N'',N'SUM',N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),5),
@@ -309,6 +319,7 @@ INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,F
 	 (N'1973ED89-E6A7-47F7-A2C7-570FBB98DEA5',N'AC17F068-EF70-49BC-9554-1FB07835DD69',N'comp_invalidos',N'Comprobantes inválidos',N'numeric',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),3),
 	 (N'5C1512C4-EB7D-481F-B04E-57595B6C9BCD',N'E6195349-5BFD-4E6C-A55F-E0A8C447CF35',N'dias_retrazo',N'Días de retrazo',N'numeric',N'No aplica',N'',N'SUM',N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),8),
 	 (N'144F7A9C-2002-4883-9780-58043E208E11',N'8CB99D27-6A5A-4206-BBA9-A2B24141708A',N'dif_pollos',N'Diferencia de pollos',N'numeric',N'No aplica',N'',N'SUM',N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),5);
+
 INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,FieldCode,FieldName,FieldType,IsCalculated,CalculationFormula,AcumulationType,FieldOptions,DefaultValue,IsActive,CreatedBy,CreationDate,UpdatedBy,UpdateDate,SortOrder) VALUES
 	 (N'1C64EAE6-3E58-471E-B59D-5A166929295C',N'D09F6B29-3BA7-47EC-8F02-CAAB9A8C0A63',N'cmt_rlv',N'Comentarios Relevantes',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),7),
 	 (N'20C81192-0465-43DF-95A6-5C86572BFCF5',N'710FA9E3-FD8D-4DBA-85BA-995795E08170',N'del',N'Del',N'date',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),1),
@@ -318,8 +329,9 @@ INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,F
 	 (N'F8EA5934-B763-47F3-8E7F-626AAD615EC4',N'A0C80AE0-4FA2-45C4-B995-E4EAFE551D5B',N'total',N'Total S/.',N'numeric',N'No aplica',N'',N'SUM',N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),3),
 	 (N'CCA88C85-8B0E-4F28-93ED-64CBF93D52EC',N'B6661C01-045D-484B-8EA1-D689518C081F',N'comp_invalidos',N'Comprobantes inválidos',N'numeric',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),4),
 	 (N'347A2EA5-63B5-4629-A82E-676A701CE88B',N'C31B3244-2A5C-41AE-9950-B79109D974F5',N'coment_sobrante',N'Comentario -Sobrante',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),8),
-	 (N'B361D40C-D445-4087-9E60-6811652FD5D4',N'EE26B3CF-385A-4EBC-9396-8C4222BC2354',N'firmados',N'Todos los descuentos estan firmados (SI/NO)',N'select',N'No aplica',N'',N'COUNT',N'["si","no"]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),3),
-	 (N'86308B44-2353-4836-A5CB-68837E8BEFBD',N'C77A1F96-DBDC-42E7-A4E9-F2D76936AEB3',N'coment',N'Comentarios relevantes',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),5);
+	 (N'B361D40C-D445-4087-9E60-6811652FD5D4',N'EE26B3CF-385A-4EBC-9396-8C4222BC2354',N'firmados',N'Todos los descuentos estan firmados (SI/NO)',N'select',N'No aplica',N'',N'COUNT',N'["si","no"]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),3);
+	 --(N'86308B44-2353-4836-A5CB-68837E8BEFBD',N'C77A1F96-DBDC-42E7-A4E9-F2D76936AEB3',N'coment',N'Comentarios relevantes',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),5);
+
 INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,FieldCode,FieldName,FieldType,IsCalculated,CalculationFormula,AcumulationType,FieldOptions,DefaultValue,IsActive,CreatedBy,CreationDate,UpdatedBy,UpdateDate,SortOrder) VALUES
 	 (N'CA3385CB-C189-4F1C-A293-6C4027D677ED',N'A0C80AE0-4FA2-45C4-B995-E4EAFE551D5B',N'prod',N'Producto',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),1),
 	 (N'8D1B6A98-1354-41F0-98A1-6CE0805C16B8',N'788DB008-B705-4CFA-83FE-B8E5E49BC31C',N'observado',N'Observado',N'select',N'No aplica',N'',N'COUNT',N'["si","excep"]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),4),
@@ -331,6 +343,7 @@ INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,F
 	 (N'ECB6E297-39D2-4595-9732-773D449E630A',N'C31B3244-2A5C-41AE-9950-B79109D974F5',N'sobrantes_soles',N'Sobrantes S/.',N'numeric',N'Excel',N'C3',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),3),
 	 (N'9F00BDD6-B9CB-4666-B6BC-783DD1DFE915',N'46B9E394-42A3-4705-BDE2-0B5E475A02B3',N'porcent_dif',N'% de diferencia',N'numeric',N'Tablas',N'dif_papa / decargada_vta',N'SUM',N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),6),
 	 (N'2B3159AB-27A0-44EE-AE91-78545200574B',N'8CB99D27-6A5A-4206-BBA9-A2B24141708A',N'porcent_dif',N'% de Diferencia',N'numeric',N'Tablas',N'dif_pollos / num_p_descargads',N'SUM',N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),6);
+
 INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,FieldCode,FieldName,FieldType,IsCalculated,CalculationFormula,AcumulationType,FieldOptions,DefaultValue,IsActive,CreatedBy,CreationDate,UpdatedBy,UpdateDate,SortOrder) VALUES
 	 (N'FC368D55-6593-48AE-937F-79CB2BF8F418',N'6AED8114-081F-4694-B24C-A26E7929F14A',N'cantidad',N'Cantidad',N'numeric',N'No aplica',N'',N'SUM',N'[]',N'0',1,N'admin',GETDATE(),N'admin',GETDATE(),2),
 	 (N'D8DFF5AC-1E2C-4FC9-A5C8-7AD3F0B32168',N'BB05A45A-54AF-47F3-83FF-CE474D0D4CC3',N'al',N'Al',N'date',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),2),
@@ -342,6 +355,7 @@ INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,F
 	 (N'261AC6D8-4D23-49A9-86FC-816F51200CCB',N'BEF36B90-3A98-4E5E-B082-D5A06CECBD56',N'facturado',N'Facturado',N'numeric',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),5),
 	 (N'64ED3823-9721-473F-80B1-825F8D9FA9A2',N'E3CEB7C8-8EC6-43C5-8C4A-3204460F6807',N'pregunta_tres',N'P3:De no ser responsabilidad de la administración - Fueron informadas al area correspondiente del Back Office.',N'select',N'No aplica',N'',N'COUNT',N'["si","no"]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),5),
 	 (N'14939E02-F620-4C80-BC67-83C6F05E8C63',N'188690D7-B460-488D-84C1-B74937FFBDD8',N'del',N'Del',N'date',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),1);
+
 INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,FieldCode,FieldName,FieldType,IsCalculated,CalculationFormula,AcumulationType,FieldOptions,DefaultValue,IsActive,CreatedBy,CreationDate,UpdatedBy,UpdateDate,SortOrder) VALUES
 	 (N'4A3C65B3-CBFD-43B2-B4AA-847FDD4E64C3',N'D09F6B29-3BA7-47EC-8F02-CAAB9A8C0A63',N'nro_dias_eval',N'Nro de Dias evaluados',N'numeric',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),3),
 	 (N'D4944ED5-C84D-437A-AC03-850532EECA69',N'710FA9E3-FD8D-4DBA-85BA-995795E08170',N'coment',N'Comentario',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),7),
@@ -353,17 +367,20 @@ INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,F
 	 (N'A45CDB94-481F-4693-81C8-8C7DC3EEA6AA',N'52E09CAE-5BD4-42A0-8F3D-67FA7E0F65C2',N'es_valida',N'¿Es valida?',N'select',N'No aplica',N'',N'COUNT',N'["Si","No"]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),3),
 	 (N'280A3DE6-A50E-4999-8010-8D561E6F2D6A',N'63F978E1-BB59-44AB-9164-21CBDA4BBD2B',N'observado',N'Observado',N'select',N'No aplica',N'',N'COUNT',N'["si","excep"]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),4),
 	 (N'8BF5A061-5A96-40CE-93A8-8D7E59A1C019',N'C31B3244-2A5C-41AE-9950-B79109D974F5',N'neto_soles',N'Neto en S/.',N'numeric',N'Excel',N'C4',N'SUM',N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),5);
+
+
 INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,FieldCode,FieldName,FieldType,IsCalculated,CalculationFormula,AcumulationType,FieldOptions,DefaultValue,IsActive,CreatedBy,CreationDate,UpdatedBy,UpdateDate,SortOrder) VALUES
 	 (N'7279B912-A878-4B39-BCF9-8EFCB8B7C9FF',N'BEF36B90-3A98-4E5E-B082-D5A06CECBD56',N'fecha',N'Fecha',N'date',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),1),
 	 (N'32300346-4AA2-4574-844C-92FD88C8C348',N'639F051C-5AD5-4110-8B7F-0CAB7E346F3C',N'detalle',N'Detalle incumplimiento',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),3),
 	 (N'2FAD3F41-5781-46E9-85AA-94C077ADDE94',N'7AF24E1C-7117-4C57-8E10-4A3D883145CB',N'al',N'Al',N'date',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),2),
-	 (N'63A17E2D-6D98-494D-B794-94C190822A77',N'C77A1F96-DBDC-42E7-A4E9-F2D76936AEB3',N'cant',N'Cantidad',N'numeric',N'Excel',N'L:2',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),3),
+	 --(N'63A17E2D-6D98-494D-B794-94C190822A77',N'C77A1F96-DBDC-42E7-A4E9-F2D76936AEB3',N'cant',N'Cantidad',N'numeric',N'Excel',N'L:2',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),3),
 	 (N'BEF14776-55A8-40D5-8AEF-958F78E7B15E',N'B6661C01-045D-484B-8EA1-D689518C081F',N'reembolso',N'C.Chicas P. Reembolso',N'numeric',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),3),
 	 (N'1503AD05-D009-478D-8A2C-95B9BE6A1F67',N'710FA9E3-FD8D-4DBA-85BA-995795E08170',N'diferencia',N'Diferencia de Papa en Kg',N'numeric',N'No aplica',N'',N'SUM',N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),5),
 	 (N'6FE7E950-948A-4D3A-834D-95F96E995277',N'F81BDC42-E8B1-4CB8-A87F-29F30D4F8583',N'adminis',N'Administrador que Gestionó TMSA',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),2),
 	 (N'6C20E5E8-C639-499C-9C6B-97F788C93719',N'46B9E394-42A3-4705-BDE2-0B5E475A02B3',N'del',N'Del',N'date',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),1),
 	 (N'12107F6D-E60B-41EF-9006-9C06777DE46D',N'EE26B3CF-385A-4EBC-9396-8C4222BC2354',N'detalle',N'Detalle de observaciones / incumplimientos',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),4),
 	 (N'86393C76-FD50-4F45-B9E9-9F55DD5CBCF9',N'F20556B2-0D00-4DCE-ACAA-1B1021203E0A',N'prod',N'Producto',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),1);
+
 INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,FieldCode,FieldName,FieldType,IsCalculated,CalculationFormula,AcumulationType,FieldOptions,DefaultValue,IsActive,CreatedBy,CreationDate,UpdatedBy,UpdateDate,SortOrder) VALUES
 	 (N'1628167C-2B3C-4B1C-B206-A074C30CD1E7',N'138FA4BB-712B-4CCD-B041-263316C32637',N'insumo',N'Insumo',N'text',N'Excel',N'D:2',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),1),
 	 (N'C56924B2-2143-427C-8F8B-A17E55FED1D7',N'6AED8114-081F-4694-B24C-A26E7929F14A',N'fecha_venc',N'Fecha vencimiento',N'date',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),3),
@@ -375,17 +392,19 @@ INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,F
 	 (N'8F0A10CE-B2CC-4492-917D-A5123E884CAC',N'B975B8B6-F6D0-4D56-BEC7-094C4A788B5F',N'descuento_sis',N'Descuento en Sistema Tareo',N'numeric',N'No aplica',N'',N'SUM',N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),4),
 	 (N'4941B679-4FD7-421D-AA35-A56BC9D7117A',N'B975B8B6-F6D0-4D56-BEC7-094C4A788B5F',N'diferencia',N'Diferencias por Aplicar S/.',N'numeric',N'Tablas',N'faltante_inv - descuento_sis',N'SUM',N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),5),
 	 (N'9A51A318-4C29-4918-B6D5-A58FB0C77507',N'639F051C-5AD5-4110-8B7F-0CAB7E346F3C',N'observado',N'Obs.',N'select',N'No aplica',N'',N'COUNT',N'["si","excep"]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),4);
+
 INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,FieldCode,FieldName,FieldType,IsCalculated,CalculationFormula,AcumulationType,FieldOptions,DefaultValue,IsActive,CreatedBy,CreationDate,UpdatedBy,UpdateDate,SortOrder) VALUES
 	 (N'077343EA-B427-4089-9E49-A7129BB3A60C',N'8CB99D27-6A5A-4206-BBA9-A2B24141708A',N'comentario',N'Comentario',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),7),
 	 (N'0B46ADFD-474A-4364-B811-A77D4E397CD9',N'BEF36B90-3A98-4E5E-B082-D5A06CECBD56',N'ingresos',N'Ingresos',N'numeric',N'No aplica',N'',N'SUM',N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),2),
-	 (N'B0E9D7D3-9182-493A-ADA6-AA369DD7B467',N'C77A1F96-DBDC-42E7-A4E9-F2D76936AEB3',N'um',N'UM',N'text',N'Excel',N'M:2',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),4),
+	 --(N'B0E9D7D3-9182-493A-ADA6-AA369DD7B467',N'C77A1F96-DBDC-42E7-A4E9-F2D76936AEB3',N'um',N'UM',N'text',N'Excel',N'M:2',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),4),
 	 (N'0BCB402A-E355-4E81-A920-AD03A9C92497',N'F81BDC42-E8B1-4CB8-A87F-29F30D4F8583',N'obs',N'Obs.',N'select',N'No aplica',N'',N'COUNT',N'["si","excep"]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),5),
 	 (N'AC9E2A71-269C-40A2-9380-AE94798CFE22',N'E6195349-5BFD-4E6C-A55F-E0A8C447CF35',N'deposito_integro',N'Depósito Integro - Conteo Dinero y Depósito en Bóveda / Sin Observac.',N'select',N'No aplica',N'',N'COUNT',N'["Si","Anomalia","Excep"]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),6),
 	 (N'153E93DD-38A9-48D4-BC04-B0C34CDC9D74',N'788DB008-B705-4CFA-83FE-B8E5E49BC31C',N'datos_documento',N'Datos documento (Nro Doc / Cantidad / Proveedor)',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),2),
 	 (N'B440A406-36FB-4605-BF9A-B0C56EC7413C',N'7AF24E1C-7117-4C57-8E10-4A3D883145CB',N'diferencia',N'Diferencias por Aplicar S/.',N'numeric',N'Tablas',N'faltante_caja - descuento_sis',N'SUM',N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),5),
 	 (N'ACD2DAF5-97BA-4BB5-A4A0-B204743D6597',N'D09F6B29-3BA7-47EC-8F02-CAAB9A8C0A63',N'del',N'Del',N'date',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),1),
-	 (N'C4B06C5E-1595-47E3-AC8A-B7B122B2EB62',N'C77A1F96-DBDC-42E7-A4E9-F2D76936AEB3',N'insumo',N'Insumo',N'text',N'Excel',N'J:2',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),1),
+	 --(N'C4B06C5E-1595-47E3-AC8A-B7B122B2EB62',N'C77A1F96-DBDC-42E7-A4E9-F2D76936AEB3',N'insumo',N'Insumo',N'text',N'Excel',N'J:2',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),1),
 	 (N'6D391A2A-4B94-4345-8628-B91DAD59B7FD',N'4B1EBA56-1DB9-4BDF-BF0B-561EA11A5034',N'cortesia',N'Cortesía',N'select',N'No aplica',N'',N'COUNT',N'["x","excep"]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),2);
+
 INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,FieldCode,FieldName,FieldType,IsCalculated,CalculationFormula,AcumulationType,FieldOptions,DefaultValue,IsActive,CreatedBy,CreationDate,UpdatedBy,UpdateDate,SortOrder) VALUES
 	 (N'8A367BE5-7EBA-4364-ADE1-B93174D37A49',N'710FA9E3-FD8D-4DBA-85BA-995795E08170',N'descarga_vta',N'Papa descargada por VTA en Kg',N'numeric',N'Excel',N'A2',N'SUM',N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),4),
 	 (N'1F5BDAA3-A525-4F25-9793-BB1AFD14F42E',N'138FA4BB-712B-4CCD-B041-263316C32637',N'coment',N'Comentario',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),5),
@@ -397,6 +416,7 @@ INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,F
 	 (N'5D0C7241-6ED0-44AB-B592-C4D49930489F',N'D09F6B29-3BA7-47EC-8F02-CAAB9A8C0A63',N'porc_dif',N'% de diferencia',N'numeric',N'Tablas',N'dif_saz_kg / desca_vta',N'SUM',N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),6),
 	 (N'5A4DEC06-24B4-4A8E-84A3-C5CC9D963F2F',N'BB05A45A-54AF-47F3-83FF-CE474D0D4CC3',N'nro_dias_evaluados',N'Nro de Dias evaluados',N'numeric',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),3),
 	 (N'3D4D71F3-9EA6-41F8-8ACE-C80CEF9CE911',N'710FA9E3-FD8D-4DBA-85BA-995795E08170',N'dias_eval',N'Nro de días evaluados',N'numeric',N'No aplica',N'',N'SUM',N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),3);
+
 INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,FieldCode,FieldName,FieldType,IsCalculated,CalculationFormula,AcumulationType,FieldOptions,DefaultValue,IsActive,CreatedBy,CreationDate,UpdatedBy,UpdateDate,SortOrder) VALUES
 	 (N'5DC4773A-0485-47ED-ACFC-CAD3602AE8DA',N'3F6DA6B5-553C-40EB-90AD-338EFF4B4513',N'es_valida',N'¿Es valida?',N'select',N'No aplica',N'',N'COUNT',N'["si","no"]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),3),
 	 (N'1DE031D8-62F3-4E08-A3E9-CDDCE442BC7B',N'BEF36B90-3A98-4E5E-B082-D5A06CECBD56',N'comentario',N'Comentario',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),8),
@@ -408,6 +428,7 @@ INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,F
 	 (N'1F63646E-186C-4D86-9D53-D62A77017C65',N'188690D7-B460-488D-84C1-B74937FFBDD8',N'detalle_obs',N'Detalle de observaciones / incumplimientos',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),4),
 	 (N'1BCFF8DB-6C90-4A2F-9BBD-D82C7E0BA929',N'03827B06-2E75-4DC5-BA6F-C0CCACD51275',N'cant',N'Cantidad',N'numeric',N'Excel',N'G:2',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),3),
 	 (N'E20182C1-4C4F-4A35-8957-D8F76FEFFE89',N'B681099A-A5ED-4E02-BD57-B57361E09EF0',N'caja_chica',N'Caja chica',N'numeric',N'No aplica',N'',NULL,N'[]',N'1000',1,N'admin',GETDATE(),N'admin',GETDATE(),1);
+
 INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,FieldCode,FieldName,FieldType,IsCalculated,CalculationFormula,AcumulationType,FieldOptions,DefaultValue,IsActive,CreatedBy,CreationDate,UpdatedBy,UpdateDate,SortOrder) VALUES
 	 (N'47AA88C1-2563-4D05-B206-DBE299856E68',N'F3811101-AC19-4952-AE67-BD7EAF18CCFB',N'monto',N'Monto',N'numeric',N'Excel',N'G8:G23',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),2),
 	 (N'D0022634-C367-41C0-BB26-DEAE195C3115',N'E6195349-5BFD-4E6C-A55F-E0A8C447CF35',N'registro_sistema',N'Registro en Sistema OK',N'select',N'No aplica',N'',N'COUNT',N'["Si","No","Excep"]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),5),
