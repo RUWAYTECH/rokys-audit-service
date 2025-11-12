@@ -8,5 +8,6 @@ namespace Rokys.Audit.Infrastructure.Repositories
         Task<AuditRoleConfiguration?> GetByRoleCodeAsync(string roleCode);
         Task<bool> ExistsByRoleCodeAsync(string roleCode, Guid? excludeId = null);
         Task<IEnumerable<AuditRoleConfiguration>> GetActiveConfigurationsOrderedAsync();
+        Task<bool> ExistsBySequenceOrderAsync(int sequenceOrder, Guid? excludeId = null);
     }
 }

@@ -42,5 +42,16 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
                 .ThenBy(x => x.RoleName)
                 .ToListAsync();
         }
+
+        public async Task<bool> ExistsBySequenceOrderAsync(int sequenceOrder, Guid? excludeId = null)
+        {
+            var query = DbSet
+                .Where(x => x.SequenceOrder == sequenceOrder && x.IsActive);
+
+            if (excludeId.HasValue)
+                query = query.Where(x => x.AuditRoleConfigurationId != excludeId.Value);
+
+            return await query.AnyAsync();
+        }
     }
 }
