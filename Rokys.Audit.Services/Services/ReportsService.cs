@@ -355,14 +355,14 @@ namespace Rokys.Audit.Services.Services
                             .Distinct()
                             .ToList(),
 
-                                                Supervisor = group
+                        Supervisor = group
                             .SelectMany(x => x.PeriodAuditParticipants)
                             .Where(p => p.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code && p.UserReference != null)
                             .Select(p => p.UserReference.FullName)
                             .Distinct()
                             .ToList(),
 
-                                                OperationManager = group
+                        OperationManager = group
                             .SelectMany(x => x.PeriodAuditParticipants)
                             .Where(p => p.RoleCodeSnapshot == RoleCodes.JefeDeOperaciones.Code && p.UserReference != null)
                             .Select(p => p.UserReference.FullName)
