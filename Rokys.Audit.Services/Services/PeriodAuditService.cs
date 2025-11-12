@@ -172,8 +172,8 @@ namespace Rokys.Audit.Services.Services
                         Action = "Creado",
                         IsActive = true
                     };
-                    inboxDto.PrevUserId = entity.PeriodAuditParticipants.FirstOrDefault(a => a.RoleCodeSnapshot == RoleCodes.JefeDeArea.ToString())?.UserReferenceId;
-                    inboxDto.NextUserId = entity.PeriodAuditParticipants.FirstOrDefault(a => a.RoleCodeSnapshot == RoleCodes.Auditor.ToString())?.UserReferenceId;
+                    inboxDto.PrevUserId = entity.PeriodAuditParticipants.FirstOrDefault(a => a.RoleCodeSnapshot == RoleCodes.JefeDeArea.Code)?.UserReferenceId;
+                    inboxDto.NextUserId = entity.PeriodAuditParticipants.FirstOrDefault(a => a.RoleCodeSnapshot == RoleCodes.Auditor.Code)?.UserReferenceId;
 
                     // let the inbox service decide the SequenceNumber and actor mapping
                     var inboxCreateResponse = await _inboxItemsService.Create(inboxDto);
@@ -309,20 +309,18 @@ namespace Rokys.Audit.Services.Services
 
                 var currentUser = _httpContextAccessor.CurrentUser();
 
-                foreach (var participant in entity.PeriodAuditParticipants.ToList())
+                foreach (var participant in entity.PeriodAuditParticipants)
                 {
-                    var existing = await _periodAuditParticipantRepository
-                        .GetFirstOrDefaultAsync(p => p.PeriodAuditParticipantId == participant.PeriodAuditParticipantId);
-
-                    if (existing != null)
-                        _periodAuditParticipantRepository.Delete(existing);
+                    _periodAuditParticipantRepository.Delete(participant);
                 }
+
                 foreach (var detail in requestDto.Participants)
                 {
                     var newParticipant = _mapper.Map<PeriodAuditParticipant>(detail);
                     newParticipant.CreateAudit(currentUser.UserName);
+                    newParticipant.PeriodAuditId = entity.PeriodAuditId;
                     newParticipant.IsActive = true;
-                    entity.PeriodAuditParticipants.Add(newParticipant);
+                    _periodAuditParticipantRepository.Insert(newParticipant);
                 }
 
                 entity.StoreId = requestDto.StoreId;
@@ -360,7 +358,7 @@ namespace Rokys.Audit.Services.Services
                     filter = filter.AndAlso(x => x.Store.EnterpriseId == paginationRequestDto.EnterpriseId.Value && x.IsActive);
 
                 if (paginationRequestDto.ResponsibleAuditorId.HasValue)
-                    filter = filter.AndAlso(x => x.PeriodAuditParticipants.Any(a=> a.UserReferenceId == paginationRequestDto.ResponsibleAuditorId.Value && a.RoleCodeSnapshot == RoleCodes.Auditor.ToString()) && x.IsActive);
+                    filter = filter.AndAlso(x => x.PeriodAuditParticipants.Any(a=> a.UserReferenceId == paginationRequestDto.ResponsibleAuditorId.Value && a.RoleCodeSnapshot == RoleCodes.Auditor.Code) && x.IsActive);
 
                 if (paginationRequestDto.StartDate.HasValue && paginationRequestDto.EndDate.HasValue)
                     filter = filter.AndAlso(x => x.CreationDate >= paginationRequestDto.StartDate.Value && x.CreationDate <= paginationRequestDto.EndDate.Value && x.IsActive);
@@ -390,7 +388,7 @@ namespace Rokys.Audit.Services.Services
                 var userReference = await _userReferenceRepository.GetFirstOrDefaultAsync(filter: x => x.UserReferenceId == currentUser.UserReferenceId);
                 foreach (var ent in pagedResult.Items)
                 {
-                    if (ent.Participants.Any(a=>a.UserReferenceId == currentUser.UserReferenceId && a.RoleCodeSnapshot == RoleCodes.Auditor.ToString()))
+                    if (ent.Participants.Any(a=>a.UserReferenceId == currentUser.UserReferenceId && a.RoleCodeSnapshot == RoleCodes.Auditor.Code))
                     {
                         ent.IAmAuditor = true;
                     }
@@ -588,7 +586,7 @@ namespace Rokys.Audit.Services.Services
                             newStatusId = statusInProgress?.AuditStatusId ?? ent.StatusId ?? Guid.Empty;
                             nextStatusId = statusInProgress?.AuditStatusId;
                         
-                            nextUserId = ent.PeriodAuditParticipants.FirstOrDefault(a => a.RoleCodeSnapshot == RoleCodes.Auditor.ToString())?.UserReferenceId;
+                            nextUserId = ent.PeriodAuditParticipants.FirstOrDefault(a => a.RoleCodeSnapshot == RoleCodes.Auditor.Code)?.UserReferenceId;
                           
                             actionText = "Aprobado";
                         }
@@ -597,7 +595,7 @@ namespace Rokys.Audit.Services.Services
                             newStatusId = statusInReview?.AuditStatusId ?? ent.StatusId ?? Guid.Empty;
                             nextStatusId = statusInReview?.AuditStatusId;
                           
-                            nextUserId = ent.PeriodAuditParticipants.FirstOrDefault(a => a.RoleCodeSnapshot == RoleCodes.JefeDeArea.ToString())?.UserReferenceId;
+                            nextUserId = ent.PeriodAuditParticipants.FirstOrDefault(a => a.RoleCodeSnapshot == RoleCodes.JefeDeArea.Code)?.UserReferenceId;
                           
                             actionText = "Enviado a revisión";
                         }
@@ -606,7 +604,7 @@ namespace Rokys.Audit.Services.Services
                             newStatusId = statusFinal?.AuditStatusId ?? ent.StatusId ?? Guid.Empty;
                             nextStatusId = statusFinal?.AuditStatusId;
                             // InReview → Final: NextUser = Administrator (finalizó)
-                            nextUserId = ent.PeriodAuditParticipants.FirstOrDefault(a => a.RoleCodeSnapshot == RoleCodes.JefeDeArea.ToString())?.UserReferenceId;
+                            nextUserId = ent.PeriodAuditParticipants.FirstOrDefault(a => a.RoleCodeSnapshot == RoleCodes.JefeDeArea.Code)?.UserReferenceId;
                           
                             actionText = "Finalizado";
                         }
@@ -623,7 +621,7 @@ namespace Rokys.Audit.Services.Services
                         newStatusId = statusInProgress?.AuditStatusId ?? ent.StatusId ?? Guid.Empty;
                         nextStatusId = statusInProgress?.AuditStatusId;
                         // Return to InProgress: NextUser = Auditor
-                        nextUserId = ent.PeriodAuditParticipants.FirstOrDefault(a => a.RoleCodeSnapshot == RoleCodes.Auditor.ToString())?.UserReferenceId;
+                        nextUserId = ent.PeriodAuditParticipants.FirstOrDefault(a => a.RoleCodeSnapshot == RoleCodes.Auditor.Code)?.UserReferenceId;
                         actionText = "Devuelto";
                     }
 

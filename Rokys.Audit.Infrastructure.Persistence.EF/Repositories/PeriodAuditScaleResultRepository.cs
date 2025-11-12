@@ -23,6 +23,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
         public async Task<PeriodAuditScaleResult> GetCustomByIdAsync(Expression<Func<PeriodAuditScaleResult, bool>> filter)
         {
             var entity = await Db.PeriodAuditScaleResults
+                .AsNoTracking()
                 .Where(filter)
                 .Include(e => e.PeriodAuditGroupResult.PeriodAudit.Store.Enterprise.ScaleCompanies)
                 .Include(sg => sg.ScaleGroup)

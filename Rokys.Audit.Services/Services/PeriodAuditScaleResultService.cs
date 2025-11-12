@@ -383,8 +383,8 @@ namespace Rokys.Audit.Services.Services
                 customDto.ScaleGroup.DataSourceTemplate = fileDataSourceTemplate;
                 customDto.ScaleGroup.DataSource = fileDataSource;
                 var currentUser = _httpContextAccessor.CurrentUser();
-                var userReference = await _userReferenceRepository.GetFirstOrDefaultAsync(filter: x => x.UserId == currentUser.UserId);
-                if (entity.PeriodAuditGroupResult.PeriodAudit.PeriodAuditParticipants.Any(p => p.UserReferenceId == userReference.UserReferenceId && p.IsActive && p.RoleCodeSnapshot == RoleCodes.Auditor.ToString()))
+                if (entity.PeriodAuditGroupResult.PeriodAudit.PeriodAuditParticipants.Any(p => p.UserReferenceId == currentUser.UserReferenceId
+                 && p.IsActive && p.RoleCodeSnapshot == RoleCodes.Auditor.Code))
                 {
                     customDto.PeriodAudit.IAmAuditor = true;
                 }

@@ -175,7 +175,7 @@ namespace Rokys.Audit.Services.Services
                 if (supervisorIds != null && supervisorIds.Length > 0)
                 {
                     var auditIdsWithSupervisor = await _periodAuditParticipantRepository.GetAsync(
-                            filter: p => p.RoleCodeSnapshot == RoleCodes.JobSupervisor.ToString() && 
+                            filter: p => p.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code && 
                                         supervisorIds.Contains(p.UserReferenceId)
                         );
                     filter = filter.AndAlso(x => auditIdsWithSupervisor.Select(a => a.PeriodAuditId).Contains(x.PeriodAuditId));
@@ -192,8 +192,8 @@ namespace Rokys.Audit.Services.Services
 
                 // Agrupar auditorías por supervisor
                 var auditsBySupervisor = periodAudits
-                    .Where(x => x.PeriodAuditParticipants.Any(p => p.RoleCodeSnapshot == RoleCodes.JobSupervisor.ToString()))
-                    .GroupBy(x => x.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JobSupervisor.ToString())!.UserReferenceId)
+                    .Where(x => x.PeriodAuditParticipants.Any(p => p.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code))
+                    .GroupBy(x => x.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code)!.UserReferenceId)
                     .ToList();
 
                 // Crear series dinámicamente por supervisor
@@ -222,7 +222,7 @@ namespace Rokys.Audit.Services.Services
                     // Crear serie para este supervisor
                     var seriesDto = new DashboardSeriesDto
                     {
-                        Name = $"{supervisorGroup.First().PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JobSupervisor.ToString())?.UserReference?.FullName ?? "Supervisor"}",
+                        Name = $"{supervisorGroup.First().PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code)?.UserReference?.FullName ?? "Supervisor"}",
                         Type = "spline",
                         Data = monthlyData,
                         Color = color,
@@ -266,10 +266,10 @@ namespace Rokys.Audit.Services.Services
                     filter = filter.AndAlso(x => x.Store.EnterpriseId == reportSearchFilterRequestDto.EnterpriseId.Value && x.IsActive);
 
                 if (reportSearchFilterRequestDto.ResponsibleAuditorId.HasValue)
-                    filter = filter.AndAlso(x => x.PeriodAuditParticipants.Any(p => p.UserReferenceId == reportSearchFilterRequestDto.ResponsibleAuditorId.Value && p.RoleCodeSnapshot == RoleCodes.Auditor.ToString()) && x.IsActive);
+                    filter = filter.AndAlso(x => x.PeriodAuditParticipants.Any(p => p.UserReferenceId == reportSearchFilterRequestDto.ResponsibleAuditorId.Value && p.RoleCodeSnapshot == RoleCodes.Auditor.Code) && x.IsActive);
 
                 if (reportSearchFilterRequestDto.SupervisorId.HasValue)
-                    filter = filter.AndAlso(x => x.PeriodAuditParticipants.Any(p => p.UserReferenceId == reportSearchFilterRequestDto.SupervisorId.Value && p.RoleCodeSnapshot == RoleCodes.JobSupervisor.ToString()) && x.IsActive);
+                    filter = filter.AndAlso(x => x.PeriodAuditParticipants.Any(p => p.UserReferenceId == reportSearchFilterRequestDto.SupervisorId.Value && p.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code) && x.IsActive);
 
                 if (reportSearchFilterRequestDto.ReportDate.HasValue)
                 {

@@ -15,13 +15,23 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
 
         public async Task<PeriodAudit> GetCustomByIdAsync(Expression<Func<PeriodAudit, bool>> filter)
         {
-           var entity = await Db.PeriodAudits.Where(filter)
-                .Include(x => x.Store)
-                    .ThenInclude(s => s.Enterprise)
-                .Include(x => x.PeriodAuditParticipants)
-                    .ThenInclude(p => p.UserReference)
-                .Include(x => x.AuditStatus)
-                .FirstOrDefaultAsync();
+            var entity = await Db.PeriodAudits.Where(filter)
+          .Include(x => x.Store)
+        .ThenInclude(s => s.Enterprise)
+          .Include(x => x.AuditStatus)
+          .FirstOrDefaultAsync();
+
+            if (entity != null)
+            {
+                // ✅ Cargar participantes ordenados por separado
+                await Db.Entry(entity)
+                    .Collection(x => x.PeriodAuditParticipants)
+                    .Query()
+                    .Where(p => p.IsActive)
+                    .OrderBy(p => p.RoleCodeSnapshot) // ✅ Orden por código de rol
+                    .Include(p => p.UserReference)
+                    .LoadAsync();
+            }
 
             return entity!;
         }
@@ -30,14 +40,24 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
         {
             var entities = await Db.PeriodAudits.Where(filter)
                 .Include(x => x.Store)
-                    .ThenInclude(s => s.Enterprise)
-                .Include(x => x.PeriodAuditParticipants)
-                    .ThenInclude(p => p.UserReference)
+                .ThenInclude(s => s.Enterprise)
                 .Include(x => x.AuditStatus)
-                .OrderByDescending(a=>a.CreationDate)
+                .OrderByDescending(a => a.CreationDate)
                 .ToListAsync();
 
-                return entities;
+            // ✅ Cargar participantes ordenados para cada entidad
+            foreach (var entity in entities)
+            {
+                await Db.Entry(entity)
+                    .Collection(x => x.PeriodAuditParticipants)
+                    .Query()
+                    .Where(p => p.IsActive)
+                    .OrderBy(p => p.RoleCodeSnapshot)
+                    .Include(p => p.UserReference)
+                    .LoadAsync();
+            }
+
+            return entities;
         }
 
     }
