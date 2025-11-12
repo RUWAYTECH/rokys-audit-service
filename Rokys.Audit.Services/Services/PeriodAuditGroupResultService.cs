@@ -171,12 +171,12 @@ namespace Rokys.Audit.Services.Services
                         {
                             fieldValue.IsActive = false;
                             fieldValue.UpdateDate = DateTime.Now;
-                            _periodAuditFieldValuesRepository.Update(fieldValue);
+                            _periodAuditFieldValuesRepository.Delete(fieldValue);
                         }
 
                         tableResult.IsActive = false;
                         tableResult.UpdateDate = DateTime.Now;
-                        _periodAuditTableScaleTemplateResultRepository.Update(tableResult);
+                        _periodAuditTableScaleTemplateResultRepository.Delete(tableResult);
                     }
 
                     var subResults = await _periodAuditScaleSubResultRepository.GetAsync(x => x.PeriodAuditScaleResultId == scaleResult.PeriodAuditScaleResultId && x.IsActive);
@@ -184,7 +184,7 @@ namespace Rokys.Audit.Services.Services
                     {
                         subResult.IsActive = false;
                         subResult.UpdateDate = DateTime.Now;
-                        _periodAuditScaleSubResultRepository.Update(subResult);
+                        _periodAuditScaleSubResultRepository.Delete(subResult);
                     }
 
                     var scoringResults = await _periodAuditScoringCriteriaResultRepository.GetAsync(x => x.PeriodAuditScaleResultId == scaleResult.PeriodAuditScaleResultId && x.IsActive);
@@ -192,7 +192,7 @@ namespace Rokys.Audit.Services.Services
                     {
                         scoringResult.IsActive = false;
                         scoringResult.UpdateDate = DateTime.Now;
-                        _periodAuditScoringCriteriaResultRepository.Update(scoringResult);
+                        _periodAuditScoringCriteriaResultRepository.Delete(scoringResult);
                     }
 
                     scaleResult.IsActive = false;
