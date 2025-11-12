@@ -1,6 +1,6 @@
 --scale company
---cambiar el valor de EnterpriseId A8248543-B5C7-4DCE-B518-E922D5DAEF00
-declare @EnterpriseId uniqueidentifier = (SELECT EnterpriseId FROM dbo.Enterprise WHERE Code = '20608029207')
+--cambiar el valor de EnterpriseId A8248543-B5C7-4DCE-B518-E922D5DAEF00 
+declare @EnterpriseId uniqueidentifier = (SELECT EnterpriseId FROM dbo.Enterprise WHERE Code = '20513427710')
 
 INSERT INTO dbo.ScaleCompany (ScaleCompanyId,EnterpriseId,Code,Name,[MinValue],[MaxValue],ColorCode,SortOrder,IsActive,CreatedBy,CreationDate,UpdatedBy,UpdateDate) VALUES
 	 (N'3133692F-C654-4700-A6D5-49D025FE2CC4',NULL,N'SC-0002',N'Riesgo Bajo',91.00,95.00,N'#4a90e2',2,1,N'admin',GETDATE(),N'admin',GETDATE()),
