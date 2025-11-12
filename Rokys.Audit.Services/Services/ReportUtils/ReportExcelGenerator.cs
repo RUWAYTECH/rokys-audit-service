@@ -34,7 +34,7 @@ namespace Rokys.Audit.Services.Services.ReportUtils
         {
             var headers = new[]
             {
-                "Empresa", "Tienda", "Auditor", "Supervisor", "Jefe Regional",
+                "Empresa", "Tienda", "Auditor", "Supervisor", "Gerente de Operaciones",
                 "Ranking", "Resultado del mes", "Nivel de Riesgo", "Veces Auditado", "Estado"
             };
 

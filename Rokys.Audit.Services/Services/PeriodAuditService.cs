@@ -174,6 +174,7 @@ namespace Rokys.Audit.Services.Services
                     };
                     inboxDto.PrevUserId = entity.PeriodAuditParticipants.FirstOrDefault(a => a.RoleCodeSnapshot == RoleCodes.JefeDeArea.Code)?.UserReferenceId;
                     inboxDto.NextUserId = entity.PeriodAuditParticipants.FirstOrDefault(a => a.RoleCodeSnapshot == RoleCodes.Auditor.Code)?.UserReferenceId;
+                    inboxDto.UserId = currentUser?.UserId;
 
                     // let the inbox service decide the SequenceNumber and actor mapping
                     var inboxCreateResponse = await _inboxItemsService.Create(inboxDto);
