@@ -51,9 +51,17 @@ namespace Rokys.Audit.Services.Services.ReportUtils
             {
                     worksheet.Cell(row, 1).Value = report.EnterpriseName;
                     worksheet.Cell(row, 2).Value = report.StoreName;
-                    worksheet.Cell(row, 3).Value = report.ResponsibleAuditorName;
-                    worksheet.Cell(row, 4).Value = report.SupervisorName;
-                    worksheet.Cell(row, 5).Value = report.OperationManagerName;
+                    worksheet.Cell(row, 3).Value = report.Auditor != null && report.Auditor.Any()
+                       ? string.Join(", ", report.Auditor)
+                       : string.Empty;
+
+                    worksheet.Cell(row, 4).Value = report.Supervisor != null && report.Supervisor.Any()
+                        ? string.Join(", ", report.Supervisor)
+                        : string.Empty;
+
+                    worksheet.Cell(row, 5).Value = report.OperationManager != null && report.OperationManager.Any()
+                        ? string.Join(", ", report.OperationManager)
+                        : string.Empty;
                     worksheet.Cell(row, 6).Value = report.Ranking;
                     worksheet.Cell(row, 7).Value = report.MothlyScore;
                     worksheet.Cell(row, 8).Value = report.LevelRisk;
@@ -105,9 +113,9 @@ namespace Rokys.Audit.Services.Services.ReportUtils
             // Ajustar ancho de columnas
             worksheet.Column(1).Width = 15;  // Empresa
             worksheet.Column(2).Width = 30;  // Tienda
-            worksheet.Column(3).Width = 25;  // Auditor
-            worksheet.Column(4).Width = 18;  // Supervisor
-            worksheet.Column(5).Width = 18;  // Jefe Regional
+            worksheet.Column(3).Width = 40;  // Auditor
+            worksheet.Column(4).Width = 40;  // Supervisor
+            worksheet.Column(5).Width = 40;  // Jefe Regional
             worksheet.Column(6).Width = 18;  // Ranking
             worksheet.Column(7).Width = 18;  // Resultado del mes
             worksheet.Column(8).Width = 20;  // Nivel de Riesgo

@@ -56,6 +56,11 @@ namespace Rokys.Audit.Services.Services
 
                 var currentUser = _httpContextAccessor.CurrentUser();
                 var entity = _mapper.Map<AuditRoleConfiguration>(requestDto);
+                var existingSortOrders = (await _auditRoleConfigurationRepository.GetAsync(filter: x => x.IsActive))
+                    .Select(x => x.SequenceOrder ?? 0)
+                    .ToList();
+                entity.SequenceOrder = Rokys.Audit.Common.Helpers.SortOrderHelper.GetNextSortOrder(existingSortOrders);
+
                 entity.CreateAudit(currentUser?.UserName ?? "system");
                 
                 _auditRoleConfigurationRepository.Insert(entity);
@@ -88,7 +93,7 @@ namespace Rokys.Audit.Services.Services
                 var currentUser = _httpContextAccessor.CurrentUser();
                 entity.UpdateAudit(currentUser?.UserName ?? "system");
                 
-                _auditRoleConfigurationRepository.Update(entity);
+                _auditRoleConfigurationRepository.Delete(entity);
                 await _unitOfWork.CommitAsync();
                 
                 _logger.LogInformation("Deleted audit role configuration with ID: {Id}", id);
