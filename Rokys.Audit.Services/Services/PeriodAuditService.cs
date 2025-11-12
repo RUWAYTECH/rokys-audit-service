@@ -368,12 +368,10 @@ namespace Rokys.Audit.Services.Services
 
                 Func<IQueryable<PeriodAudit>, IOrderedQueryable<PeriodAudit>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 
-                var entities = await _periodAuditRepository.GetPagedAsync(
+                var entities = await _periodAuditRepository.GetSearchPagedAsync(
                     filter: filter,
-                    orderBy: orderBy,
                     pageNumber: paginationRequestDto.PageNumber,
-                    pageSize: paginationRequestDto.PageSize,
-                    includeProperties: [x => x.Store.Enterprise, x=>x.PeriodAuditParticipants , x => x.AuditStatus]
+                    pageSize: paginationRequestDto.PageSize
                 );
                 var pagedResult = new PaginationResponseDto<PeriodAuditResponseDto>
                 {

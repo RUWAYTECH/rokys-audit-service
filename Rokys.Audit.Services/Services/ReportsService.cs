@@ -348,6 +348,15 @@ namespace Rokys.Audit.Services.Services
                         MothlyScore = Math.Round(averageScore, 2),
                         LevelRisk = riskLevel,
                         RiskColor = riskColor,
+                        ResponsibleAuditorName = group
+                            .SelectMany(x => x.PeriodAuditParticipants)
+                            .FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.Auditor.Code)?.UserReference?.FullName ?? string.Empty,
+                        SupervisorName = group
+                            .SelectMany(x => x.PeriodAuditParticipants)
+                            .FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code)?.UserReference?.FullName ?? string.Empty,
+                        OperationManagerName = group
+                            .SelectMany(x => x.PeriodAuditParticipants)
+                            .FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JefeDeOperaciones.Code)?.UserReference?.FullName ?? string.Empty,
                         AuditStatus = _mapper.Map<AuditStatusResponseDto>(storeEntity.AuditStatus)
                     };
 
