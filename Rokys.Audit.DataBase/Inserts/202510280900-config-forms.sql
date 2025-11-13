@@ -22,21 +22,21 @@ INSERT INTO dbo.ScaleGroup (ScaleGroupId,GroupId,Code,Name,Weighting,IsActive,Cr
 	 (N'437C3B1B-ED05-4C48-8499-076C88618BD6',N'4412D98D-E6D2-42EB-660B-08DE122F9350',N'INV-1',N'Dif. Valorizada en ALMACEN - Fisico Vs Sistema',15.00,1,N'admin',GETDATE(),N'admin',GETDATE(),1,1),
 	 (N'44E5865F-7271-4D14-974B-2297B23946EB',N'4412D98D-E6D2-42EB-660B-08DE122F9350',N'INV-3',N'Control de Descarga x  Salidas (sin sustento)',10.00,1,N'admin',GETDATE(),N'admin',GETDATE(),0,3),
 	 (N'A3A7AA02-5770-400D-A235-31636E192121',N'01B92D97-D1DD-427A-660C-08DE122F9350',N'CINV-3',N'Aplicación de Descuentos Inventarios',30.00,1,N'admin',GETDATE(),N'admin',GETDATE(),0,3),
-	 (N'A3C72B7D-982B-4377-B181-33FB2A9D15D8',N'4A55ADC7-CFBA-4979-660A-08DE122F9350',N'DN-1',N'Arqueo Caja Chica',20.00,1,N'admin',GETDATE(),N'admin',GETDATE(),1,1),
+	 (N'A3C72B7D-982B-4377-B181-33FB2A9D15D8',N'4A55ADC7-CFBA-4979-660A-08DE122F9350',N'DN-1',N'Arqueo Caja Chica',20.00,1,N'admin',GETDATE(),N'admin',GETDATE(),0,1),
 	 (N'D64BD028-45D1-4620-9F79-4D91B25F4096',N'4A55ADC7-CFBA-4979-660A-08DE122F9350',N'DN-5',N'Aplicación de Descuentos - Caja / Bancos / Ventas',15.00,1,N'admin',GETDATE(),N'admin',GETDATE(),0,5),
 	 (N'46A21C17-B379-4880-BBBE-55E7D7C8E383',N'4412D98D-E6D2-42EB-660B-08DE122F9350',N'INV-5',N'Vencimiento de Insumos / Mal Estado',10.00,1,N'admin',GETDATE(),N'admin',GETDATE(),0,5),
 	 (N'9C959014-5A7A-4F59-B2A5-61E2334EE9E4',N'4412D98D-E6D2-42EB-660B-08DE122F9350',N'INV-4',N'Descuento Aplicado en Auditoria',10.00,1,N'admin',GETDATE(),N'admin',GETDATE(),0,4),
 	 (N'2A73C0B1-6DD3-4EF8-A2EA-76142909BDFE',N'4A55ADC7-CFBA-4979-660A-08DE122F9350',N'DN-2',N'Arqueo Fondo de Sencillo',20.00,1,N'admin',GETDATE(),N'admin',GETDATE(),0,2),
-	 (N'DF93B3E9-7EEE-40C8-B8EE-78254D69B8AB',N'4412D98D-E6D2-42EB-660B-08DE122F9350',N'INV-6',N'Diferencia Real de Pollo',8.00,1,N'admin',GETDATE(),N'admin',GETDATE(),0,6),
+	 (N'DF93B3E9-7EEE-40C8-B8EE-78254D69B8AB',N'4412D98D-E6D2-42EB-660B-08DE122F9350',N'INV-6',N'Diferencia Real de Pollo',8.00,1,N'admin',GETDATE(),N'admin',GETDATE(),1,6),
 	 (N'8963D8F1-E642-4D9F-BEEC-985ABDAFB4B9',N'663F6B67-5A08-4669-660D-08DE122F9350',N'CBO-2',N'Verificación del Sistema CCTV',30.00,1,N'admin',GETDATE(),N'admin',GETDATE(),0,2);
 INSERT INTO dbo.ScaleGroup (ScaleGroupId,GroupId,Code,Name,Weighting,IsActive,CreatedBy,CreationDate,UpdatedBy,UpdateDate,HasSourceData,SortOrder) VALUES
 	 (N'74E60725-492E-40CA-B99A-9B177A96A3C4',N'663F6B67-5A08-4669-660D-08DE122F9350',N'CBO-1',N'Aprobación de venta a precio costo',40.00,1,N'admin',GETDATE(),N'admin',GETDATE(),0,1),
-	 (N'87A40461-5D99-472E-B86C-9E801F7173B7',N'4A55ADC7-CFBA-4979-660A-08DE122F9350',N'DN-4',N'Cuenta Corriente - Liquidaciones Tienda',15.00,1,N'admin',GETDATE(),N'admin',GETDATE(),1,4),
-	 (N'0FE32FE6-F6D7-4113-B775-A8B36743047A',N'4412D98D-E6D2-42EB-660B-08DE122F9350',N'INV-8',N'Diferencia Real de Lechuga',8.00,1,N'admin',GETDATE(),N'admin',GETDATE(),0,8),
-	 (N'40FED23C-B2F7-40C0-B36E-B21B1874E779',N'4412D98D-E6D2-42EB-660B-08DE122F9350',N'INV-7',N'Diferencia Real de Papa',8.00,1,N'admin',GETDATE(),N'admin',GETDATE(),0,7),
-	 (N'64266FFA-ABC7-4237-907C-B2C71191B0FB',N'4412D98D-E6D2-42EB-660B-08DE122F9350',N'INV-2',N'Dif. Valorizada en AREAS - Fisico Vs Sistema',15.00,1,N'admin',GETDATE(),N'admin',GETDATE(),0,2),
+	 (N'87A40461-5D99-472E-B86C-9E801F7173B7',N'4A55ADC7-CFBA-4979-660A-08DE122F9350',N'DN-4',N'Cuenta Corriente - Liquidaciones Tienda',15.00,1,N'admin',GETDATE(),N'admin',GETDATE(),0,4),
+	 (N'0FE32FE6-F6D7-4113-B775-A8B36743047A',N'4412D98D-E6D2-42EB-660B-08DE122F9350',N'INV-8',N'Diferencia Real de Lechuga',8.00,1,N'admin',GETDATE(),N'admin',GETDATE(),1,8),
+	 (N'40FED23C-B2F7-40C0-B36E-B21B1874E779',N'4412D98D-E6D2-42EB-660B-08DE122F9350',N'INV-7',N'Diferencia Real de Papa',8.00,1,N'admin',GETDATE(),N'admin',GETDATE(),1,7),
+	 (N'64266FFA-ABC7-4237-907C-B2C71191B0FB',N'4412D98D-E6D2-42EB-660B-08DE122F9350',N'INV-2',N'Dif. Valorizada en AREAS - Fisico Vs Sistema',15.00,1,N'admin',GETDATE(),N'admin',GETDATE(),1,2),
 	 (N'B3498FFE-0342-4172-9865-BA5B191A7AF7',N'663F6B67-5A08-4669-660D-08DE122F9350',N'CBO-3',N'Venta de Aceite Quemado',30.00,1,N'admin',GETDATE(),N'admin',GETDATE(),0,3),
-	 (N'77AEB317-256B-4F47-9BF1-BFE2A3AD3EF2',N'4412D98D-E6D2-42EB-660B-08DE122F9350',N'INV-9',N'Diferencia Real de Aji',8.00,1,N'admin',GETDATE(),N'admin',GETDATE(),0,9),
+	 (N'77AEB317-256B-4F47-9BF1-BFE2A3AD3EF2',N'4412D98D-E6D2-42EB-660B-08DE122F9350',N'INV-9',N'Diferencia Real de Aji',8.00,1,N'admin',GETDATE(),N'admin',GETDATE(),1,9),
 	 (N'658A508A-F5DF-4DE8-B182-C5191B7346C8',N'01B92D97-D1DD-427A-660C-08DE122F9350',N'CINV-2',N'Aprobacion de bajas sin descuento',15.00,1,N'admin',GETDATE(),N'admin',GETDATE(),0,2),
 	 (N'62E6BB4B-9112-485B-B331-C736E4C832E3',N'4A55ADC7-CFBA-4979-660A-08DE122F9350',N'DN-3',N'Depositos de Dinero de Ventas',20.00,1,N'admin',GETDATE(),N'admin',GETDATE(),0,3);
 INSERT INTO dbo.ScaleGroup (ScaleGroupId,GroupId,Code,Name,Weighting,IsActive,CreatedBy,CreationDate,UpdatedBy,UpdateDate,HasSourceData,SortOrder) VALUES
@@ -248,7 +248,7 @@ INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,F
 
 
 INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,FieldCode,FieldName,FieldType,IsCalculated,CalculationFormula,AcumulationType,FieldOptions,DefaultValue,IsActive,CreatedBy,CreationDate,UpdatedBy,UpdateDate,SortOrder) VALUES
-	 (N'CDFBEFD4-7A84-4886-BA8F-0A51A20F640F',N'639F051C-5AD5-4110-8B7F-0CAB7E346F3C',N'tipo',N'Tipo de Observación',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),1),
+	 (N'CDFBEFD4-7A84-4886-BA8F-0A51A20F640F',N'639F051C-5AD5-4110-8B7F-0CAB7E346F3C',N'tipo',N'Tipo de Observación',N'select',N'No aplica',N'',NULL,N'["Falta_de_registro","Registro_fuera_de_fecha","Registro_con_cantidades_diferentes","Otros_casos"]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),1),
 	 (N'6283C2E4-7B62-4F0F-B929-0C12DDCA5C6C',N'788DB008-B705-4CFA-83FE-B8E5E49BC31C',N'detalle',N'Detalle de incumplimiento',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),3),
 	 (N'9153B223-71C1-4483-A245-109BEF9FFB2A',N'E6195349-5BFD-4E6C-A55F-E0A8C447CF35',N'incump_dia_deposito',N'Incumplimiento en día de depósito',N'select',N'No aplica',N'',N'COUNT',N'["Si","No","Excep"]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),3),
 	 (N'8159E6F5-2E83-4451-9B9B-1233D5938D69',N'F3811101-AC19-4952-AE67-BD7EAF18CCFB',N'coment',N'Comentarios relevantes',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),5),
@@ -262,14 +262,14 @@ INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,F
 
 INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,FieldCode,FieldName,FieldType,IsCalculated,CalculationFormula,AcumulationType,FieldOptions,DefaultValue,IsActive,CreatedBy,CreationDate,UpdatedBy,UpdateDate,SortOrder) VALUES
 	 (N'BC12A4AB-AA5D-4B37-9A94-1BB7AB5A5A42',N'C31B3244-2A5C-41AE-9950-B79109D974F5',N'sobrantes_cant',N'Sobrantes Cant',N'numeric',N'Excel',N'E3',N'SUM',N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),4),
-	 (N'1642667A-9AA2-4661-945A-1C1B31EED4CD',N'63F978E1-BB59-44AB-9164-21CBDA4BBD2B',N'tipo',N'Tipo de Observación',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),1),
+	 (N'1642667A-9AA2-4661-945A-1C1B31EED4CD',N'63F978E1-BB59-44AB-9164-21CBDA4BBD2B',N'tipo',N'Tipo de Observación',N'select',N'No aplica',N'',NULL,N'["Falta_de_registro","Registro_fuera_de_fecha","Registro_con_cantidades_diferentes","Otros_casos"]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),1),
 	 (N'9F527DF0-170C-49B7-98E1-1D25FC232739',N'52E09CAE-5BD4-42A0-8F3D-67FA7E0F65C2',N'justificacion',N'Justificación',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),2),
 	 (N'7281702A-6426-4AB5-BC9C-1EAD34ADCF42',N'4B1EBA56-1DB9-4BDF-BF0B-561EA11A5034',N'degustacion',N'Degustación',N'select',N'No aplica',N'',N'COUNT',N'["x","excep"]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),3),
 	 (N'CE2F194C-0CFD-4622-80AE-20596394CA61',N'BB05A45A-54AF-47F3-83FF-CE474D0D4CC3',N'dif_aji_bolsas_ltrs',N'Diferencia de Aji en bolsas de 4ltrs',N'numeric',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),5),
 	 (N'09EE0616-8DA5-45EF-9834-2188CB834737',N'7AF24E1C-7117-4C57-8E10-4A3D883145CB',N'descuento_sis',N'Descuento en Sistema Tareo',N'numeric',N'No aplica',N'',N'SUM',N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),4),
 	 (N'F7E9F6F3-7E5D-409B-911E-2292B7276227',N'EDD3492C-AE56-44DE-9E9C-E5D64CF6BC8F',N'coment_sobrantes',N'Cometario Sobrantes',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),6),
 	 (N'622FDDF8-FEA9-4353-B8AC-231AF7AAC00B',N'03827B06-2E75-4DC5-BA6F-C0CCACD51275',N'insumo',N'Insumo',N'text',N'Excel',N'F:2',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),1),
-	 (N'F2E320F4-DE28-4042-8FA0-280B79C4E1C1',N'7EFA860D-15ED-4076-AB0E-C8F5FC366321',N'tipo',N'Tipo de Observación',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),1),
+	 (N'F2E320F4-DE28-4042-8FA0-280B79C4E1C1',N'7EFA860D-15ED-4076-AB0E-C8F5FC366321',N'tipo',N'Tipo de Observación',N'select',N'No aplica',N'',NULL,N'["Falta_de_registro","Registro_fuera_de_fecha","Registro_con_cantidades_diferentes","Otros_casos"]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),1),
 	 (N'499B4F07-6CEF-40F2-9C45-2A854DF7DF48',N'EE26B3CF-385A-4EBC-9396-8C4222BC2354',N'del',N'Del',N'date',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),1);
 
 INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,FieldCode,FieldName,FieldType,IsCalculated,CalculationFormula,AcumulationType,FieldOptions,DefaultValue,IsActive,CreatedBy,CreationDate,UpdatedBy,UpdateDate,SortOrder) VALUES
@@ -323,7 +323,7 @@ INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,F
 INSERT INTO dbo.AuditTemplateFields (AuditTemplateFieldId,TableScaleTemplateId,FieldCode,FieldName,FieldType,IsCalculated,CalculationFormula,AcumulationType,FieldOptions,DefaultValue,IsActive,CreatedBy,CreationDate,UpdatedBy,UpdateDate,SortOrder) VALUES
 	 (N'1C64EAE6-3E58-471E-B59D-5A166929295C',N'D09F6B29-3BA7-47EC-8F02-CAAB9A8C0A63',N'cmt_rlv',N'Comentarios Relevantes',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),7),
 	 (N'20C81192-0465-43DF-95A6-5C86572BFCF5',N'710FA9E3-FD8D-4DBA-85BA-995795E08170',N'del',N'Del',N'date',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),1),
-	 (N'55ED6C6F-7A62-46B9-B48E-5DDB314196CE',N'788DB008-B705-4CFA-83FE-B8E5E49BC31C',N'tipo',N'Tipo de Observación',N'text',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),1),
+	 (N'55ED6C6F-7A62-46B9-B48E-5DDB314196CE',N'788DB008-B705-4CFA-83FE-B8E5E49BC31C',N'tipo',N'Tipo de Observación',N'select',N'No aplica',N'',NULL,N'["Falta_de_registro","Registro_fuera_de_fecha","Registro_con_cantidades_diferentes","Otros_casos"]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),1),
 	 (N'B869DA46-AE3D-4BBE-ABD0-5EDB31EE9064',N'BEF36B90-3A98-4E5E-B082-D5A06CECBD56',N'saldo_inicial',N'Saldo inicial',N'numeric',N'No aplica',N'',N'SUM',N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),9),
 	 (N'66019315-17BA-4D57-9163-6236FC29CF19',N'5F5BDC64-F471-464A-B0BC-3A2CF9914A0C',N'monto_soles',N'S/.',N'numeric',N'No aplica',N'',NULL,N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),2),
 	 (N'F8EA5934-B763-47F3-8E7F-626AAD615EC4',N'A0C80AE0-4FA2-45C4-B995-E4EAFE551D5B',N'total',N'Total S/.',N'numeric',N'No aplica',N'',N'SUM',N'[]',N'',1,N'admin',GETDATE(),N'admin',GETDATE(),3),
