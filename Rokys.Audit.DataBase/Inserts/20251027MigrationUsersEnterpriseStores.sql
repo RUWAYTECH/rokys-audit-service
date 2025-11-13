@@ -9,7 +9,7 @@ USE [DBSecurityQA]
 GO
 
 
-update DBMemoQAV2.dbo.Roles
+update DBMemoQA.dbo.Roles
 set Code='APPADMIN'
 where Code='R005'
 --select * from [dbo].[Users]
@@ -52,8 +52,8 @@ SELECT
     ,e.[FirstName] AS [FirstName]                         -- FirstName del empleado
     ,e.[LastName] AS [LastName]                           -- LastName del empleado
     ,e.[Phone] AS [PhoneNumber]                           -- Phone del empleado
-FROM [DBMemoQAV2].[dbo].[Users] u
-INNER JOIN [DBMemoQAV2].[dbo].[Employees] e ON u.[EmployeeId] = e.[Id]
+FROM [DBMemoQA].[dbo].[Users] u
+INNER JOIN [DBMemoQA].[dbo].[Employees] e ON u.[EmployeeId] = e.[Id]
 WHERE u.[IsActive] = 1                                    -- Solo usuarios activos
     AND e.[IsActive] = 1   and u.Id!='eeeeeeee-1111-1111-1111-111111111111'                               -- Solo empleados activos
 GO
@@ -78,8 +78,8 @@ UNION ALL
 SELECT 
     'Usuarios origen (activos)' as Concepto,
     COUNT(*) as Cantidad
-FROM [DBMemoQAV2].[dbo].[Users] u
-INNER JOIN [DBMemoQAV2].[dbo].[Employees] e ON u.[EmployeeId] = e.[Id]
+FROM [DBMemoQA].[dbo].[Users] u
+INNER JOIN [DBMemoQA].[dbo].[Employees] e ON u.[EmployeeId] = e.[Id]
 WHERE u.[IsActive] = 1 AND e.[IsActive] = 1
 GO
 
@@ -174,8 +174,8 @@ SELECT
     GETDATE() AS AssignedAt,
     GETDATE() AS CreatedAt,
     GETDATE() AS UpdatedAt
-FROM [DBMemoQAV2].[dbo].[Users] u_orig
-INNER JOIN [DBMemoQAV2].[dbo].[Roles] r ON u_orig.RoleId = r.Id
+FROM [DBMemoQA].[dbo].[Users] u_orig
+INNER JOIN [DBMemoQA].[dbo].[Roles] r ON u_orig.RoleId = r.Id
 INNER JOIN [dbo].[Users] u_dest ON u_orig.[Id] = u_dest.[UserId]
 WHERE u_orig.[IsActive] = 1
     AND u_orig.Id != 'eeeeeeee-1111-1111-1111-111111111111'
@@ -187,7 +187,7 @@ WHERE u_orig.[IsActive] = 1
 
 
 
-USE DBAuditQAV3
+USE DBAuditQA
 --select * from Roles
 --where ApplicationId= (select top 1 ApplicationId from Applications where code ='MEMOS') 
 -- SCRIPT FOR AUDIT
@@ -213,7 +213,7 @@ SELECT
     a.[CreationDate],
     a.[UpdatedBy],
     a.[UpdateDate]
-FROM [DBMemoQAV2].[dbo].[Enterprise] a
+FROM [DBMemoQA].[dbo].[Enterprise] a
 WHERE NOT EXISTS (
     SELECT 1
     FROM [dbo].[Enterprise] b
@@ -245,7 +245,7 @@ SELECT
     a.[CreationDate],
     a.[UpdatedBy],
     a.[UpdateDate]
-FROM [DBMemoQAV2].[dbo].[Stores] a
+FROM [DBMemoQA].[dbo].[Stores] a
 WHERE NOT EXISTS (
     SELECT 1
     FROM [dbo].[Stores] b
