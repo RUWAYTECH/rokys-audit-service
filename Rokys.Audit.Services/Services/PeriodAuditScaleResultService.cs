@@ -109,7 +109,8 @@ namespace Rokys.Audit.Services.Services
                 }
                 var periodAuditScaleResult = await _repository.GetFirstOrDefaultAsync(
                     filter: x => x.PeriodAuditGroupResultId == requestDto.PeriodAuditGroupResultId,
-                    orderBy: x => x.OrderByDescending(y => y.SortOrder)
+                    orderBy: x => x.OrderByDescending(y => y.SortOrder),
+                    includeProperties: [x => x.PeriodAuditGroupResult.PeriodAudit]
                 );
 
                 var scaleGroup = await _scaleGroupRepository.GetFirstOrDefaultAsync(filter: x=>x.ScaleGroupId == requestDto.ScaleGroupId && x.IsActive);
@@ -123,7 +124,8 @@ namespace Rokys.Audit.Services.Services
                 _repository.Insert(entity);
                 var scaleGroupResponse = _mapper.Map<ScaleGroupResponseDto>(scaleGroup);
                 var periodAuditScaleResultResponse = _mapper.Map<PeriodAuditScaleResultResponseDto>(periodAuditScaleResult);
-                await _periodAuditGroupResultService.CreateTableScaleTemplateResults(scaleGroupResponse, periodAuditScaleResultResponse);
+                await _periodAuditGroupResultService.CreateTableScaleTemplateResults(scaleGroupResponse, periodAuditScaleResultResponse, 
+                    periodAuditScaleResult?.PeriodAuditGroupResult?.PeriodAudit?.StartDate, periodAuditScaleResult?.PeriodAuditGroupResult?.PeriodAudit?.EndDate);
                 await _unitOfWork.CommitAsync();
                 var createdEntity = await _repository.GetFirstOrDefaultAsync(
                     filter: x => x.PeriodAuditScaleResultId == entity.PeriodAuditScaleResultId && x.IsActive,

@@ -18,8 +18,13 @@ namespace Rokys.Audit.DTOs.Responses.Reports
         // fin Audit Info
 
         //TODO review these properties
-        public List<string> Auditor { get; set; }
-        public List<string> Supervisor { get; set; }
-        public List<string> OperationManager { get; set; }
+        public List<UserInfoAuditItem> Auditor { get; set; }
+        public List<UserInfoAuditItem> Supervisor { get; set; }
+        public List<UserInfoAuditItem> OperationManager { get; set; }
+    }
+    public class UserInfoAuditItem
+    {
+        public string FullName { get; set; } = string.Empty;
+        public int TotalAudits { get; set; }
     }
 }

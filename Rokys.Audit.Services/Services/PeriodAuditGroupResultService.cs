@@ -3,10 +3,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Reatil.Services.Services;
+using Rokys.Audit.Common.Constant;
 using Rokys.Audit.Common.Extensions;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.PeriodAuditGroupResult;
 using Rokys.Audit.DTOs.Responses.Common;
+using Rokys.Audit.DTOs.Responses.PeriodAudit;
 using Rokys.Audit.DTOs.Responses.PeriodAuditGroupResult;
 using Rokys.Audit.DTOs.Responses.PeriodAuditScaleResult;
 using Rokys.Audit.DTOs.Responses.ScaleGroup;
@@ -21,7 +23,7 @@ namespace Rokys.Audit.Services.Services
 {
     public class PeriodAuditGroupResultService : IPeriodAuditGroupResultService
     {
-        private readonly IPeriodAuditGroupResultRepository _repository;
+        private readonly IPeriodAuditGroupResultRepository _periodAuditGroupResultRepository;
         private readonly IValidator<PeriodAuditGroupResultRequestDto> _validator;
         private readonly ILogger<PeriodAuditGroupResultService> _logger;
         private readonly IUnitOfWork _unitOfWork;
@@ -39,6 +41,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IScoringCriteriaRepository _scoringCriteriaRepository;
         private readonly IScaleCompanyRepository _scaleCompanyRepository;
         private readonly IServiceScopeFactory _serviceScopeFactory;
+        private readonly IPeriodAuditRepository _periodAuditRepository;
 
         public PeriodAuditGroupResultService(
             IPeriodAuditGroupResultRepository repository,
@@ -58,9 +61,10 @@ namespace Rokys.Audit.Services.Services
             IPeriodAuditScoringCriteriaResultRepository periodAuditScoringCriteriaResultRepository,
             IScoringCriteriaRepository scoringCriteriaRepository,
             IScaleCompanyRepository scaleCompanyRepository,
-            IServiceScopeFactory serviceScopeFactory)
+            IServiceScopeFactory serviceScopeFactory,
+            IPeriodAuditRepository periodAuditRepository)
         {
-            _repository = repository;
+            _periodAuditGroupResultRepository = repository;
             _validator = validator;
             _logger = logger;
             _unitOfWork = unitOfWork;
@@ -78,6 +82,7 @@ namespace Rokys.Audit.Services.Services
             _scoringCriteriaRepository = scoringCriteriaRepository;
             _scaleCompanyRepository = scaleCompanyRepository;
             _serviceScopeFactory = serviceScopeFactory;
+            _periodAuditRepository = periodAuditRepository;
         }
         public async Task<ResponseDto<PeriodAuditGroupResultResponseDto>> Create(PeriodAuditGroupResultRequestDto requestDto, bool isTrasacction = false)
         {
@@ -97,10 +102,10 @@ namespace Rokys.Audit.Services.Services
                 var entity = _mapper.Map<PeriodAuditGroupResult>(requestDto);
                 entity.CreateAudit(currentUser.UserName);
                 entity.IsActive = true;
-                _repository.Insert(entity);
+                _periodAuditGroupResultRepository.Insert(entity);
 
                 var scaleGroups = await _scaleGroupRepository.GetByGroupIdAsync(requestDto.GroupId);
-                var currentPeriodAuditGroupResult = await _repository.GetByPeriodAuditIdAsync(requestDto.PeriodAuditId);
+                var currentPeriodAuditGroupResult = await _periodAuditGroupResultRepository.GetByPeriodAuditIdAsync(requestDto.PeriodAuditId);
                 var currentWeighting = currentPeriodAuditGroupResult.Sum(x => x.TotalWeighting);
                 if(currentWeighting + requestDto.TotalWeighting > 100)
                 {
@@ -128,12 +133,12 @@ namespace Rokys.Audit.Services.Services
 
                     var scaleResponse = _mapper.Map<ScaleGroupResponseDto>(scale);
                     var periodAuditScaleResultResponse = _mapper.Map<PeriodAuditScaleResultResponseDto>(periodAuditScaleResult);
-                    await CreateTableScaleTemplateResults(scaleResponse, periodAuditScaleResultResponse);
+                    await CreateTableScaleTemplateResults(scaleResponse, periodAuditScaleResultResponse, requestDto.StartDate, requestDto.EndDate);
                 }
                 if (!isTrasacction)
                     await _unitOfWork.CommitAsync();
 
-                var createdEntity = await _repository.GetFirstOrDefaultAsync(
+                var createdEntity = await _periodAuditGroupResultRepository.GetFirstOrDefaultAsync(
                     filter: x => x.PeriodAuditGroupResultId == entity.PeriodAuditGroupResultId && x.IsActive,
                     includeProperties: [x => x.Group, y => y.PeriodAudit]);
                 response.Data = _mapper.Map<PeriodAuditGroupResultResponseDto>(createdEntity);
@@ -151,7 +156,7 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create();
             try
             {
-                var entity = await _repository.GetFirstOrDefaultAsync(
+                var entity = await _periodAuditGroupResultRepository.GetFirstOrDefaultAsync(
                     filter: x => x.PeriodAuditGroupResultId == id && x.IsActive);
 
                 if (entity == null)
@@ -203,7 +208,7 @@ namespace Rokys.Audit.Services.Services
                 // Finalmente desactivar el GroupResult principal
                 entity.IsActive = false;
                 entity.UpdateDate = DateTime.Now;
-                _repository.Update(entity);
+                _periodAuditGroupResultRepository.Update(entity);
 
                 await _unitOfWork.CommitAsync();
                 response.WithMessage("El grupo de resultados y sus dependencias fueron eliminados correctamente.");
@@ -222,7 +227,7 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<PeriodAuditGroupResultResponseDto>();
             try
             {
-                var entity = await _repository.GetFirstOrDefaultAsync(
+                var entity = await _periodAuditGroupResultRepository.GetFirstOrDefaultAsync(
                     filter: x => x.PeriodAuditGroupResultId == id && x.IsActive, 
                     includeProperties: [ x => x.Group, y => y.PeriodAudit]);
                 if (entity == null)
@@ -245,14 +250,14 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<PeriodAuditGroupResultResponseDto>();
             try
             {
-                var entity = await _repository.GetFirstOrDefaultAsync(
+                var entity = await _periodAuditGroupResultRepository.GetFirstOrDefaultAsync(
                     filter: x => x.PeriodAuditGroupResultId == id && x.IsActive);
                 if (entity == null)
                 {
                     response = ResponseDto.Error<PeriodAuditGroupResultResponseDto>("No se encontró el registro.");
                     return response;
                 }
-                var currentPeriodAuditGroupResult = await _repository.GetByPeriodAuditIdAsync(entity.PeriodAuditId, id);
+                var currentPeriodAuditGroupResult = await _periodAuditGroupResultRepository.GetByPeriodAuditIdAsync(entity.PeriodAuditId, id);
                 var currentWeighting = currentPeriodAuditGroupResult.Sum(x => x.PeriodAuditGroupResultId == id ? 0 : x.TotalWeighting);
                 if (currentWeighting + requestDto.TotalWeighting > 100)
                 {
@@ -262,7 +267,7 @@ namespace Rokys.Audit.Services.Services
                 var currentUser = _httpContextAccessor.CurrentUser();
                 entity.TotalWeighting = requestDto.TotalWeighting;
                 entity.UpdateAudit(currentUser.UserName);
-                _repository.Update(entity);
+                _periodAuditGroupResultRepository.Update(entity);
                 
                 await _unitOfWork.CommitAsync();
                 response.Data = _mapper.Map<PeriodAuditGroupResultResponseDto>(entity);
@@ -295,7 +300,7 @@ namespace Rokys.Audit.Services.Services
                 }
 
                 Func<IQueryable<PeriodAuditGroupResult>, IOrderedQueryable<PeriodAuditGroupResult>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
-                var entities = await _repository.GetPagedAsync(
+                var entities = await _periodAuditGroupResultRepository.GetPagedAsync(
                     filter: filter,
                     orderBy: orderBy,
                     pageNumber: filterRequestDto.PageNumber,
@@ -325,7 +330,7 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<bool>();
             try
             {
-                var entity = await _repository.GetFirstOrDefaultAsync(
+                var entity = await _periodAuditGroupResultRepository.GetFirstOrDefaultAsync(
                     filter: x => x.PeriodAuditGroupResultId == periodAuditGroupResultId && x.IsActive,
                     includeProperties: [x => x.Group, y => y.PeriodAudit.Store]);
 
@@ -366,7 +371,7 @@ namespace Rokys.Audit.Services.Services
                 }
 
                 entity.ScoreValue = acumulatedScore;
-                _repository.Update(entity);
+                _periodAuditGroupResultRepository.Update(entity);
 
                 await _unitOfWork.CommitAsync();
 
@@ -389,7 +394,7 @@ namespace Rokys.Audit.Services.Services
             return response;
         }
 
-        public async Task CreateTableScaleTemplateResults(ScaleGroupResponseDto scale, PeriodAuditScaleResultResponseDto periodAuditScaleResult)
+        public async Task CreateTableScaleTemplateResults(ScaleGroupResponseDto scale, PeriodAuditScaleResultResponseDto periodAuditScaleResult, DateTime? startDate = null, DateTime? endDate = null)
         {
             var currentUser = _httpContextAccessor.CurrentUser();
             var tableScaleTemplates = await _tableScaleTemplateRepository.GetByScaleGroupId(periodAuditScaleResult.ScaleGroupId);
@@ -415,6 +420,17 @@ namespace Rokys.Audit.Services.Services
                     {
                         foreach (var field in auditTemplateField)
                         {
+                            var defaultValue = field.DefaultValue;
+
+                            if (field.FieldType == FieldConstants.Date && field.FieldCode == FieldConstants.From && startDate != null && field.DefaultValue != null)
+                            {
+                                defaultValue = startDate.Value.ToString();
+                            }
+
+                            if (field.FieldType == FieldConstants.Date && field.FieldCode == FieldConstants.To && endDate != null && field.DefaultValue != null)
+                            {
+                                defaultValue = endDate.Value.ToString();
+                            }
                             var periodAuditFieldValue = new PeriodAuditFieldValues
                             {
                                 PeriodAuditTableScaleTemplateResultId = periodAuditTableScaleTemplateResult.PeriodAuditTableScaleTemplateResultId,
@@ -427,7 +443,7 @@ namespace Rokys.Audit.Services.Services
                                 AcumulationType = field.AcumulationType,
                                 FieldOptions = field.FieldOptions,
                                 SortOrder = field.SortOrder,
-                                DefaultValue = field.DefaultValue
+                                DefaultValue = defaultValue
                             };
                             periodAuditFieldValue.CreateAudit(currentUser.UserName);
                             _periodAuditFieldValuesRepository.Insert(periodAuditFieldValue);

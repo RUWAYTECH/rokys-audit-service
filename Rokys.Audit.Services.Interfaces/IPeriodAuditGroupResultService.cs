@@ -4,6 +4,7 @@ using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Responses.Common;
 using Rokys.Audit.DTOs.Responses.ScaleGroup;
 using Rokys.Audit.DTOs.Responses.PeriodAuditScaleResult;
+using Rokys.Audit.DTOs.Responses.PeriodAudit;
 
 namespace Rokys.Audit.Services.Interfaces
 {
@@ -13,6 +14,6 @@ namespace Rokys.Audit.Services.Interfaces
         Task<ResponseDto<PaginationResponseDto<PeriodAuditGroupResultResponseDto>>> GetPaged(PeriodAuditGroupResultFilterRequestDto filterRequestDto);
         Task<ResponseDto<bool>> Recalculate(Guid periodAuditGroupResultId);
         Task<ResponseDto<PeriodAuditGroupResultResponseDto>> Update(Guid id, UpdatePeriodAuditGroupResultRequestDto requestDto);
-        Task CreateTableScaleTemplateResults(ScaleGroupResponseDto scale, PeriodAuditScaleResultResponseDto periodAuditScaleResult);
+        Task CreateTableScaleTemplateResults(ScaleGroupResponseDto scale, PeriodAuditScaleResultResponseDto periodAuditScaleResult, DateTime? startDate, DateTime? endDate);
     }
 }

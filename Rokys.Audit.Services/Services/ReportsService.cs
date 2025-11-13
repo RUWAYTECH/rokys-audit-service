@@ -351,22 +351,34 @@ namespace Rokys.Audit.Services.Services
                         Auditor = group
                             .SelectMany(x => x.PeriodAuditParticipants)
                             .Where(p => p.RoleCodeSnapshot == RoleCodes.Auditor.Code && p.UserReference != null)
-                            .Select(p => p.UserReference.FullName)
-                            .Distinct()
+                            .GroupBy(p => p.UserReference.FullName)
+                            .Select(g => new UserInfoAuditItem
+                            {
+                                FullName = g.Key,
+                                TotalAudits = g.Count()
+                            })
                             .ToList(),
 
                         Supervisor = group
                             .SelectMany(x => x.PeriodAuditParticipants)
                             .Where(p => p.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code && p.UserReference != null)
-                            .Select(p => p.UserReference.FullName)
-                            .Distinct()
+                            .GroupBy(p => p.UserReference.FullName)
+                            .Select(g => new UserInfoAuditItem
+                            {
+                                FullName = g.Key,
+                                TotalAudits = g.Count()
+                            })
                             .ToList(),
 
                         OperationManager = group
                             .SelectMany(x => x.PeriodAuditParticipants)
                             .Where(p => p.RoleCodeSnapshot == RoleCodes.JefeDeOperaciones.Code && p.UserReference != null)
-                            .Select(p => p.UserReference.FullName)
-                            .Distinct()
+                            .GroupBy(p => p.UserReference.FullName)
+                            .Select(g => new UserInfoAuditItem
+                            {
+                                FullName = g.Key,
+                                TotalAudits = g.Count()
+                            })
                             .ToList(),
                         AuditStatus = _mapper.Map<AuditStatusResponseDto>(storeEntity.AuditStatus)
                     };

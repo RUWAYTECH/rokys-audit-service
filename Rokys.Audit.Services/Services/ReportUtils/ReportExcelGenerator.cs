@@ -52,16 +52,16 @@ namespace Rokys.Audit.Services.Services.ReportUtils
                     worksheet.Cell(row, 1).Value = report.EnterpriseName;
                     worksheet.Cell(row, 2).Value = report.StoreName;
                     worksheet.Cell(row, 3).Value = report.Auditor != null && report.Auditor.Any()
-                       ? string.Join(", ", report.Auditor)
-                       : string.Empty;
+                    ? string.Join(", ", report.Auditor.Select(a => a.FullName))
+                    : string.Empty;
 
                     worksheet.Cell(row, 4).Value = report.Supervisor != null && report.Supervisor.Any()
-                        ? string.Join(", ", report.Supervisor)
-                        : string.Empty;
+                    ? string.Join(", ", report.Supervisor.Select(s => s.FullName))
+                    : string.Empty;
 
                     worksheet.Cell(row, 5).Value = report.OperationManager != null && report.OperationManager.Any()
-                        ? string.Join(", ", report.OperationManager)
-                        : string.Empty;
+                    ? string.Join(", ", report.OperationManager.Select(o => o.FullName))
+                    : string.Empty;
                     worksheet.Cell(row, 6).Value = report.Ranking;
                     worksheet.Cell(row, 7).Value = report.MothlyScore;
                     worksheet.Cell(row, 8).Value = report.LevelRisk;

@@ -144,6 +144,8 @@ namespace Rokys.Audit.Services.Services
                         GroupId = grp.GroupId,
                         ScoreValue = 0,
                         TotalWeighting = grp.Weighting,
+                        StartDate = entity.StartDate,
+                        EndDate = entity.EndDate
                     };
                     await _periodAuditGroupResultService.Create(newPeriodAuditGroupResult, true);
                 }
