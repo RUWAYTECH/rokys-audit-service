@@ -59,19 +59,7 @@ namespace Rokys.Audit.Services.Services
                 var currentUser = _httpContextAccessor.CurrentUser();
                 var entity = _mapper.Map<InboxItems>(requestDto);
                 // resolve provided request user id (system user) to UserReferenceId if given
-                if (requestDto.UserId.HasValue)
-                {
-                    var actorRef = await _userReferenceRepository.GetByUserIdAsync(requestDto.UserId.Value);
-                    if (actorRef != null)
-                        entity.UserId = actorRef.UserReferenceId;
-                    else
-                        entity.UserId = null; // Clear if user reference not found to avoid FK error
-                }
-                else if (currentUser != null && currentUser.UserReferenceId != Guid.Empty)
-                {
-                    // CurrentUser already provides UserReferenceId, no need to normalize
-                    entity.UserId = currentUser.UserReferenceId;
-                }
+                entity.UserId = currentUser.UserReferenceId;
 
                 // compute next sequence number for this PeriodAudit
                 if (entity.PeriodAuditId.HasValue)
@@ -80,13 +68,6 @@ namespace Rokys.Audit.Services.Services
                     entity.SequenceNumber = (last?.SequenceNumber ?? 0) + 1;
                 }
 
-                // Normalize user references: PrevUserId, NextUserId, ApproverId
-                // Note: entity.UserId is already properly set above from requestDto or currentUser
-                entity.PrevUserId = await NormalizeUserRefAsync(entity.PrevUserId);
-                entity.NextUserId = await NormalizeUserRefAsync(entity.NextUserId);
-                entity.ApproverId = await NormalizeUserRefAsync(entity.ApproverId);
-
-                // if incoming DTO provides an action label, keep it
                 if (!string.IsNullOrEmpty(requestDto.Action))
                     entity.Action = requestDto.Action;
 

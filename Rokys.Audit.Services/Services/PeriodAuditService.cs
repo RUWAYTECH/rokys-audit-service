@@ -102,6 +102,16 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<PeriodAuditResponseDto>();
             try
             {
+                var currentUser = _httpContextAccessor.CurrentUser();
+                var currentUserReferenceId = currentUser?.UserReferenceId;
+                if (currentUserReferenceId == null || currentUserReferenceId.Equals(Guid.Empty))
+                {
+                    response.Messages.Add(new ApplicationMessage
+                    {
+                        Message = "El usuario que está creando, no tiene referencia en el sistema de auditoría. Ingrese a la aplicación de seguridad y vuelva asignar el usuario " + currentUser?.FullName,
+                        MessageType = ApplicationMessageType.Error,
+                    });
+                }
                 var validate = _validator.Validate(requestDto);
                 if (!validate.IsValid)
                 {
@@ -111,7 +121,6 @@ namespace Rokys.Audit.Services.Services
 
                 var auditStatus = await _auditStatusRepository.GetFirstOrDefaultAsync(filter: x => x.Code == AuditStatusCode.Pending && x.IsActive);
 
-                var currentUser = _httpContextAccessor.CurrentUser();
                 var currentUserName = currentUser?.UserName ?? "system";
                 var entity = _mapper.Map<PeriodAudit>(requestDto);
                 // Obtener el último código existente
@@ -155,15 +164,7 @@ namespace Rokys.Audit.Services.Services
                 try
                 {
                     // Build InboxItemRequestDto and reuse the inbox service to handle creation (sequence number, user mapping, audit fields)
-                    var currentUserReferenceId = currentUser?.UserReferenceId;
-                    if (currentUserReferenceId == null || currentUserReferenceId.Equals(Guid.Empty))
-                    {
-                        response.Messages.Add(new ApplicationMessage
-                        {
-                            Message = "No se encontro al usuario que esta creando",
-                            MessageType = ApplicationMessageType.Error,
-                        });
-                    }
+                    
                     var inboxDto = new DTOs.Requests.InboxItems.InboxItemRequestDto
                     {
                         PeriodAuditId = entity.PeriodAuditId,
@@ -176,7 +177,7 @@ namespace Rokys.Audit.Services.Services
                     };
                     inboxDto.PrevUserId = entity.PeriodAuditParticipants.FirstOrDefault(a => a.RoleCodeSnapshot == RoleCodes.JefeDeArea.Code)?.UserReferenceId;
                     inboxDto.NextUserId = entity.PeriodAuditParticipants.FirstOrDefault(a => a.RoleCodeSnapshot == RoleCodes.Auditor.Code)?.UserReferenceId;
-                    inboxDto.UserId = currentUser?.UserId;
+                    inboxDto.UserId = currentUser?.UserReferenceId;
 
                     // let the inbox service decide the SequenceNumber and actor mapping
                     var inboxCreateResponse = await _inboxItemsService.Create(inboxDto);
