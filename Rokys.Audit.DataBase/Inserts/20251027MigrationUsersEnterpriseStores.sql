@@ -186,6 +186,15 @@ WHERE u_orig.[IsActive] = 1
     );
 
 
+USE DBMemoQA
+
+update Stores   
+set Name = TRIM(Name)
+
+
+update Enterprise   
+set Name = TRIM(Name)
+
 
 USE DBAuditQA
 --select * from Roles
