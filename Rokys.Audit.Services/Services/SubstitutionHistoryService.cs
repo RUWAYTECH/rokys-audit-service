@@ -112,22 +112,37 @@ namespace Rokys.Audit.Services.Services
                     return response;
                 }
 
-                // Validar que el nuevo usuario tenga el mismo rol que el usuario anterior tenía en la auditoría
+                // Validar que el nuevo usuario tenga al menos uno de los roles requeridos
+                // Los usuarios pueden tener múltiples roles separados por comas (ej: "A001,A002")
                 // Usamos el RoleCodeSnapshot porque el usuario pudo haber cambiado de rol después de asignarse a la auditoría
-                if (participant.RoleCodeSnapshot != newUser.RoleCode)
+                var requiredRoleCode = participant.RoleCodeSnapshot;
+                var newUserRoleCodes = (newUser.RoleCode ?? string.Empty).Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+                // Verificar si el nuevo usuario tiene al menos el rol requerido
+                var hasRequiredRole = newUserRoleCodes.Any(role => role.Equals(requiredRoleCode, StringComparison.OrdinalIgnoreCase));
+
+                if (!hasRequiredRole)
                 {
                     response = ResponseDto.Error<SubstitutionHistoryResponseDto>(
-                        $"El nuevo usuario debe tener el mismo rol que el usuario anterior en esta auditoría. Rol requerido: {participant.RoleNameSnapshot}, Rol del nuevo usuario: {newUser.RoleName}");
+                        $"El nuevo usuario debe tener al menos el rol requerido para esta auditoría. " +
+                        $"Rol requerido: {participant.RoleNameSnapshot} ({requiredRoleCode}), " +
+                        $"Roles del nuevo usuario: {newUser.RoleName}");
                     return response;
                 }
 
                 // Actualizar el participante con el nuevo usuario
                 participant.UserReferenceId = newUser.UserReferenceId;
-                // Mantenemos el mismo rol snapshot (ya que validamos que el nuevo usuario tiene ese rol)
-                participant.RoleCodeSnapshot = newUser.RoleCode ?? string.Empty;
-                participant.RoleNameSnapshot = newUser.RoleName ?? string.Empty;
+
+                // No se actualiza RoleCodeSnapshot ni RoleNameSnapshot porque ya están correctos
                 participant.UpdateAudit(_httpContextAccessor.CurrentUser()?.UserName);
-                _periodAuditParticipantRepository.Update(participant);
+
+                // Solo actualizamos el UserReferenceId y los campos de auditoría
+                _periodAuditParticipantRepository.UpdatePartial(
+                    participant,
+                    nameof(participant.UserReferenceId),
+                    nameof(participant.UpdatedBy),
+                    nameof(participant.UpdateDate)
+                );
 
                 // Crear la entidad de suplencia
                 var currentUser = _httpContextAccessor.CurrentUser();
