@@ -666,6 +666,10 @@ namespace Rokys.Audit.Services.Services
                     {
                         await BuildSendEmail.NotifySupervisorOfNewAudit(_emailService, periodAuditUpdate);
                     }
+                    if (periodAuditUpdate.StatusId == statusFinal?.AuditStatusId)
+                    {
+                        await BuildSendEmail.NotifyAllUserAudit(_emailService, periodAuditUpdate);
+                    }
                 }
 
                 response = ResponseDto.Create(new ApplicationMessage[] { });
