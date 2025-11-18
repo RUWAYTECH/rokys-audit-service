@@ -26,6 +26,7 @@
         {
             public const string OPERACIONES_CONFIRMACION = @"\Template\Mail\Operaciones.Confirmacion.html";
             public const string NotificationSupervisorNewAudit = "Template/Mail/NotificationSupervisor.NewAudit.html";
+            public const string NotificationAllUserEndAudit = "Template/Mail/NotificationAllUserAudit.EndAudit.html";
         }
         public struct FileDirectories
         {
