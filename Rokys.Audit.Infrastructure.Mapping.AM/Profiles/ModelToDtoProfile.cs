@@ -27,6 +27,7 @@ using Rokys.Audit.DTOs.Responses.InboxItems;
 using Rokys.Audit.DTOs.Responses.Reports;
 using Rokys.Audit.DTOs.Responses.AuditRoleConfiguration;
 using Rokys.Audit.DTOs.Responses.PeriodAuditParticipant;
+using Rokys.Audit.DTOs.Responses.SubstitutionHistory;
 using Rokys.Audit.DTOs.Common;
 
 namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
@@ -286,7 +287,21 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                    };
                }
             });
-            
+
+            CreateMap<SubstitutionHistory, SubstitutionHistoryResponseDto>()
+                .AfterMap((src, dest) =>
+                {
+                    dest.AuditCode = src.PeriodAudit?.CorrelativeNumber;
+                    dest.StoreName = src.PeriodAudit?.Store?.Name;
+                    dest.EnterpriseName = src.PeriodAudit?.Store?.Enterprise?.Name;
+                    dest.PreviousUserFullName = src.PreviousUserReference != null
+                        ? $"{src.PreviousUserReference.FirstName} {src.PreviousUserReference.LastName}".Trim()
+                        : null;
+                    dest.PreviousUserEmail = src.PreviousUserReference?.Email;
+                    dest.NewUserFullName = $"{src.NewUserReference?.FirstName} {src.NewUserReference?.LastName}".Trim();
+                    dest.NewUserEmail = src.NewUserReference?.Email;
+                });
+
         }
     }
 }
