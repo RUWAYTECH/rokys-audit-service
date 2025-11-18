@@ -425,13 +425,16 @@ namespace Rokys.Audit.Services.Services
                             if (field.FieldType == FieldConstants.Date && field.FieldCode == FieldConstants.From && startDate != null && field.DefaultValue != null)
                             {
                                 defaultValue = startDate?.ToString("yyyy-MM-dd");
-
                             }
-
                             if (field.FieldType == FieldConstants.Date && field.FieldCode == FieldConstants.To && endDate != null && field.DefaultValue != null)
                             {
                                 defaultValue = endDate?.ToString("yyyy-MM-dd");
                             }
+                            if (field.FieldType == FieldConstants.Numeric && field.FieldCode == FieldConstants.DaysAudit && startDate.HasValue && endDate.HasValue)
+                            {
+                                defaultValue = (endDate.Value - startDate.Value).Days.ToString();
+                            }
+
                             var periodAuditFieldValue = new PeriodAuditFieldValues
                             {
                                 PeriodAuditTableScaleTemplateResultId = periodAuditTableScaleTemplateResult.PeriodAuditTableScaleTemplateResultId,
