@@ -117,6 +117,15 @@ namespace Rokys.Audit.Services.Services
                     response = ResponseDto.Error<PeriodAuditGroupResultResponseDto>("No se encontró el grupo de escala asociado al grupo.");
                     return response;
                 }
+                if (requestDto.StartDate == null && requestDto.EndDate == null)
+                {
+                    var periodAudit = await _periodAuditRepository.GetFirstOrDefaultAsync(filter: x => x.PeriodAuditId == requestDto.PeriodAuditId && x.IsActive);
+                    if (periodAudit != null)
+                    {
+                        requestDto.StartDate = periodAudit.StartDate;
+                        requestDto.EndDate = periodAudit.EndDate;
+                    }
+                }
 
                 foreach (var scale in scaleGroups)
                 {
@@ -432,7 +441,7 @@ namespace Rokys.Audit.Services.Services
                             }
                             if (field.FieldType == FieldConstants.Numeric && field.FieldCode == FieldConstants.DaysAudit && startDate.HasValue && endDate.HasValue)
                             {
-                                defaultValue = (endDate.Value - startDate.Value).Days.ToString();
+                                defaultValue = ((endDate.Value - startDate.Value).Days + 1).ToString();
                             }
 
                             var periodAuditFieldValue = new PeriodAuditFieldValues
