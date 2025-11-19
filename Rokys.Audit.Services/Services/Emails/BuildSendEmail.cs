@@ -3,6 +3,7 @@ using Rokys.Audit.External.Services;
 using static Rokys.Audit.Common.Constant.Constants;
 using Scriban;
 using Rokys.Audit.Common.Constant;
+using Rokys.Audit.Infrastructure.Repositories;
 
 namespace Rokys.Audit.Services.Services.Emails
 {
@@ -45,42 +46,65 @@ namespace Rokys.Audit.Services.Services.Emails
                 throw new Exception(ex.Message);
             }
         }
-        public static async Task NotifyAllUserAudit(IEmailService emailService, PeriodAudit audit)
+        public static async Task NotifyAllUserAudit(
+            IEmailService emailService,
+            PeriodAudit audit,
+            IAuditRoleConfigurationRepository auditRoleConfigurationRepository)
         {
             try
             {
-                var templateText = File.ReadAllText(MailTemplate.NotificationSupervisorNewAudit);
-                var template = Template.Parse(templateText);
-                var auditor = audit.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.Auditor.Code);
-                var supervisor = audit.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code);
-
-                // Filtra solo participantes activos y con email válido
+                var roles = await auditRoleConfigurationRepository.GetAllAsync();
                 var participants = audit.PeriodAuditParticipants
-                    .Where(p => p.IsActive && !string.IsNullOrWhiteSpace(p.UserReference?.Email))
+                    .Select(p => new
+                    {
+                        RoleCode = p.RoleCodeSnapshot,
+                        RoleName = roles
+                            .FirstOrDefault(r => r.RoleCode == p.RoleCodeSnapshot)?
+                            .RoleName ?? "Sin Rol",
+                        Sequence = roles
+                            .FirstOrDefault(r => r.RoleCode == p.RoleCodeSnapshot)?
+                            .SequenceOrder ?? 999, // fallback al final
+                        FullName = p.UserReference?.FullName ?? "Sin Nombre",
+                        Email = p.UserReference?.Email ?? string.Empty
+                    })
+                    .OrderBy(p => p.Sequence) // Orden por la configuración del rol
                     .ToList();
 
-                foreach (var participant in participants)
+                var participantsHtml = string.Join("", participants.Select(p =>
+                    $"<li><strong>{p.RoleName}:</strong> {p.FullName}</li>"
+                ));
+
+                var templateText = File.ReadAllText(MailTemplate.NotificationAllUserEndAudit);
+                var template = Template.Parse(templateText);
+
+                var inputTexts = new Dictionary<string, object>
                 {
-                    var inputTexts = new Dictionary<string, object>
-                    {
-                        ["UserFullName"] = participant.UserReference?.FullName ?? string.Empty,
-                        ["AuditorFullName"] = auditor?.UserReference?.FullName ?? string.Empty,
-                        ["SupervisorFullName"] = supervisor?.UserReference?.FullName ?? string.Empty,
-                        ["CorrelativeNumber"] = audit.CorrelativeNumber,
-                        ["ExpirationDate"] = audit.EndDate,
-                        ["StoreName"] = audit.Store?.Name ?? "Sin tienda"
-                    };
+                    ["ParticipantsListHtml"] = participantsHtml,
+                    ["CorrelativeNumber"] = audit.CorrelativeNumber,
+                    ["ExpirationDate"] = audit.EndDate,
+                    ["StoreName"] = audit.Store?.Name ?? "Sin tienda"
+                };
 
-                    var htmlBody = template.Render(inputTexts);
-                    var email = participant.UserReference.Email ?? string.Empty;
+                var htmlBody = template.Render(inputTexts);
 
-                    await emailService.SendEmailAsync(new[] { email }, "Nueva Auditoría para la tienda", htmlBody, true);
-                }
+                var emailsTo = participants
+                    .Select(x => x.Email)
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .Distinct()
+                    .ToList();
+
+                await emailService.SendEmailAsync(
+                    emailsTo,
+                    "Auditoría Finalizada para la tienda",
+                    htmlBody,
+                    true
+                );
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                throw new Exception($"Error en NotifyAllUserAudit: {ex.Message}", ex);
             }
         }
+
     }
 }

@@ -48,6 +48,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IStoreRepository _storeRepository;
         private readonly IEmailService _emailService;
         private readonly IPeriodAuditParticipantRepository _periodAuditParticipantRepository;
+        private readonly IAuditRoleConfigurationRepository _auditRoleConfigurationRepository;
 
         public PeriodAuditService(
             IPeriodAuditRepository periodAuditRepository,
@@ -71,7 +72,8 @@ namespace Rokys.Audit.Services.Services
             IPeriodAuditGroupResultService periodAuditGroupResultService,
             IStoreRepository storeRepository,
             IEmailService emailService,
-            IPeriodAuditParticipantRepository periodAuditParticipantRepository)
+            IPeriodAuditParticipantRepository periodAuditParticipantRepository,
+            IAuditRoleConfigurationRepository auditRoleConfigurationRepository)
         {
             _periodAuditRepository = periodAuditRepository;
             _validator = validator;
@@ -95,6 +97,7 @@ namespace Rokys.Audit.Services.Services
             _storeRepository = storeRepository;
             _emailService = emailService;
             _periodAuditParticipantRepository = periodAuditParticipantRepository;
+            _auditRoleConfigurationRepository = auditRoleConfigurationRepository;
         }
 
         public async Task<ResponseDto<PeriodAuditResponseDto>> Create(PeriodAuditRequestDto requestDto)
@@ -369,6 +372,9 @@ namespace Rokys.Audit.Services.Services
 
                 if (paginationRequestDto.AuditStatusId.HasValue)
                     filter = filter.AndAlso(x => x.StatusId == paginationRequestDto.AuditStatusId.Value && x.IsActive);
+
+                if (paginationRequestDto.DocumentNumber != null)
+                    filter = filter.AndAlso(x => x.CorrelativeNumber == paginationRequestDto.DocumentNumber);
 
                 Func<IQueryable<PeriodAudit>, IOrderedQueryable<PeriodAudit>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 
@@ -668,7 +674,7 @@ namespace Rokys.Audit.Services.Services
                     }
                     if (periodAuditUpdate.StatusId == statusFinal?.AuditStatusId)
                     {
-                        await BuildSendEmail.NotifyAllUserAudit(_emailService, periodAuditUpdate);
+                        await BuildSendEmail.NotifyAllUserAudit(_emailService, periodAuditUpdate, _auditRoleConfigurationRepository);
                     }
                 }
 
