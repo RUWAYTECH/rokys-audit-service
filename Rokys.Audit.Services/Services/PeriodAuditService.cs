@@ -373,6 +373,9 @@ namespace Rokys.Audit.Services.Services
                 if (paginationRequestDto.AuditStatusId.HasValue)
                     filter = filter.AndAlso(x => x.StatusId == paginationRequestDto.AuditStatusId.Value && x.IsActive);
 
+                if (paginationRequestDto.DocumentNumber != null)
+                    filter = filter.AndAlso(x => x.CorrelativeNumber == paginationRequestDto.DocumentNumber);
+
                 Func<IQueryable<PeriodAudit>, IOrderedQueryable<PeriodAudit>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 
                 var entities = await _periodAuditRepository.GetSearchPagedAsync(

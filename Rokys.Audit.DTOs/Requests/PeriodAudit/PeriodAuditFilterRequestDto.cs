@@ -10,5 +10,6 @@ namespace Rokys.Audit.DTOs.Requests.PeriodAudit
         public DateTime? EndDate { get; set; }
         public DateTime? StartDate { get; set; }
         public Guid? AuditStatusId { get; set; }
+        public string? DocumentNumber { get; set; }
     }
 }
