@@ -49,6 +49,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IEmailService _emailService;
         private readonly IPeriodAuditParticipantRepository _periodAuditParticipantRepository;
         private readonly IAuditRoleConfigurationRepository _auditRoleConfigurationRepository;
+        private readonly WebAppSettings _webAppSettings;
 
         public PeriodAuditService(
             IPeriodAuditRepository periodAuditRepository,
@@ -73,7 +74,8 @@ namespace Rokys.Audit.Services.Services
             IStoreRepository storeRepository,
             IEmailService emailService,
             IPeriodAuditParticipantRepository periodAuditParticipantRepository,
-            IAuditRoleConfigurationRepository auditRoleConfigurationRepository)
+            IAuditRoleConfigurationRepository auditRoleConfigurationRepository,
+            WebAppSettings webAppSettings)
         {
             _periodAuditRepository = periodAuditRepository;
             _validator = validator;
@@ -98,6 +100,7 @@ namespace Rokys.Audit.Services.Services
             _emailService = emailService;
             _periodAuditParticipantRepository = periodAuditParticipantRepository;
             _auditRoleConfigurationRepository = auditRoleConfigurationRepository;
+            _webAppSettings = webAppSettings;
         }
 
         public async Task<ResponseDto<PeriodAuditResponseDto>> Create(PeriodAuditRequestDto requestDto)
@@ -127,11 +130,12 @@ namespace Rokys.Audit.Services.Services
                 var currentUserName = currentUser?.UserName ?? "system";
                 var entity = _mapper.Map<PeriodAudit>(requestDto);
                 // Obtener el último código existente
+                var currentYear = DateTime.Now.Year;
                 var lastCode = _periodAuditRepository.Get()
-                    .OrderByDescending(x => x.CreationDate)
+                    .Where(x => x.CreationDate.Year == currentYear)
+                    .OrderByDescending(x => x.CorrelativeNumber)
                     .Select(x => x.CorrelativeNumber)
                     .FirstOrDefault();
-                var currentYear = DateTime.Now.Year;
                 var nextCode = CodeGeneratorHelper.GenerateNextCode("AUD" + currentYear, lastCode, 4);
                 entity.CorrelativeNumber = nextCode;
                 entity.StatusId = auditStatus.AuditStatusId;
@@ -670,11 +674,11 @@ namespace Rokys.Audit.Services.Services
                     var periodAuditUpdate = await _periodAuditRepository.GetCustomByIdAsync(filter: x => x.PeriodAuditId == ent.PeriodAuditId && x.IsActive);
                     if (periodAuditUpdate.StatusId == statusInReview?.AuditStatusId)
                     {
-                        await BuildSendEmail.NotifySupervisorOfNewAudit(_emailService, periodAuditUpdate);
+                        await BuildSendEmail.NotifySupervisorOfNewAudit(_emailService, periodAuditUpdate, _webAppSettings.Url);
                     }
                     if (periodAuditUpdate.StatusId == statusFinal?.AuditStatusId)
                     {
-                        await BuildSendEmail.NotifyAllUserAudit(_emailService, periodAuditUpdate, _auditRoleConfigurationRepository);
+                        await BuildSendEmail.NotifyAllUserAudit(_emailService, periodAuditUpdate, _auditRoleConfigurationRepository, _webAppSettings.Url);
                     }
                 }
 

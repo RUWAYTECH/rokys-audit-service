@@ -30,6 +30,7 @@
 
         .info {
             margin-bottom: 18px;
+            text-align: center; /* CENTRAR TODO EL CONTENIDO, INCLUIDO EL BOTÓN */
         }
 
         .label {
@@ -64,7 +65,7 @@
     <div class="container">
         <div class="header">Notificación de Auditoría, pendiente de aprobar</div>
         <div class="info">
-            <p style="margin-bottom: 18px; font-size: 1.08em; color: #333;">
+            <p style="margin-bottom: 18px; font-size: 1.08em; color: #333; text-align:left;">
                 Estimado/a <span class="label">{{ AdministratorFullName }}</span>,<br><br>
                 Te informamos que debe aprobar la auditoría con el número <span class="label">{{ CorrelativeNumber }}</span>. Para la tienda {{ StoreName }}<br><br>
                 Participantes:<br>
@@ -72,7 +73,10 @@
                 <b>Auditor:</b> <span class="value">{{ AuditorFullName }}</span>.<br><br>
                 Para tu comodidad, puedes realizar la revisión de la auditoría directamente en el Sistema de Auditoría.
             </p>
+
+            <a class="button" href="{{ UrlAplication }}">Ir a la Aplicación</a>
         </div>
+
         <div class="footer">
             Si tienes alguna consulta o necesitas asistencia, no dudes en contactar al área de TI.<br>
             Este mensaje fue generado automáticamente por el sistema de Auditoría.

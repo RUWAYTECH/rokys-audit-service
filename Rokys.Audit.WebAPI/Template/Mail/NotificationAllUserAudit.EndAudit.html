@@ -59,6 +59,11 @@
             margin-top: 18px;
         }
 
+        .button-wrapper {
+            text-align: center; /* SOLO CENTRA EL BOTÓN */
+            margin-top: 10px;
+        }
+
         ul.participants-list {
             padding-left: 18px;
             margin-top: 8px;
@@ -84,10 +89,14 @@
                 <ul class="participants-list">
                     {{ ParticipantsListHtml }}
                 </ul>
-
                 Para tu comodidad, puedes realizar la revisión de la auditoría directamente en el Sistema de Auditoría.
             </p>
+
+            <div class="button-wrapper">
+                <a class="button" href="{{ UrlAplication }}">Ir a la Aplicación</a>
+            </div>
         </div>
+
         <div class="footer">
             Si tienes alguna consulta o necesitas asistencia, no dudes en contactar al área de TI.<br>
             Este mensaje fue generado automáticamente por el sistema de Auditoría.

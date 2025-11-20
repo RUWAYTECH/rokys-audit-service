@@ -9,7 +9,7 @@ namespace Rokys.Audit.Services.Services.Emails
 {
     public class BuildSendEmail
     {
-        public static async Task NotifySupervisorOfNewAudit(IEmailService emailService, PeriodAudit audit)
+        public static async Task NotifySupervisorOfNewAudit(IEmailService emailService, PeriodAudit audit, string urlApp)
         {
             try
             {                
@@ -26,7 +26,8 @@ namespace Rokys.Audit.Services.Services.Emails
                     ["SupervisorFullName"] = supervisor?.UserReference?.FullName ?? string.Empty,
                     ["CorrelativeNumber"] = audit.CorrelativeNumber,
                     ["ExpirationDate"] = audit.EndDate,
-                    ["StoreName"] = audit.Store?.Name ?? "Sin tienda"
+                    ["StoreName"] = audit.Store?.Name ?? "Sin tienda",
+                    ["UrlAplication"] = urlApp
                 };
 
                 var templateTextSupervisor = File.ReadAllText(MailTemplate.NotificationSupervisorNewAudit);
@@ -49,7 +50,8 @@ namespace Rokys.Audit.Services.Services.Emails
         public static async Task NotifyAllUserAudit(
             IEmailService emailService,
             PeriodAudit audit,
-            IAuditRoleConfigurationRepository auditRoleConfigurationRepository)
+            IAuditRoleConfigurationRepository auditRoleConfigurationRepository,
+            string urlApp)
         {
             try
             {
@@ -82,7 +84,8 @@ namespace Rokys.Audit.Services.Services.Emails
                     ["ParticipantsListHtml"] = participantsHtml,
                     ["CorrelativeNumber"] = audit.CorrelativeNumber,
                     ["ExpirationDate"] = audit.EndDate,
-                    ["StoreName"] = audit.Store?.Name ?? "Sin tienda"
+                    ["StoreName"] = audit.Store?.Name ?? "Sin tienda",
+                    ["UrlAplication"] = urlApp
                 };
 
                 var htmlBody = template.Render(inputTexts);
