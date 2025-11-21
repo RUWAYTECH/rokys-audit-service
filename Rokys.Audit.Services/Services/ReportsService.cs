@@ -70,7 +70,7 @@ namespace Rokys.Audit.Services.Services
                 // Agrupar auditorías por ScaleCode y mes
                 var auditsByScaleAndMonth = periodAudits
                     .Where(x => !string.IsNullOrEmpty(x.ScaleCode))
-                    .GroupBy(x => new { x.StoreId, x.ScaleCode, x.ScaleName, x.ScaleColor })
+                    .GroupBy(x => new { x.ScaleCode, x.ScaleName, x.ScaleColor })
                     .ToList();
 
                 // Crear series dinámicamente basadas en los ScaleCodes encontrados
