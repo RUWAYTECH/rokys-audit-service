@@ -66,6 +66,7 @@ CREATE TABLE [Group]
 
     -- Ponderación del grupo
     Weighting DECIMAL(5,2) NOT NULL, -- Peso del Grupo
+    SortOrder INT NOT NULL DEFAULT 0,
 
     -- Auditoría
     IsActive BIT DEFAULT 1, -- Está Activo
@@ -400,6 +401,7 @@ CREATE TABLE PeriodAuditGroupResult
         FOREIGN KEY REFERENCES [Group](GroupId),
 
     ScoreValue DECIMAL(10,2) NOT NULL, -- Valor Obtenido
+    SortOrder INT NOT NULL DEFAULT 0,
 
     Observations NVARCHAR(150) NULL, -- Observaciones
     ScaleDescription NVARCHAR(150) NULL, -- Descripción de la Escala
