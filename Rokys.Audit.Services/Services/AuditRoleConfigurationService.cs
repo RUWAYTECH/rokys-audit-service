@@ -57,8 +57,7 @@ namespace Rokys.Audit.Services.Services
                 var currentUser = _httpContextAccessor.CurrentUser();
                 var entity = _mapper.Map<AuditRoleConfiguration>(requestDto);
                 var existingSortOrders = (await _auditRoleConfigurationRepository.GetAsync(filter: x => x.IsActive))
-                    .Select(x => x.SequenceOrder ?? 0)
-                    .ToList();
+                    .Select(x => x.SequenceOrder ?? 0);
                 entity.SequenceOrder = Rokys.Audit.Common.Helpers.SortOrderHelper.GetNextSortOrder(existingSortOrders);
 
                 entity.CreateAudit(currentUser?.UserName ?? "system");

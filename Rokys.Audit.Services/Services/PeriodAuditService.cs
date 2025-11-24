@@ -132,8 +132,7 @@ namespace Rokys.Audit.Services.Services
                 // Obtener el último código existente
                 var currentYear = DateTime.Now.Year;
                 var lastCode = _periodAuditRepository.Get()
-                    .Where(x => x.CreationDate.Year == currentYear)
-                    .OrderByDescending(x => x.CorrelativeNumber)
+                    .OrderByDescending(x => x.CreationDate)
                     .Select(x => x.CorrelativeNumber)
                     .FirstOrDefault();
                 var nextCode = CodeGeneratorHelper.GenerateNextCode("AUD" + currentYear, lastCode, 4);
