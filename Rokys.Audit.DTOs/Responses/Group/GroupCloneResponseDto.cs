@@ -51,6 +51,11 @@ namespace Rokys.Audit.DTOs.Responses.Group
         public int CriteriaSubResultsCloned { get; set; }
 
         /// <summary>
+        /// Cantidad de archivos adjuntos clonados
+        /// </summary>
+        public int StorageFilesCloned { get; set; }
+
+        /// <summary>
         /// Fecha y hora de la clonación
         /// </summary>
         public DateTime ClonedAt { get; set; }

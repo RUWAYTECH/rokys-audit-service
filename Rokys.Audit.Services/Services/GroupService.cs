@@ -24,12 +24,14 @@ namespace Rokys.Audit.Services.Services
         private readonly IAuditTemplateFieldRepository _auditTemplateFieldRepository;
         private readonly IScoringCriteriaRepository _scoringCriteriaRepository;
         private readonly ICriteriaSubResultRepository _criteriaSubResultRepository;
+        private readonly IStorageFilesRepository _storageFilesRepository;
         private readonly IValidator<GroupRequestDto> _fluentValidator;
         private readonly IValidator<GroupCloneRequestDto> _cloneValidator;
         private readonly ILogger<GroupService> _logger;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly DTOs.Common.FileSettings _fileSettings;
 
         public GroupService(
             IGroupRepository groupRepository,
@@ -38,12 +40,14 @@ namespace Rokys.Audit.Services.Services
             IAuditTemplateFieldRepository auditTemplateFieldRepository,
             IScoringCriteriaRepository scoringCriteriaRepository,
             ICriteriaSubResultRepository criteriaSubResultRepository,
+            IStorageFilesRepository storageFilesRepository,
             IValidator<GroupRequestDto> fluentValidator,
             IValidator<GroupCloneRequestDto> cloneValidator,
             ILogger<GroupService> logger,
             IUnitOfWork unitOfWork,
             IAMapper mapper,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            DTOs.Common.FileSettings fileSettings)
         {
             _groupRepository = groupRepository;
             _scaleGroupRepository = scaleGroupRepository;
@@ -51,12 +55,14 @@ namespace Rokys.Audit.Services.Services
             _auditTemplateFieldRepository = auditTemplateFieldRepository;
             _scoringCriteriaRepository = scoringCriteriaRepository;
             _criteriaSubResultRepository = criteriaSubResultRepository;
+            _storageFilesRepository = storageFilesRepository;
             _fluentValidator = fluentValidator;
             _cloneValidator = cloneValidator;
             _logger = logger;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
+            _fileSettings = fileSettings;
         }
 
         public async Task<ResponseDto<GroupResponseDto>> Create(GroupRequestDto requestDto)
@@ -433,10 +439,55 @@ namespace Rokys.Audit.Services.Services
                     criteriaSubResultsCount++;
                 }
 
-                // 8. Guardar todos los cambios en una sola transacción
+                // 8. Obtener y clonar archivos adjuntos de los ScaleGroups
+                int storageFilesCount = 0;
+                var originalStorageFiles = await _storageFilesRepository.GetAsync(
+                    filter: x => scaleGroupMapping.Keys.Contains(x.EntityId) && x.IsActive);
+
+                foreach (var originalFile in originalStorageFiles)
+                {
+                    // Clonar el archivo físico si existe
+                    string? newFileUrl = null;
+                    if (!string.IsNullOrEmpty(originalFile.FileUrl))
+                    {
+                        var originalFilePath = Path.Combine(_fileSettings.Path, "Uploads", originalFile.FileUrl);
+                        if (File.Exists(originalFilePath))
+                        {
+                            var newFileName = $"{Guid.NewGuid()}_{Path.GetFileName(originalFile.FileName)}";
+                            var uploadsFolder = Path.Combine(_fileSettings.Path, "Uploads");
+                            if (!Directory.Exists(uploadsFolder))
+                                Directory.CreateDirectory(uploadsFolder);
+
+                            var newFilePath = Path.Combine(uploadsFolder, newFileName);
+                            File.Copy(originalFilePath, newFilePath);
+                            newFileUrl = newFileName;
+                        }
+                    }
+
+                    // Crear el registro del archivo clonado
+                    var clonedFile = new StorageFiles
+                    {
+                        StorageFileId = Guid.NewGuid(),
+                        OriginalName = originalFile.OriginalName,
+                        FileName = originalFile.FileName,
+                        FileUrl = newFileUrl ?? originalFile.FileUrl,
+                        FileType = originalFile.FileType,
+                        UploadedBy = currentUser.UserName,
+                        UploadDate = DateTime.Now,
+                        ClassificationType = originalFile.ClassificationType,
+                        EntityId = scaleGroupMapping[originalFile.EntityId],
+                        EntityName = originalFile.EntityName,
+                        IsActive = true
+                    };
+                    clonedFile.CreateAudit(currentUser.UserName);
+                    _storageFilesRepository.Insert(clonedFile);
+                    storageFilesCount++;
+                }
+
+                // 9. Guardar todos los cambios en una sola transacción
                 await _unitOfWork.CommitAsync();
 
-                // 9. Crear la respuesta
+                // 10. Crear la respuesta
                 response.Data = new GroupCloneResponseDto
                 {
                     OriginalGroupId = requestDto.GroupId,
@@ -448,6 +499,7 @@ namespace Rokys.Audit.Services.Services
                     AuditTemplateFieldsCloned = auditTemplateFieldsCount,
                     ScoringCriteriaCloned = scoringCriteriaCount,
                     CriteriaSubResultsCloned = criteriaSubResultsCount,
+                    StorageFilesCloned = storageFilesCount,
                     ClonedAt = DateTime.Now
                 };
 
