@@ -314,7 +314,7 @@ namespace Rokys.Audit.Services.Services
                     filter = filter.AndAlso(x => (x.ScaleDescription.Contains(filterRequestDto.Filter) || x.Observations.Contains(filterRequestDto.Filter)));
                 }
 
-                Func<IQueryable<PeriodAuditGroupResult>, IOrderedQueryable<PeriodAuditGroupResult>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
+                Func<IQueryable<PeriodAuditGroupResult>, IOrderedQueryable<PeriodAuditGroupResult>> orderBy = q => q.OrderBy(x => x.SortOrder);
                 var entities = await _periodAuditGroupResultRepository.GetPagedAsync(
                     filter: filter,
                     orderBy: orderBy,
