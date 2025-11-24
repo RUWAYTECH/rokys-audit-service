@@ -123,7 +123,7 @@ namespace Rokys.Audit.Services.Services
                 entity.SortOrder = periodAuditScaleResult != null ? periodAuditScaleResult.SortOrder + 1 : 1 ;
                 _repository.Insert(entity);
                 var scaleGroupResponse = _mapper.Map<ScaleGroupResponseDto>(scaleGroup);
-                var periodAuditScaleResultResponse = _mapper.Map<PeriodAuditScaleResultResponseDto>(periodAuditScaleResult);
+                var periodAuditScaleResultResponse = _mapper.Map<PeriodAuditScaleResultResponseDto>(entity);
                 await _periodAuditGroupResultService.CreateTableScaleTemplateResults(scaleGroupResponse, periodAuditScaleResultResponse, 
                     periodAuditScaleResult?.PeriodAuditGroupResult?.PeriodAudit?.StartDate, periodAuditScaleResult?.PeriodAuditGroupResult?.PeriodAudit?.EndDate);
                 await _unitOfWork.CommitAsync();
@@ -151,16 +151,33 @@ namespace Rokys.Audit.Services.Services
                     response = ResponseDto.Error("No se encontró el registro.");
                     return response;
                 }
+                var currentUser = _httpContextAccessor.CurrentUser();
                 var periodAuditGroupResult = await _periodAuditGroupResultService.GetById(entity.PeriodAuditGroupResultId);
                 var periodAudit = await _periodAuditRepository.GetFirstOrDefaultAsync(filter: x => x.PeriodAuditId == periodAuditGroupResult.Data.PeriodAuditId, includeProperties: [ x => x.AuditStatus]);
+                
+                var userReference = await _userReferenceRepository.GetFirstOrDefaultAsync(filter: x => x.UserReferenceId == currentUser.UserReferenceId && x.IsActive);
+                var validRoles = new[]
+                {
+                    RoleCodes.JefeDeArea.Code
+                };
+
+                var userRoles = userReference.RoleCode
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(x => x.Trim())
+                    .Distinct()
+                    .ToList();
+
+                // TRUE si al menos uno coincide
+                bool userAuthorization = userRoles.Any(r => validRoles.Contains(r));
                 if (periodAudit != null)
                 {
-                    if (periodAudit.AuditStatus.Code != AuditStatusCode.Pending)
+                    if (periodAudit.AuditStatus.Code != AuditStatusCode.Pending && !userAuthorization)
                     {
                         response = ResponseDto.Error("No se puede eliminar una escala si no está en estado pendiente.");
                         return response;
                     }
                 }
+                    
 
                 var tableResults = await _periodAuditTableScaleTemplateResultRepository.GetAsync(x => x.PeriodAuditScaleResultId == entity.PeriodAuditScaleResultId && x.IsActive);
                 foreach (var tableResult in tableResults)
@@ -199,6 +216,14 @@ namespace Rokys.Audit.Services.Services
                 entity.UpdateDate = DateTime.UtcNow;
                 _repository.Update(entity);
                 await _unitOfWork.CommitAsync();
+                await using (var scope = _serviceScopeFactory.CreateAsyncScope())
+                {
+                    var auditService = scope.ServiceProvider.GetRequiredService<IPeriodAuditService>();
+                    var responseAudit = await auditService.Recalculate(periodAudit.PeriodAuditId);
+
+                    if (!responseAudit.IsValid)
+                        response.Messages.AddRange(responseAudit.Messages);
+                }
             }
             catch (Exception ex)
             {

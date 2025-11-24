@@ -10,6 +10,7 @@ namespace Rokys.Audit.Common.Constant
         public static readonly RoleCodes Volante = new("A004");
         public static readonly RoleCodes Auditor = new("A005");
         public static readonly RoleCodes JobSupervisor = new("A006");
+        public static readonly RoleCodes Administrator = new("APPADMIN");
     }
 
 }
