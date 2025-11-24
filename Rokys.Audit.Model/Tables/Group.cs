@@ -6,6 +6,7 @@ namespace Rokys.Audit.Model.Tables
         public Guid EnterpriseId { get; set; }
         public string Name { get; set; } = string.Empty;
         public decimal Weighting { get; set; }
+        public int SortOrder { get; set; } = 0;
         public bool IsActive { get; set; }
 
         // Navigation properties

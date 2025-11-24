@@ -70,5 +70,19 @@ namespace Rokys.Audit.WebAPI.Controllers
                 return Ok(response);
             return BadRequest(response);
         }
+
+        /// <summary>
+        /// Cambia el orden de un PeriodAuditGroupResult dentro de un PeriodAudit
+        /// </summary>
+        /// <param name="request">Datos para el cambio de orden</param>
+        /// <returns>Resultado del cambio de orden</returns>
+        [HttpPut("change-order")]
+        public async Task<IActionResult> ChangeOrder([FromBody] ChangePeriodAuditGroupResultOrderRequestDto request)
+        {
+            var response = await _service.ChangeOrder(request.PeriodAuditId, request.CurrentPosition, request.NewPosition);
+            if (response.IsValid)
+                return Ok(response);
+            return BadRequest(response);
+        }
     }
 }

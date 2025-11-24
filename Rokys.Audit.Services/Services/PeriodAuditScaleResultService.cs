@@ -539,5 +539,42 @@ namespace Rokys.Audit.Services.Services
 
             return response;
         }
+
+        public async Task<ResponseDto<bool>> ChangeOrder(Guid periodAuditGroupResultId, int currentPosition, int newPosition)
+        {
+            var response = ResponseDto.Create<bool>();
+            try
+            {
+                var items = (await _repository.GetAsync(filter: x => x.PeriodAuditGroupResultId == periodAuditGroupResultId && x.IsActive))
+                    .OrderBy(x => x.SortOrder)
+                    .ToList();
+
+                var currentIndex = items.FindIndex(x => x.SortOrder == currentPosition);
+                var newIndex = items.FindIndex(x => x.SortOrder == newPosition);
+                if (currentIndex < 0 || newIndex < 0)
+                {
+                    response = ResponseDto.Error<bool>("SortOrder no encontrado en el resultado del grupo de auditoría.");
+                    return response;
+                }
+
+                var item = items[currentIndex];
+                items.RemoveAt(currentIndex);
+                items.Insert(newIndex, item);
+
+                for (int i = 0; i < items.Count; i++)
+                {
+                    items[i].SortOrder = i + 1;
+                    _repository.Update(items[i]);
+                }
+                await _unitOfWork.CommitAsync();
+                response.Data = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response = ResponseDto.Error<bool>(ex.Message);
+            }
+            return response;
+        }
     }
 }

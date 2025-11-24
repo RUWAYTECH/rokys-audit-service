@@ -8,6 +8,7 @@ namespace Rokys.Audit.Model.Tables
     public Guid PeriodAuditId { get; set; }
     public Guid GroupId { get; set; }
     public decimal ScoreValue { get; set; }
+    public int SortOrder { get; set; } = 0;
     public string? Observations { get; set; }
     public string? ScaleDescription { get; set; }
     public decimal TotalWeighting { get; set; }

@@ -76,5 +76,19 @@ namespace Rokys.Audit.WebAPI.Controllers
                 return Ok(response);
             return BadRequest(response);
         }
+
+        /// <summary>
+        /// Cambia el orden de un grupo dentro de una empresa
+        /// </summary>
+        /// <param name="request">Datos para el cambio de orden</param>
+        /// <returns>Resultado del cambio de orden</returns>
+        [HttpPut("change-order")]
+        public async Task<IActionResult> ChangeOrder([FromBody] ChangeGroupOrderRequestDto request)
+        {
+            var response = await _groupService.ChangeOrder(request.EnterpriseId, request.CurrentPosition, request.NewPosition);
+            if (response.IsValid)
+                return Ok(response);
+            return BadRequest(response);
+        }
     }
 }

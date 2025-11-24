@@ -78,6 +78,12 @@ namespace Rokys.Audit.Services.Services
                 }
                 var currentUser = _httpContextAccessor.CurrentUser();
                 var entity = _mapper.Map<Group>(requestDto);
+
+                // Assign SortOrder server-side grouped by EnterpriseId
+                var existingSortOrders = (await _groupRepository.GetAsync(filter: x => x.EnterpriseId == requestDto.EnterpriseId && x.IsActive))
+                    .Select(x => x.SortOrder);
+                entity.SortOrder = Rokys.Audit.Common.Helpers.SortOrderHelper.GetNextSortOrder(existingSortOrders);
+
                 entity.CreateAudit(currentUser.UserName);
                 _groupRepository.Insert(entity);
                 await _unitOfWork.CommitAsync();
@@ -510,6 +516,43 @@ namespace Rokys.Audit.Services.Services
             {
                 _logger.LogError(ex, $"Error al clonar el grupo {requestDto.GroupId}: {ex.Message}");
                 response = ResponseDto.Error<GroupCloneResponseDto>(ex.Message);
+            }
+            return response;
+        }
+
+        public async Task<ResponseDto<bool>> ChangeOrder(Guid enterpriseId, int currentPosition, int newPosition)
+        {
+            var response = ResponseDto.Create<bool>();
+            try
+            {
+                var items = (await _groupRepository.GetAsync(filter: x => x.EnterpriseId == enterpriseId && x.IsActive))
+                    .OrderBy(x => x.SortOrder)
+                    .ToList();
+
+                var currentIndex = items.FindIndex(x => x.SortOrder == currentPosition);
+                var newIndex = items.FindIndex(x => x.SortOrder == newPosition);
+                if (currentIndex < 0 || newIndex < 0)
+                {
+                    response = ResponseDto.Error<bool>("SortOrder no encontrado en la empresa.");
+                    return response;
+                }
+
+                var item = items[currentIndex];
+                items.RemoveAt(currentIndex);
+                items.Insert(newIndex, item);
+
+                for (int i = 0; i < items.Count; i++)
+                {
+                    items[i].SortOrder = i + 1;
+                    _groupRepository.Update(items[i]);
+                }
+                await _unitOfWork.CommitAsync();
+                response.Data = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response = ResponseDto.Error<bool>(ex.Message);
             }
             return response;
         }

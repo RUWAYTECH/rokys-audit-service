@@ -100,6 +100,12 @@ namespace Rokys.Audit.Services.Services
 
                 var currentUser = _httpContextAccessor.CurrentUser();
                 var entity = _mapper.Map<PeriodAuditGroupResult>(requestDto);
+
+                // Assign SortOrder server-side grouped by PeriodAuditId
+                var existingSortOrders = (await _periodAuditGroupResultRepository.GetAsync(filter: x => x.PeriodAuditId == requestDto.PeriodAuditId && x.IsActive))
+                    .Select(x => x.SortOrder);
+                entity.SortOrder = Rokys.Audit.Common.Helpers.SortOrderHelper.GetNextSortOrder(existingSortOrders);
+
                 entity.CreateAudit(currentUser.UserName);
                 entity.IsActive = true;
                 _periodAuditGroupResultRepository.Insert(entity);
@@ -505,6 +511,43 @@ namespace Rokys.Audit.Services.Services
                     _periodAuditScoringCriteriaResultRepository.Insert(periodAuditScoringCriteriaResult);
                 }
             }
+        }
+
+        public async Task<ResponseDto<bool>> ChangeOrder(Guid periodAuditId, int currentPosition, int newPosition)
+        {
+            var response = ResponseDto.Create<bool>();
+            try
+            {
+                var items = (await _periodAuditGroupResultRepository.GetAsync(filter: x => x.PeriodAuditId == periodAuditId && x.IsActive))
+                    .OrderBy(x => x.SortOrder)
+                    .ToList();
+
+                var currentIndex = items.FindIndex(x => x.SortOrder == currentPosition);
+                var newIndex = items.FindIndex(x => x.SortOrder == newPosition);
+                if (currentIndex < 0 || newIndex < 0)
+                {
+                    response = ResponseDto.Error<bool>("SortOrder no encontrado en el resultado de auditoría del período.");
+                    return response;
+                }
+
+                var item = items[currentIndex];
+                items.RemoveAt(currentIndex);
+                items.Insert(newIndex, item);
+
+                for (int i = 0; i < items.Count; i++)
+                {
+                    items[i].SortOrder = i + 1;
+                    _periodAuditGroupResultRepository.Update(items[i]);
+                }
+                await _unitOfWork.CommitAsync();
+                response.Data = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response = ResponseDto.Error<bool>(ex.Message);
+            }
+            return response;
         }
     }
 }

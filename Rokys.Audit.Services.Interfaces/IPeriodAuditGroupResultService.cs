@@ -15,5 +15,14 @@ namespace Rokys.Audit.Services.Interfaces
         Task<ResponseDto<bool>> Recalculate(Guid periodAuditGroupResultId);
         Task<ResponseDto<PeriodAuditGroupResultResponseDto>> Update(Guid id, UpdatePeriodAuditGroupResultRequestDto requestDto);
         Task CreateTableScaleTemplateResults(ScaleGroupResponseDto scale, PeriodAuditScaleResultResponseDto periodAuditScaleResult, DateTime? startDate, DateTime? endDate);
+
+        /// <summary>
+        /// Cambia el orden de un PeriodAuditGroupResult dentro de un PeriodAudit
+        /// </summary>
+        /// <param name="periodAuditId">ID del PeriodAudit</param>
+        /// <param name="currentPosition">Posición actual</param>
+        /// <param name="newPosition">Nueva posición</param>
+        /// <returns>Resultado del cambio de orden</returns>
+        Task<ResponseDto<bool>> ChangeOrder(Guid periodAuditId, int currentPosition, int newPosition);
     }
 }
