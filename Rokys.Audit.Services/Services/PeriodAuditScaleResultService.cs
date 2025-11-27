@@ -118,9 +118,13 @@ namespace Rokys.Audit.Services.Services
                 var currentUser = _httpContextAccessor.CurrentUser();
                 var entity = _mapper.Map<PeriodAuditScaleResult>(requestDto);
                 entity.CreateAudit(currentUser.UserName);
+
+                var existingSortOrders = (await _repository.GetAsync(filter: x => x.PeriodAuditGroupResultId == requestDto.PeriodAuditGroupResultId && x.IsActive))
+                    .Select(x => x.SortOrder);
+                entity.SortOrder = Rokys.Audit.Common.Helpers.SortOrderHelper.GetNextSortOrder(existingSortOrders);
+
                 entity.IsActive = true;
                 entity.AppliedWeighting = requestDto.AppliedWeighting.HasValue && requestDto.AppliedWeighting >= 0 ? requestDto.AppliedWeighting.Value : scaleGroup.Weighting;
-                entity.SortOrder = periodAuditScaleResult != null ? periodAuditScaleResult.SortOrder + 1 : 1 ;
                 _repository.Insert(entity);
                 var scaleGroupResponse = _mapper.Map<ScaleGroupResponseDto>(scaleGroup);
                 var periodAuditScaleResultResponse = _mapper.Map<PeriodAuditScaleResultResponseDto>(entity);

@@ -1,3 +1,4 @@
+using DocumentFormat.OpenXml.Office2010.Excel;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -13,6 +14,7 @@ using Rokys.Audit.Infrastructure.Repositories;
 using Rokys.Audit.Model.Tables;
 using Rokys.Audit.Services.Interfaces;
 using System.Linq.Expressions;
+using static Rokys.Audit.Common.Constant.Constants;
 
 namespace Rokys.Audit.Services.Services
 {
@@ -328,6 +330,14 @@ namespace Rokys.Audit.Services.Services
 
                 foreach (var originalScaleGroup in originalScaleGroups)
                 {
+                    var storageFiles = await _storageFilesRepository.GetFirstOrDefaultAsync(
+                        filter: x => x.EntityId == originalScaleGroup.ScaleGroupId && x.IsActive
+                    );
+                    var hasSourceData = false;
+                    if (storageFiles != null)
+                    {
+                        hasSourceData = true;
+                    }
                     var clonedScaleGroup = new ScaleGroup
                     {
                         ScaleGroupId = Guid.NewGuid(),
@@ -336,11 +346,45 @@ namespace Rokys.Audit.Services.Services
                         Name = originalScaleGroup.Name,
                         Weighting = originalScaleGroup.Weighting,
                         SortOrder = originalScaleGroup.SortOrder,
+                        HasSourceData = hasSourceData,
                         IsActive = originalScaleGroup.IsActive
                     };
                     clonedScaleGroup.CreateAudit(currentUser.UserName);
                     _scaleGroupRepository.Insert(clonedScaleGroup);
-                    
+
+
+                    if (storageFiles != null && !string.IsNullOrEmpty(storageFiles.FileUrl))
+                    {
+                        var originalPath = Path.Combine(_fileSettings.Path, FileDirectories.Uploads, storageFiles.FileUrl);
+
+                        if (File.Exists(originalPath))
+                        {
+                            string newFileName = $"{Guid.NewGuid()}{Path.GetExtension(storageFiles.OriginalName)}";
+                            string newFilePath = Path.Combine(_fileSettings.Path, FileDirectories.Uploads, newFileName);
+
+                            File.Copy(originalPath, newFilePath);
+
+                            var clonedStorageFile = new StorageFiles
+                            {
+                                StorageFileId = Guid.NewGuid(),
+                                EntityId = clonedScaleGroup.ScaleGroupId,
+                                EntityName = clonedScaleGroup.Name,
+                                OriginalName = storageFiles.OriginalName,
+                                FileUrl = newFilePath,
+                                FileName = storageFiles.FileName,
+                                FileType = storageFiles.FileType,
+                                ClassificationType = storageFiles.ClassificationType,
+                                UpdateDate = DateTime.Now,
+                                UploadedBy = currentUser.UserName ?? "system",
+                                IsActive = true
+                            };
+
+                            clonedStorageFile.CreateAudit(currentUser.UserName);
+                            _storageFilesRepository.Insert(clonedStorageFile);
+                        }
+                    }
+
+
                     scaleGroupMapping[originalScaleGroup.ScaleGroupId] = clonedScaleGroup.ScaleGroupId;
                     scaleGroupsCount++;
                 }
