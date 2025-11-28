@@ -257,7 +257,7 @@ namespace Rokys.Audit.Services.Services
                     response.Messages.AddRange(validate.Errors.Select(e => new ApplicationMessage { Message = e.ErrorMessage, MessageType = ApplicationMessageType.Error }));
                     return response;
                 }
-                var entity = await _groupRepository.GetFirstOrDefaultAsync(filter: x => x.GroupId == id && x.IsActive, includeProperties: [x => x.Enterprise]);
+                var entity = await _groupRepository.GetFirstOrDefaultAsync(filter: x => x.GroupId == id && x.IsActive);
                 if (entity == null)
                 {
                     response = ResponseDto.Error<GroupResponseDto>("No se encontró el grupo.");
