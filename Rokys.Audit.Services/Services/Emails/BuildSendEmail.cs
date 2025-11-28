@@ -27,7 +27,7 @@ namespace Rokys.Audit.Services.Services.Emails
                     ["CorrelativeNumber"] = audit.CorrelativeNumber,
                     ["ExpirationDate"] = audit.EndDate,
                     ["StoreName"] = audit.Store?.Name ?? "Sin tienda",
-                    ["UrlAplication"] = urlApp
+                    ["UrlAplication"] = urlApp + "/store-audit/secure/manageaudits/" + audit.PeriodAuditId
                 };
 
                 var templateTextSupervisor = File.ReadAllText(MailTemplate.NotificationSupervisorNewAudit);
@@ -85,7 +85,7 @@ namespace Rokys.Audit.Services.Services.Emails
                     ["CorrelativeNumber"] = audit.CorrelativeNumber,
                     ["ExpirationDate"] = audit.EndDate,
                     ["StoreName"] = audit.Store?.Name ?? "Sin tienda",
-                    ["UrlAplication"] = urlApp
+                    ["UrlAplication"] = urlApp + "/store-audit/secure/manageaudits/" + audit.PeriodAuditId
                 };
 
                 var htmlBody = template.Render(inputTexts);
