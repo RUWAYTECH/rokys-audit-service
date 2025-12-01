@@ -246,7 +246,7 @@ CREATE TABLE CriteriaSubResult (
     Score DECIMAL(10,2) NULL, -- Puntaje otorgado si cumple
 
     -- Configuración
-    forSummary BIT NOT NULL DEFAULT 0, -- Indica si el criterio se incluye en el resumen
+    ForSummary BIT NOT NULL DEFAULT 0, -- Indica si el criterio se incluye en el resumen
 
     -- Auditoría
     IsActive BIT DEFAULT 1,
@@ -594,7 +594,7 @@ CREATE TABLE PeriodAuditScaleSubResult (
     ColorCode NVARCHAR(20), -- Código de color del resultado
 
     -- Configuración
-    forSummary BIT NOT NULL DEFAULT 0, -- Indica si el resultado se incluye en el resumen
+    ForSummary BIT NOT NULL DEFAULT 0, -- Indica si el resultado se incluye en el resumen
 
     -- Auditoría
     IsActive BIT DEFAULT 1,

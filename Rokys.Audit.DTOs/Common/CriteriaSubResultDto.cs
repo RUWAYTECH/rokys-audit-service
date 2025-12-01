@@ -7,6 +7,6 @@ namespace Rokys.Audit.DTOs.Common
         public string? ResultFormula { get; set; }
         public string ColorCode { get; set; } = string.Empty;
         public decimal? Score { get; set; }
-        public bool forSummary { get; set; } = false;
+        public bool ForSummary { get; set; } = false;
     }
 }

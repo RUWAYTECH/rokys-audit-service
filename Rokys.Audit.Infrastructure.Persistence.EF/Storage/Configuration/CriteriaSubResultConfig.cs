@@ -40,7 +40,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .HasColumnType("decimal(10,2)");
 
             // Configuración
-            builder.Property(x => x.forSummary)
+            builder.Property(x => x.ForSummary)
                 .IsRequired()
                 .HasDefaultValue(false);
 

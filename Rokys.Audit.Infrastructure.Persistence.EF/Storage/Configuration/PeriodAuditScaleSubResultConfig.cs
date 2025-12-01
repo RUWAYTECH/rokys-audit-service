@@ -48,7 +48,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .HasMaxLength(20);
 
             // Configuración
-            builder.Property(x => x.forSummary)
+            builder.Property(x => x.ForSummary)
                 .IsRequired()
                 .HasDefaultValue(false);
 

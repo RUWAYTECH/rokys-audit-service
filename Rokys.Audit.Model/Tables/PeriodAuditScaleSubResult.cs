@@ -20,7 +20,7 @@ namespace Rokys.Audit.Model.Tables
         public string? ColorCode { get; set; } // Código de color del resultado
 
         // Configuración
-        public bool forSummary { get; set; } = false; // Indica si el resultado se incluye en el resumen
+        public bool ForSummary { get; set; } = false; // Indica si el resultado se incluye en el resumen
 
         public bool IsActive { get; set; } = true;
 

@@ -482,6 +482,7 @@ namespace Rokys.Audit.Services.Services
                         CriteriaName = criteriaSubResult.CriteriaName,
                         CriteriaCode = criteriaSubResult.CriteriaCode,
                         ColorCode = criteriaSubResult.ColorCode,
+                        ForSummary = criteriaSubResult.ForSummary,
                         AppliedFormula = criteriaSubResult.ResultFormula,
                         ScoreObtained = 0,
                     };

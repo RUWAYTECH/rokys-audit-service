@@ -95,11 +95,11 @@ namespace Rokys.Audit.Services.Services
 					return response;
 				}
 
-				// Validar que solo haya un registro con forSummary = true por ScaleGroupId
-				if (requestDto.forSummary)
+				// Validar que solo haya un registro con ForSummary = true por ScaleGroupId
+				if (requestDto.ForSummary)
 				{
 					var existingForSummary = await _criteriaSubResultRepository.GetFirstOrDefaultAsync(
-						filter: x => x.ScaleGroupId == requestDto.ScaleGroupId && x.forSummary && x.IsActive);
+						filter: x => x.ScaleGroupId == requestDto.ScaleGroupId && x.ForSummary && x.IsActive);
 
 					if (existingForSummary != null)
 					{
@@ -177,11 +177,11 @@ namespace Rokys.Audit.Services.Services
 					return response;
 				}
 
-				// Validar que solo haya un registro con forSummary = true por ScaleGroupId
-				if (requestDto.forSummary)
+				// Validar que solo haya un registro con ForSummary = true por ScaleGroupId
+				if (requestDto.ForSummary)
 				{
 					var existingForSummary = await _criteriaSubResultRepository.GetFirstOrDefaultAsync(
-						filter: x => x.ScaleGroupId == requestDto.ScaleGroupId && x.forSummary && x.IsActive && x.CriteriaSubResultId != id);
+						filter: x => x.ScaleGroupId == requestDto.ScaleGroupId && x.ForSummary && x.IsActive && x.CriteriaSubResultId != id);
 
 					if (existingForSummary != null)
 					{
