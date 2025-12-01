@@ -244,9 +244,10 @@ CREATE TABLE CriteriaSubResult (
   
     -- Puntuación
     Score DECIMAL(10,2) NULL, -- Puntaje otorgado si cumple
-  
-   
-    
+
+    -- Configuración
+    forSummary BIT NOT NULL DEFAULT 0, -- Indica si el criterio se incluye en el resumen
+
     -- Auditoría
     IsActive BIT DEFAULT 1,
     CreatedBy VARCHAR(120) NULL,
@@ -588,9 +589,10 @@ CREATE TABLE PeriodAuditScaleSubResult (
     -- Resultado de la evaluación
     ScoreObtained DECIMAL(10,2) NULL, -- Puntaje obtenido
     ColorCode NVARCHAR(20), -- Código de color del resultado
-    
 
-    
+    -- Configuración
+    forSummary BIT NOT NULL DEFAULT 0, -- Indica si el resultado se incluye en el resumen
+
     -- Auditoría
     IsActive BIT DEFAULT 1,
     CreatedBy VARCHAR(120) NULL,

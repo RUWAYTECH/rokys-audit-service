@@ -11,5 +11,6 @@
         public string? AppliedFormula { get; set; }
         public decimal? ScoreObtained { get; set; }
         public string? ColorCode { get; set; }
+        public bool forSummary { get; set; } = false;
     }
 }

@@ -15,7 +15,10 @@ namespace Rokys.Audit.Model.Tables
         
         // Puntuación
         public decimal? Score { get; set; } // Puntaje otorgado si cumple
-        
+
+        // Configuración
+        public bool forSummary { get; set; } = false; // Indica si el criterio se incluye en el resumen
+
         public bool IsActive { get; set; } = true;
 
         // Navigation properties

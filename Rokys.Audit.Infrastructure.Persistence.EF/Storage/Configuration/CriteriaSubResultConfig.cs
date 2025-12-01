@@ -39,6 +39,11 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.Property(x => x.Score)
                 .HasColumnType("decimal(10,2)");
 
+            // Configuración
+            builder.Property(x => x.forSummary)
+                .IsRequired()
+                .HasDefaultValue(false);
+
             builder.Property(x => x.IsActive)
                 .IsRequired()
                 .HasDefaultValue(true);

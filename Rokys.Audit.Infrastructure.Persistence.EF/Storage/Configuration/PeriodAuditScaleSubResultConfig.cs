@@ -47,6 +47,11 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.Property(x => x.ColorCode)
                 .HasMaxLength(20);
 
+            // Configuración
+            builder.Property(x => x.forSummary)
+                .IsRequired()
+                .HasDefaultValue(false);
+
             builder.Property(x => x.IsActive)
                 .IsRequired()
                 .HasDefaultValue(true);

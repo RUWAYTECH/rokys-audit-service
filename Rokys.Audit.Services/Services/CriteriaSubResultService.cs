@@ -94,6 +94,21 @@ namespace Rokys.Audit.Services.Services
 					response.Messages.AddRange(validate.Errors.Select(e => new ApplicationMessage { Message = e.ErrorMessage, MessageType = ApplicationMessageType.Error }));
 					return response;
 				}
+
+				// Validar que solo haya un registro con forSummary = true por ScaleGroupId
+				if (requestDto.forSummary)
+				{
+					var existingForSummary = await _criteriaSubResultRepository.GetFirstOrDefaultAsync(
+						filter: x => x.ScaleGroupId == requestDto.ScaleGroupId && x.forSummary && x.IsActive);
+
+					if (existingForSummary != null)
+					{
+						response = ResponseDto.Error<CriteriaSubResultResponseDto>(
+							$"Ya existe un criterio marcado como 'Para Resumen' en este grupo de escala. Solo puede haber uno por grupo.");
+						return response;
+					}
+				}
+
 				var currentUser = _httpContextAccessor.CurrentUser();
 				// Obtener el último código existente
 				var lastCode = _criteriaSubResultRepository.Get(x => x.IsActive)
@@ -161,6 +176,21 @@ namespace Rokys.Audit.Services.Services
 					response = ResponseDto.Error<CriteriaSubResultResponseDto>("No se encontró el subcriterio.");
 					return response;
 				}
+
+				// Validar que solo haya un registro con forSummary = true por ScaleGroupId
+				if (requestDto.forSummary)
+				{
+					var existingForSummary = await _criteriaSubResultRepository.GetFirstOrDefaultAsync(
+						filter: x => x.ScaleGroupId == requestDto.ScaleGroupId && x.forSummary && x.IsActive && x.CriteriaSubResultId != id);
+
+					if (existingForSummary != null)
+					{
+						response = ResponseDto.Error<CriteriaSubResultResponseDto>(
+							$"Ya existe un criterio marcado como 'Para Resumen' en este grupo de escala. Solo puede haber uno por grupo.");
+						return response;
+					}
+				}
+
 				var currentUser = _httpContextAccessor.CurrentUser();
 				entity = _mapper.Map(requestDto, entity);
 				entity.UpdateAudit(currentUser.UserName);
