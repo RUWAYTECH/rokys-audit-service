@@ -4,6 +4,7 @@ using static Rokys.Audit.Common.Constant.Constants;
 using Scriban;
 using Rokys.Audit.Common.Constant;
 using Rokys.Audit.Infrastructure.Repositories;
+using Rokys.Audit.Services.Services.Pdf;
 
 namespace Rokys.Audit.Services.Services.Emails
 {
@@ -51,6 +52,8 @@ namespace Rokys.Audit.Services.Services.Emails
             IEmailService emailService,
             PeriodAudit audit,
             IAuditRoleConfigurationRepository auditRoleConfigurationRepository,
+            IPeriodAuditGroupResultRepository periodAuditGroupResultRepository,
+            Rokys.Audit.DTOs.Common.FileSettings fileSettings,
             string urlApp)
         {
             try
@@ -96,10 +99,28 @@ namespace Rokys.Audit.Services.Services.Emails
                     .Distinct()
                     .ToList();
 
-                await emailService.SendEmailAsync(
+                // Generar PDF con los datos de auditoría
+                var auditData = await GetAuditDataForPdf(audit, periodAuditGroupResultRepository);
+                var pdfBytes = await AuditPdfGenerator.GenerateAuditReportPdf(audit, auditData);
+
+                var fileName = $"{audit.CorrelativeNumber}.pdf";
+
+                // Guardar PDF en carpeta configurada (FileSettings.Path)
+                var pdfFolderPath = Path.Combine(fileSettings.Path, "Reports", "Audits", audit.EndDate.Year.ToString());
+                Directory.CreateDirectory(pdfFolderPath);
+                var pdfFilePath = Path.Combine(pdfFolderPath, fileName);
+                await File.WriteAllBytesAsync(pdfFilePath, pdfBytes);
+
+                var attachments = new List<(string fileName, byte[] content)>
+                {
+                    (fileName, pdfBytes)
+                };
+
+                await emailService.SendEmailWithAttachmentsAsync(
                     emailsTo,
                     "Auditoría Finalizada para la tienda",
                     htmlBody,
+                    attachments,
                     true
                 );
             }
@@ -107,6 +128,40 @@ namespace Rokys.Audit.Services.Services.Emails
             {
                 throw new Exception($"Error en NotifyAllUserAudit: {ex.Message}", ex);
             }
+        }
+
+        private static async Task<List<(int nro, string proceso, string observations, string impact, string recommendation, string valorized)>> GetAuditDataForPdf(
+            PeriodAudit audit,
+            IPeriodAuditGroupResultRepository periodAuditGroupResultRepository)
+        {
+            var auditData = new List<(int nro, string proceso, string observations, string impact, string recommendation, string valorized)>();
+
+            // Obtener los resultados de grupo con sus resultados de escala INCLUYENDO las relaciones
+            var groupResults = await periodAuditGroupResultRepository.GetByPeriodAuditIdWithScaleResultsAsync(audit.PeriodAuditId);
+
+            int nro = 1;
+            foreach (var groupResult in groupResults)
+            {
+                if (groupResult.PeriodAuditScaleResults != null)
+                {
+                    // Ordenar por SortOrder para mantener el orden correcto
+                    foreach (var scaleResult in groupResult.PeriodAuditScaleResults
+                        .Where(sr => sr.IsActive)
+                        .OrderBy(sr => sr.SortOrder))
+                    {
+                        auditData.Add((
+                            nro++,
+                            scaleResult.ScaleGroup?.Name ?? "N/A",
+                            scaleResult.Observations ?? "",
+                            scaleResult.Impact ?? "",
+                            scaleResult.Recommendation ?? "",
+                            scaleResult.Valorized ?? ""
+                        ));
+                    }
+                }
+            }
+
+            return auditData;
         }
 
     }

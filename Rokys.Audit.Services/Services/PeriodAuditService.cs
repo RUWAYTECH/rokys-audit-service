@@ -50,6 +50,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IPeriodAuditParticipantRepository _periodAuditParticipantRepository;
         private readonly IAuditRoleConfigurationRepository _auditRoleConfigurationRepository;
         private readonly WebAppSettings _webAppSettings;
+        private readonly FileSettings _fileSettings;
 
         public PeriodAuditService(
             IPeriodAuditRepository periodAuditRepository,
@@ -75,7 +76,8 @@ namespace Rokys.Audit.Services.Services
             IEmailService emailService,
             IPeriodAuditParticipantRepository periodAuditParticipantRepository,
             IAuditRoleConfigurationRepository auditRoleConfigurationRepository,
-            WebAppSettings webAppSettings)
+            WebAppSettings webAppSettings,
+            FileSettings fileSettings)
         {
             _periodAuditRepository = periodAuditRepository;
             _validator = validator;
@@ -101,6 +103,7 @@ namespace Rokys.Audit.Services.Services
             _periodAuditParticipantRepository = periodAuditParticipantRepository;
             _auditRoleConfigurationRepository = auditRoleConfigurationRepository;
             _webAppSettings = webAppSettings;
+            _fileSettings = fileSettings;
         }
 
         public async Task<ResponseDto<PeriodAuditResponseDto>> Create(PeriodAuditRequestDto requestDto)
@@ -570,9 +573,6 @@ namespace Rokys.Audit.Services.Services
                 // All validations passed - process each entity (one transaction)
                 foreach (var ent in entities)
                 {
-                    // reuse the previous behavior for a single entity: compute nextStatusId, nextUserId, prevUserId, actionText
-                    // (extract core logic inline to avoid duplicating heavy refactor)
-
                     // Get PrevUserId from the last inbox item's NextUserId for this audit
                     Guid? prevUserId = null;
                     var lastInboxItem = await _inboxItemsRepository.GetFirstOrDefaultAsync(
@@ -677,7 +677,7 @@ namespace Rokys.Audit.Services.Services
                     }
                     if (periodAuditUpdate.StatusId == statusFinal?.AuditStatusId)
                     {
-                        await BuildSendEmail.NotifyAllUserAudit(_emailService, periodAuditUpdate, _auditRoleConfigurationRepository, _webAppSettings.Url);
+                        await BuildSendEmail.NotifyAllUserAudit(_emailService, periodAuditUpdate, _auditRoleConfigurationRepository, _periodAuditGroupResultRepository, _fileSettings, _webAppSettings.Url);
                     }
                 }
 

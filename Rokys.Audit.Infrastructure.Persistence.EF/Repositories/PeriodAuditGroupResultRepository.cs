@@ -18,6 +18,17 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
                 .Where(pagr => pagr.PeriodAuditId == periodAuditId && pagr.IsActive && (id == null || pagr.PeriodAuditGroupResultId != id))
                 .ToListAsync();
         }
+
+        public async Task<List<PeriodAuditGroupResult>> GetByPeriodAuditIdWithScaleResultsAsync(Guid periodAuditId)
+        {
+            return await _context.PeriodAuditGroupResults
+                .Include(pagr => pagr.PeriodAuditScaleResults)
+                    .ThenInclude(pasr => pasr.ScaleGroup)
+                .Where(pagr => pagr.PeriodAuditId == periodAuditId && pagr.IsActive)
+                .OrderBy(pagr => pagr.SortOrder)
+                .ToListAsync();
+        }
+
         public async Task<bool> GetValidatorByGroupIdAsync(Guid periodAuditId, Guid groupId, Guid? id = null)
         {
             return await _context.PeriodAuditGroupResults
