@@ -38,6 +38,21 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .HasColumnType("NVARCHAR(MAX)")
                 .IsRequired(false);
 
+            builder.Property(x => x.Impact)
+                .HasColumnName("Impact")
+                .HasColumnType("NVARCHAR(MAX)")
+                .IsRequired(false);
+
+            builder.Property(x => x.Recommendation)
+                .HasColumnName("Recommendation")
+                .HasColumnType("NVARCHAR(MAX)")
+                .IsRequired(false);
+
+            builder.Property(x => x.Valorized)
+                .HasColumnName("Valorized")
+                .HasColumnType("NVARCHAR(MAX)")
+                .IsRequired(false);
+
             builder.Property(x => x.ScaleDescription)
                 .HasColumnName("ScaleDescription")
                 .HasMaxLength(200)

@@ -455,6 +455,9 @@ CREATE TABLE PeriodAuditScaleResult
     SortOrder INT DEFAULT 0,
 
     Observations NVARCHAR(MAX) NULL, -- Observaciones
+    Impact NVARCHAR(MAX) NULL, -- Impacto
+    Recommendation NVARCHAR(MAX) NULL, -- Recomendación
+    Valorized NVARCHAR(MAX) NULL, -- Valorizado
 
     ScaleDescription NVARCHAR(150) NULL, -- Descripción de la Escala
     ScaleColor NVARCHAR(20) NULL, -- Código de Color de la Escala

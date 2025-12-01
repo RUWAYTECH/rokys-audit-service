@@ -6,6 +6,10 @@
         public decimal ResultObtained { get; set; }
         public List<periodAuditScaleSubResult> PeriodAuditScaleSubResult { get; set; }
         public List<UpdatePeriodAuditFieldValuesRequestDto> PeriodAuditFieldValues { get; set; }
+        public string? Observations { get; set; }
+        public string? Impact { get; set; }
+        public string? Recommendation { get; set; }
+        public string? Valorized { get; set; }
     }
 
     public class periodAuditScaleSubResult

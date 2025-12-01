@@ -496,6 +496,13 @@ namespace Rokys.Audit.Services.Services
                 }
 
                 periodAuditScaleResults.ScoreValue = scoringCriteriaResult.Score;
+
+                // Actualizar campos de texto
+                periodAuditScaleResults.Observations = periodAuditFieldValuesUpdateAllValuesRequestDto.Observations;
+                periodAuditScaleResults.Impact = periodAuditFieldValuesUpdateAllValuesRequestDto.Impact;
+                periodAuditScaleResults.Recommendation = periodAuditFieldValuesUpdateAllValuesRequestDto.Recommendation;
+                periodAuditScaleResults.Valorized = periodAuditFieldValuesUpdateAllValuesRequestDto.Valorized;
+
                 // Actualizar color y descripción de la escala según el nuevo puntaje
                 bool foundScale = false;
                 foreach (var scale in scaleCompany)
@@ -507,7 +514,7 @@ namespace Rokys.Audit.Services.Services
                         foundScale = true;
                         break;
                     }
-                    
+
                 }
                 if (!foundScale)
                 {
