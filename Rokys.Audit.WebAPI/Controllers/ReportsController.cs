@@ -44,6 +44,18 @@ namespace Rokys.Audit.WebAPI.Controllers
             return BadRequest(response);
         }
 
+        [HttpGet("dashboards/stores/{year:int}/{enterpriseId:guid}")]
+        public async Task<IActionResult> GetDashboardStoresData([FromRoute] int year, [FromRoute] Guid enterpriseId, [FromQuery] Guid[] storeIds)
+        {
+
+            var response = await _reportsService.GetDashboardStoresDataAsync(year, enterpriseId, storeIds);
+
+            if (response.IsValid)
+                return Ok(response);
+
+            return BadRequest(response);
+        }
+
         [HttpGet("search")]
         public async Task<IActionResult> GetReportSearch([FromQuery] ReportSearchFilterRequestDto reportSearchFilterRequestDto)
         {

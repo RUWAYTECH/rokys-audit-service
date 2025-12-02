@@ -252,6 +252,130 @@ namespace Rokys.Audit.Services.Services
             return response;
         }
 
+        public async Task<ResponseDto<DashboardDataResponseDto>> GetDashboardStoresDataAsync(int year, Guid enterpriseId, Guid[] storeIds)
+        {
+            var response = ResponseDto.Create<DashboardDataResponseDto>();
+            try
+            {
+                // Obtener auditorías del año especificado y filtradas por tiendas
+                var startDate = new DateTime(year, 1, 1);
+                var endDate = new DateTime(year, 12, 31, 23, 59, 59);
+
+                Expression<Func<PeriodAudit, bool>> filter = x => x.CreationDate >= startDate &&
+                                                                   x.CreationDate <= endDate &&
+                                                                   x.IsActive &&
+                                                                   x.Store != null &&
+                                                                   x.Store.EnterpriseId == enterpriseId &&
+                                                                   x.AuditStatus != null &&
+                                                                   x.AuditStatus.Code == AuditStatusCode.Completed;
+
+                // Filtrar por tiendas si se especifican
+                if (storeIds != null && storeIds.Length > 0)
+                {
+                    var storeIdsList = storeIds.ToList();
+                    filter = filter.AndAlso(x => x.StoreId != null && storeIdsList.Contains(x.StoreId.Value));
+                }
+
+                var periodAudits = await _periodAuditRepository.GetCustomSearchAsync(filter);
+
+                // Crear las categorías (meses)
+                var categories = new List<string>
+                {
+                    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+                    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+                };
+
+                // Agrupar auditorías por tienda
+                var auditsByStore = periodAudits
+                    .GroupBy(x => x.StoreId)
+                    .ToList();
+
+                // Crear series dinámicamente por tienda
+                var series = new List<DashboardSeriesDto>();
+                var dashStyles = new[] { "ShortDot", "Dash", "ShortDash", "LongDash", "DashDot" };
+
+                var storeIndex = 0;
+                foreach (var storeGroup in auditsByStore)
+                {
+                    var storeId = storeGroup.Key;
+                    var storeName = (storeGroup.First().Store?.Name ?? "Tienda").Trim();
+
+                    // Calcular cantidad de auditorías por mes
+                    var monthlyCountData = new List<decimal>();
+                    for (int month = 1; month <= 12; month++)
+                    {
+                        var countForMonth = storeGroup.Count(x => x.CreationDate.Month == month);
+                        monthlyCountData.Add(countForMonth);
+                    }
+
+                    // Calcular promedio de calificación por mes
+                    var monthlyAvgData = new List<decimal>();
+                    for (int month = 1; month <= 12; month++)
+                    {
+                        var auditsInMonth = storeGroup.Where(x => x.CreationDate.Month == month).ToList();
+                        if (auditsInMonth.Any())
+                        {
+                            var avgScore = auditsInMonth.Average(x => x.ScoreValue);
+                            monthlyAvgData.Add(Math.Round(avgScore, 2));
+                        }
+                        else
+                        {
+                            monthlyAvgData.Add(0);
+                        }
+                    }
+
+                    // Generar color único para cada tienda
+                    var color = storeIndex < Constants.ColorPalette.Palette.Length
+                        ? Constants.ColorPalette.Palette[storeIndex]
+                        : GenerateColor.GenerateColorFromIndex(storeIndex);
+
+                    // Crear serie para cantidad de auditorías (columnas)
+                    var countSeries = new DashboardSeriesDto
+                    {
+                        Name = $"{storeName} - Cantidad",
+                        Type = "column",
+                        YAxis = 1, // Eje secundario (derecha)
+                        Data = monthlyCountData,
+                        Color = color,
+                        Tooltip = new DashboardTooltipDto { ValueSuffix = " auditorías" }
+                    };
+
+                    // Crear serie para promedio de calificación (línea)
+                    var avgSeries = new DashboardSeriesDto
+                    {
+                        Name = $"{storeName} - Promedio",
+                        Type = "spline",
+                        YAxis = 0, // Eje principal (izquierda)
+                        Data = monthlyAvgData,
+                        Color = color,
+                        DashStyle = storeIndex == 0 ? null : dashStyles[(storeIndex - 1) % dashStyles.Length],
+                        Tooltip = new DashboardTooltipDto { ValueSuffix = " pts" }
+                    };
+
+                    series.Add(countSeries);
+                    series.Add(avgSeries);
+                    storeIndex++;
+                }
+
+                var dashboardData = new DashboardDataResponseDto
+                {
+                    Categories = categories,
+                    Series = series
+                };
+
+                response.Data = dashboardData;
+
+                _logger.LogInformation($"Dashboard stores data generated successfully for year {year} with {storeIds?.Length ?? 0} stores");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error generating dashboard stores data for year {year}: {ex.Message}");
+                response = ResponseDto.Error<DashboardDataResponseDto>(ex.Message);
+            }
+
+            return response;
+        }
+
         public async Task<ResponseDto<PeriodAuditReportResponseDto>> GetReportSearchAsync(ReportSearchFilterRequestDto reportSearchFilterRequestDto)
         {
             var response = ResponseDto.Create<PeriodAuditReportResponseDto>();
