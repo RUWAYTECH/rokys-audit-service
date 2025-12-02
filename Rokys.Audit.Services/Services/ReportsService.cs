@@ -395,19 +395,48 @@ namespace Rokys.Audit.Services.Services
                 if (reportSearchFilterRequestDto.SupervisorId.HasValue)
                     filter = filter.AndAlso(x => x.PeriodAuditParticipants.Any(p => p.UserReferenceId == reportSearchFilterRequestDto.SupervisorId.Value && p.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code) && x.IsActive);
 
-                if (reportSearchFilterRequestDto.ReportDate.HasValue)
+                // Filtro por rango de fechas
+                if (reportSearchFilterRequestDto.ReportDateInit.HasValue && reportSearchFilterRequestDto.ReportDateFinish.HasValue)
                 {
-                    var date = reportSearchFilterRequestDto.ReportDate.Value;
-
-                    var startDate = new DateTime(date.Year, date.Month, 1, 0, 0, 0);
-
-                    var endDate = startDate.AddMonths(1).AddTicks(-1);
+                    // Si se proporcionan ambas fechas, usar rango completo
+                    var startDate = reportSearchFilterRequestDto.ReportDateInit.Value.Date; // Inicio del día
+                    var endDate = reportSearchFilterRequestDto.ReportDateFinish.Value.Date.AddDays(1).AddTicks(-1); // Fin del día
 
                     filter = filter.AndAlso(x =>
                         x.CreationDate >= startDate &&
                         x.CreationDate <= endDate &&
                         x.IsActive
                     );
+                }
+                else if (reportSearchFilterRequestDto.ReportDateInit.HasValue)
+                {
+                    // Si solo se proporciona fecha inicial, desde esa fecha en adelante
+                    var startDate = reportSearchFilterRequestDto.ReportDateInit.Value.Date;
+                    filter = filter.AndAlso(x => x.CreationDate >= startDate && x.IsActive);
+                }
+                else if (reportSearchFilterRequestDto.ReportDateFinish.HasValue)
+                {
+                    // Si solo se proporciona fecha final, hasta esa fecha
+                    var endDate = reportSearchFilterRequestDto.ReportDateFinish.Value.Date.AddDays(1).AddTicks(-1);
+                    filter = filter.AndAlso(x => x.CreationDate <= endDate && x.IsActive);
+                }
+                else if (!string.IsNullOrEmpty(reportSearchFilterRequestDto.ReportDate))
+                {
+                    // Mantener compatibilidad con ReportDate antiguo (por mes completo)
+                    // Soporta formatos: "YYYY-MM" o "YYYY-MM-DD"
+                    DateTime parsedDate;
+
+                    if (DateTime.TryParse(reportSearchFilterRequestDto.ReportDate, out parsedDate))
+                    {
+                        var startDate = new DateTime(parsedDate.Year, parsedDate.Month, 1, 0, 0, 0);
+                        var endDate = startDate.AddMonths(1).AddTicks(-1);
+
+                        filter = filter.AndAlso(x =>
+                            x.CreationDate >= startDate &&
+                            x.CreationDate <= endDate &&
+                            x.IsActive
+                        );
+                    }
                 }
 
                 filter = filter.AndAlso(x => x.AuditStatus.Code == AuditStatusCode.Completed);

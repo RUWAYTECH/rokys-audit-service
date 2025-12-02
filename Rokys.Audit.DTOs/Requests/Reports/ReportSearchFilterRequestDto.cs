@@ -12,6 +12,8 @@ namespace Rokys.Audit.DTOs.Requests.Reports
         public Guid? StoreId { get; set; }
         public Guid? SupervisorId { get; set; }
         public Guid? ResponsibleAuditorId { get; set; }
-        public DateTime? ReportDate { get; set; }
+        public string? ReportDate { get; set; }  // Cambiar a string para soportar formato "YYYY-MM" o "YYYY-MM-DD"
+        public DateTime? ReportDateInit { get; set; }
+        public DateTime? ReportDateFinish { get; set; }
     }
 }
