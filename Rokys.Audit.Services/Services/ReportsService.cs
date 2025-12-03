@@ -261,15 +261,20 @@ namespace Rokys.Audit.Services.Services
                 var startDate = new DateTime(year, 1, 1);
                 var endDate = new DateTime(year, 12, 31, 23, 59, 59);
 
-                Expression<Func<PeriodAudit, bool>> filter = x => x.CreationDate >= startDate &&
-                                                                   x.CreationDate <= endDate &&
-                                                                   x.IsActive &&
-                                                                   x.Store != null &&
-                                                                   x.Store.EnterpriseId == enterpriseId &&
-                                                                   x.AuditStatus != null &&
-                                                                   x.AuditStatus.Code == AuditStatusCode.Completed;
+                // Filtro base para la empresa
+                Expression<Func<PeriodAudit, bool>> baseFilter = x => x.CreationDate >= startDate &&
+                                                                       x.CreationDate <= endDate &&
+                                                                       x.IsActive &&
+                                                                       x.Store != null &&
+                                                                       x.Store.EnterpriseId == enterpriseId &&
+                                                                       x.AuditStatus != null &&
+                                                                       x.AuditStatus.Code == AuditStatusCode.Completed;
 
-                // Filtrar por tiendas si se especifican
+                // Obtener TODAS las auditorías de la empresa para el promedio general
+                var allEnterpriseAudits = await _periodAuditRepository.GetCustomSearchAsync(baseFilter);
+
+                // Filtrar por tiendas seleccionadas para mostrar en el gráfico
+                Expression<Func<PeriodAudit, bool>> filter = baseFilter;
                 if (storeIds != null && storeIds.Length > 0)
                 {
                     var storeIdsList = storeIds.ToList();
@@ -316,7 +321,8 @@ namespace Rokys.Audit.Services.Services
                         if (auditsInMonth.Any())
                         {
                             var avgScore = auditsInMonth.Average(x => x.ScoreValue);
-                            monthlyAvgData.Add(Math.Round(avgScore, 2));
+                            var roundedAvg = Math.Round(avgScore, 2);
+                            monthlyAvgData.Add(roundedAvg);
                         }
                         else
                         {
@@ -355,6 +361,56 @@ namespace Rokys.Audit.Services.Services
                     series.Add(countSeries);
                     series.Add(avgSeries);
                     storeIndex++;
+                }
+
+                // Calcular y agregar la serie de promedio general de TODAS las tiendas de la empresa
+                if (allEnterpriseAudits.Any())
+                {
+                    // Agrupar todas las auditorías de la empresa por tienda y mes
+                    var allStoresByMonth = allEnterpriseAudits.GroupBy(x => x.StoreId).ToList();
+
+                    var generalAverageData = new List<decimal>();
+                    for (int month = 1; month <= 12; month++)
+                    {
+                        var monthlyStoreAverages = new List<decimal>();
+
+                        // Calcular el promedio de cada tienda para este mes
+                        foreach (var storeGroup in allStoresByMonth)
+                        {
+                            var auditsInMonth = storeGroup.Where(x => x.CreationDate.Month == month).ToList();
+                            if (auditsInMonth.Any())
+                            {
+                                var storeAvg = auditsInMonth.Average(x => x.ScoreValue);
+                                monthlyStoreAverages.Add(storeAvg);
+                            }
+                        }
+
+                        // Calcular el promedio general del mes (promedio de promedios de tiendas)
+                        if (monthlyStoreAverages.Any())
+                        {
+                            var generalAvg = monthlyStoreAverages.Average();
+                            generalAverageData.Add(Math.Round(generalAvg, 2));
+                        }
+                        else
+                        {
+                            generalAverageData.Add(0);
+                        }
+                    }
+
+                    // Crear serie para el promedio general en color rojo
+                    var generalAvgSeries = new DashboardSeriesDto
+                    {
+                        Name = "Promedio General",
+                        Type = "spline",
+                        YAxis = 0, // Eje principal (izquierda)
+                        Data = generalAverageData,
+                        Color = "#FF0000", // Color rojo
+                        DashStyle = "Solid",
+                        Tooltip = new DashboardTooltipDto { ValueSuffix = " pts" },
+                        LineWidth = 3 // Línea más gruesa para distinguirla
+                    };
+
+                    series.Add(generalAvgSeries);
                 }
 
                 var dashboardData = new DashboardDataResponseDto

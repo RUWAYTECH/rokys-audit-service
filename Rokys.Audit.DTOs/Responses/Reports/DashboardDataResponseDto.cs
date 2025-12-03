@@ -47,6 +47,11 @@ namespace Rokys.Audit.DTOs.Responses.Reports
         public string? DashStyle { get; set; }
 
         /// <summary>
+        /// Ancho de la línea (para gráficos tipo spline/line)
+        /// </summary>
+        public int? LineWidth { get; set; }
+
+        /// <summary>
         /// Eje Y para la serie (opcional, para múltiples ejes)
         /// </summary>
         public int? YAxis { get; set; }
