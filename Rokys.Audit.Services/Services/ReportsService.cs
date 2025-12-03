@@ -162,20 +162,27 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<DashboardDataResponseDto>();
             try
             {
-                // Obtener auditorías del año especificado y filtradas por supervisores
+                // Obtener auditorías del año especificado
                 var startDate = new DateTime(year, 1, 1);
                 var endDate = new DateTime(year, 12, 31, 23, 59, 59);
-                Expression<Func<PeriodAudit, bool>> filter = x => x.CreationDate >= startDate &&
-                                                                                             x.CreationDate <= endDate &&
-                                                                                             x.IsActive &&
-                                                                                             x.Store.EnterpriseId == enterpriseId &&
-                                                                                             x.AuditStatus != null &&
-                                                                                             x.AuditStatus.Code == AuditStatusCode.Completed;
 
+                // Filtro base para la empresa
+                Expression<Func<PeriodAudit, bool>> baseFilter = x => x.CreationDate >= startDate &&
+                                                                       x.CreationDate <= endDate &&
+                                                                       x.IsActive &&
+                                                                       x.Store.EnterpriseId == enterpriseId &&
+                                                                       x.AuditStatus != null &&
+                                                                       x.AuditStatus.Code == AuditStatusCode.Completed;
+
+                // Obtener TODAS las auditorías de la empresa para el promedio general
+                var allEnterpriseAudits = await _periodAuditRepository.GetCustomSearchAsync(baseFilter);
+
+                // Filtrar por supervisores seleccionados
+                Expression<Func<PeriodAudit, bool>> filter = baseFilter;
                 if (supervisorIds != null && supervisorIds.Length > 0)
                 {
                     var auditIdsWithSupervisor = await _periodAuditParticipantRepository.GetAsync(
-                            filter: p => p.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code && 
+                            filter: p => p.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code &&
                                         supervisorIds.Contains(p.UserReferenceId)
                         );
                     filter = filter.AndAlso(x => auditIdsWithSupervisor.Select(a => a.PeriodAuditId).Contains(x.PeriodAuditId));
@@ -204,14 +211,32 @@ namespace Rokys.Audit.Services.Services
                 foreach (var supervisorGroup in auditsBySupervisor)
                 {
                     var supervisor = supervisorGroup.Key;
+                    var supervisorName = supervisorGroup.First().PeriodAuditParticipants
+                        .FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code)?.UserReference?.FullName ?? "Supervisor";
 
-                    // Calcular datos por mes para este supervisor (contar auditorías)
-                    var monthlyData = new List<decimal>();
+                    // Calcular cantidad de auditorías por mes
+                    var monthlyCountData = new List<decimal>();
                     for (int month = 1; month <= 12; month++)
                     {
-                        // Contar auditorías por mes
                         var countForMonth = supervisorGroup.Count(x => x.CreationDate.Month == month);
-                        monthlyData.Add(countForMonth);
+                        monthlyCountData.Add(countForMonth);
+                    }
+
+                    // Calcular promedio de calificación por mes
+                    var monthlyAvgData = new List<decimal>();
+                    for (int month = 1; month <= 12; month++)
+                    {
+                        var auditsInMonth = supervisorGroup.Where(x => x.CreationDate.Month == month).ToList();
+                        if (auditsInMonth.Any())
+                        {
+                            var avgScore = auditsInMonth.Average(x => x.ScoreValue);
+                            var roundedAvg = Math.Round(avgScore, 2);
+                            monthlyAvgData.Add(roundedAvg);
+                        }
+                        else
+                        {
+                            monthlyAvgData.Add(0);
+                        }
                     }
 
                     // Generar color único para cada supervisor
@@ -219,18 +244,88 @@ namespace Rokys.Audit.Services.Services
                         ? Constants.ColorPalette.Palette[supervisorIndex]
                         : GenerateColor.GenerateColorFromIndex(supervisorIndex);
 
-                    // Crear serie para este supervisor
-                    var seriesDto = new DashboardSeriesDto
+                    // Crear serie para cantidad de auditorías (columnas)
+                    var countSeries = new DashboardSeriesDto
                     {
-                        Name = $"{supervisorGroup.First().PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code)?.UserReference?.FullName ?? "Supervisor"}",
-                        Type = "spline",
-                        Data = monthlyData,
+                        Name = $"{supervisorName} - Cantidad",
+                        Type = "column",
+                        YAxis = 1, // Eje secundario (derecha)
+                        Data = monthlyCountData,
                         Color = color,
-                        DashStyle = supervisorIndex == 0 ? null : dashStyles[(supervisorIndex - 1) % dashStyles.Length]
+                        Tooltip = new DashboardTooltipDto { ValueSuffix = " auditorías" }
                     };
 
-                    series.Add(seriesDto);
+                    // Crear serie para promedio de calificación (línea)
+                    var avgSeries = new DashboardSeriesDto
+                    {
+                        Name = $"{supervisorName} - Promedio",
+                        Type = "spline",
+                        YAxis = 0, // Eje principal (izquierda)
+                        Data = monthlyAvgData,
+                        Color = color,
+                        DashStyle = supervisorIndex == 0 ? null : dashStyles[(supervisorIndex - 1) % dashStyles.Length],
+                        Tooltip = new DashboardTooltipDto { ValueSuffix = " pts" }
+                    };
+
+                    series.Add(countSeries);
+                    series.Add(avgSeries);
                     supervisorIndex++;
+                }
+
+                // Calcular y agregar la serie de promedio general de TODOS los supervisores de la empresa
+                var allSupervisorAudits = allEnterpriseAudits
+                    .Where(x => x.PeriodAuditParticipants.Any(p => p.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code))
+                    .ToList();
+
+                if (allSupervisorAudits.Any())
+                {
+                    // Agrupar todas las auditorías de la empresa por supervisor
+                    var allSupervisorsByMonth = allSupervisorAudits
+                        .GroupBy(x => x.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code)!.UserReferenceId)
+                        .ToList();
+
+                    var generalAverageData = new List<decimal>();
+                    for (int month = 1; month <= 12; month++)
+                    {
+                        var monthlySupervisorAverages = new List<decimal>();
+
+                        // Calcular el promedio de cada supervisor para este mes
+                        foreach (var supervisorGroup in allSupervisorsByMonth)
+                        {
+                            var auditsInMonth = supervisorGroup.Where(x => x.CreationDate.Month == month).ToList();
+                            if (auditsInMonth.Any())
+                            {
+                                var supervisorAvg = auditsInMonth.Average(x => x.ScoreValue);
+                                monthlySupervisorAverages.Add(supervisorAvg);
+                            }
+                        }
+
+                        // Calcular el promedio general del mes (promedio de promedios de supervisores)
+                        if (monthlySupervisorAverages.Any())
+                        {
+                            var generalAvg = monthlySupervisorAverages.Average();
+                            generalAverageData.Add(Math.Round(generalAvg, 2));
+                        }
+                        else
+                        {
+                            generalAverageData.Add(0);
+                        }
+                    }
+
+                    // Crear serie para el promedio general en color rojo
+                    var generalAvgSeries = new DashboardSeriesDto
+                    {
+                        Name = "Promedio General",
+                        Type = "spline",
+                        YAxis = 0, // Eje principal (izquierda)
+                        Data = generalAverageData,
+                        Color = "#FF0000", // Color rojo
+                        DashStyle = "Solid",
+                        Tooltip = new DashboardTooltipDto { ValueSuffix = " pts" },
+                        LineWidth = 3 // Línea más gruesa para distinguirla
+                    };
+
+                    series.Add(generalAvgSeries);
                 }
 
                 var dashboardData = new DashboardDataResponseDto
@@ -241,7 +336,7 @@ namespace Rokys.Audit.Services.Services
 
                 response.Data = dashboardData;
 
-                _logger.LogInformation($"Dashboard supervisors data generated successfully for year {year} with {supervisorIds.Length} supervisors");
+                _logger.LogInformation($"Dashboard supervisors data generated successfully for year {year} with {supervisorIds?.Length ?? 0} supervisors");
             }
             catch (Exception ex)
             {
