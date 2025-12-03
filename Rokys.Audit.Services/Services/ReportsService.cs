@@ -264,7 +264,7 @@ namespace Rokys.Audit.Services.Services
                         Data = monthlyAvgData,
                         Color = color,
                         DashStyle = supervisorIndex == 0 ? null : dashStyles[(supervisorIndex - 1) % dashStyles.Length],
-                        Tooltip = new DashboardTooltipDto { ValueSuffix = " pts" }
+                        Tooltip = new DashboardTooltipDto { ValueSuffix = " %" }
                     };
 
                     series.Add(countSeries);
@@ -321,7 +321,7 @@ namespace Rokys.Audit.Services.Services
                         Data = generalAverageData,
                         Color = "#FF0000", // Color rojo
                         DashStyle = "Solid",
-                        Tooltip = new DashboardTooltipDto { ValueSuffix = " pts" },
+                        Tooltip = new DashboardTooltipDto { ValueSuffix = " %" },
                         LineWidth = 3 // Línea más gruesa para distinguirla
                     };
 
@@ -450,7 +450,7 @@ namespace Rokys.Audit.Services.Services
                         Data = monthlyAvgData,
                         Color = color,
                         DashStyle = storeIndex == 0 ? null : dashStyles[(storeIndex - 1) % dashStyles.Length],
-                        Tooltip = new DashboardTooltipDto { ValueSuffix = " pts" }
+                        Tooltip = new DashboardTooltipDto { ValueSuffix = " %" }
                     };
 
                     series.Add(countSeries);
