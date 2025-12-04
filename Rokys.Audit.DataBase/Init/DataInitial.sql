@@ -90,6 +90,8 @@ CREATE TABLE ScaleGroup
 
     -- Group weighting
     Weighting DECIMAL(5,2) NOT NULL, -- Ponderación
+    Recommendation NVARCHAR(1000) NULL, -- Recomendación
+    Impact NVARCHAR(1000) NULL, -- Impacto
 
     -- Audit fields
     IsActive BIT DEFAULT 1, -- Está Activo

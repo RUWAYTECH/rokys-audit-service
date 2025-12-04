@@ -7,5 +7,7 @@
         public string Name { get; set; } = string.Empty;
         public bool? HasSourceData { get; set; }
         public decimal Weighting { get; set; }
+        public string? Recommendation { get; set; }
+        public string? Impact { get; set; }
     }
 }

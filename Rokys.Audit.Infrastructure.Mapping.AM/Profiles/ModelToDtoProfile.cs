@@ -170,6 +170,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                         EndDate = src.PeriodAuditGroupResult?.PeriodAudit?.EndDate ?? default,
                         ReportDate = src.PeriodAuditGroupResult?.PeriodAudit?.ReportDate,
                         ScaleCode = src.PeriodAuditGroupResult?.PeriodAudit?.ScaleCode ?? string.Empty,
+
                         AuditStatus = src.PeriodAuditGroupResult.PeriodAudit.AuditStatus == null
                                         ? null
                                         : new AuditStatusResponseDto
@@ -223,6 +224,9 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                         ScoreObtained = subResult.ScoreObtained,
                         ColorCode = subResult.ColorCode
                     }).ToList();
+                    dest.Recommendation = src.Recommendation;
+                    dest.Impact = src.Impact;
+                    dest.Valorized = src.Valorized;
                     dest.PeriodAuditScoringCriteriaResult = src.PeriodAuditScoringCriteriaResults
                     .OrderBy(criteriaResult => criteriaResult.SortOrder)
                     .Select(criteriaResult => new PeriodAuditScoringCriteriaResultResponseDto

@@ -142,6 +142,8 @@ namespace Rokys.Audit.Services.Services
                         AppliedWeighting = scale.Weighting,
                         ScoreValue = 0,
                         SortOrder = scale.SortOrder,
+                        Recommendation = scale.Recommendation,
+                        Impact = scale.Impact
                     };
                     periodAuditScaleResult.CreateAudit(currentUser.UserName);
                     _periodAuditScaleResultRepository.Insert(periodAuditScaleResult);

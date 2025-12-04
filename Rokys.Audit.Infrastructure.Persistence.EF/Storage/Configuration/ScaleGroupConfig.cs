@@ -25,6 +25,8 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.Property(a => a.CreatedBy).HasMaxLength(120);
             builder.Property(a => a.CreationDate).HasDefaultValueSql("GETDATE()");
             builder.Property(a => a.UpdatedBy).HasMaxLength(120);
+            builder.Property(a => a.Recommendation).HasMaxLength(1000);
+            builder.Property(a => a.Impact).HasMaxLength(1000);
 
             // Foreign key relationships
             builder.HasOne(a => a.Group)
