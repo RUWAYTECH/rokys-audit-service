@@ -83,8 +83,7 @@ namespace Rokys.Audit.Services.Services
                     .ToList();
 
                 var auditsGroupByStores = periodAudits
-                    .Where(x => !string.IsNullOrEmpty(x.StoreId.ToString()))
-                    .GroupBy(x => new { x.StoreId, x.Store.Name, x.Store.Code })
+                    .GroupBy(x => x.StoreId)
                     .ToList();
 
                 // Crear series dinámicamente basadas en los ScaleCodes encontrados
@@ -116,23 +115,80 @@ namespace Rokys.Audit.Services.Services
                 // Agregar serie de ranking de desempeño si hay datos
                 if (periodAudits.Any())
                 {
-                    var totalAuditsByMonth = new Dictionary<int, int>();
+
+                    var generalAverageData = new List<decimal>();
                     for (int month = 1; month <= 12; month++)
                     {
-                        totalAuditsByMonth[month] = periodAudits.Count(x => x.CreationDate.Month == month);
+                        var monthlyStoreAverages = new List<decimal>();
+
+                        // Calcular el promedio de cada tienda para este mes
+                        foreach (var storeGroup in auditsGroupByStores)
+                        {
+                            var auditsInMonth = storeGroup.Where(x => x.CreationDate.Month == month).ToList();
+                            if (auditsInMonth.Any())
+                            {
+                                var storeAvg = auditsInMonth.Average(x => x.ScoreValue);
+                                monthlyStoreAverages.Add(storeAvg);
+                            }
+                        }
+
+                        // Calcular el promedio general del mes (promedio de promedios de tiendas)
+                        if (monthlyStoreAverages.Any())
+                        {
+                            var generalAvg = monthlyStoreAverages.Average();
+                            generalAverageData.Add(Math.Round(generalAvg, 2));
+                        }
+                        else
+                        {
+                            generalAverageData.Add(0);
+                        }
                     }
 
-                    series.Add(new DashboardSeriesDto
+                    // Crear serie para el promedio general en color rojo
+                    var generalAvgSeries = new DashboardSeriesDto
                     {
-                        Name = "Ranking de desempeño",
+                        Name = "Promedio General",
                         Type = "spline",
-                        YAxis = 1,
-                        Color = "#004d99",
-                        Data = CalculatePerformanceRanking(totalAuditsByMonth),
-                        Tooltip = new DashboardTooltipDto { ValueSuffix = " pts" }
-                    });
+                        YAxis = 0, // Eje principal (izquierda)
+                        Data = generalAverageData,
+                        Color = "#FF0000", // Color rojo
+                        DashStyle = "Solid",
+                        Tooltip = new DashboardTooltipDto { ValueSuffix = " pts" },
+                        LineWidth = 3 // Línea más gruesa para distinguirla
+                    };
+
+                    series.Add(generalAvgSeries);
+
                 }
 
+
+                // Calcular cantidad de auditorías por mes
+                var monthlyCountData = new List<decimal>();
+                for (int month = 1; month <= 12; month++)
+                {
+                    var uniqueStoresInMonth = periodAudits
+                     .Where(x => x.CreationDate.Month == month && x.StoreId.HasValue)
+                     .Select(x => x.StoreId.Value)
+                     .Distinct()
+                     .Count();
+                    monthlyCountData.Add(uniqueStoresInMonth);
+                }
+
+
+
+                // Crear serie para promedio de calificación (línea)
+                var avgSeries = new DashboardSeriesDto
+                {
+                    Name = $"Cantidad de tiendas auditadas",
+                    Type = "spline",
+                    YAxis = 0, // Eje principal (izquierda)
+                    Data = monthlyCountData,
+                    Color = "#20be67ff",
+                    DashStyle = "Solid",
+                    Tooltip = new DashboardTooltipDto { ValueSuffix = " %" }
+                };
+
+                series.Add(avgSeries);
 
                 var dashboardData = new DashboardDataResponseDto
                 {
@@ -153,23 +209,7 @@ namespace Rokys.Audit.Services.Services
             return response;
         }
 
-        /// <summary>
-        /// Calcula el ranking de desempeño por mes
-        /// </summary>
-        private List<decimal> CalculatePerformanceRanking(Dictionary<int, int> auditsByMonth)
-        {
-            var data = new List<decimal>();
-            var baseScore = 400m;
 
-            for (int month = 1; month <= 12; month++)
-            {
-                var totalAudits = auditsByMonth[month];
-                // El ranking aumenta con más auditorías realizadas
-                var score = baseScore + (totalAudits * 5m) + (month * 2m); // Mejora progresiva
-                data.Add(score);
-            }
-            return data;
-        }
 
         public async Task<ResponseDto<DashboardDataResponseDto>> GetDashboardSupervisorsDataAsync(int year, Guid[] enterpriseIds, Guid[] supervisorIds)
         {
