@@ -103,7 +103,11 @@ namespace Rokys.Audit.Services.Services
                     filter = filter.AndAlso(x => x.Name.Contains(requestDto.Filter) || x.Enterprise.Name.Contains(requestDto.Filter));
 
                 if (requestDto.EnterpriseId != null)
-                    filter = filter.AndAlso(x => x.EnterpriseId == requestDto.EnterpriseId);
+                {
+                    var enterpriseGuid = requestDto.EnterpriseId.Split(',').Select(id => Guid.Parse(id.Trim())).ToList();
+                    filter = filter.AndAlso(x => enterpriseGuid.Contains(x.EnterpriseId));
+                }
+                    
 
                 var result = await _storeRepository.GetPagedAsync(
                     filter,

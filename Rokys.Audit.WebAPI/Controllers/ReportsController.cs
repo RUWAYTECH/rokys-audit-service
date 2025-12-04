@@ -20,11 +20,11 @@ namespace Rokys.Audit.WebAPI.Controllers
             _reportsService = reportsService;
         }
 
-        [HttpGet("dashboards/evolutions/{year:int}/{enterpriseId:guid}")]
-        public async Task<IActionResult> GetDashboardEvolutionsData([FromRoute] int year, [FromRoute] Guid enterpriseId)
+        [HttpGet("dashboards/evolutions/{year:int}")]
+        public async Task<IActionResult> GetDashboardEvolutionsData([FromRoute] int year, [FromQuery] Guid[] enterpriseIds)
         {
 
-            var response = await _reportsService.GetDashboardEvolutionsDataAsync(year, enterpriseId);
+            var response = await _reportsService.GetDashboardEvolutionsDataAsync(year, enterpriseIds);
 
             if (response.IsValid)
                 return Ok(response);
@@ -32,11 +32,11 @@ namespace Rokys.Audit.WebAPI.Controllers
             return BadRequest(response);
         }
 
-        [HttpGet("dashboards/supervisors/{year:int}/{enterpriseId:guid}")]
-        public async Task<IActionResult> GetDashboardSupervisorsData([FromRoute] int year, [FromRoute] Guid enterpriseId, [FromQuery] Guid[] supervisorIds)
+        [HttpGet("dashboards/supervisors/{year:int}")]
+        public async Task<IActionResult> GetDashboardSupervisorsData([FromRoute] int year, [FromQuery] Guid[] enterpriseIds, [FromQuery] Guid[] supervisorIds)
         {
 
-            var response = await _reportsService.GetDashboardSupervisorsDataAsync(year, enterpriseId, supervisorIds);
+            var response = await _reportsService.GetDashboardSupervisorsDataAsync(year, enterpriseIds, supervisorIds);
 
             if (response.IsValid)
                 return Ok(response);
@@ -44,12 +44,11 @@ namespace Rokys.Audit.WebAPI.Controllers
             return BadRequest(response);
         }
 
-        [HttpGet("dashboards/stores/{year:int}/{enterpriseId:guid}")]
-        public async Task<IActionResult> GetDashboardStoresData([FromRoute] int year, [FromRoute] Guid enterpriseId, [FromQuery] Guid[] storeIds)
+        [HttpGet("dashboards/stores/{year:int}")]
+        public async Task<IActionResult> GetDashboardStoresData([FromRoute] int year, [FromQuery] Guid[] enterpriseIds, [FromQuery] Guid[] storeIds)
         {
 
-            var response = await _reportsService.GetDashboardStoresDataAsync(year, enterpriseId, storeIds);
-
+            var response = await _reportsService.GetDashboardStoresDataAsync(year, enterpriseIds, storeIds);
             if (response.IsValid)
                 return Ok(response);
 

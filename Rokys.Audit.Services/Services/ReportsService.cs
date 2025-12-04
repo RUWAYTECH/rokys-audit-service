@@ -45,7 +45,7 @@ namespace Rokys.Audit.Services.Services
             _scaleCompanyRepository = scaleCompanyRepository;
         }
 
-        public async Task<ResponseDto<DashboardDataResponseDto>> GetDashboardEvolutionsDataAsync(int year, Guid enterpriseId)
+        public async Task<ResponseDto<DashboardDataResponseDto>> GetDashboardEvolutionsDataAsync(int year, Guid[] enterpriseIds)
         {
             var response = ResponseDto.Create<DashboardDataResponseDto>();
             try
@@ -54,11 +54,20 @@ namespace Rokys.Audit.Services.Services
                 var startDate = new DateTime(year, 1, 1);
                 var endDate = new DateTime(year, 12, 31, 23, 59, 59);
 
+                Expression<Func<PeriodAudit, bool>> baseFilter = x => x.CreationDate >= startDate &&
+                  x.CreationDate <= endDate && x.IsActive
+                  && x.AuditStatus != null && x.AuditStatus.Code == AuditStatusCode.Completed;
+                if (enterpriseIds != null && enterpriseIds.Length > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => enterpriseIds.Contains(x.Store.EnterpriseId));
+                }
+
+
                 var periodAudits = await _periodAuditRepository.GetAsync(
-                    filter: x => x.CreationDate >= startDate &&
-                    x.CreationDate <= endDate && x.IsActive &&
-                    x.Store.EnterpriseId == enterpriseId
-                    && x.AuditStatus != null && x.AuditStatus.Code == AuditStatusCode.Completed);
+                    filter: baseFilter, includeProperties:
+                    [
+                        x => x.Store.Enterprise
+                    ]);
 
                 // Crear las categorías (meses)
                 var categories = new List<string>
@@ -71,6 +80,11 @@ namespace Rokys.Audit.Services.Services
                 var auditsByScaleAndMonth = periodAudits
                     .Where(x => !string.IsNullOrEmpty(x.ScaleCode))
                     .GroupBy(x => new { x.ScaleCode, x.ScaleName, x.ScaleColor })
+                    .ToList();
+
+                var auditsGroupByStores = periodAudits
+                    .Where(x => !string.IsNullOrEmpty(x.StoreId.ToString()))
+                    .GroupBy(x => new { x.StoreId, x.Store.Name, x.Store.Code })
                     .ToList();
 
                 // Crear series dinámicamente basadas en los ScaleCodes encontrados
@@ -157,7 +171,7 @@ namespace Rokys.Audit.Services.Services
             return data;
         }
 
-        public async Task<ResponseDto<DashboardDataResponseDto>> GetDashboardSupervisorsDataAsync(int year, Guid enterpriseId, Guid[] supervisorIds)
+        public async Task<ResponseDto<DashboardDataResponseDto>> GetDashboardSupervisorsDataAsync(int year, Guid[] enterpriseIds, Guid[] supervisorIds)
         {
             var response = ResponseDto.Create<DashboardDataResponseDto>();
             try
@@ -170,9 +184,12 @@ namespace Rokys.Audit.Services.Services
                 Expression<Func<PeriodAudit, bool>> baseFilter = x => x.CreationDate >= startDate &&
                                                                        x.CreationDate <= endDate &&
                                                                        x.IsActive &&
-                                                                       x.Store.EnterpriseId == enterpriseId &&
                                                                        x.AuditStatus != null &&
                                                                        x.AuditStatus.Code == AuditStatusCode.Completed;
+                if (enterpriseIds != null && enterpriseIds.Length > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => enterpriseIds.Contains(x.Store.EnterpriseId));
+                }
 
                 // Obtener TODAS las auditorías de la empresa para el promedio general
                 var allEnterpriseAudits = await _periodAuditRepository.GetCustomSearchAsync(baseFilter);
@@ -347,7 +364,7 @@ namespace Rokys.Audit.Services.Services
             return response;
         }
 
-        public async Task<ResponseDto<DashboardDataResponseDto>> GetDashboardStoresDataAsync(int year, Guid enterpriseId, Guid[] storeIds)
+        public async Task<ResponseDto<DashboardDataResponseDto>> GetDashboardStoresDataAsync(int year, Guid[] enterpriseIds, Guid[] storeIds)
         {
             var response = ResponseDto.Create<DashboardDataResponseDto>();
             try
@@ -361,9 +378,13 @@ namespace Rokys.Audit.Services.Services
                                                                        x.CreationDate <= endDate &&
                                                                        x.IsActive &&
                                                                        x.Store != null &&
-                                                                       x.Store.EnterpriseId == enterpriseId &&
                                                                        x.AuditStatus != null &&
                                                                        x.AuditStatus.Code == AuditStatusCode.Completed;
+
+                if (enterpriseIds != null && enterpriseIds.Length > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => enterpriseIds.Contains(x.Store.EnterpriseId));
+                }
 
                 // Obtener TODAS las auditorías de la empresa para el promedio general
                 var allEnterpriseAudits = await _periodAuditRepository.GetCustomSearchAsync(baseFilter);
@@ -592,7 +613,7 @@ namespace Rokys.Audit.Services.Services
 
                 filter = filter.AndAlso(x => x.AuditStatus.Code == AuditStatusCode.Completed);
 
-          
+
                 var entities = await _periodAuditRepository.GetCustomSearchAsync(
                     filter: filter
                 );
@@ -616,7 +637,7 @@ namespace Rokys.Audit.Services.Services
                     var storeEntity = group.FirstOrDefault();
                     if (storeEntity == null)
                         continue;
-                      
+
 
                     var totalAudits = group.Count();
                     var totalScore = group.Sum(x => x.ScoreValue);
