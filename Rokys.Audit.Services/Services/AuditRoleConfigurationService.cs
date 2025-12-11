@@ -189,7 +189,7 @@ namespace Rokys.Audit.Services.Services
                 var entity = await _auditRoleConfigurationRepository.GetFirstOrDefaultAsync(filter: x => x.AuditRoleConfigurationId == id && x.IsActive);
                 if (entity == null)
                     return ResponseDto.Error<AuditRoleConfigurationResponseDto>("No se encontró la configuración de rol de auditoría.");
-
+                requestDto.SequenceOrder = entity.SequenceOrder;
                 var currentUser = _httpContextAccessor.CurrentUser();
                 _mapper.Map(requestDto, entity);
                 entity.UpdateAudit(currentUser?.UserName ?? "system");
