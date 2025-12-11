@@ -110,9 +110,10 @@ namespace Rokys.Audit.WebAPI
             // Configure the HTTP request pipeline.
             if (env.IsDevelopment())
             {
-                app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseDeveloperExceptionPage();
             }
+            app.UseSwagger();
+            app.UseSwaggerUI();
 
             app.UseHttpsRedirection();
 
