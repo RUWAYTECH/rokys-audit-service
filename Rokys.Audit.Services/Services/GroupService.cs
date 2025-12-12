@@ -345,6 +345,8 @@ namespace Rokys.Audit.Services.Services
                         Code = originalScaleGroup.Code,
                         Name = originalScaleGroup.Name,
                         Weighting = originalScaleGroup.Weighting,
+                        Recommendation = originalScaleGroup.Recommendation,
+                        Impact = originalScaleGroup.Impact,
                         SortOrder = originalScaleGroup.SortOrder,
                         HasSourceData = hasSourceData,
                         IsActive = originalScaleGroup.IsActive
