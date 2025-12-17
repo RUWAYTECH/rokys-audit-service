@@ -5,6 +5,7 @@ using Scriban;
 using Rokys.Audit.Common.Constant;
 using Rokys.Audit.Infrastructure.Repositories;
 using Rokys.Audit.Services.Services.Pdf;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace Rokys.Audit.Services.Services.Emails
 {
@@ -149,6 +150,14 @@ namespace Rokys.Audit.Services.Services.Emails
                         .Where(sr => sr.IsActive)
                         .OrderBy(sr => sr.SortOrder))
                     {
+
+                        bool haveRecommendation = !string.IsNullOrWhiteSpace(scaleResult.Recommendation);
+                        bool haveObservation = !string.IsNullOrWhiteSpace(scaleResult.Observations);
+                        bool haveValor = decimal.TryParse(scaleResult.Valorized, out var valor) && valor > 0;
+                        bool haveImpact = !string.IsNullOrWhiteSpace(scaleResult.Impact);
+                        if (!haveRecommendation && !haveValor && !haveImpact && !haveObservation)
+                            continue;
+
                         auditData.Add((
                             nro++,
                             scaleResult.ScaleGroup?.Name ?? "N/A",

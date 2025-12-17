@@ -96,6 +96,11 @@ namespace Rokys.Audit.Services.Services.Pdf
 
                             column.Item().PaddingTop(15);
 
+                            decimal totalValorizado = auditData.Sum(x =>
+                            {
+                                decimal.TryParse(x.valorized, out var value);
+                                return value;
+                            });
                             // Tabla de datos
                             column.Item().Table(table =>
                             {
@@ -134,6 +139,7 @@ namespace Rokys.Audit.Services.Services.Pdf
                                 // Datos
                                 foreach (var row in auditData)
                                 {
+
                                     table.Cell().Element(CellStyle).AlignCenter().Text(row.nro.ToString());
                                     table.Cell().Element(CellStyle).Text(row.proceso);
                                     table.Cell().Element(CellStyle).Text(row.observations);
@@ -144,11 +150,33 @@ namespace Rokys.Audit.Services.Services.Pdf
                                     static IContainer CellStyle(IContainer container)
                                     {
                                         return container
-                                            .Border(1)
-                                            .BorderColor(Colors.Grey.Lighten2)
-                                            .PaddingVertical(4)
-                                            .PaddingHorizontal(3);
+                                        .Border(1)
+                                        .BorderColor(Colors.Grey.Lighten2)
+                                        .PaddingVertical(4)
+                                        .PaddingHorizontal(3);
                                     }
+                                    
+                                }
+                                
+                                table.Cell().ColumnSpan(5)
+                                .Element(TotalCellStyle)
+                                .AlignRight()
+                                .Text("TOTAL VALORIZADO");
+
+                                table.Cell()
+                                    .Element(TotalCellStyle)
+                                    .AlignCenter()
+                                    .Text(totalValorizado.ToString("N2"));
+
+                                static IContainer TotalCellStyle(IContainer container)
+                                {
+                                    return container
+                                        .Border(1)
+                                        .BorderColor(Colors.Grey.Lighten2)
+                                        .Background(Colors.Grey.Lighten3)
+                                        .PaddingVertical(6)
+                                        .PaddingHorizontal(4)
+                                        .DefaultTextStyle(x => x.SemiBold());
                                 }
                             });
                         });
