@@ -308,6 +308,7 @@ namespace Rokys.Audit.Services.Services
                 {
                     GroupId = Guid.NewGuid(),
                     EnterpriseId = requestDto.EnterpriseId,
+                    SortOrder = originalGroup.SortOrder,
                     Name = requestDto.Name,
                     Weighting = requestDto.Weighting,
                     IsActive = true

@@ -152,7 +152,8 @@ namespace Rokys.Audit.Services.Services
                 _periodAuditRepository.Insert(entity);
 
                 var store = await _storeRepository.GetFirstOrDefaultAsync(filter: x => x.StoreId == entity.StoreId && x.IsActive);
-                var group = await _groupRepository.GetAsync(filter: x => x.EnterpriseId == store.EnterpriseId && x.IsActive);
+                var group = await _groupRepository.GetAsync(filter: x => x.EnterpriseId == store.EnterpriseId && x.IsActive, 
+                                                    orderBy: q => q.OrderBy(x => x.SortOrder));
                 // Crear resultados de grupo de auditoría asociados a la nueva auditoría
                 foreach (var grp in group)
                 {
