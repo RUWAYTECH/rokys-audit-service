@@ -21,6 +21,7 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
             IEventSubscriber eventSubscriber,
             IEmployeeEventService employeeEventService,
             IUserEventService userEventService,
+            IStoreEventService storeEventService,
             ILogger<SubscriptionHubService> logger)
         {
             _eventSubscriber = eventSubscriber;

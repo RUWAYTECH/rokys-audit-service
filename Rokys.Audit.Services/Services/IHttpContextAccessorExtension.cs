@@ -49,6 +49,7 @@ namespace Reatil.Services.Services
                     if (userEntity != null)
                     {
                         response.UserReferenceId = userEntity.UserReferenceId;
+                        response.RoleCodes = userEntity.RoleCode?.Split(',', StringSplitOptions.RemoveEmptyEntries)?.ToList() ?? [];
                     }
                 }
                 catch (Exception)

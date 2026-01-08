@@ -14,11 +14,10 @@ namespace Rokys.Audit.Services.Services.Emails
         public static async Task NotifySupervisorOfNewAudit(IEmailService emailService, PeriodAudit audit, string urlApp)
         {
             try
-            {                
+            {
                 var administrator =audit.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JefeDeArea.Code);
                 var auditor = audit.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.Auditor.Code);
                 var supervisor = audit.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code);
-                var assistantAudit = audit.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.AsistenteAudit.Code);
                 var headOperations = audit.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JefeDeOperaciones.Code);
 
                 var inputTexts = new Dictionary<string, object>
@@ -41,7 +40,7 @@ namespace Rokys.Audit.Services.Services.Emails
                     auditor.UserReference?.Email ?? string.Empty,
                     supervisor.UserReference?.Email ?? string.Empty
                 };
-                
+
                 await emailService.SendEmailAsync(emailsTo, "Nueva Auditoria para la tienda", htmlBodySupervisor, true);
             }
             catch (Exception ex)
@@ -55,6 +54,7 @@ namespace Rokys.Audit.Services.Services.Emails
             IAuditRoleConfigurationRepository auditRoleConfigurationRepository,
             IPeriodAuditGroupResultRepository periodAuditGroupResultRepository,
             Rokys.Audit.DTOs.Common.FileSettings fileSettings,
+            string? storeEmail,
             string urlApp)
         {
             try
@@ -95,10 +95,16 @@ namespace Rokys.Audit.Services.Services.Emails
                 var htmlBody = template.Render(inputTexts);
 
                 var emailsTo = participants
+                    .Where(x => x.RoleCode != RoleCodes.StoreAdmin.Code)
                     .Select(x => x.Email)
                     .Where(x => !string.IsNullOrWhiteSpace(x))
                     .Distinct()
                     .ToList();
+
+                if (storeEmail != null)
+                {
+                    emailsTo.Add(storeEmail);
+                }
 
                 // Generar PDF con los datos de auditoría
                 var auditData = await GetAuditDataForPdf(audit, periodAuditGroupResultRepository);

@@ -361,7 +361,14 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<PaginationResponseDto<PeriodAuditResponseDto>>();
             try
             {
+                var currentUser = _httpContextAccessor.CurrentUser();
                 Expression<Func<PeriodAudit, bool>> filter = x => x.IsActive;
+
+                if (currentUser.RoleCodes.Contains(RoleCodes.StoreAdmin.Code))
+                {
+                    filter = filter.AndAlso(x => x.PeriodAuditParticipants.Any(p => p.UserReferenceId == currentUser.UserReferenceId && p.IsActive));
+                }
+                
                 if (!string.IsNullOrEmpty(paginationRequestDto.Filter))
                     filter = filter.AndAlso(x => x.GlobalObservations.Contains(paginationRequestDto.Filter) && x.IsActive);
 
@@ -399,7 +406,6 @@ namespace Rokys.Audit.Services.Services
                 };
 
 
-                var currentUser = _httpContextAccessor.CurrentUser();
                 var userReference = await _userReferenceRepository.GetFirstOrDefaultAsync(filter: x => x.UserReferenceId == currentUser.UserReferenceId);
                 foreach (var ent in pagedResult.Items)
                 {
@@ -529,7 +535,7 @@ namespace Rokys.Audit.Services.Services
                 foreach (var id in ids)
                 {
                     var ent = await _periodAuditRepository.GetFirstOrDefaultAsync(filter: x => x.PeriodAuditId == id && x.IsActive,
-                        includeProperties: [v => v.PeriodAuditParticipants, y => y.AuditStatus]);
+                        includeProperties: [v => v.PeriodAuditParticipants, y => y.AuditStatus, z => z.Store]);
                     if (ent == null)
                         return ResponseDto.Error($"No se encontró el registro PeriodAuditId={id}");
                     entities.Add(ent);
@@ -678,7 +684,7 @@ namespace Rokys.Audit.Services.Services
                     }
                     if (periodAuditUpdate.StatusId == statusFinal?.AuditStatusId)
                     {
-                        await BuildSendEmail.NotifyAllUserAudit(_emailService, periodAuditUpdate, _auditRoleConfigurationRepository, _periodAuditGroupResultRepository, _fileSettings, _webAppSettings.Url);
+                        await BuildSendEmail.NotifyAllUserAudit(_emailService, periodAuditUpdate, _auditRoleConfigurationRepository, _periodAuditGroupResultRepository, _fileSettings, ent.Store?.Email, _webAppSettings.Url);
                     }
                 }
 

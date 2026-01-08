@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.4.33205.214
+# Visual Studio Version 18
+VisualStudioVersion = 18.1.11312.151 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rokys.Audit.WebAPI", "Rokys.Audit.WebAPI\Rokys.Audit.WebAPI.csproj", "{C5EA919D-345D-4BE2-8AB8-405B36B93144}"
 EndProject
@@ -64,6 +64,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ruway.Events.Command", "..\ruway-rabbitmq-events-shared\Ruway.Events.Command\Ruway.Events.Command.csproj", "{048549F6-A869-4A1A-B2BE-39687739AA76}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ruway.Events.Command.Interfaces", "..\ruway-rabbitmq-events-shared\Ruway.Events.Command.Interfaces\Ruway.Events.Command.Interfaces.csproj", "{3AF4E7F2-2C35-4241-AF9C-2389FC54E76F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventSubscriberConsoleApp", "..\ruway-rabbitmq-events-shared\EventSubscriberConsoleApp\EventSubscriberConsoleApp.csproj", "{331FB0A2-55B7-30EB-FB2F-2CB75811FD19}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -291,6 +293,18 @@ Global
 		{3AF4E7F2-2C35-4241-AF9C-2389FC54E76F}.Release|x64.Build.0 = Release|Any CPU
 		{3AF4E7F2-2C35-4241-AF9C-2389FC54E76F}.Release|x86.ActiveCfg = Release|Any CPU
 		{3AF4E7F2-2C35-4241-AF9C-2389FC54E76F}.Release|x86.Build.0 = Release|Any CPU
+		{331FB0A2-55B7-30EB-FB2F-2CB75811FD19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{331FB0A2-55B7-30EB-FB2F-2CB75811FD19}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{331FB0A2-55B7-30EB-FB2F-2CB75811FD19}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{331FB0A2-55B7-30EB-FB2F-2CB75811FD19}.Debug|x64.Build.0 = Debug|Any CPU
+		{331FB0A2-55B7-30EB-FB2F-2CB75811FD19}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{331FB0A2-55B7-30EB-FB2F-2CB75811FD19}.Debug|x86.Build.0 = Debug|Any CPU
+		{331FB0A2-55B7-30EB-FB2F-2CB75811FD19}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{331FB0A2-55B7-30EB-FB2F-2CB75811FD19}.Release|Any CPU.Build.0 = Release|Any CPU
+		{331FB0A2-55B7-30EB-FB2F-2CB75811FD19}.Release|x64.ActiveCfg = Release|Any CPU
+		{331FB0A2-55B7-30EB-FB2F-2CB75811FD19}.Release|x64.Build.0 = Release|Any CPU
+		{331FB0A2-55B7-30EB-FB2F-2CB75811FD19}.Release|x86.ActiveCfg = Release|Any CPU
+		{331FB0A2-55B7-30EB-FB2F-2CB75811FD19}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

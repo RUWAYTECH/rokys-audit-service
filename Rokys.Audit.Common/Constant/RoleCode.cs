@@ -5,7 +5,7 @@ namespace Rokys.Audit.Common.Constant
     {        
         // Códigos de roles de auditoría
         public static readonly RoleCodes JefeDeArea = new("A001");
-        public static readonly RoleCodes AsistenteAudit = new("A002");
+        public static readonly RoleCodes StoreAdmin = new("A002");
         public static readonly RoleCodes JefeDeOperaciones = new("A003");
         public static readonly RoleCodes Volante = new("A004");
         public static readonly RoleCodes Auditor = new("A005");

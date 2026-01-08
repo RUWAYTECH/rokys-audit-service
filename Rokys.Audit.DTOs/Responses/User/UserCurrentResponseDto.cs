@@ -10,8 +10,9 @@ namespace Rokys.Audit.DTOs.Responses.User
         public string FullName { get; set; }
         public Guid EmployeeId { get; set; }
         public string Email { get; set; }
+           
+        public List<string> RoleCodes { get; set; } = new List<string>();
 
-       
     }
 }
 
