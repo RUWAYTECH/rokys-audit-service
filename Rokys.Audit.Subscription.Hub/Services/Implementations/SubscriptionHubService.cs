@@ -14,6 +14,7 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
         private readonly IEventSubscriber _eventSubscriber;
         private readonly IEmployeeEventService _employeeEventService;
         private readonly IUserEventService _userEventService;
+        private readonly IStoreEventService _storeEventService;
         private readonly ILogger<SubscriptionHubService> _logger;
         private bool _isRunning = false;
 
@@ -27,6 +28,7 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
             _eventSubscriber = eventSubscriber;
             _employeeEventService = employeeEventService;
             _userEventService = userEventService;
+            _storeEventService = storeEventService;
             _logger = logger;
         }
 
@@ -50,6 +52,8 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
                 await SubscribeToEmployeeEvents(cancellationToken);
 
                 await SubscribeToUserEvents(cancellationToken);
+
+                await SubscribeToStoreEvents(cancellationToken);
 
                 // Iniciar el listener de eventos
                 await _eventSubscriber.StartListeningAsync(cancellationToken);
@@ -144,6 +148,27 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
 
 
             _logger.LogInformation("Users event subscriptions configured successfully");
+        }
+
+          private async Task SubscribeToStoreEvents(CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Setting up store event subscriptions...");
+
+            // Configurar handlers específicos por tipo de evento usando los eventos existentes
+            await _eventSubscriber.SubscribeAsync<StoreUpdatedEvent>(async (storeEvent) =>
+            {
+                if (_storeEventService != null)
+                    await _storeEventService.HandleStoreUpdatedAsync(storeEvent);
+            }, EventConstants.StoreEvents.StoreUpdated);
+
+            await _eventSubscriber.SubscribeAsync<StoreCreatedEvent>(async (storeEvent) =>
+            {
+                if (_storeEventService != null)
+                    await _storeEventService.HandleStoreCreatedAsync(storeEvent);
+            }, EventConstants.StoreEvents.StoreCreated);
+
+
+            _logger.LogInformation("Store event subscriptions configured successfully");
         }
     }
 }

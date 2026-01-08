@@ -21,10 +21,5 @@ namespace Rokys.Audit.Subscription.Hub.Services.Interfaces
         /// Procesa evento de eliminación de empleado
         /// </summary>
         Task HandleStoreDeletedAsync(StoreDeletedEvent StoreEvent, CancellationToken cancellationToken = default);
-
-        /// <summary>
-        /// Procesa mensaje genérico de empleado
-        /// </summary>
-        Task HandleGenericStoreEventAsync(string message, string routingKey, CancellationToken cancellationToken = default);
     }
 }

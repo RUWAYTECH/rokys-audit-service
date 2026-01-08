@@ -7,6 +7,7 @@ using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.Store;
 using Rokys.Audit.DTOs.Responses.Common;
 using Rokys.Audit.DTOs.Responses.Store;
+using Rokys.Audit.Globalization;
 using Rokys.Audit.Infrastructure.IMapping;
 using Rokys.Audit.Infrastructure.Persistence.Abstract;
 using Rokys.Audit.Infrastructure.Repositories;
@@ -107,7 +108,7 @@ namespace Rokys.Audit.Services.Services
                     var enterpriseGuid = requestDto.EnterpriseId.Split(',').Select(id => Guid.Parse(id.Trim())).ToList();
                     filter = filter.AndAlso(x => enterpriseGuid.Contains(x.EnterpriseId));
                 }
-                    
+
 
                 var result = await _storeRepository.GetPagedAsync(
                     filter,
@@ -123,7 +124,8 @@ namespace Rokys.Audit.Services.Services
                     PageNumber = requestDto.PageNumber,
                     PageSize = requestDto.PageSize
                 };
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 response = ResponseDto.Error<PaginationResponseDto<StoreResponseDto>>(ex.Message);
                 _logger.LogError(ex.Message);
@@ -131,9 +133,32 @@ namespace Rokys.Audit.Services.Services
             return response;
         }
 
-public Task<ResponseDto<StoreResponseDto>> Update(Guid id, StoreRequestDto requestDto)
+        public async Task<ResponseDto<StoreResponseDto>> Update(Guid id, StoreRequestDto requestDto)
         {
-            throw new NotImplementedException();
+            var response = ResponseDto.Create<StoreResponseDto>();
+            try
+            {
+                var entity = await _storeRepository.GetFirstOrDefaultAsync(a => a.StoreId == (Guid)id && a.IsActive);
+                if (entity == null)
+                    response.Messages.Add(new ApplicationMessage { Message = ValidationMessage.NotFound, MessageType = ApplicationMessageType.Error });
+                else
+                {
+                    var currentUser = _httpContextAccessor.CurrentUser();
+                    _mapper.Map(requestDto, entity);
+                    entity.UpdateAudit(currentUser.UserName);
+                    _storeRepository.Update(entity);
+                    await _unitOfWork.CommitAsync();
+                    response.Data = _mapper.Map<StoreResponseDto>(entity);
+
+
+                }
+            }
+            catch (Exception ex)
+            {
+                response = ResponseDto.Error<StoreResponseDto>(ex.Message);
+                _logger.LogError(ex.Message);
+            }
+            return response;
         }
     }
 }
