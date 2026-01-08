@@ -27,6 +27,9 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.Property(s => s.Address)
                 .HasMaxLength(500);
 
+            builder.Property(s => s.Email)
+                .HasMaxLength(255);
+
             builder.Property(s => s.EnterpriseId)
                 .IsRequired();
 
