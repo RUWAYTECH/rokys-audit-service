@@ -364,11 +364,7 @@ namespace Rokys.Audit.Services.Services
                 var currentUser = _httpContextAccessor.CurrentUser();
                 Expression<Func<PeriodAudit, bool>> filter = x => x.IsActive;
 
-                if (currentUser.RoleCodes.Contains(RoleCodes.StoreAdmin.Code))
-                {
-                    filter = filter.AndAlso(x => x.PeriodAuditParticipants.Any(p => p.UserReferenceId == currentUser.UserReferenceId && p.IsActive));
-                }
-                
+               
                 if (!string.IsNullOrEmpty(paginationRequestDto.Filter))
                     filter = filter.AndAlso(x => x.GlobalObservations.Contains(paginationRequestDto.Filter) && x.IsActive);
 
@@ -389,6 +385,12 @@ namespace Rokys.Audit.Services.Services
 
                 if (paginationRequestDto.DocumentNumber != null)
                     filter = filter.AndAlso(x => x.CorrelativeNumber == paginationRequestDto.DocumentNumber);
+
+                if (currentUser.RoleCodes.Contains(RoleCodes.StoreAdmin.Code))
+                {
+                    filter = filter.AndAlso(x => x.PeriodAuditParticipants.Any(p => p.UserReferenceId == currentUser.UserReferenceId && p.RoleCodeSnapshot == RoleCodes.StoreAdmin.Code && p.IsActive));
+                }
+                
 
                 Func<IQueryable<PeriodAudit>, IOrderedQueryable<PeriodAudit>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 
