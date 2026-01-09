@@ -25,6 +25,13 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
         /// <inheritdoc />
         public async Task HandleStoreCreatedAsync(StoreCreatedEvent StoreEvent, CancellationToken cancellationToken = default)
         {
+            _logger.LogInformation("[SUBSCRIPTION-TRACE] StoreCreated event received at {Timestamp}. StoreId: {StoreId}, Code: {Code}, Name: {Name}, EnterpriseId: {EnterpriseId}",
+                DateTime.UtcNow,
+                StoreEvent.StoreId,
+                StoreEvent.Code,
+                StoreEvent.Name,
+                StoreEvent.EnterpriseId);
+
             try
             {
                 await _storeService.Create(new DTOs.Requests.Store.StoreRequestDto
@@ -36,15 +43,18 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
                     Email = StoreEvent.Email
                 });
 
-
-
-                _logger.LogInformation("Successfully processed Store created event for Store ID: {StoreId}",
-                    StoreEvent.StoreId);
+                _logger.LogInformation("[SUBSCRIPTION-TRACE] StoreCreated event processed successfully at {Timestamp}. StoreId: {StoreId}, Code: {Code}",
+                    DateTime.UtcNow,
+                    StoreEvent.StoreId,
+                    StoreEvent.Code);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error processing Store created event for Store ID: {StoreId}",
-                    StoreEvent.StoreId);
+                _logger.LogError(ex, "[SUBSCRIPTION-ERROR] Error processing StoreCreated event at {Timestamp}. StoreId: {StoreId}, Code: {Code}, Error: {ErrorMessage}",
+                    DateTime.UtcNow,
+                    StoreEvent.StoreId,
+                    StoreEvent.Code,
+                    ex.Message);
                 throw;
             }
         }
@@ -52,9 +62,15 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
         /// <inheritdoc />
         public async Task HandleStoreUpdatedAsync(StoreUpdatedEvent StoreEvent, CancellationToken cancellationToken = default)
         {
+            _logger.LogInformation("[SUBSCRIPTION-TRACE] StoreUpdated event received at {Timestamp}. StoreId: {StoreId}, Code: {Code}, Name: {Name}, EnterpriseId: {EnterpriseId}",
+                DateTime.UtcNow,
+                StoreEvent.StoreId,
+                StoreEvent.Code,
+                StoreEvent.Name,
+                StoreEvent.EnterpriseId);
+
             try
             {
-
                 if (StoreEvent != null)
                 {
                     await _storeService.Update(StoreEvent.StoreId, new DTOs.Requests.Store.StoreRequestDto
@@ -65,16 +81,20 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
                         EnterpriseId = StoreEvent.EnterpriseId,
                         Email = StoreEvent.Email
                     });
-
                 }
-                _logger.LogInformation("Successfully processed Store update event for Store ID: {StoreId}",
-                   StoreEvent.StoreId);
 
+                _logger.LogInformation("[SUBSCRIPTION-TRACE] StoreUpdated event processed successfully at {Timestamp}. StoreId: {StoreId}, Code: {Code}",
+                    DateTime.UtcNow,
+                    StoreEvent.StoreId,
+                    StoreEvent.Code);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error processing Store updated event for Store ID: {StoreId}",
-                    StoreEvent.StoreId);
+                _logger.LogError(ex, "[SUBSCRIPTION-ERROR] Error processing StoreUpdated event at {Timestamp}. StoreId: {StoreId}, Code: {Code}, Error: {ErrorMessage}",
+                    DateTime.UtcNow,
+                    StoreEvent.StoreId,
+                    StoreEvent.Code,
+                    ex.Message);
                 throw;
             }
         }
@@ -82,14 +102,24 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
         /// <inheritdoc />
         public async Task HandleStoreDeletedAsync(StoreDeletedEvent StoreEvent, CancellationToken cancellationToken = default)
         {
+            _logger.LogInformation("[SUBSCRIPTION-TRACE] StoreDeleted event received at {Timestamp}. StoreId: {StoreId}",
+                DateTime.UtcNow,
+                StoreEvent.StoreId);
+
             try
             {
                 await _storeService.Delete(StoreEvent.StoreId);
+
+                _logger.LogInformation("[SUBSCRIPTION-TRACE] StoreDeleted event processed successfully at {Timestamp}. StoreId: {StoreId}",
+                    DateTime.UtcNow,
+                    StoreEvent.StoreId);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error processing Store deleted event for Store ID: {StoreId}",
-                    StoreEvent.StoreId);
+                _logger.LogError(ex, "[SUBSCRIPTION-ERROR] Error processing StoreDeleted event at {Timestamp}. StoreId: {StoreId}, Error: {ErrorMessage}",
+                    DateTime.UtcNow,
+                    StoreEvent.StoreId,
+                    ex.Message);
                 throw;
             }
         }

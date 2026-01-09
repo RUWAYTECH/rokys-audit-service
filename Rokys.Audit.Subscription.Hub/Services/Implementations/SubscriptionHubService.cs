@@ -40,30 +40,32 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
         {
             if (_isRunning)
             {
-                _logger.LogWarning("Subscription Hub is already running");
+                _logger.LogWarning("[SUBSCRIPTION-HUB] Already running");
                 return;
             }
 
             try
             {
-                _logger.LogInformation("Starting Rokys Audit Subscription Hub...");
+                _logger.LogInformation("[SUBSCRIPTION-HUB] Starting Subscription Hub...");
 
-                // Suscribirse a eventos específicos de empleados
                 await SubscribeToEmployeeEvents(cancellationToken);
+                _logger.LogInformation("[SUBSCRIPTION-HUB] Employee events subscribed");
 
                 await SubscribeToUserEvents(cancellationToken);
+                _logger.LogInformation("[SUBSCRIPTION-HUB] User events subscribed");
 
                 await SubscribeToStoreEvents(cancellationToken);
+                _logger.LogInformation("[SUBSCRIPTION-HUB] Store events subscribed");
 
-                // Iniciar el listener de eventos
                 await _eventSubscriber.StartListeningAsync(cancellationToken);
+                _logger.LogInformation("[SUBSCRIPTION-HUB] RabbitMQ listener started");
 
                 _isRunning = true;
-                _logger.LogInformation("Rokys Audit Subscription Hub started successfully");
+                _logger.LogInformation("[SUBSCRIPTION-HUB] Subscription Hub started successfully - now listening for events");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to start Rokys Audit Subscription Hub");
+                _logger.LogError(ex, "[SUBSCRIPTION-ERROR] Failed to start Subscription Hub: {Message}", ex.Message);
                 throw;
             }
         }
@@ -98,21 +100,27 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
         /// </summary>
         private async Task SubscribeToEmployeeEvents(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Setting up employee event subscriptions...");
+            _logger.LogInformation("[SUBSCRIPTION-SETUP] Setting up employee event subscriptions...");
 
             // Configurar handlers específicos por tipo de evento usando los eventos existentes
+            _logger.LogInformation("[SUBSCRIPTION-SETUP] Registering handler for: {EventType} with routing key: {RoutingKey}", 
+                nameof(EmployeeCreatedEvent), EventConstants.EmployeeEvents.EmployeeCreated);
             await _eventSubscriber.SubscribeAsync<EmployeeCreatedEvent>(async (employeeEvent) =>
             {
                 if (_employeeEventService != null)
                     await _employeeEventService.HandleEmployeeCreatedAsync(employeeEvent);
             }, EventConstants.EmployeeEvents.EmployeeCreated);
 
+            _logger.LogInformation("[SUBSCRIPTION-SETUP] Registering handler for: {EventType} with routing key: {RoutingKey}", 
+                nameof(EmployeeUpdatedEvent), EventConstants.EmployeeEvents.EmployeeUpdated);
             await _eventSubscriber.SubscribeAsync<EmployeeUpdatedEvent>(async (employeeEvent) =>
              {
                  if (_employeeEventService != null)
                      await _employeeEventService.HandleEmployeeUpdatedAsync(employeeEvent);
              }, EventConstants.EmployeeEvents.EmployeeUpdated);
 
+             _logger.LogInformation("[SUBSCRIPTION-SETUP] Registering handler for: {EventType} with routing key: {RoutingKey}", 
+                nameof(EmployeeDeletedEvent), EventConstants.EmployeeEvents.EmployeeDeleted);
              await _eventSubscriber.SubscribeAsync<EmployeeDeletedEvent>(async (employeeEvent) =>
              {
                  if (_employeeEventService != null)
@@ -125,20 +133,24 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
                "#",
                cancellationToken); */
 
-            _logger.LogInformation("Employee event subscriptions configured successfully");
+            _logger.LogInformation("[SUBSCRIPTION-SETUP] ✅ Employee event subscriptions configured successfully");
         }
         
          private async Task SubscribeToUserEvents(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Setting up user event subscriptions...");
+            _logger.LogInformation("[SUBSCRIPTION-SETUP] Setting up user event subscriptions...");
 
             // Configurar handlers específicos por tipo de evento usando los eventos existentes
+            _logger.LogInformation("[SUBSCRIPTION-SETUP] Registering handler for: {EventType} with routing key: {RoutingKey}", 
+                nameof(UserUpdatedEvent), EventConstants.UserEvents.UserUpdated);
             await _eventSubscriber.SubscribeAsync<UserUpdatedEvent>(async (userEvent) =>
             {
                 if (_userEventService != null)
                     await _userEventService.HandleUserUpdatedAsync(userEvent);
             }, EventConstants.UserEvents.UserUpdated);
 
+            _logger.LogInformation("[SUBSCRIPTION-SETUP] Registering handler for: {EventType} with routing key: {RoutingKey}", 
+                nameof(UserDeletedEvent), EventConstants.UserEvents.UserDeleted);
             await _eventSubscriber.SubscribeAsync<UserDeletedEvent>(async (userEvent) =>
             {
                 if (_userEventService != null)
@@ -147,7 +159,7 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
 
 
 
-            _logger.LogInformation("Users event subscriptions configured successfully");
+            _logger.LogInformation("[SUBSCRIPTION-SETUP] ✅ Users event subscriptions configured successfully");
         }
 
           private async Task SubscribeToStoreEvents(CancellationToken cancellationToken)

@@ -34,11 +34,11 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
             {
                 if (!_options.AutoStart)
                 {
-                    _logger.LogInformation("Subscription Hub auto-start is disabled");
+                    _logger.LogWarning("[SUBSCRIPTION-HOST] Auto-start is disabled");
                     return;
                 }
 
-                _logger.LogInformation("Starting Subscription Hub as background service...");
+                _logger.LogInformation("[SUBSCRIPTION-HOST] Starting Subscription Hub background service...");
 
                 // Iniciar el hub con timeout
                 using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
@@ -46,7 +46,7 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
 
                 await _subscriptionHubService.StartAsync(timeoutCts.Token);
 
-                _logger.LogInformation("Subscription Hub background service started successfully");
+                _logger.LogInformation("[SUBSCRIPTION-HOST] Subscription Hub started - listening for events...");
 
                 // Mantener el servicio corriendo hasta que se cancele
                 try
@@ -55,12 +55,12 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
                 }
                 catch (OperationCanceledException)
                 {
-                    _logger.LogInformation("Subscription Hub background service is shutting down...");
+                    _logger.LogInformation("[SUBSCRIPTION-HOST] Subscription Hub is shutting down...");
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in Subscription Hub background service");
+                _logger.LogError(ex, "[SUBSCRIPTION-ERROR] Critical error in Subscription Hub: {Message}", ex.Message);
                 throw;
             }
         }
@@ -72,20 +72,28 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
         {
             try
             {
-                _logger.LogInformation("Stopping Subscription Hub background service...");
+                _logger.LogInformation("[SUBSCRIPTION-HOST] ========================================");
+                _logger.LogInformation("[SUBSCRIPTION-HOST] 🛑 Stopping Subscription Hub background service...");
 
                 if (_subscriptionHubService.IsRunning)
                 {
+                    _logger.LogInformation("[SUBSCRIPTION-HOST] Hub is running, stopping it now...");
                     await _subscriptionHubService.StopAsync(cancellationToken);
+                }
+                else
+                {
+                    _logger.LogInformation("[SUBSCRIPTION-HOST] Hub was not running");
                 }
 
                 await base.StopAsync(cancellationToken);
 
-                _logger.LogInformation("Subscription Hub background service stopped successfully");
+                _logger.LogInformation("[SUBSCRIPTION-HOST] ✅ Subscription Hub background service stopped successfully");
+                _logger.LogInformation("[SUBSCRIPTION-HOST] ========================================");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error stopping Subscription Hub background service");
+                _logger.LogError(ex, "[SUBSCRIPTION-HOST] ❌ Error stopping Subscription Hub background service");
+                _logger.LogError("[SUBSCRIPTION-HOST] Exception: {Message}", ex.Message);
                 throw;
             }
         }

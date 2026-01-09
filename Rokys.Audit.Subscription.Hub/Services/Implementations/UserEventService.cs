@@ -31,20 +31,33 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
 
         public async Task HandleUserDeletedAsync(UserDeletedEvent UserEvent, CancellationToken cancellationToken = default)
         {
+            _logger.LogInformation("[SUBSCRIPTION-TRACE] UserDeleted event received - UserId: {UserId}, EventId: {EventId}", 
+                UserEvent.UserId, UserEvent.EventId);
+            
              if(UserEvent.ApplicationCode != CommonConstants.ApplicationCode)
+             {
+                _logger.LogInformation("[SUBSCRIPTION-TRACE] Event ignored - wrong application: {ApplicationCode}", UserEvent.ApplicationCode);
                 return;
+             }
 
             var exist = await _userReferenceService.GetByUserId(UserEvent.UserId);
             if (exist.Data != null)
             {
                 await _userReferenceService.Delete(exist.Data.UserReferenceId);
+                _logger.LogInformation("[SUBSCRIPTION-TRACE] UserDeleted processed successfully - UserId: {UserId}", UserEvent.UserId);
             }
         }
 
         public async Task HandleUserUpdatedAsync(UserUpdatedEvent UserEvent, CancellationToken cancellationToken = default)
         {
+            _logger.LogInformation("[SUBSCRIPTION-TRACE] UserUpdated event received - UserId: {UserId}, EventId: {EventId}", 
+                UserEvent.UserId, UserEvent.EventId);
+            
             if(UserEvent.ApplicationCode != CommonConstants.ApplicationCode)
+            {
+                _logger.LogInformation("[SUBSCRIPTION-TRACE] Event ignored - wrong application: {ApplicationCode}", UserEvent.ApplicationCode);
                 return;
+            }
 
             var exist = await _userReferenceService.GetByUserId(UserEvent.UserId);
             if (exist.Data == null)
@@ -70,6 +83,8 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
             {
                 await UpdateUser(exist.Data.UserReferenceId, UserEvent);
             }
+
+            _logger.LogInformation("[SUBSCRIPTION-TRACE] UserUpdated processed successfully - UserId: {UserId}", UserEvent.UserId);
         }
 
         private async Task CreateUser(UserUpdatedEvent UserEvent)

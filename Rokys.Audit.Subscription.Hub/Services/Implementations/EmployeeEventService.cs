@@ -26,6 +26,9 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
         /// <inheritdoc />
         public async Task HandleEmployeeCreatedAsync(EmployeeCreatedEvent employeeEvent, CancellationToken cancellationToken = default)
         {
+            _logger.LogInformation("[SUBSCRIPTION-TRACE] EmployeeCreated event received - EmployeeId: {EmployeeId}, Name: {FirstName} {LastName}, EventId: {EventId}", 
+                employeeEvent.EmployeeId, employeeEvent.FirstName, employeeEvent.LastName, employeeEvent.EventId);
+            
             try
             {
                await _userReferenceService.Create(new DTOs.Requests.UserReference.UserReferenceRequestDto
@@ -48,15 +51,11 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
                         .ToArray(),
                });
 
-               
-
-                _logger.LogInformation("Successfully processed employee created event for Employee ID: {EmployeeId}", 
-                    employeeEvent.EmployeeId);
+                _logger.LogInformation("[SUBSCRIPTION-TRACE] EmployeeCreated processed successfully - EmployeeId: {EmployeeId}", employeeEvent.EmployeeId);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error processing employee created event for Employee ID: {EmployeeId}", 
-                    employeeEvent.EmployeeId);
+                _logger.LogError(ex, "[SUBSCRIPTION-ERROR] Error processing EmployeeCreated - EmployeeId: {EmployeeId}", employeeEvent.EmployeeId);
                 throw;
             }
         }
@@ -64,14 +63,15 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
         /// <inheritdoc />
         public async Task HandleEmployeeUpdatedAsync(EmployeeUpdatedEvent employeeEvent, CancellationToken cancellationToken = default)
         {
+            _logger.LogInformation("[SUBSCRIPTION-TRACE] EmployeeUpdated event received - EmployeeId: {EmployeeId}, Name: {FirstName} {LastName}, EventId: {EventId}", 
+                employeeEvent.EmployeeId, employeeEvent.FirstName, employeeEvent.LastName, employeeEvent.EventId);
+            
             try
             {
                 var userReference = await _userReferenceService.GetByEmployeeId(employeeEvent.EmployeeId);
                 if (userReference.Data != null)
                 {
                     var userRef = userReference.Data;
-                    _logger.LogWarning("User reference not found for Employee ID: {EmployeeId}. Creating new reference.", 
-                        employeeEvent.EmployeeId);
                     await _userReferenceService.Update(userRef.UserReferenceId, new DTOs.Requests.UserReference.UserReferenceRequestDto
                     {
                         UserId = userRef.UserId,
@@ -91,14 +91,13 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
                             })
                             .ToArray(),
                     });
-                    return;
                 }
-               
+
+                _logger.LogInformation("[SUBSCRIPTION-TRACE] EmployeeUpdated processed successfully - EmployeeId: {EmployeeId}", employeeEvent.EmployeeId);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error processing employee updated event for Employee ID: {EmployeeId}", 
-                    employeeEvent.EmployeeId);
+                _logger.LogError(ex, "[SUBSCRIPTION-ERROR] Error processing EmployeeUpdated - EmployeeId: {EmployeeId}", employeeEvent.EmployeeId);
                 throw;
             }
         }
@@ -106,14 +105,17 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
         /// <inheritdoc />
         public async Task HandleEmployeeDeletedAsync(EmployeeDeletedEvent employeeEvent, CancellationToken cancellationToken = default)
         {
+            _logger.LogInformation("[SUBSCRIPTION-TRACE] EmployeeDeleted event received - EmployeeId: {EmployeeId}, EventId: {EventId}", 
+                employeeEvent.EmployeeId, employeeEvent.EventId);
+
             try
             {
                 await _userReferenceService.Delete(employeeEvent.EmployeeId);
+                _logger.LogInformation("[SUBSCRIPTION-TRACE] EmployeeDeleted processed successfully - EmployeeId: {EmployeeId}", employeeEvent.EmployeeId);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error processing employee deleted event for Employee ID: {EmployeeId}", 
-                    employeeEvent.EmployeeId);
+                _logger.LogError(ex, "[SUBSCRIPTION-ERROR] Error processing EmployeeDeleted - EmployeeId: {EmployeeId}", employeeEvent.EmployeeId);
                 throw;
             }
         }

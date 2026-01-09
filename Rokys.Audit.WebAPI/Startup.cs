@@ -11,6 +11,7 @@ using Rokys.Audit.WebAPI.DependencyInjection;
 using Rokys.Audit.WebAPI.Filters;
 using Rokys.Audit.WebAPI.Middleware;
 using System.Data;
+using Serilog;
 
 namespace Rokys.Audit.WebAPI
 {
@@ -104,8 +105,8 @@ namespace Rokys.Audit.WebAPI
                 .AllowAnyHeader()
                 );
 
-            //Logger file
-            loggerFactory.AddFile(env.ContentRootPath + "/LogError/log-{Date}.txt");
+            //Logger file - Usando Serilog configurado en Program.cs
+            loggerFactory.AddSerilog();
 
             // Configure the HTTP request pipeline.
             if (env.IsDevelopment())
