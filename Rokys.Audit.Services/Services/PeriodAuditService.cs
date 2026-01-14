@@ -4,6 +4,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Reatil.Services.Services;
+using ClosedXML.Excel;
 using Rokys.Audit.Common.Constant;
 using Rokys.Audit.Common.Extensions;
 using Rokys.Audit.Common.Helpers;
@@ -725,6 +726,129 @@ namespace Rokys.Audit.Services.Services
             {
                 _logger.LogError(ex.Message);
                 response = ResponseDto.Error<LastAuditByStoreIdResponseDto>(ex.Message);
+            }
+            return response;
+        }
+
+        public async Task<ResponseDto<PeriodAuditReportResponseDto>> Export(PeriodAuditFilterRequestDto requestDto)
+        {
+            var response = ResponseDto.Create<PeriodAuditReportResponseDto>();
+            try
+            {
+                var pagedResponse = await GetPaged(requestDto);
+                if (!pagedResponse.IsValid || pagedResponse.Data == null)
+                {
+                    return ResponseDto.Error<PeriodAuditReportResponseDto>("No se pudieron obtener los datos para exportar.");
+                }
+
+                var exportData = pagedResponse.Data.Items;
+
+                using var workbook = new XLWorkbook();
+                var worksheet = workbook.Worksheets.Add("Auditorías");
+
+                // Configurar encabezados
+                var headers = new[]
+                {
+                    "Nº auditoría", "Empresa", "Tienda", "Jefe de área", "Auditor responsable", "Fecha de registro", "Fecha de auditoría", "Días auditados", "Estado", "Calificación", "Calificación %"
+                };
+
+                for (int i = 0; i < headers.Length; i++)
+                {
+                    worksheet.Cell(1, i + 1).Value = headers[i];
+                }
+
+                // Llenar datos
+                int row = 2;
+                foreach (var item in exportData)
+                {
+                    worksheet.Cell(row, 1).Value = item.CorrelativeNumber ?? "";
+                    worksheet.Cell(row, 2).Value = item.EnterpriseName ?? "";
+                    worksheet.Cell(row, 3).Value = item.StoreName ?? "";
+                    worksheet.Cell(row, 4).Value = item.Participants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JefeDeArea.Code)?.UserFullName ?? "";
+                    worksheet.Cell(row, 5).Value = item.Participants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.Auditor.Code)?.UserFullName ?? "";
+                    worksheet.Cell(row, 6).Value = item.CreationDate.ToString("dd/MM/yyyy");
+                    worksheet.Cell(row, 7).Value = item.ReportDate?.ToString("dd/MM/yyyy") ?? "";   
+                    worksheet.Cell(row, 8).Value = item.AuditedDays;
+                    worksheet.Cell(row, 9).Value = item.AuditStatus?.Name ?? "";
+                    worksheet.Cell(row, 10).Value = item.ScaleName ?? "";
+                    worksheet.Cell(row, 11).Value = item.ScoreValue;
+
+                    // Aplicar color al estado si existe
+                    if (!string.IsNullOrEmpty(item.AuditStatus?.ColorCode))
+                    {
+                        try
+                        {
+                            var statusColor = System.Drawing.ColorTranslator.FromHtml(item.AuditStatus?.ColorCode ?? "#FFFFFF");
+                            worksheet.Cell(row, 9).Style.Fill.BackgroundColor = XLColor.FromColor(statusColor);
+
+                            // Texto blanco si el color de fondo es oscuro
+                            var luminance = (0.299 * statusColor.R + 0.587 * statusColor.G + 0.114 * statusColor.B) / 255;
+                            if (luminance < 0.5)
+                            {
+                                worksheet.Cell(row, 9).Style.Font.FontColor = XLColor.White;
+                            }
+                        }
+                        catch
+                        {
+                            // Ignorar si el color no es válido
+                        }
+                    }
+                    row++;
+                }
+
+                // Aplicar formato
+                var dataRange = worksheet.Range(1, 1, row - 1, headers.Length);
+                dataRange.Style.Font.FontName = "Arial";
+                dataRange.Style.Font.FontSize = 10;
+                dataRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                dataRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
+                // Formato de encabezados
+                var headerRange = worksheet.Range(1, 1, 1, headers.Length);
+                headerRange.Style.Font.Bold = true;
+                headerRange.Style.Fill.BackgroundColor = XLColor.FromArgb(84, 130, 53);
+                headerRange.Style.Font.FontColor = XLColor.White;
+                headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                headerRange.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+
+                // Ajustar ancho de columnas
+                worksheet.Column(1).Width = 18;  // Nro. Documento
+                worksheet.Column(2).Width = 30;  // Empresa
+                worksheet.Column(3).Width = 25;  // Tienda
+                worksheet.Column(4).Width = 25;  // Jefe de área
+                worksheet.Column(5).Width = 25;  // Auditor responsable
+                worksheet.Column(6).Width = 18;  // Fecha de registro
+                worksheet.Column(7).Width = 18;  // Fecha de auditoría
+                worksheet.Column(8).Width = 15;  // Días auditados
+                worksheet.Column(9).Width = 20;  // Estado
+                worksheet.Column(10).Width = 15; // Calificación
+                worksheet.Column(11).Width = 15; // Calificación %
+
+                // Congelar fila de encabezados
+                worksheet.SheetView.FreezeRows(1);
+
+                // Filtros automáticos
+                worksheet.RangeUsed().SetAutoFilter();
+
+                // Convertir a Base64
+                using var stream = new MemoryStream();
+                workbook.SaveAs(stream);
+                var fileBytes = stream.ToArray();
+                var fileBase64 = Convert.ToBase64String(fileBytes);
+
+                var resultExport = new PeriodAuditReportResponseDto
+                {
+                    FileBase64 = fileBase64,
+                    FileName = $"Auditorias-{DateTime.Now:yyyyMMddHHmmss}.xlsx",
+                    MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                };
+
+                response.Data = resultExport;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error exportando auditorías: {ex.Message}");
+                response = ResponseDto.Error<PeriodAuditReportResponseDto>(ex.Message);
             }
             return response;
         }
