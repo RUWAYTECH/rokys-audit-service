@@ -153,7 +153,7 @@ namespace Rokys.Audit.Services.Services
                 _periodAuditRepository.Insert(entity);
 
                 var store = await _storeRepository.GetFirstOrDefaultAsync(filter: x => x.StoreId == entity.StoreId && x.IsActive);
-                var group = await _groupRepository.GetAsync(filter: x => x.EnterpriseId == store.EnterpriseId && x.IsActive, 
+                var group = await _groupRepository.GetAsync(filter: x => x.EnterpriseId == store.EnterpriseId && x.IsActive,
                                                     orderBy: q => q.OrderBy(x => x.SortOrder));
                 // Crear resultados de grupo de auditoría asociados a la nueva auditoría
                 foreach (var grp in group)
@@ -175,7 +175,7 @@ namespace Rokys.Audit.Services.Services
                 try
                 {
                     // Build InboxItemRequestDto and reuse the inbox service to handle creation (sequence number, user mapping, audit fields)
-                    
+
                     var inboxDto = new DTOs.Requests.InboxItems.InboxItemRequestDto
                     {
                         PeriodAuditId = entity.PeriodAuditId,
@@ -365,7 +365,7 @@ namespace Rokys.Audit.Services.Services
                 var currentUser = _httpContextAccessor.CurrentUser();
                 Expression<Func<PeriodAudit, bool>> filter = x => x.IsActive;
 
-               
+
                 if (!string.IsNullOrEmpty(paginationRequestDto.Filter))
                     filter = filter.AndAlso(x => x.GlobalObservations.Contains(paginationRequestDto.Filter) && x.IsActive);
 
@@ -376,7 +376,7 @@ namespace Rokys.Audit.Services.Services
                     filter = filter.AndAlso(x => x.Store.EnterpriseId == paginationRequestDto.EnterpriseId.Value && x.IsActive);
 
                 if (paginationRequestDto.ResponsibleAuditorId.HasValue)
-                    filter = filter.AndAlso(x => x.PeriodAuditParticipants.Any(a=> a.UserReferenceId == paginationRequestDto.ResponsibleAuditorId.Value && a.RoleCodeSnapshot == RoleCodes.Auditor.Code) && x.IsActive);
+                    filter = filter.AndAlso(x => x.PeriodAuditParticipants.Any(a => a.UserReferenceId == paginationRequestDto.ResponsibleAuditorId.Value && a.RoleCodeSnapshot == RoleCodes.Auditor.Code) && x.IsActive);
 
                 if (paginationRequestDto.StartDate.HasValue && paginationRequestDto.EndDate.HasValue)
                     filter = filter.AndAlso(x => x.CreationDate >= paginationRequestDto.StartDate.Value && x.CreationDate <= paginationRequestDto.EndDate.Value && x.IsActive);
@@ -391,7 +391,7 @@ namespace Rokys.Audit.Services.Services
                 {
                     filter = filter.AndAlso(x => x.PeriodAuditParticipants.Any(p => p.UserReferenceId == currentUser.UserReferenceId && p.RoleCodeSnapshot == RoleCodes.StoreAdmin.Code && p.IsActive));
                 }
-                
+
 
                 Func<IQueryable<PeriodAudit>, IOrderedQueryable<PeriodAudit>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 
@@ -412,7 +412,7 @@ namespace Rokys.Audit.Services.Services
                 var userReference = await _userReferenceRepository.GetFirstOrDefaultAsync(filter: x => x.UserReferenceId == currentUser.UserReferenceId);
                 foreach (var ent in pagedResult.Items)
                 {
-                    if (ent.Participants.Any(a=>a.UserReferenceId == currentUser.UserReferenceId && a.RoleCodeSnapshot == RoleCodes.Auditor.Code))
+                    if (ent.Participants.Any(a => a.UserReferenceId == currentUser.UserReferenceId && a.RoleCodeSnapshot == RoleCodes.Auditor.Code))
                     {
                         ent.IAmAuditor = true;
                     }
@@ -606,18 +606,18 @@ namespace Rokys.Audit.Services.Services
                         {
                             newStatusId = statusInProgress?.AuditStatusId ?? ent.StatusId ?? Guid.Empty;
                             nextStatusId = statusInProgress?.AuditStatusId;
-                        
+
                             nextUserId = ent.PeriodAuditParticipants.FirstOrDefault(a => a.RoleCodeSnapshot == RoleCodes.Auditor.Code)?.UserReferenceId;
-                          
+
                             actionText = "Aprobado";
                         }
                         if (ent.StatusId == statusInProgress?.AuditStatusId)
                         {
                             newStatusId = statusInReview?.AuditStatusId ?? ent.StatusId ?? Guid.Empty;
                             nextStatusId = statusInReview?.AuditStatusId;
-                          
+
                             nextUserId = ent.PeriodAuditParticipants.FirstOrDefault(a => a.RoleCodeSnapshot == RoleCodes.JefeDeArea.Code)?.UserReferenceId;
-                          
+
                             actionText = "Enviado a revisión";
                         }
                         else if (ent.StatusId == statusInReview?.AuditStatusId)
@@ -626,7 +626,7 @@ namespace Rokys.Audit.Services.Services
                             nextStatusId = statusFinal?.AuditStatusId;
                             // InReview → Final: NextUser = Administrator (finalizó)
                             nextUserId = ent.PeriodAuditParticipants.FirstOrDefault(a => a.RoleCodeSnapshot == RoleCodes.JefeDeArea.Code)?.UserReferenceId;
-                          
+
                             actionText = "Finalizado";
                         }
                     }
@@ -754,7 +754,7 @@ namespace Rokys.Audit.Services.Services
                         endDate = parsedEnd;
                 }
 
-               
+
                 if (!string.IsNullOrEmpty(requestDto.Filter))
                     filter = filter.AndAlso(x => x.GlobalObservations.Contains(requestDto.Filter) && x.IsActive);
 
@@ -764,7 +764,7 @@ namespace Rokys.Audit.Services.Services
                     filter = filter.AndAlso(x => x.Store.EnterpriseId == requestDto.EnterpriseId.Value && x.IsActive);
 
                 if (requestDto.ResponsibleAuditorId.HasValue)
-                    filter = filter.AndAlso(x => x.PeriodAuditParticipants.Any(a=> a.UserReferenceId == requestDto.ResponsibleAuditorId.Value && a.RoleCodeSnapshot == RoleCodes.Auditor.Code) && x.IsActive);
+                    filter = filter.AndAlso(x => x.PeriodAuditParticipants.Any(a => a.UserReferenceId == requestDto.ResponsibleAuditorId.Value && a.RoleCodeSnapshot == RoleCodes.Auditor.Code) && x.IsActive);
 
                 if (startDate.HasValue && endDate.HasValue)
                     filter = filter.AndAlso(x => x.CreationDate >= startDate.Value && x.CreationDate <= endDate.Value && x.IsActive);
@@ -787,18 +787,7 @@ namespace Rokys.Audit.Services.Services
 
                 Func<IQueryable<PeriodAudit>, IOrderedQueryable<PeriodAudit>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 
-                var (Items, TotalRows) = await _periodAuditRepository.GetSearchPagedAsync(
-                    filter: filter,
-                    pageNumber: requestDto.PageNumber ?? 0,
-                    pageSize: requestDto.PageSize ?? 0
-                );
-                var exportData = new PaginationResponseDto<PeriodAuditResponseDto>
-                {
-                    Items = _mapper.Map<IEnumerable<PeriodAuditResponseDto>>(Items),
-                    TotalCount = TotalRows,
-                    PageNumber = requestDto.PageNumber ?? 0,
-                    PageSize = requestDto.PageSize ?? 0
-                };
+                var exportData = await _periodAuditRepository.GetWithScaleGroup(filter: filter);
 
                 using var workbook = new XLWorkbook();
                 var worksheet = workbook.Worksheets.Add("Auditorías");
@@ -806,7 +795,8 @@ namespace Rokys.Audit.Services.Services
                 // Configurar encabezados
                 var headers = new[]
                 {
-                    "Nº auditoría", "Empresa", "Tienda", "Jefe de área", "Auditor responsable", "Fecha de registro", "Fecha de auditoría", "Días auditados", "Estado", "Calificación", "Calificación %"
+                    "Nº auditoría", "Empresa", "Tienda", "Jefe de área", "Auditor responsable", "Fecha de registro", "Fecha de auditoría", "Días auditados", "Estado", "Calificación", "Calificación %",
+                    "Grupo", "Nivel de riesgo", "Calificación", "Peso/Ponderación", "Código", "Punto auditable", "Nivel de riesgo", "Calificación", "Peso/Ponderación"
                 };
 
                 for (int i = 0; i < headers.Length; i++)
@@ -816,40 +806,64 @@ namespace Rokys.Audit.Services.Services
 
                 // Llenar datos
                 int row = 2;
-                foreach (var item in exportData.Items)
+                foreach (var item in exportData)
                 {
-                    worksheet.Cell(row, 1).Value = item.CorrelativeNumber ?? "";
-                    worksheet.Cell(row, 2).Value = item.EnterpriseName ?? "";
-                    worksheet.Cell(row, 3).Value = item.StoreName ?? "";
-                    worksheet.Cell(row, 4).Value = item.Participants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JefeDeArea.Code)?.UserFullName ?? "";
-                    worksheet.Cell(row, 5).Value = item.Participants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.Auditor.Code)?.UserFullName ?? "";
-                    worksheet.Cell(row, 6).Value = item.CreationDate.ToString("dd/MM/yyyy");
-                    worksheet.Cell(row, 7).Value = item.ReportDate?.ToString("dd/MM/yyyy") ?? "";   
-                    worksheet.Cell(row, 8).Value = item.AuditedDays;
-                    worksheet.Cell(row, 9).Value = item.AuditStatus?.Name ?? "";
-                    worksheet.Cell(row, 10).Value = item.ScaleName ?? "";
-                    worksheet.Cell(row, 11).Value = item.ScoreValue;
-
-                    // Aplicar color al estado si existe
-                    if (!string.IsNullOrEmpty(item.AuditStatus?.ColorCode))
+                    // Detalles de grupos y puntos auditables
+                    foreach (var groupResult in item.PeriodAuditGroupResults)
                     {
-                        try
+                        bool isFirstPoint = true;
+                        foreach (var scaResult in groupResult.PeriodAuditScaleResults)
                         {
-                            var statusColor = System.Drawing.ColorTranslator.FromHtml(item.AuditStatus?.ColorCode ?? "#FFFFFF");
-                            worksheet.Cell(row, 9).Style.Fill.BackgroundColor = XLColor.FromColor(statusColor);
-
-                            // Texto blanco si el color de fondo es oscuro
-                            var luminance = (0.299 * statusColor.R + 0.587 * statusColor.G + 0.114 * statusColor.B) / 255;
-                            if (luminance < 0.5)
+                            if (!isFirstPoint)
                             {
-                                worksheet.Cell(row, 9).Style.Font.FontColor = XLColor.White;
+                                row++;
                             }
-                        }
-                        catch
-                        {
-                            // Ignorar si el color no es válido
+                            worksheet.Cell(row, 1).Value = item.CorrelativeNumber ?? "";
+                            worksheet.Cell(row, 2).Value = item.Store?.Enterprise?.Name ?? "";
+                            worksheet.Cell(row, 3).Value = item.Store?.Name;
+                            worksheet.Cell(row, 4).Value = item.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JefeDeArea.Code)?.UserReference?.FullName ?? "";
+                            worksheet.Cell(row, 5).Value = item.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.Auditor.Code)?.UserReference?.FullName ?? "";
+                            worksheet.Cell(row, 6).Value = item.CreationDate.ToString("dd/MM/yyyy");
+                            worksheet.Cell(row, 7).Value = item.ReportDate?.ToString("dd/MM/yyyy") ?? "";
+                            worksheet.Cell(row, 8).Value = item.AuditedDays;
+                            worksheet.Cell(row, 9).Value = item.AuditStatus?.Name ?? "";
+                            worksheet.Cell(row, 10).Value = item.ScaleName ?? "";
+                            worksheet.Cell(row, 11).Value = item.ScoreValue;
+                            worksheet.Cell(row, 12).Value = groupResult?.Group?.Name ?? "";
+                            worksheet.Cell(row, 13).Value = groupResult?.ScaleDescription ?? "";
+                            worksheet.Cell(row, 14).Value = groupResult?.ScoreValue ?? 0;
+                            worksheet.Cell(row, 15).Value = groupResult?.TotalWeighting ?? 0;
+                            worksheet.Cell(row, 16).Value = scaResult.ScaleGroup?.Code ?? "";
+                            worksheet.Cell(row, 17).Value = scaResult.ScaleGroup?.Name ?? "";
+                            worksheet.Cell(row, 18).Value = scaResult.ScaleDescription ?? "";
+                            worksheet.Cell(row, 19).Value = scaResult.ScoreValue;
+                            worksheet.Cell(row, 20).Value = scaResult.AppliedWeighting;
+
+                            // Aplicar color al estado si existe
+                            if (!string.IsNullOrEmpty(item.AuditStatus?.ColorCode))
+                            {
+                                try
+                                {
+                                    var statusColor = System.Drawing.ColorTranslator.FromHtml(item.AuditStatus?.ColorCode ?? "#FFFFFF");
+                                    worksheet.Cell(row, 9).Style.Fill.BackgroundColor = XLColor.FromColor(statusColor);
+
+                                    // Texto blanco si el color de fondo es oscuro
+                                    var luminance = (0.299 * statusColor.R + 0.587 * statusColor.G + 0.114 * statusColor.B) / 255;
+                                    if (luminance < 0.5)
+                                    {
+                                        worksheet.Cell(row, 9).Style.Font.FontColor = XLColor.White;
+                                    }
+                                }
+                                catch
+                                {
+                                    // Ignorar si el color no es válido
+                                }
+                            }
+
+                            isFirstPoint = false;
                         }
                     }
+
                     row++;
                 }
 
@@ -880,6 +894,15 @@ namespace Rokys.Audit.Services.Services
                 worksheet.Column(9).Width = 20;  // Estado
                 worksheet.Column(10).Width = 15; // Calificación
                 worksheet.Column(11).Width = 15; // Calificación %
+                worksheet.Column(12).Width = 15; // Grupo
+                worksheet.Column(13).Width = 25; // Nivel de riesgo
+                worksheet.Column(14).Width = 15; // Calificación
+                worksheet.Column(15).Width = 15; // Peso/Ponderación
+                worksheet.Column(16).Width = 25; // Código
+                worksheet.Column(17).Width = 25; // Punto auditable
+                worksheet.Column(18).Width = 15; // Nivel de riesgo
+                worksheet.Column(19).Width = 15; // Calificación
+                worksheet.Column(20).Width = 15; // Peso/Ponderación
 
                 // Congelar fila de encabezados
                 worksheet.SheetView.FreezeRows(1);
