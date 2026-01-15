@@ -38,8 +38,8 @@ namespace Rokys.Audit.WebAPI.Controllers
             return BadRequest(response);
         }
 
-        [HttpGet("export")]
-        public async Task<IActionResult> Export([FromQuery] PeriodAuditFilterRequestDto requestDto)
+        [HttpPost("export")]
+        public async Task<IActionResult> Export([FromBody] PeriodAuditExportRequestDto requestDto)
         {
             var response = await _service.Export(requestDto);
             if (response.IsValid)

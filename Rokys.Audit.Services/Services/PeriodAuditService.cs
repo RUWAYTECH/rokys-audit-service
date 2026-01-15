@@ -730,18 +730,75 @@ namespace Rokys.Audit.Services.Services
             return response;
         }
 
-        public async Task<ResponseDto<PeriodAuditReportResponseDto>> Export(PeriodAuditFilterRequestDto requestDto)
+        public async Task<ResponseDto<PeriodAuditReportResponseDto>> Export(PeriodAuditExportRequestDto requestDto)
         {
             var response = ResponseDto.Create<PeriodAuditReportResponseDto>();
             try
             {
-                var pagedResponse = await GetPaged(requestDto);
-                if (!pagedResponse.IsValid || pagedResponse.Data == null)
+                var currentUser = _httpContextAccessor.CurrentUser();
+                Expression<Func<PeriodAudit, bool>> filter = x => x.IsActive;
+
+                // Parse dates from string
+                DateTime? startDate = null;
+                DateTime? endDate = null;
+
+                if (!string.IsNullOrEmpty(requestDto.StartDate))
                 {
-                    return ResponseDto.Error<PeriodAuditReportResponseDto>("No se pudieron obtener los datos para exportar.");
+                    if (DateTime.TryParse(requestDto.StartDate, out var parsedStart))
+                        startDate = parsedStart;
                 }
 
-                var exportData = pagedResponse.Data.Items;
+                if (!string.IsNullOrEmpty(requestDto.EndDate))
+                {
+                    if (DateTime.TryParse(requestDto.EndDate, out var parsedEnd))
+                        endDate = parsedEnd;
+                }
+
+               
+                if (!string.IsNullOrEmpty(requestDto.Filter))
+                    filter = filter.AndAlso(x => x.GlobalObservations.Contains(requestDto.Filter) && x.IsActive);
+
+                if (requestDto.StoreId.HasValue)
+                    filter = filter.AndAlso(x => x.StoreId == requestDto.StoreId.Value && x.IsActive);
+                if (requestDto.EnterpriseId.HasValue)
+                    filter = filter.AndAlso(x => x.Store.EnterpriseId == requestDto.EnterpriseId.Value && x.IsActive);
+
+                if (requestDto.ResponsibleAuditorId.HasValue)
+                    filter = filter.AndAlso(x => x.PeriodAuditParticipants.Any(a=> a.UserReferenceId == requestDto.ResponsibleAuditorId.Value && a.RoleCodeSnapshot == RoleCodes.Auditor.Code) && x.IsActive);
+
+                if (startDate.HasValue && endDate.HasValue)
+                    filter = filter.AndAlso(x => x.CreationDate >= startDate.Value && x.CreationDate <= endDate.Value && x.IsActive);
+
+                if (requestDto.AuditStatusId.HasValue)
+                    filter = filter.AndAlso(x => x.StatusId == requestDto.AuditStatusId.Value && x.IsActive);
+
+                if (requestDto.DocumentNumber != null)
+                    filter = filter.AndAlso(x => x.CorrelativeNumber == requestDto.DocumentNumber);
+
+                if (currentUser.RoleCodes.Contains(RoleCodes.StoreAdmin.Code))
+                {
+                    filter = filter.AndAlso(x => x.PeriodAuditParticipants.Any(p => p.UserReferenceId == currentUser.UserReferenceId && p.RoleCodeSnapshot == RoleCodes.StoreAdmin.Code && p.IsActive));
+                }
+
+                if (requestDto.PeriodAuditIds != null && requestDto.PeriodAuditIds.Length != 0)
+                {
+                    filter = filter.AndAlso(x => requestDto.PeriodAuditIds.Contains(x.PeriodAuditId) && x.IsActive);
+                }
+
+                Func<IQueryable<PeriodAudit>, IOrderedQueryable<PeriodAudit>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
+
+                var (Items, TotalRows) = await _periodAuditRepository.GetSearchPagedAsync(
+                    filter: filter,
+                    pageNumber: requestDto.PageNumber ?? 0,
+                    pageSize: requestDto.PageSize ?? 0
+                );
+                var exportData = new PaginationResponseDto<PeriodAuditResponseDto>
+                {
+                    Items = _mapper.Map<IEnumerable<PeriodAuditResponseDto>>(Items),
+                    TotalCount = TotalRows,
+                    PageNumber = requestDto.PageNumber ?? 0,
+                    PageSize = requestDto.PageSize ?? 0
+                };
 
                 using var workbook = new XLWorkbook();
                 var worksheet = workbook.Worksheets.Add("Auditorías");
@@ -759,7 +816,7 @@ namespace Rokys.Audit.Services.Services
 
                 // Llenar datos
                 int row = 2;
-                foreach (var item in exportData)
+                foreach (var item in exportData.Items)
                 {
                     worksheet.Cell(row, 1).Value = item.CorrelativeNumber ?? "";
                     worksheet.Cell(row, 2).Value = item.EnterpriseName ?? "";
