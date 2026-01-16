@@ -15,14 +15,14 @@ namespace Rokys.Audit.Services.Services.Emails
         {
             try
             {
-                var administrator =audit.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JefeDeArea.Code);
+                var bossOfArea =audit.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JefeDeArea.Code);
                 var auditor = audit.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.Auditor.Code);
                 var supervisor = audit.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code);
                 var headOperations = audit.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JefeDeOperaciones.Code);
 
                 var inputTexts = new Dictionary<string, object>
                 {
-                    ["AdministratorFullName"] = administrator?.UserReference?.FullName ?? string.Empty,
+                    ["AdministratorFullName"] = bossOfArea?.UserReference?.FullName ?? string.Empty,
                     ["AuditorFullName"] = auditor?.UserReference?.FullName ?? string.Empty,
                     ["SupervisorFullName"] = supervisor?.UserReference?.FullName ?? string.Empty,
                     ["CorrelativeNumber"] = audit.CorrelativeNumber,
@@ -36,7 +36,7 @@ namespace Rokys.Audit.Services.Services.Emails
                 var htmlBodySupervisor = templateSupervisor.Render(inputTexts);
                 var emailsTo = new List<string>
                 {
-                    administrator.UserReference?.Email ?? string.Empty,
+                    bossOfArea.UserReference?.Email ?? string.Empty,
                     auditor.UserReference?.Email ?? string.Empty,
                     supervisor.UserReference?.Email ?? string.Empty
                 };
@@ -95,7 +95,7 @@ namespace Rokys.Audit.Services.Services.Emails
                 var htmlBody = template.Render(inputTexts);
 
                 var emailsTo = participants
-                    .Where(x => x.RoleCode != RoleCodes.StoreAdmin.Code)
+                    .Where(x => x.RoleCode != RoleCodes.StoreAdmin.Code && x.RoleCode != RoleCodes.AssistantAdministrative.Code)
                     .Select(x => x.Email)
                     .Where(x => !string.IsNullOrWhiteSpace(x))
                     .Distinct()
