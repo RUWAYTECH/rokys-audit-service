@@ -323,7 +323,7 @@ namespace Rokys.Audit.Services.Services
                     orderBy: orderBy,
                     pageNumber: filterRequestDto.PageNumber,
                     pageSize: filterRequestDto.PageSize,
-                    includeProperties: [ x => x.ScaleGroup, x => x.PeriodAuditGroupResult ]
+                    includeProperties: [ x => x.ScaleGroup, x => x.PeriodAuditGroupResult, x => x.PeriodAuditActionPlans ]
                 );
                 var pagedResult = new PaginationResponseDto<PeriodAuditScaleResultResponseDto>
                 {

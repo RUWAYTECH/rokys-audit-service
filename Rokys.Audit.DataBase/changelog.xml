@@ -16,6 +16,7 @@
 
 <!-- TABLES -->
 <include file="./Table/202601081055-store-add-email.sql" relativeToChangelogFile="true"/>
+<include file="./Table/202601151204-add-action-plan-table.sql" relativeToChangelogFile="true"/>
 
 
 </databaseChangeLog>

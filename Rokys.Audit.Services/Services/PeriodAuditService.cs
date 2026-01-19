@@ -39,6 +39,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IInboxItemsService _inboxItemsService;
         private readonly IUserReferenceRepository _userReferenceRepository;
         private readonly IPeriodAuditScaleResultRepository _periodAuditScaleResultRepository;
+        private readonly IPeriodAuditActionPlanRepository _periodAuditActionPlanRepository;
         private readonly IPeriodAuditTableScaleTemplateResultRepository _periodAuditTableScaleTemplateResultRepository;
         private readonly IPeriodAuditFieldValuesRepository _periodAuditFieldValuesRepository;
         private readonly IPeriodAuditScaleSubResultRepository _periodAuditScaleSubResultRepository;
@@ -67,6 +68,7 @@ namespace Rokys.Audit.Services.Services
             IInboxItemsService inboxItemsService,
             IUserReferenceRepository userReferenceRepository,
             IPeriodAuditScaleResultRepository periodAuditScaleResultRepository,
+            IPeriodAuditActionPlanRepository periodAuditActionPlanRepository,
             IPeriodAuditTableScaleTemplateResultRepository periodAuditTableScaleTemplateResultRepository,
             IPeriodAuditFieldValuesRepository periodAuditFieldValuesRepository,
             IPeriodAuditScaleSubResultRepository periodAuditScaleSubResultRepository,
@@ -93,6 +95,7 @@ namespace Rokys.Audit.Services.Services
             _inboxItemsService = inboxItemsService;
             _userReferenceRepository = userReferenceRepository;
             _periodAuditScaleResultRepository = periodAuditScaleResultRepository;
+            _periodAuditActionPlanRepository = periodAuditActionPlanRepository;
             _periodAuditTableScaleTemplateResultRepository = periodAuditTableScaleTemplateResultRepository;
             _periodAuditFieldValuesRepository = periodAuditFieldValuesRepository;
             _periodAuditScaleSubResultRepository = periodAuditScaleSubResultRepository;
@@ -932,6 +935,5 @@ namespace Rokys.Audit.Services.Services
             }
             return response;
         }
-
     }
 }

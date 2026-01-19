@@ -16,9 +16,13 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .HasColumnName("PeriodAuditActionPlanId")
                 .IsRequired();
 
+            builder.Property(x => x.PeriodAuditScaleResultId)
+                .HasColumnName("PeriodAuditScaleResultId")
+                .IsRequired();
+
             builder.Property(x => x.DisiplinaryMeasureTypeId)
                 .HasColumnName("DisiplinaryMeasureTypeId")
-                .IsRequired();
+                .IsRequired(false);
 
             builder.Property(x => x.ResponsibleUserId)
                 .HasColumnName("ResponsibleUserId")
@@ -53,10 +57,10 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .IsRequired(false);
 
             //Relaciones corregidas
-            /* builder.HasOne(x => x.PeriodAuditScaleResult)
-                .WithOne(pa => pa.PeriodAuditActionPlan)
-                .HasForeignKey(x => x.PeriodAuditActionPlanId)
-                .OnDelete(DeleteBehavior.Restrict); */
+            builder.HasOne(x => x.PeriodAuditScaleResult)
+                .WithMany(pa => pa.PeriodAuditActionPlans)
+                .HasForeignKey(x => x.PeriodAuditScaleResultId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(x => x.DisiplinaryMeasureType)
                 .WithMany(g => g.PeriodAuditActionPlans)

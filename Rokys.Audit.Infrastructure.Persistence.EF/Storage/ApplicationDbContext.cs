@@ -81,6 +81,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
             modelBuilder.ApplyConfiguration(new PeriodAuditConfig());
             //modelBuilder.ApplyConfiguration(new PeriodAuditResultConfig());
             modelBuilder.ApplyConfiguration(new PeriodAuditScaleResultConfig());
+            modelBuilder.ApplyConfiguration(new PeriodAuditActionPlanConfig());
             modelBuilder.ApplyConfiguration(new PeriodAuditScaleSubResultConfig());
             modelBuilder.ApplyConfiguration(new PeriodAuditFieldValuesConfig());
 

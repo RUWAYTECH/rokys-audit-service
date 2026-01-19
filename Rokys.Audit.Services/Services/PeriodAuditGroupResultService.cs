@@ -42,6 +42,9 @@ namespace Rokys.Audit.Services.Services
         private readonly IScaleCompanyRepository _scaleCompanyRepository;
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly IPeriodAuditRepository _periodAuditRepository;
+        private readonly IPeriodAuditActionPlanRepository _periodAuditActionPlanRepository;
+        private readonly IAuditStatusRepository _auditStatusRepository;
+        private readonly IUserReferenceRepository _userReferenceRepository;
 
         public PeriodAuditGroupResultService(
             IPeriodAuditGroupResultRepository repository,
@@ -62,7 +65,10 @@ namespace Rokys.Audit.Services.Services
             IScoringCriteriaRepository scoringCriteriaRepository,
             IScaleCompanyRepository scaleCompanyRepository,
             IServiceScopeFactory serviceScopeFactory,
-            IPeriodAuditRepository periodAuditRepository)
+            IPeriodAuditRepository periodAuditRepository,
+            IPeriodAuditActionPlanRepository periodAuditActionPlanRepository,
+            IAuditStatusRepository auditStatusRepository,
+            IUserReferenceRepository userReferenceRepository)
         {
             _periodAuditGroupResultRepository = repository;
             _validator = validator;
@@ -83,6 +89,9 @@ namespace Rokys.Audit.Services.Services
             _scaleCompanyRepository = scaleCompanyRepository;
             _serviceScopeFactory = serviceScopeFactory;
             _periodAuditRepository = periodAuditRepository;
+            _periodAuditActionPlanRepository = periodAuditActionPlanRepository;
+            _auditStatusRepository = auditStatusRepository;
+            _userReferenceRepository = userReferenceRepository;
         }
         public async Task<ResponseDto<PeriodAuditGroupResultResponseDto>> Create(PeriodAuditGroupResultRequestDto requestDto, bool isTrasacction = false)
         {
@@ -549,6 +558,98 @@ namespace Rokys.Audit.Services.Services
             {
                 _logger.LogError(ex.Message);
                 response = ResponseDto.Error<bool>(ex.Message);
+            }
+            return response;
+        }
+
+        public async Task<ResponseDto<int>> SyncActionPlans(Guid periodAuditGroupResultId, PeriodAuditUpdateActionPlanRequestDto requestDto)
+        {
+            var response = ResponseDto.Create<int>();
+            try
+            {
+                if (requestDto.PeriodAuditActionPlans == null || !requestDto.PeriodAuditActionPlans.Any())
+                {
+                    response = ResponseDto.Error<int>("No se proporcionaron planes de acción para sincronizar.");
+                    return response;
+                }
+
+                var entity = await _periodAuditGroupResultRepository.GetFirstOrDefaultAsync(x => x.PeriodAuditGroupResultId == periodAuditGroupResultId && x.IsActive, includeProperties: [x => x.PeriodAudit.AuditStatus]);
+                if (entity == null)
+                {
+                    response = ResponseDto.Error<int>("No se encontró el registro.");
+                    return response;
+                }
+
+                if (entity.PeriodAudit?.AuditStatus?.Code != AuditStatusCode.Completed)
+                {
+                    response = ResponseDto.Error<int>("Solo se pueden sincronizar planes de acción para auditorías finalizadas.");
+                    return response;
+                }
+
+                var currentUser = _httpContextAccessor.CurrentUser();
+                var currentUserName = currentUser?.UserName ?? "system";
+
+                // Validar que todos los usuarios responsables existen
+                var responsibleUserIds = requestDto.PeriodAuditActionPlans
+                    .Select(x => x.ResponsibleUserId)
+                    .Distinct()
+                    .ToList();
+
+                foreach (var userId in responsibleUserIds)
+                {
+                    var userExists = await _userReferenceRepository.GetFirstOrDefaultAsync(filter: x => x.UserReferenceId == userId);
+                    if (userExists == null)
+                    {
+                        response = ResponseDto.Error<int>($"El usuario responsable con ID {userId} no existe en el sistema.");
+                        return response;
+                    }
+                }
+
+                int actionPlansCount = 0;
+                foreach (var actionPlanDto in requestDto.PeriodAuditActionPlans)
+                {
+                    var existingActionPlan = await _periodAuditActionPlanRepository.GetFirstOrDefaultAsync(filter: x => x.PeriodAuditScaleResultId == actionPlanDto.PeriodAuditScaleResultId);
+
+                    if (existingActionPlan != null)
+                    {
+                        // Update existing action plan
+                        existingActionPlan.DisiplinaryMeasureTypeId = actionPlanDto.DisiplinaryMeasureTypeId;
+                        existingActionPlan.ResponsibleUserId = actionPlanDto.ResponsibleUserId;
+                        existingActionPlan.Description = actionPlanDto.Description;
+                        existingActionPlan.DueDate = actionPlanDto.DueDate;
+                        existingActionPlan.ApplyMeasure = actionPlanDto.ApplyMeasure;
+
+                        existingActionPlan.UpdateAudit(currentUserName);
+
+                        _periodAuditActionPlanRepository.Update(existingActionPlan);
+                    }
+                    else
+                    {
+                        // Create new action plan
+                        var newActionPlan = new PeriodAuditActionPlan
+                        {
+                            PeriodAuditScaleResultId = actionPlanDto.PeriodAuditScaleResultId,
+                            DisiplinaryMeasureTypeId = actionPlanDto.DisiplinaryMeasureTypeId,
+                            ResponsibleUserId = actionPlanDto.ResponsibleUserId,
+                            Description = actionPlanDto.Description,
+                            DueDate = actionPlanDto.DueDate,
+                            ApplyMeasure = actionPlanDto.ApplyMeasure
+                        };
+
+                        newActionPlan.CreateAudit(currentUserName);
+
+                        _periodAuditActionPlanRepository.Insert(newActionPlan);
+                    }
+                    actionPlansCount++;
+                }
+
+                await _unitOfWork.CommitAsync();
+                response.Data = actionPlansCount;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response = ResponseDto.Error<int>(ex.Message);
             }
             return response;
         }
