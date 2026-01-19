@@ -28,6 +28,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
         public DbSet<PeriodAudit> PeriodAudits { get; set; }
         //public DbSet<PeriodAuditResult> PeriodAuditResults { get; set; }
         public DbSet<PeriodAuditScaleResult> PeriodAuditScaleResults { get; set; }
+        public DbSet<PeriodAuditActionPlan> PeriodAuditActionPlan { get; set; }
         public DbSet<PeriodAuditScaleSubResult> PeriodAuditScaleSubResults { get; set; }
         public DbSet<PeriodAuditFieldValues> PeriodAuditFieldValues { get; set; }
         public DbSet<PeriodAuditTableScaleTemplateResult> PeriodAuditTableScaleTemplateResults { get; set; }
