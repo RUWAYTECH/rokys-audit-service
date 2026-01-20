@@ -935,5 +935,57 @@ namespace Rokys.Audit.Services.Services
             }
             return response;
         }
+    
+        public async Task<ResponseDto<bool>> GetAllowedActionPlans(Guid id)
+        {
+            var response = ResponseDto.Create<bool>();
+            try
+            {
+                var entity = await _periodAuditRepository.GetCustomByIdAsync(filter: x => x.PeriodAuditId == id && x.IsActive);
+                
+                if (entity == null)
+                {
+                    throw new Exception("No se encontró el registro.");
+                }
+
+                var currentUser = _httpContextAccessor.CurrentUser();
+
+                // Definir roles permitidos para crear y editar planes de acción
+                var allowedEditRoles = new List<string> { RoleCodes.JobSupervisor.Code, RoleCodes.Volante.Code, RoleCodes.StoreAdmin.Code, RoleCodes.Auditor.Code };
+
+                if (currentUser == null)
+                {
+                    throw new Exception("No se encontró la información del usuario actual.");
+                }
+
+                // Validar que el usuario sea participante de la auditoría con uno de los roles autorizados
+                if (entity.PeriodAuditParticipants == null || !entity.PeriodAuditParticipants.Any())
+                {
+                   throw new Exception("La auditoría no tiene participantes asignados.");
+                }
+
+                var userParticipant = entity.PeriodAuditParticipants
+                    .FirstOrDefault(p => p.UserReferenceId == currentUser.UserReferenceId && p.IsActive);
+
+                if (userParticipant == null)
+                {
+                    throw new Exception("El usuario actual no es participante de la auditoría.");
+                }
+
+                var userRoleInAudit = userParticipant.RoleCodeSnapshot;
+                if (string.IsNullOrEmpty(userRoleInAudit) || !allowedEditRoles.Contains(userRoleInAudit))
+                {
+                    throw new Exception("El usuario no tiene un rol autorizado para realizar esta acción. Se requiere uno de los siguientes roles: Supervisor (A006), Asistente Administrativo (A004), Administrador de tienda (A002) o Auditor (A005).");
+                }
+
+                response.Data = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response = ResponseDto.Error<bool>(ex.Message);
+            }
+            return response;
+        }
     }
 }

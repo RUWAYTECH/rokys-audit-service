@@ -573,7 +573,7 @@ namespace Rokys.Audit.Services.Services
                     return response;
                 }
 
-                var entity = await _periodAuditGroupResultRepository.GetFirstOrDefaultAsync(x => x.PeriodAuditGroupResultId == periodAuditGroupResultId && x.IsActive, includeProperties: [x => x.PeriodAudit.AuditStatus]);
+                var entity = await _periodAuditGroupResultRepository.GetFirstOrDefaultAsync(x => x.PeriodAuditGroupResultId == periodAuditGroupResultId && x.IsActive, includeProperties: [x => x.PeriodAudit.AuditStatus, x => x.PeriodAudit.PeriodAuditParticipants]);
                 if (entity == null)
                 {
                     response = ResponseDto.Error<int>("No se encontró el registro.");
@@ -588,6 +588,39 @@ namespace Rokys.Audit.Services.Services
 
                 var currentUser = _httpContextAccessor.CurrentUser();
                 var currentUserName = currentUser?.UserName ?? "system";
+
+                // Definir roles permitidos para crear y editar planes de acción
+                var allowedCreateRoles = new List<string> { RoleCodes.JobSupervisor.Code, RoleCodes.Volante.Code, RoleCodes.StoreAdmin.Code };
+                var allowedEditRoles = new List<string> { RoleCodes.JobSupervisor.Code, RoleCodes.Volante.Code, RoleCodes.StoreAdmin.Code, RoleCodes.Auditor.Code };
+
+                if (currentUser == null)
+                {
+                    response = ResponseDto.Error<int>("No se encontró la información del usuario actual.");
+                    return response;
+                }
+
+                // Validar que el usuario sea participante de la auditoría con uno de los roles autorizados
+                if (entity.PeriodAudit?.PeriodAuditParticipants == null || !entity.PeriodAudit.PeriodAuditParticipants.Any())
+                {
+                    response = ResponseDto.Error<int>("La auditoría no tiene participantes asignados.");
+                    return response;
+                }
+
+                var userParticipant = entity.PeriodAudit.PeriodAuditParticipants
+                    .FirstOrDefault(p => p.UserReferenceId == currentUser.UserReferenceId && p.IsActive);
+
+                if (userParticipant == null)
+                {
+                    response = ResponseDto.Error<int>("El usuario actual no es participante de la auditoría.");
+                    return response;
+                }
+
+                var userRoleInAudit = userParticipant.RoleCodeSnapshot;
+                if (string.IsNullOrEmpty(userRoleInAudit) || !allowedEditRoles.Contains(userRoleInAudit))
+                {
+                    response = ResponseDto.Error<int>("El usuario no tiene un rol autorizado para realizar esta acción. Se requiere uno de los siguientes roles: Supervisor (A006), Asistente Administrativo (A004), Administrador de tienda (A002) o Auditor (A005).");
+                    return response;
+                }
 
                 // Validar que todos los usuarios responsables existen
                 var responsibleUserIds = requestDto.PeriodAuditActionPlans

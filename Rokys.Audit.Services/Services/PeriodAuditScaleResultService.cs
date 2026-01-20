@@ -1,3 +1,4 @@
+using DocumentFormat.OpenXml.Bibliography;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -318,12 +319,11 @@ namespace Rokys.Audit.Services.Services
                 }
 
                 Func<IQueryable<PeriodAuditScaleResult>, IOrderedQueryable<PeriodAuditScaleResult>> orderBy = q => q.OrderBy(x => x.SortOrder);
-                var entities = await _repository.GetPagedAsync(
+                var entities = await _repository.GetPagedCustomAsync(
                     filter: filter,
                     orderBy: orderBy,
                     pageNumber: filterRequestDto.PageNumber,
-                    pageSize: filterRequestDto.PageSize,
-                    includeProperties: [ x => x.ScaleGroup, x => x.PeriodAuditGroupResult, x => x.PeriodAuditActionPlans ]
+                    pageSize: filterRequestDto.PageSize
                 );
                 var pagedResult = new PaginationResponseDto<PeriodAuditScaleResultResponseDto>
                 {

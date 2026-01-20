@@ -47,6 +47,15 @@ namespace Rokys.Audit.WebAPI.Controllers
             return BadRequest(response);
         }
 
+        [HttpGet("allowed-action-plans/{periodAuditId}")]
+        public async Task<IActionResult> GetAllowedActionPlans([FromRoute] Guid periodAuditId)
+        {
+            var response = await _service.GetAllowedActionPlans(periodAuditId);
+            if (response.IsValid)
+                return Ok(response);
+            return BadRequest(response);
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById([FromRoute] Guid id)
         {

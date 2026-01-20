@@ -14,5 +14,6 @@ namespace Rokys.Audit.Services.Interfaces
         Task<ResponseDto> ProcessAction(Rokys.Audit.DTOs.Requests.PeriodAudit.PeriodAuditBatchActionRequestDto requestDto);
         Task<ResponseDto<LastAuditByStoreIdResponseDto>> GetLasAuditByStoreId(Guid storeId);
         Task<ResponseDto<PeriodAuditReportResponseDto>> Export(PeriodAuditExportRequestDto requestDto);
+        Task<ResponseDto<bool>> GetAllowedActionPlans(Guid periodAuditId);
     }
 }

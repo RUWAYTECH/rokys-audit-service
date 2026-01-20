@@ -54,17 +54,17 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                         Weighting = src.ScaleGroup.Weighting,
                         IsActive = src.ScaleGroup.IsActive,
                     } : null;
-                    /* dest.PeriodAuditActionPlans = src.PeriodAuditActionPlans?.Select(p => new PeriodAuditActionPlanResponseDto
+                    dest.PeriodAuditActionPlans = src.PeriodAuditActionPlans?.Select(p => new PeriodAuditActionPlanResponseDto
                     {
                         PeriodAuditActionPlanId = p.PeriodAuditActionPlanId,
                         PeriodAuditScaleResultId = p.PeriodAuditScaleResultId,
                         DisiplinaryMeasureTypeId = p.DisiplinaryMeasureTypeId,
                         ResponsibleUserId = p.ResponsibleUserId,
+                        ResponsibleUserName = p.ResponsibleUser != null ? $"{p.ResponsibleUser.FirstName} {p.ResponsibleUser.LastName}".Trim() : string.Empty,
                         Description = p.Description,
                         DueDate = p.DueDate,
                         ApplyMeasure = p.ApplyMeasure
-                    }).ToList() ?? new List<PeriodAuditActionPlanResponseDto>(); */
-                    dest.PeriodAuditActionPlans = new List<PeriodAuditActionPlanResponseDto>();
+                    }).ToList() ?? new List<PeriodAuditActionPlanResponseDto>();
                 });
             CreateMap<Proveedor, ProveedorResponseDto>();
             CreateMap<ScaleCompany, ScaleCompanyResponseDto>()
@@ -318,6 +318,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                     dest.NewUserEmail = src.NewUserReference?.Email;
                 });
 
+            CreateMap<PeriodAuditActionPlan, PeriodAuditActionPlanResponseDto>();
         }
     }
 }
