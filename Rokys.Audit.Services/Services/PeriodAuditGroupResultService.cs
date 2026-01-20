@@ -45,6 +45,8 @@ namespace Rokys.Audit.Services.Services
         private readonly IPeriodAuditActionPlanRepository _periodAuditActionPlanRepository;
         private readonly IAuditStatusRepository _auditStatusRepository;
         private readonly IUserReferenceRepository _userReferenceRepository;
+        private readonly IEnterpriseGroupRepository _enterpriseGroupRepository;
+        private readonly ISystemConfigurationRepository _systemConfigurationRepository;
 
         public PeriodAuditGroupResultService(
             IPeriodAuditGroupResultRepository repository,
@@ -68,7 +70,10 @@ namespace Rokys.Audit.Services.Services
             IPeriodAuditRepository periodAuditRepository,
             IPeriodAuditActionPlanRepository periodAuditActionPlanRepository,
             IAuditStatusRepository auditStatusRepository,
-            IUserReferenceRepository userReferenceRepository)
+            IUserReferenceRepository userReferenceRepository,
+            IEnterpriseGroupRepository enterpriseGroupRepository,
+            ISystemConfigurationRepository systemConfigurationRepository
+        )
         {
             _periodAuditGroupResultRepository = repository;
             _validator = validator;
@@ -92,6 +97,8 @@ namespace Rokys.Audit.Services.Services
             _periodAuditActionPlanRepository = periodAuditActionPlanRepository;
             _auditStatusRepository = auditStatusRepository;
             _userReferenceRepository = userReferenceRepository;
+            _enterpriseGroupRepository = enterpriseGroupRepository;
+            _systemConfigurationRepository = systemConfigurationRepository;
         }
         public async Task<ResponseDto<PeriodAuditGroupResultResponseDto>> Create(PeriodAuditGroupResultRequestDto requestDto, bool isTrasacction = false)
         {
@@ -573,7 +580,7 @@ namespace Rokys.Audit.Services.Services
                     return response;
                 }
 
-                var entity = await _periodAuditGroupResultRepository.GetFirstOrDefaultAsync(x => x.PeriodAuditGroupResultId == periodAuditGroupResultId && x.IsActive, includeProperties: [x => x.PeriodAudit.AuditStatus, x => x.PeriodAudit.PeriodAuditParticipants]);
+                var entity = await _periodAuditGroupResultRepository.GetFirstOrDefaultAsync(x => x.PeriodAuditGroupResultId == periodAuditGroupResultId && x.IsActive, includeProperties: [x => x.PeriodAudit.AuditStatus, x => x.PeriodAudit.PeriodAuditParticipants, x => x.PeriodAudit.Store]);
                 if (entity == null)
                 {
                     response = ResponseDto.Error<int>("No se encontró el registro.");
@@ -622,6 +629,30 @@ namespace Rokys.Audit.Services.Services
                     return response;
                 }
 
+                // validar que existe una configuracion de puntaje para aplicar planes de acción
+                var groupingConfig = await _enterpriseGroupRepository.GetFirstOrDefaultAsync(filter: g => g.EnterpriseId == entity.PeriodAudit!.Store!.EnterpriseId && g.IsActive);
+                var groupingConfigId = groupingConfig?.EnterpriseGroupingId.ToString();
+
+                if (string.IsNullOrEmpty(groupingConfigId))
+                {
+                    response = ResponseDto.Error<int>("No se encontró la configuración de agrupación empresarial para la empresa de la tienda asociada a la auditoría.");
+                    return response;
+                }
+
+                var systemConfig = await _systemConfigurationRepository.GetFirstOrDefaultAsync(filter: s => s.ReferenceType == SystemConfigRelation.EnterpriseGrouping.Code && s.ReferenceCode == groupingConfigId && s.ConfigKey == SystemConfigKey.ScoreApplyToActionPlan.Code && s.IsActive);
+
+                if (systemConfig == null)
+                {
+                    response = ResponseDto.Error<int>("No se encontró la configuración del sistema para aplicar puntajes a los planes de acción para la agrupación empresarial asociada.");
+                    return response;
+                }
+
+                if (string.IsNullOrEmpty(systemConfig.ConfigValue) || !decimal.TryParse(systemConfig.ConfigValue, out decimal configValue))
+                {
+                    response = ResponseDto.Error<int>("La configuración del sistema tiene un valor inválido. Se espera un valor numérico.");
+                    return response;
+                }
+
                 // Validar que todos los usuarios responsables existen
                 var responsibleUserIds = requestDto.PeriodAuditActionPlans
                     .Select(x => x.ResponsibleUserId)
@@ -641,6 +672,20 @@ namespace Rokys.Audit.Services.Services
                 int actionPlansCount = 0;
                 foreach (var actionPlanDto in requestDto.PeriodAuditActionPlans)
                 {
+                    // Validar que el ScoreValue del PeriodAuditScaleResult sea menor al valor configurado
+                    var scaleResult = await _periodAuditScaleResultRepository.GetFirstOrDefaultAsync(filter: x => x.PeriodAuditScaleResultId == actionPlanDto.PeriodAuditScaleResultId && x.IsActive);
+                    if (scaleResult == null)
+                    {
+                        response = ResponseDto.Error<int>($"No se encontró el resultado de escala con ID {actionPlanDto.PeriodAuditScaleResultId}.");
+                        return response;
+                    }
+
+                    if (scaleResult.ScoreValue >= configValue)
+                    {
+                        response = ResponseDto.Error<int>($"El puntaje obtenido ({scaleResult.ScoreValue}) debe ser menor a {configValue} para poder crear o editar planes de acción en este resultado de escala.");
+                        return response;
+                    }
+
                     var existingActionPlan = await _periodAuditActionPlanRepository.GetFirstOrDefaultAsync(filter: x => x.PeriodAuditScaleResultId == actionPlanDto.PeriodAuditScaleResultId);
 
                     if (existingActionPlan != null)

@@ -100,6 +100,8 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
             // Substitution history configuration
             modelBuilder.ApplyConfiguration(new SubstitutionHistoryConfig());
             modelBuilder.ApplyConfiguration(new SystemConfigurationConfig());
+            modelBuilder.ApplyConfiguration(new EnterpriseGroupingConfig());
+            modelBuilder.ApplyConfiguration(new EnterpriseGroupConfig());
         }
     }
 }
