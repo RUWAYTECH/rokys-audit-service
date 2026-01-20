@@ -56,7 +56,10 @@ namespace Rokys.Audit.Services.Services
 
                 var currentUser = _httpContextAccessor.CurrentUser();
                 var entity = _mapper.Map<AuditRoleConfiguration>(requestDto);
-                var existingSortOrders = (await _auditRoleConfigurationRepository.GetAsync(filter: x => x.IsActive))
+                var existingSortOrders = (await _auditRoleConfigurationRepository.GetAsync(filter: x => (
+                    (requestDto.EnterpriseId == null && x.EnterpriseId == null) ||
+                    (requestDto.EnterpriseId != null && x.EnterpriseId == requestDto.EnterpriseId)        
+                ) && x.IsActive))
                     .Select(x => x.SequenceOrder ?? 0);
                 entity.SequenceOrder = Rokys.Audit.Common.Helpers.SortOrderHelper.GetNextSortOrder(existingSortOrders);
 
@@ -64,8 +67,9 @@ namespace Rokys.Audit.Services.Services
                 
                 _auditRoleConfigurationRepository.Insert(entity);
                 await _unitOfWork.CommitAsync();
-                
-                response.Data = _mapper.Map<AuditRoleConfigurationResponseDto>(entity);
+
+                var entityCreate = await _auditRoleConfigurationRepository.GetFirstOrDefaultAsync(filter: x => x.AuditRoleConfigurationId == entity.AuditRoleConfigurationId && x.IsActive, includeProperties: [t => t.Enterprise]);
+                response.Data = _mapper.Map<AuditRoleConfigurationResponseDto>(entityCreate);
                 _logger.LogInformation("Created audit role configuration with ID: {Id}", entity.AuditRoleConfigurationId);
             }
             catch (Exception ex)
@@ -118,12 +122,15 @@ namespace Rokys.Audit.Services.Services
                 if (!string.IsNullOrEmpty(requestDto.Filter))
                     filter = filter.AndAlso(x => x.RoleCode.Contains(requestDto.Filter) || x.RoleName.Contains(requestDto.Filter));
 
+                if (requestDto.EnterpriseId.HasValue)
+                    filter = filter.AndAlso(x => x.EnterpriseId == requestDto.EnterpriseId.Value);
 
                 var entities = await _auditRoleConfigurationRepository.GetPagedAsync(
                     filter: filter,
                     orderBy: orderBy,
                     pageNumber: requestDto.PageNumber,
-                    pageSize: requestDto.PageSize
+                    pageSize: requestDto.PageSize,
+                    includeProperties: [e => e.Enterprise]
                 );
 
                 var pagedResult = new PaginationResponseDto<AuditRoleConfigurationResponseDto>
@@ -150,7 +157,7 @@ namespace Rokys.Audit.Services.Services
             try
             {
                 var entity = await _auditRoleConfigurationRepository.GetFirstOrDefaultAsync(
-                    filter: x => x.AuditRoleConfigurationId == id && x.IsActive
+                    filter: x => x.AuditRoleConfigurationId == id && x.IsActive, includeProperties: [e => e.Enterprise]
                 );
                 
                 if (entity == null)
@@ -197,7 +204,8 @@ namespace Rokys.Audit.Services.Services
                 _auditRoleConfigurationRepository.Update(entity);
                 await _unitOfWork.CommitAsync();
 
-                response.Data = _mapper.Map<AuditRoleConfigurationResponseDto>(entity);
+                var entityUpdate = await _auditRoleConfigurationRepository.GetFirstOrDefaultAsync(filter: x => x.AuditRoleConfigurationId == id && x.IsActive, includeProperties: [e => e.Enterprise]);
+                response.Data = _mapper.Map<AuditRoleConfigurationResponseDto>(entityUpdate);
                 _logger.LogInformation("Updated audit role configuration with ID: {Id}", id);
             }
             catch (Exception ex)
@@ -233,12 +241,15 @@ namespace Rokys.Audit.Services.Services
             }
         }
 
-        public async Task<ResponseDto<bool>> ChangeOrder(int currentPosition, int newPosition)
+        public async Task<ResponseDto<bool>> ChangeOrder(int currentPosition, int newPosition, Guid? enterpriseId)
         {
             var response = ResponseDto.Create<bool>();
             try
             {
-                var items = (await _auditRoleConfigurationRepository.GetAsync(filter: x => x.IsActive))
+                var items = (await _auditRoleConfigurationRepository.GetAsync(filter: x => (
+                    (enterpriseId == null && x.EnterpriseId == null) ||
+                    (enterpriseId != null && x.EnterpriseId == enterpriseId)
+                ) && x.IsActive))
                     .Where(x => x.SequenceOrder.HasValue)
                     .OrderBy(x => x.SequenceOrder)
                     .ToList();

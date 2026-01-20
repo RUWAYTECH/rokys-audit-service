@@ -15,9 +15,9 @@ namespace Rokys.Audit.Services.Validations
             RuleFor(x => x.RoleCode)
                 .NotEmpty().WithMessage("El código de rol es requerido.")
                 .MaximumLength(10).WithMessage("El código de rol acepta como máximo 10 caracteres.")
-                .MustAsync(async (code, _) =>
+                .MustAsync(async (dto, code, _) =>
                 {
-                    var exists = await _auditRoleConfigurationRepository.ExistsByRoleCodeAsync(code, id);
+                    var exists = await _auditRoleConfigurationRepository.ExistsByRoleCodeAsync(code, dto.EnterpriseId, id);
                     return !exists;
                 })
                 .WithMessage("Ya existe una configuración de rol con este código.");
@@ -29,10 +29,10 @@ namespace Rokys.Audit.Services.Validations
             RuleFor(x => x.SequenceOrder)
                 .GreaterThan(0).WithMessage("El orden de secuencia debe ser mayor a 0.")
                 .When(x => x.SequenceOrder.HasValue)
-                .MustAsync(async (sequenceOrder, _) =>
+                .MustAsync(async (dto, sequenceOrder, _) =>
                 {
                     if (!sequenceOrder.HasValue) return true;
-                    var exists = await _auditRoleConfigurationRepository.ExistsBySequenceOrderAsync(sequenceOrder.Value, id);
+                    var exists = await _auditRoleConfigurationRepository.ExistsBySequenceOrderAsync(sequenceOrder.Value, dto.EnterpriseId, id);
                     return !exists;
                 })
                 .WithMessage("Ya existe una configuración de rol con este orden de secuencia.");

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Rokys.Audit.Infrastructure.Persistence.EF.Storage;
 using Rokys.Audit.Infrastructure.Repositories;
 using Rokys.Audit.Model.Tables;
@@ -20,14 +21,22 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
                 .FirstOrDefaultAsync(x => x.RoleCode == roleCode && x.IsActive);
         }
 
-        public async Task<bool> ExistsByRoleCodeAsync(string roleCode, Guid? excludeId = null)
+        public async Task<bool> ExistsByRoleCodeAsync(string roleCode, Guid? enterpriseId, Guid? excludeId = null)
         {
             if (string.IsNullOrWhiteSpace(roleCode))
                 return false;
-
-            var query = DbSet
-                .Where(x => x.RoleCode == roleCode && x.IsActive);
             
+            var query = DbSet
+                .Where(x =>
+                    x.RoleCode == roleCode &&
+                    x.IsActive &&
+                    (
+                        (enterpriseId == null && x.EnterpriseId == null) ||
+                        (enterpriseId != null && x.EnterpriseId == enterpriseId)
+                    )
+                );
+
+
             if (excludeId.HasValue)
                 query = query.Where(x => x.AuditRoleConfigurationId != excludeId.Value);
 
@@ -37,16 +46,24 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
         public async Task<IEnumerable<AuditRoleConfiguration>> GetActiveConfigurationsOrderedAsync()
         {
             return await DbSet
+                .Include(x => x.Enterprise)
                 .Where(x => x.IsActive)
                 .OrderBy(x => x.SequenceOrder ?? int.MaxValue)
                 .ThenBy(x => x.RoleName)
                 .ToListAsync();
         }
 
-        public async Task<bool> ExistsBySequenceOrderAsync(int sequenceOrder, Guid? excludeId = null)
-        {
+        public async Task<bool> ExistsBySequenceOrderAsync(int sequenceOrder, Guid? enterpriseId, Guid? excludeId = null)
+        {            
             var query = DbSet
-                .Where(x => x.SequenceOrder == sequenceOrder && x.IsActive);
+                .Where(x =>
+                    x.SequenceOrder == sequenceOrder &&
+                    x.IsActive &&
+                    (
+                        (enterpriseId == null && x.EnterpriseId == null) ||
+                        (enterpriseId != null && x.EnterpriseId == enterpriseId)
+                    )
+                );
 
             if (excludeId.HasValue)
                 query = query.Where(x => x.AuditRoleConfigurationId != excludeId.Value);
