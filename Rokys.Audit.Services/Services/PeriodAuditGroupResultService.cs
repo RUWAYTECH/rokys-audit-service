@@ -48,6 +48,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IEnterpriseGroupRepository _enterpriseGroupRepository;
         private readonly ISystemConfigurationRepository _systemConfigurationRepository;
 
+        private readonly IPeriodAuditActionPlanService _periodAuditActionPlanService;
         public PeriodAuditGroupResultService(
             IPeriodAuditGroupResultRepository repository,
             IValidator<PeriodAuditGroupResultRequestDto> validator,
@@ -72,7 +73,8 @@ namespace Rokys.Audit.Services.Services
             IAuditStatusRepository auditStatusRepository,
             IUserReferenceRepository userReferenceRepository,
             IEnterpriseGroupRepository enterpriseGroupRepository,
-            ISystemConfigurationRepository systemConfigurationRepository
+            ISystemConfigurationRepository systemConfigurationRepository,
+            IPeriodAuditActionPlanService periodAuditActionPlanService
         )
         {
             _periodAuditGroupResultRepository = repository;
@@ -99,6 +101,7 @@ namespace Rokys.Audit.Services.Services
             _userReferenceRepository = userReferenceRepository;
             _enterpriseGroupRepository = enterpriseGroupRepository;
             _systemConfigurationRepository = systemConfigurationRepository;
+            _periodAuditActionPlanService = periodAuditActionPlanService;
         }
         public async Task<ResponseDto<PeriodAuditGroupResultResponseDto>> Create(PeriodAuditGroupResultRequestDto requestDto, bool isTrasacction = false)
         {
@@ -630,28 +633,14 @@ namespace Rokys.Audit.Services.Services
                 }
 
                 // validar que existe una configuracion de puntaje para aplicar planes de acción
-                var groupingConfig = await _enterpriseGroupRepository.GetFirstOrDefaultAsync(filter: g => g.EnterpriseId == entity.PeriodAudit!.Store!.EnterpriseId && g.IsActive);
-                var groupingConfigId = groupingConfig?.EnterpriseGroupingId.ToString();
-
-                if (string.IsNullOrEmpty(groupingConfigId))
+              var enterpriseConfigResponse = await _periodAuditActionPlanService.GetEnterpriseConfigurationByPeriodAuditId(entity.PeriodAuditId);
+                if (!enterpriseConfigResponse.IsValid || enterpriseConfigResponse.Data == null || !enterpriseConfigResponse.Data.HasConfiguration)
                 {
-                    response = ResponseDto.Error<int>("No se encontró la configuración de agrupación empresarial para la empresa de la tienda asociada a la auditoría.");
+                    response = ResponseDto.Error<int>("No se encontró la configuración de puntaje para aplicar planes de acción en la empresa asociada a la auditoría.");
                     return response;
                 }
 
-                var systemConfig = await _systemConfigurationRepository.GetFirstOrDefaultAsync(filter: s => s.ReferenceType == SystemConfigRelation.EnterpriseGrouping.Code && s.ReferenceCode == groupingConfigId && s.ConfigKey == SystemConfigKey.ScoreApplyToActionPlan.Code && s.IsActive);
-
-                if (systemConfig == null)
-                {
-                    response = ResponseDto.Error<int>("No se encontró la configuración del sistema para aplicar puntajes a los planes de acción para la agrupación empresarial asociada.");
-                    return response;
-                }
-
-                if (string.IsNullOrEmpty(systemConfig.ConfigValue) || !decimal.TryParse(systemConfig.ConfigValue, out decimal configValue))
-                {
-                    response = ResponseDto.Error<int>("La configuración del sistema tiene un valor inválido. Se espera un valor numérico.");
-                    return response;
-                }
+                var configValue = enterpriseConfigResponse.Data.ConfigurationValue;
 
                 // Validar que todos los usuarios responsables existen
                 var responsibleUserIds = requestDto.PeriodAuditActionPlans
