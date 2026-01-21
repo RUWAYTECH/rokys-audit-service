@@ -798,8 +798,8 @@ namespace Rokys.Audit.Services.Services
                 // Configurar encabezados
                 var headers = new[]
                 {
-                    "Nº auditoría", "Empresa", "Tienda", "Jefe de área", "Auditor responsable", "Fecha de registro", "Fecha de auditoría", "Días auditados", "Estado", "Calificación", "Calificación %",
-                    "Grupo", "Nivel de riesgo", "Calificación", "Peso/Ponderación", "Código", "Punto auditable", "Nivel de riesgo", "Calificación", "Peso/Ponderación"
+                    "Nº auditoría", "Empresa", "Tienda", "Jefe de área", "Auditor responsable", "Fecha de registro", "Fecha de auditoría", "Días auditados", "Estado", "Calificación general", "Calificación general %",
+                    "Grupo", "Nivel de riesgo de grupo", "Calificación de grupo", "Peso/Ponderación de grupo", "Código de punto auditable", "Punto auditable", "Nivel de riesgo de punto auditable", "Calificación de punto auditable", "Peso/Ponderación de punto auditable"
                 };
 
                 for (int i = 0; i < headers.Length; i++)
