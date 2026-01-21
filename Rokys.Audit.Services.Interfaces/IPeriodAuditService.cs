@@ -15,5 +15,6 @@ namespace Rokys.Audit.Services.Interfaces
         Task<ResponseDto<LastAuditByStoreIdResponseDto>> GetLasAuditByStoreId(Guid storeId);
         Task<ResponseDto<PeriodAuditReportResponseDto>> Export(PeriodAuditExportRequestDto requestDto);
         Task<ResponseDto<bool>> GetAllowedActionPlans(Guid periodAuditId);
+        Task<ResponseDto> SendActionPlanCompletedNotification(Guid periodAuditId);
     }
 }

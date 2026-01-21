@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Planes de Acción Completados</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f6f6f6;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 2px 8px rgba(45, 140, 53, 0.08);
+            padding: 32px 28px;
+            border-top: 2px solid #2D8C35;
+        }
+
+        .header {
+            color: #2D8C35;
+            font-size: 1.6em;
+            font-weight: bold;
+            margin-bottom: 18px;
+            text-align: center;
+        }
+
+        .info {
+            margin-bottom: 18px;
+            text-align: center;
+        }
+
+        .label {
+            color: #2D8C35;
+            font-weight: 600;
+        }
+
+        .value {
+            color: #333;
+        }
+
+        .footer {
+            font-size: 0.95em;
+            color: #888;
+            margin-top: 28px;
+            text-align: center;
+        }
+
+        .button {
+            display: inline-block;
+            background: #2D8C35;
+            color: #fff;
+            padding: 12px 32px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">Planes de Acción Completados</div>
+        <div class="info">
+            <p style="margin-bottom: 18px; font-size: 1.08em; color: #333;">
+                Estimados/(as),<br><br>
+                Se han completado todos los planes de acción para la auditoría
+                <span class="label">{{ CorrelativeNumber }}</span> de la tienda <span class="label">{{ StoreName }}</span>.<br><br>
+                Puede revisar los detalles accediendo al sistema de auditoría.
+            </p>
+
+            <a class="button"
+               href="{{ UrlAplication }}"
+               style="color:#ffffff !important; text-decoration:none !important;">
+                Ver Planes de Acción
+            </a>
+        </div>
+
+        <div class="footer">
+            Si tienes alguna consulta o necesitas asistencia, no dudes en contactar al área de TI.<br>
+            Este mensaje fue generado automáticamente por el sistema de Auditoría.
+        </div>
+    </div>
+</body>
+</html>

@@ -19,6 +19,7 @@
 <include file="./Table/202601081055-store-add-email.sql" relativeToChangelogFile="true"/>
 <include file="./Table/202601151204-add-action-plan-table.sql" relativeToChangelogFile="true"/>
 <include file="./Table/202601201258-enterprise-group-configurations.sql" relativeToChangelogFile="true"/>
+<include file="./Table/202601211451-period-audit-add-action-plan-completed-date.sql" relativeToChangelogFile="true"/>
 
 
 </databaseChangeLog>

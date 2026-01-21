@@ -2,6 +2,7 @@ using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using DocumentFormat.OpenXml.Vml.Office;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Reatil.Services.Services;
 using ClosedXML.Excel;
@@ -53,6 +54,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IAuditRoleConfigurationRepository _auditRoleConfigurationRepository;
         private readonly WebAppSettings _webAppSettings;
         private readonly FileSettings _fileSettings;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
 
         public PeriodAuditService(
             IPeriodAuditRepository periodAuditRepository,
@@ -80,7 +82,8 @@ namespace Rokys.Audit.Services.Services
             IPeriodAuditParticipantRepository periodAuditParticipantRepository,
             IAuditRoleConfigurationRepository auditRoleConfigurationRepository,
             WebAppSettings webAppSettings,
-            FileSettings fileSettings)
+            FileSettings fileSettings,
+            IServiceScopeFactory serviceScopeFactory)
         {
             _periodAuditRepository = periodAuditRepository;
             _validator = validator;
@@ -108,6 +111,7 @@ namespace Rokys.Audit.Services.Services
             _auditRoleConfigurationRepository = auditRoleConfigurationRepository;
             _webAppSettings = webAppSettings;
             _fileSettings = fileSettings;
+            _serviceScopeFactory = serviceScopeFactory;
         }
 
         public async Task<ResponseDto<PeriodAuditResponseDto>> Create(PeriodAuditRequestDto requestDto)
@@ -932,6 +936,91 @@ namespace Rokys.Audit.Services.Services
         public async Task<ResponseDto<bool>> GetAllowedActionPlans(Guid id)
         {
            return await _periodAuditGroupResultService.GetAllowedActionPlans(id);
+        }
+
+        public async Task<ResponseDto> SendActionPlanCompletedNotification(Guid periodAuditId)
+        {
+            var response = ResponseDto.Create();
+            try
+            {
+                var periodAudit = await _periodAuditRepository.GetFirstOrDefaultAsync(
+                    filter: x => x.PeriodAuditId == periodAuditId && x.IsActive,
+                    includeProperties: [x => x.Store, x => x.PeriodAuditParticipants]
+                );
+
+                if (periodAudit == null)
+                {
+                    response = ResponseDto.Error("No se encontró la auditoría.");
+                    return response;
+                }
+
+                if (periodAudit.ActionPlanCompletedDate != null)
+                {
+                    response = ResponseDto.Error("Los planes de acción ya fueron marcados como completados anteriormente.");
+                    return response;
+                }
+
+                // Obtener la configuración de puntaje para validar qué resultados requieren planes de acción
+                var periodAuditActionPlanService = _serviceScopeFactory.CreateScope().ServiceProvider.GetRequiredService<IPeriodAuditActionPlanService>();
+                var enterpriseConfigResponse = await periodAuditActionPlanService.GetEnterpriseConfigurationByPeriodAuditId(periodAuditId);
+                if (!enterpriseConfigResponse.IsValid || enterpriseConfigResponse.Data == null || !enterpriseConfigResponse.Data.HasConfiguration)
+                {
+                    response = ResponseDto.Error("No se encontró la configuración de puntaje para aplicar planes de acción en la empresa asociada a la auditoría.");
+                    return response;
+                }
+
+                var configValue = enterpriseConfigResponse.Data.ConfigurationValue;
+
+                // Obtener todos los resultados de escala de la auditoría
+                var allScaleResults = await _periodAuditScaleResultRepository.GetAsync(
+                    filter: x => x.PeriodAuditGroupResult.PeriodAuditId == periodAuditId && x.IsActive,
+                    includeProperties: [x => x.PeriodAuditGroupResult]
+                );
+
+                // Filtrar solo los resultados que requieren plan de acción (puntaje menor al configurado)
+                var scaleResultsRequiringPlan = allScaleResults.Where(x => x.ScoreValue < configValue).ToList();
+
+                // Obtener los planes de acción existentes
+                var scaleResultsWithActionPlan = await _periodAuditActionPlanRepository.GetAsync(
+                    filter: x => x.PeriodAuditScaleResult.PeriodAuditGroupResult.PeriodAuditId == periodAuditId,
+                    includeProperties: [x => x.PeriodAuditScaleResult.PeriodAuditGroupResult]
+                );
+
+                var scaleResultIdsRequiringPlan = scaleResultsRequiringPlan.Select(x => x.PeriodAuditScaleResultId).ToHashSet();
+                var scaleResultIdsWithPlan = scaleResultsWithActionPlan.Select(x => x.PeriodAuditScaleResultId).ToHashSet();
+
+                bool allHaveActionPlan = scaleResultIdsRequiringPlan.Any() && scaleResultIdsRequiringPlan.All(id => scaleResultIdsWithPlan.Contains(id));
+
+                if (!allHaveActionPlan)
+                {
+                    response = ResponseDto.Error("No todos los resultados de escala que requieren planes de acción tienen uno asignado.");
+                    return response;
+                }
+
+                // Actualizar la fecha de completado de planes de acción
+                var currentUser = _httpContextAccessor.CurrentUser();
+                periodAudit.ActionPlanCompletedDate = DateTime.UtcNow;
+                periodAudit.UpdateAudit(currentUser.UserName);
+                _periodAuditRepository.Update(periodAudit);
+                await _unitOfWork.CommitAsync();
+
+                try
+                {
+                    await BuildSendEmail.NotifyActionPlanCompleted(_emailService, periodAudit, _webAppSettings.Url);
+                    response.WithMessage("Los planes de acción fueron marcados como completados y la notificación fue enviada exitosamente.");
+                }
+                catch (Exception emailEx)
+                {
+                    _logger.LogWarning(emailEx, "Los planes de acción fueron marcados como completados pero no se pudo enviar el correo de notificación");
+                    response.WithMessage("Los planes de acción fueron marcados como completados pero no se pudo enviar el correo de notificación.");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response = ResponseDto.Error(ex.Message);
+            }
+            return response;
         }
     }
 }

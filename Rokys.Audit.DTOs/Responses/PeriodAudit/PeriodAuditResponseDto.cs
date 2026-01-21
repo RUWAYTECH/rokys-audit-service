@@ -28,6 +28,7 @@ namespace Rokys.Audit.DTOs.Responses.PeriodAudit
         public bool IsActive { get; set; }
         public string? CorrelativeNumber { get; set; }
         public bool? IAmAuditor { get; set; } = false;
+        public DateTime? ActionPlanCompletedDate { get; set; }
         public AuditStatusResponseDto? AuditStatus { get; set; }
         // Nested inbox items related to this period audit
         public List<Rokys.Audit.DTOs.Responses.InboxItems.InboxItemResponseDto>? InboxItems { get; set; }

@@ -99,5 +99,14 @@ namespace Rokys.Audit.WebAPI.Controllers
                 return Ok(response);
             return BadRequest(response);
         }
+
+        [HttpPost("send-action-plans/{periodAuditId}")]
+        public async Task<IActionResult> SendActionPlanCompletedNotification([FromRoute] Guid periodAuditId)
+        {
+            var response = await _service.SendActionPlanCompletedNotification(periodAuditId);
+            if (response.IsValid)
+                return Ok(response);
+            return BadRequest(response);
+        }
     }
 }
