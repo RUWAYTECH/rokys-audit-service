@@ -798,7 +798,7 @@ namespace Rokys.Audit.Services.Services
                 // Configurar encabezados
                 var headers = new[]
                 {
-                    "Nº auditoría", "Empresa", "Tienda", "Jefe de área", "Auditor responsable", "Fecha de registro", "Fecha de auditoría", "Días auditados", "Estado", "Calificación general", "Calificación general %",
+                    "Nº auditoría", "Empresa", "Tienda", "Jefe de área", "Auditor responsable", "Fecha de registro", "Fecha de auditoría", "Días auditados", "Estado", "Nivel de riesgo general", "Calificación general",
                     "Grupo", "Nivel de riesgo de grupo", "Calificación de grupo", "Peso/Ponderación de grupo", "Código de punto auditable", "Punto auditable", "Nivel de riesgo de punto auditable", "Calificación de punto auditable", "Peso/Ponderación de punto auditable"
                 };
 
@@ -814,13 +814,8 @@ namespace Rokys.Audit.Services.Services
                     // Detalles de grupos y puntos auditables
                     foreach (var groupResult in item.PeriodAuditGroupResults)
                     {
-                        bool isFirstPoint = true;
                         foreach (var scaResult in groupResult.PeriodAuditScaleResults)
                         {
-                            if (!isFirstPoint)
-                            {
-                                row++;
-                            }
                             worksheet.Cell(row, 1).Value = item.CorrelativeNumber ?? "";
                             worksheet.Cell(row, 2).Value = item.Store?.Enterprise?.Name ?? "";
                             worksheet.Cell(row, 3).Value = item.Store?.Name;
@@ -863,11 +858,9 @@ namespace Rokys.Audit.Services.Services
                                 }
                             }
 
-                            isFirstPoint = false;
+                            row++;
                         }
                     }
-
-                    row++;
                 }
 
                 // Aplicar formato
