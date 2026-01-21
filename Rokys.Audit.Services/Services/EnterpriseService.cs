@@ -7,6 +7,7 @@ using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.Enterprise;
 using Rokys.Audit.DTOs.Responses.Common;
 using Rokys.Audit.DTOs.Responses.Enterprise;
+using Rokys.Audit.Globalization;
 using Rokys.Audit.Infrastructure.IMapping;
 using Rokys.Audit.Infrastructure.Persistence.Abstract;
 using Rokys.Audit.Infrastructure.Repositories;
@@ -24,6 +25,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IAMapper _mapper;
         private readonly ILogger _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IEnterpriseThemeRepository _enterpriseThemeRepository;
 
         public EnterpriseService(
             IEnterpriseRepository enterpriseRepository,
@@ -31,7 +33,8 @@ namespace Rokys.Audit.Services.Services
             IUnitOfWork unitOfWork,
             IAMapper mapper,
             ILogger<EnterpriseService> logger,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            IEnterpriseThemeRepository enterpriseThemeRepository)
         {
             _enterpriseRepository = enterpriseRepository;
             _fluentValidator = fluentValidator;
@@ -39,6 +42,7 @@ namespace Rokys.Audit.Services.Services
             _mapper = mapper;
             _logger = logger;
             _httpContextAccessor = httpContextAccessor;
+            _enterpriseThemeRepository = enterpriseThemeRepository;
         }
 
         public async Task<ResponseDto<EnterpriseResponseDto>> Create(EnterpriseRequestDto requestDto)
@@ -135,9 +139,77 @@ namespace Rokys.Audit.Services.Services
             return response;
         }
 
-        public Task<ResponseDto<EnterpriseResponseDto>> Update(Guid id, EnterpriseRequestDto requestDto)
+        public async Task<ResponseDto<EnterpriseResponseDto>> Update(Guid id, EnterpriseUpdateRequestDto requestDto)
         {
-            throw new NotImplementedException();
+            var response = ResponseDto.Create<EnterpriseResponseDto>();
+            try
+            {
+                var entity = _enterpriseRepository.GetByKey(id);
+                if (entity == null)
+                    response.Messages.Add(new ApplicationMessage { Message = ValidationMessage.NotFound, MessageType = ApplicationMessageType.Error });
+                else
+                {
+                    var currentUser = _httpContextAccessor.CurrentUser();
+                    _mapper.Map(requestDto, entity);
+                    entity.UpdateAudit(currentUser.UserName);
+                    _enterpriseRepository.Update(entity);
+
+                    // Actualizar o crear theme si se envían propiedades de theme
+                    await HandleEnterpriseThemeAsync(entity.EnterpriseId, requestDto, currentUser.UserName, isUpdate: true);
+
+                    await _unitOfWork.CommitAsync();
+                    response.Data = _mapper.Map<EnterpriseResponseDto>(entity);
+                }
+            }
+            catch (Exception ex)
+            {
+                response = ResponseDto.Error<EnterpriseResponseDto>(ex.Message);
+                _logger.LogError(ex.Message);
+            }
+            return response;
+        }
+
+        private async Task HandleEnterpriseThemeAsync(Guid enterpriseId, EnterpriseRequestDto requestDto, string userName, bool isUpdate = false)
+        {
+            var existingTheme = await _enterpriseThemeRepository.GetFirstOrDefaultAsync(t => t.EnterpriseId == enterpriseId);
+
+            if (existingTheme != null)
+            {
+                // Actualizar theme existente
+                existingTheme.PrimaryColor = requestDto.PrimaryColor ?? existingTheme.PrimaryColor;
+                existingTheme.SecondaryColor = requestDto.SecondaryColor ?? existingTheme.SecondaryColor;
+                existingTheme.AccentColor = requestDto.AccentColor ?? existingTheme.AccentColor;
+                existingTheme.BackgroundColor = requestDto.BackgroundColor ?? existingTheme.BackgroundColor;
+                existingTheme.TextColor = requestDto.TextColor ?? existingTheme.TextColor;
+
+                if (requestDto.LogoData != null)
+                {
+                    existingTheme.LogoData = requestDto.LogoData;
+                    existingTheme.LogoContentType = requestDto.LogoContentType;
+                    existingTheme.LogoFileName = requestDto.LogoFileName;
+                }
+
+                existingTheme.UpdateAudit(userName);
+                _enterpriseThemeRepository.Update(existingTheme);
+            }
+            else
+            {
+                // Crear nuevo theme
+                var theme = new EnterpriseTheme
+                {
+                    EnterpriseId = enterpriseId,
+                    PrimaryColor = requestDto.PrimaryColor ?? "#0066CC",
+                    SecondaryColor = requestDto.SecondaryColor ?? "#333333",
+                    AccentColor = requestDto.AccentColor,
+                    BackgroundColor = requestDto.BackgroundColor,
+                    TextColor = requestDto.TextColor,
+                    LogoData = requestDto.LogoData,
+                    LogoContentType = requestDto.LogoContentType,
+                    LogoFileName = requestDto.LogoFileName
+                };
+                theme.CreateAudit(userName);
+                _enterpriseThemeRepository.Insert(theme);
+            }
         }
     }
 }
