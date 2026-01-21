@@ -64,7 +64,24 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
 
         public async Task HandleEnterpriseDeletedAsync(EnterpriseDeletedEvent EnterpriseEvent, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            _logger.LogInformation("[SUBSCRIPTION-TRACE] EnterpriseDeleted event received at {Timestamp}. EnterpriseId: {EnterpriseId}",
+                DateTime.UtcNow,
+                EnterpriseEvent.EnterpriseId);
+            try
+            {
+                await _enterpriseService.Delete(EnterpriseEvent.EnterpriseId);
+                _logger.LogInformation("[SUBSCRIPTION-TRACE] EnterpriseDeleted event processed successfully at {Timestamp}. EnterpriseId: {EnterpriseId}",
+                   DateTime.UtcNow,
+                   EnterpriseEvent.EnterpriseId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation("[SUBSCRIPTION-TRACE] EnterpriseDeleted event processed successfully at {Timestamp}. EnterpriseId: {EnterpriseId}, Error: {ErrorMessage}",
+                   DateTime.UtcNow,
+                   EnterpriseEvent.EnterpriseId,
+                   ex.Message);
+                throw;
+            }
         }
 
         public async Task HandleEnterpriseUpdatedAsync(EnterpriseUpdatedEvent EnterpriseEvent, CancellationToken cancellationToken = default)

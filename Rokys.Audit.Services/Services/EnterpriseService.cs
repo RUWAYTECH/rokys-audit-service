@@ -26,6 +26,7 @@ namespace Rokys.Audit.Services.Services
         private readonly ILogger _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IEnterpriseThemeRepository _enterpriseThemeRepository;
+        private readonly IStoreRepository _storeRepository;
 
         public EnterpriseService(
             IEnterpriseRepository enterpriseRepository,
@@ -34,7 +35,8 @@ namespace Rokys.Audit.Services.Services
             IAMapper mapper,
             ILogger<EnterpriseService> logger,
             IHttpContextAccessor httpContextAccessor,
-            IEnterpriseThemeRepository enterpriseThemeRepository)
+            IEnterpriseThemeRepository enterpriseThemeRepository,
+            IStoreRepository storeRepository)
         {
             _enterpriseRepository = enterpriseRepository;
             _fluentValidator = fluentValidator;
@@ -43,6 +45,7 @@ namespace Rokys.Audit.Services.Services
             _logger = logger;
             _httpContextAccessor = httpContextAccessor;
             _enterpriseThemeRepository = enterpriseThemeRepository;
+            _storeRepository = storeRepository;
         }
 
         public async Task<ResponseDto<EnterpriseResponseDto>> Create(EnterpriseRequestDto requestDto)
@@ -75,9 +78,33 @@ namespace Rokys.Audit.Services.Services
             return response;
         }
 
-        public Task<ResponseDto> Delete(Guid id)
+        public async Task<ResponseDto> Delete(Guid id)
         {
-            throw new NotImplementedException();
+            var response = ResponseDto.Create();
+            try
+            {
+                var entity = _enterpriseRepository.GetByKey(id);
+                Guid enterpriseId = entity.EnterpriseId;
+                var getStoreByEnterpriseId = await _storeRepository.GetFirstOrDefaultAsync(x => x.EnterpriseId == enterpriseId && x.IsActive);
+                if (getStoreByEnterpriseId != null)
+                {
+                    response.Messages.Add(new ApplicationMessage { Message = "No se puede eliminar esta empresa porque tiene tiendas relacionadas.", MessageType = ApplicationMessageType.Error });
+                    return response;
+                }
+                if (entity == null)
+                    response.Messages.Add(new ApplicationMessage { Message = ValidationMessage.NotFound, MessageType = ApplicationMessageType.Error });
+                else
+                {
+                    _enterpriseRepository.Delete(entity);
+                    await _unitOfWork.CommitAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                response = ResponseDto.Error(ex.Message);
+                _logger.LogError(ex.Message);
+            }
+            return response;
         }
 
         public async Task<ResponseDto<EnterpriseResponseDto>> GetById(Guid id)
@@ -85,7 +112,31 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<EnterpriseResponseDto>();
             try
             {
-                var entity = await _enterpriseRepository.GetFirstOrDefaultAsync(filter: x => x.EnterpriseId == id && x.IsActive);
+                var entity = await _enterpriseRepository.GetFirstOrDefaultAsync(filter: x => x.EnterpriseId == id && x.IsActive, includeProperties: e=>e.Theme);
+                if (entity == null)
+                {
+                    response.Messages.Add(new ApplicationMessage
+                    {
+                        Message = "Enterprise not found",
+                        MessageType = ApplicationMessageType.Error
+                    });
+                    return response;
+                }
+
+                var dto = _mapper.Map<EnterpriseResponseDto>(entity);
+
+                if (entity.Theme != null)
+                {
+                    dto.PrimaryColor = entity.Theme.PrimaryColor;
+                    dto.SecondaryColor = entity.Theme.SecondaryColor;
+                    dto.AccentColor = entity.Theme.AccentColor;
+                    dto.BackgroundColor = entity.Theme.BackgroundColor;
+                    dto.TextColor = entity.Theme.TextColor;
+
+                    dto.LogoData = entity.Theme.LogoData;
+                    dto.LogoContentType = entity.Theme.LogoContentType;
+                    dto.LogoFileName = entity.Theme.LogoFileName;
+                }
                 response.Data = _mapper.Map<EnterpriseResponseDto>(entity);
             }
             catch (Exception ex)
@@ -119,12 +170,33 @@ namespace Rokys.Audit.Services.Services
                     filter: filter,
                     orderBy: orderBy,
                     pageNumber: requestDto.PageNumber,
-                    pageSize: requestDto.PageSize
+                    pageSize: requestDto.PageSize,
+                    includeProperties: e => e.Theme
                 );
+
+                var items = _mapper.Map<List<EnterpriseResponseDto>>(entities.Items);
+
+                foreach (var item in items)
+                {
+                    var entity = entities.Items.First(e => e.EnterpriseId == item.EnterpriseId);
+
+                    if (entity.Theme != null)
+                    {
+                        item.PrimaryColor = entity.Theme.PrimaryColor;
+                        item.SecondaryColor = entity.Theme.SecondaryColor;
+                        item.AccentColor = entity.Theme.AccentColor;
+                        item.BackgroundColor = entity.Theme.BackgroundColor;
+                        item.TextColor = entity.Theme.TextColor;
+
+                        item.LogoData = entity.Theme.LogoData;
+                        item.LogoContentType = entity.Theme.LogoContentType;
+                        item.LogoFileName = entity.Theme.LogoFileName;
+                    }
+                }
 
                 var pagedResult = new PaginationResponseDto<EnterpriseResponseDto>
                 {
-                    Items = _mapper.Map<IEnumerable<EnterpriseResponseDto>>(entities.Items),
+                    Items = items,
                     TotalCount = entities.TotalRows,
                     PageNumber = requestDto.PageNumber,
                     PageSize = requestDto.PageSize
