@@ -31,6 +31,8 @@ namespace Rokys.Audit.Model.Tables
 
         public bool IsActive { get; set; } = true;
 
+        public DateTime? ActionPlanCompletedDate { get; set; } // Fecha de Finalización del Plan de Acción
+
         // Navigation properties
         public virtual Stores? Store { get; set; }
         public virtual AuditStatus? AuditStatus { get; set; } = null!;

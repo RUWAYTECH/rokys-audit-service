@@ -2,6 +2,7 @@ using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using DocumentFormat.OpenXml.Vml.Office;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Reatil.Services.Services;
 using ClosedXML.Excel;
@@ -53,6 +54,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IAuditRoleConfigurationRepository _auditRoleConfigurationRepository;
         private readonly WebAppSettings _webAppSettings;
         private readonly FileSettings _fileSettings;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
 
         public PeriodAuditService(
             IPeriodAuditRepository periodAuditRepository,
@@ -80,7 +82,8 @@ namespace Rokys.Audit.Services.Services
             IPeriodAuditParticipantRepository periodAuditParticipantRepository,
             IAuditRoleConfigurationRepository auditRoleConfigurationRepository,
             WebAppSettings webAppSettings,
-            FileSettings fileSettings)
+            FileSettings fileSettings,
+            IServiceScopeFactory serviceScopeFactory)
         {
             _periodAuditRepository = periodAuditRepository;
             _validator = validator;
@@ -108,6 +111,7 @@ namespace Rokys.Audit.Services.Services
             _auditRoleConfigurationRepository = auditRoleConfigurationRepository;
             _webAppSettings = webAppSettings;
             _fileSettings = fileSettings;
+            _serviceScopeFactory = serviceScopeFactory;
         }
 
         public async Task<ResponseDto<PeriodAuditResponseDto>> Create(PeriodAuditRequestDto requestDto)
@@ -798,8 +802,8 @@ namespace Rokys.Audit.Services.Services
                 // Configurar encabezados
                 var headers = new[]
                 {
-                    "Nº auditoría", "Empresa", "Tienda", "Jefe de área", "Auditor responsable", "Fecha de registro", "Fecha de auditoría", "Días auditados", "Estado", "Calificación", "Calificación %",
-                    "Grupo", "Nivel de riesgo", "Calificación", "Peso/Ponderación", "Código", "Punto auditable", "Nivel de riesgo", "Calificación", "Peso/Ponderación"
+                    "Nº auditoría", "Empresa", "Tienda", "Jefe de área", "Auditor responsable", "Fecha de registro", "Fecha de auditoría", "Días auditados", "Estado", "Nivel de riesgo general", "Calificación general",
+                    "Grupo", "Nivel de riesgo de grupo", "Calificación de grupo", "Peso/Ponderación de grupo", "Código de punto auditable", "Punto auditable", "Nivel de riesgo de punto auditable", "Calificación de punto auditable", "Peso/Ponderación de punto auditable"
                 };
 
                 for (int i = 0; i < headers.Length; i++)
@@ -814,13 +818,8 @@ namespace Rokys.Audit.Services.Services
                     // Detalles de grupos y puntos auditables
                     foreach (var groupResult in item.PeriodAuditGroupResults)
                     {
-                        bool isFirstPoint = true;
                         foreach (var scaResult in groupResult.PeriodAuditScaleResults)
                         {
-                            if (!isFirstPoint)
-                            {
-                                row++;
-                            }
                             worksheet.Cell(row, 1).Value = item.CorrelativeNumber ?? "";
                             worksheet.Cell(row, 2).Value = item.Store?.Enterprise?.Name ?? "";
                             worksheet.Cell(row, 3).Value = item.Store?.Name;
@@ -863,11 +862,9 @@ namespace Rokys.Audit.Services.Services
                                 }
                             }
 
-                            isFirstPoint = false;
+                            row++;
                         }
                     }
-
-                    row++;
                 }
 
                 // Aplicar formato
@@ -938,52 +935,90 @@ namespace Rokys.Audit.Services.Services
     
         public async Task<ResponseDto<bool>> GetAllowedActionPlans(Guid id)
         {
-            var response = ResponseDto.Create<bool>();
+           return await _periodAuditGroupResultService.GetAllowedActionPlans(id);
+        }
+
+        public async Task<ResponseDto> SendActionPlanCompletedNotification(Guid periodAuditId)
+        {
+            var response = ResponseDto.Create();
             try
             {
-                var entity = await _periodAuditRepository.GetCustomByIdAsync(filter: x => x.PeriodAuditId == id && x.IsActive);
-                
-                if (entity == null)
+                var periodAudit = await _periodAuditRepository.GetFirstOrDefaultAsync(
+                    filter: x => x.PeriodAuditId == periodAuditId && x.IsActive,
+                    includeProperties: [x => x.Store, x => x.PeriodAuditParticipants]
+                );
+
+                if (periodAudit == null)
                 {
-                    throw new Exception("No se encontró el registro.");
+                    response = ResponseDto.Error("No se encontró la auditoría.");
+                    return response;
                 }
 
+                if (periodAudit.ActionPlanCompletedDate != null)
+                {
+                    response = ResponseDto.Error("Los planes de acción ya fueron marcados como completados anteriormente.");
+                    return response;
+                }
+
+                // Obtener la configuración de puntaje para validar qué resultados requieren planes de acción
+                var periodAuditActionPlanService = _serviceScopeFactory.CreateScope().ServiceProvider.GetRequiredService<IPeriodAuditActionPlanService>();
+                var enterpriseConfigResponse = await periodAuditActionPlanService.GetEnterpriseConfigurationByPeriodAuditId(periodAuditId);
+                if (!enterpriseConfigResponse.IsValid || enterpriseConfigResponse.Data == null || !enterpriseConfigResponse.Data.HasConfiguration)
+                {
+                    response = ResponseDto.Error("No se encontró la configuración de puntaje para aplicar planes de acción en la empresa asociada a la auditoría.");
+                    return response;
+                }
+
+                var configValue = enterpriseConfigResponse.Data.ConfigurationValue;
+
+                // Obtener todos los resultados de escala de la auditoría
+                var allScaleResults = await _periodAuditScaleResultRepository.GetAsync(
+                    filter: x => x.PeriodAuditGroupResult.PeriodAuditId == periodAuditId && x.IsActive,
+                    includeProperties: [x => x.PeriodAuditGroupResult]
+                );
+
+                // Filtrar solo los resultados que requieren plan de acción (puntaje menor al configurado)
+                var scaleResultsRequiringPlan = allScaleResults.Where(x => x.ScoreValue < configValue).ToList();
+
+                // Obtener los planes de acción existentes
+                var scaleResultsWithActionPlan = await _periodAuditActionPlanRepository.GetAsync(
+                    filter: x => x.PeriodAuditScaleResult.PeriodAuditGroupResult.PeriodAuditId == periodAuditId,
+                    includeProperties: [x => x.PeriodAuditScaleResult.PeriodAuditGroupResult]
+                );
+
+                var scaleResultIdsRequiringPlan = scaleResultsRequiringPlan.Select(x => x.PeriodAuditScaleResultId).ToHashSet();
+                var scaleResultIdsWithPlan = scaleResultsWithActionPlan.Select(x => x.PeriodAuditScaleResultId).ToHashSet();
+
+                bool allHaveActionPlan = scaleResultIdsRequiringPlan.Any() && scaleResultIdsRequiringPlan.All(id => scaleResultIdsWithPlan.Contains(id));
+
+                if (!allHaveActionPlan)
+                {
+                    response = ResponseDto.Error("No todos los resultados de escala que requieren planes de acción tienen uno asignado.");
+                    return response;
+                }
+
+                // Actualizar la fecha de completado de planes de acción
                 var currentUser = _httpContextAccessor.CurrentUser();
+                periodAudit.ActionPlanCompletedDate = DateTime.UtcNow;
+                periodAudit.UpdateAudit(currentUser.UserName);
+                _periodAuditRepository.Update(periodAudit);
+                await _unitOfWork.CommitAsync();
 
-                // Definir roles permitidos para crear y editar planes de acción
-                var allowedEditRoles = new List<string> { RoleCodes.JobSupervisor.Code, RoleCodes.Volante.Code, RoleCodes.StoreAdmin.Code, RoleCodes.Auditor.Code };
-
-                if (currentUser == null)
+                try
                 {
-                    throw new Exception("No se encontró la información del usuario actual.");
+                    await BuildSendEmail.NotifyActionPlanCompleted(_emailService, periodAudit, _webAppSettings.Url);
+                    response.WithMessage("Los planes de acción fueron marcados como completados y la notificación fue enviada exitosamente.");
                 }
-
-                // Validar que el usuario sea participante de la auditoría con uno de los roles autorizados
-                if (entity.PeriodAuditParticipants == null || !entity.PeriodAuditParticipants.Any())
+                catch (Exception emailEx)
                 {
-                   throw new Exception("La auditoría no tiene participantes asignados.");
+                    _logger.LogWarning(emailEx, "Los planes de acción fueron marcados como completados pero no se pudo enviar el correo de notificación");
+                    response.WithMessage("Los planes de acción fueron marcados como completados pero no se pudo enviar el correo de notificación.");
                 }
-
-                var userParticipant = entity.PeriodAuditParticipants
-                    .FirstOrDefault(p => p.UserReferenceId == currentUser.UserReferenceId && p.IsActive);
-
-                if (userParticipant == null)
-                {
-                    throw new Exception("El usuario actual no es participante de la auditoría.");
-                }
-
-                var userRoleInAudit = userParticipant.RoleCodeSnapshot;
-                if (string.IsNullOrEmpty(userRoleInAudit) || !allowedEditRoles.Contains(userRoleInAudit))
-                {
-                    throw new Exception("El usuario no tiene un rol autorizado para realizar esta acción. Se requiere uno de los siguientes roles: Supervisor (A006), Asistente Administrativo (A004), Administrador de tienda (A002) o Auditor (A005).");
-                }
-
-                response.Data = true;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                response = ResponseDto.Error<bool>(ex.Message);
+                response = ResponseDto.Error(ex.Message);
             }
             return response;
         }

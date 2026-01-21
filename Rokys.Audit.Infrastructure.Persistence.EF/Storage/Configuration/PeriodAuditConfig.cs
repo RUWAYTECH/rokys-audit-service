@@ -64,6 +64,11 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .HasDefaultValue(true)
                 .IsRequired();
 
+            builder.Property(x => x.ActionPlanCompletedDate)
+                .HasColumnName("ActionPlanCompletedDate")
+                .HasColumnType("datetime2(7)")
+                .IsRequired(false);
+
             // Audit properties
             builder.Property(x => x.CreatedBy)
                 .HasColumnName("CreatedBy")

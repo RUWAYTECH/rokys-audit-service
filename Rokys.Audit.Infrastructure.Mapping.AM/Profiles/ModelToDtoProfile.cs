@@ -115,6 +115,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                 dest.EnterpriseId = src.Store?.EnterpriseId ?? Guid.Empty;
                 dest.StoreName = src.Store?.Name ?? string.Empty;
                 dest.ScaleCode = src.ScaleCode ?? string.Empty;
+                dest.ActionPlanCompletedDate = src.ActionPlanCompletedDate;
 
                 if (src.AuditStatus != null)
                 {

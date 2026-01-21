@@ -17,7 +17,7 @@ namespace Rokys.Audit.Services.Services.Pdf
 
             var storeName = audit.Store?.Name ?? "Sin tienda";
             var enterpriseName = audit.Store?.Enterprise?.Name ?? "Sin empresa";
-            var administrator = audit.PeriodAuditParticipants?.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JefeDeArea.Code);
+            var administrator = audit.PeriodAuditParticipants?.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.StoreAdmin.Code);
             var supervisor = audit.PeriodAuditParticipants?.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code);
             var auditor = audit.PeriodAuditParticipants?.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.Auditor.Code);
 
