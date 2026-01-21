@@ -590,6 +590,12 @@ namespace Rokys.Audit.Services.Services
                     return response;
                 }
 
+                if (entity.PeriodAudit?.ActionPlanCompletedDate != null)
+                {
+                    response = ResponseDto.Error<int>("No se pueden gestionar planes de acción en una auditoría que ya ha completado la gestión de planes de acción.");
+                    return response;
+                }
+
                 var currentUser = _httpContextAccessor.CurrentUser();
                 var currentUserName = currentUser.UserName;
 
