@@ -21,88 +21,88 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
             _enterpriseService = enterpriseService;
         }
 
-        public async Task HandleEnterpriseCreatedAsync(EnterpriseCreatedEvent StoreEvent, CancellationToken cancellationToken = default)
+        public async Task HandleEnterpriseCreatedAsync(EnterpriseCreatedEvent EnterpriseEvent, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("[SUBSCRIPTION-TRACE] EnterpriseCreated event received at {Timestamp}. Code: {Code}, Name: {Name}, EnterpriseId: {EnterpriseId}",
                 DateTime.UtcNow,
-                StoreEvent.Code,
-                StoreEvent.Name,
-                StoreEvent.EnterpriseId);
+                EnterpriseEvent.Code,
+                EnterpriseEvent.Name,
+                EnterpriseEvent.EnterpriseId);
 
             try
             {
                 await _enterpriseService.Create(new DTOs.Requests.Enterprise.EnterpriseRequestDto
                 {
-                    Name = StoreEvent.Name,
-                    Code = StoreEvent.Code,
-                    Address = StoreEvent.Address,
-                    PrimaryColor = StoreEvent.PrimaryColor,
-                    SecondaryColor = StoreEvent.SecondaryColor,
-                    AccentColor = StoreEvent.AccentColor,
-                    BackgroundColor = StoreEvent.BackgroundColor,
-                    TextColor = StoreEvent.TextColor,
-                    LogoData = StoreEvent.LogoData,
-                    LogoContentType = StoreEvent.LogoContentType,
-                    LogoFileName = StoreEvent.LogoFileName
+                    Name = EnterpriseEvent.Name,
+                    Code = EnterpriseEvent.Code,
+                    Address = EnterpriseEvent.Address,
+                    PrimaryColor = EnterpriseEvent.PrimaryColor,
+                    SecondaryColor = EnterpriseEvent.SecondaryColor,
+                    AccentColor = EnterpriseEvent.AccentColor,
+                    BackgroundColor = EnterpriseEvent.BackgroundColor,
+                    TextColor = EnterpriseEvent.TextColor,
+                    LogoData = EnterpriseEvent.LogoData,
+                    LogoContentType = EnterpriseEvent.LogoContentType,
+                    LogoFileName = EnterpriseEvent.LogoFileName
                 });
 
                 _logger.LogInformation("[SUBSCRIPTION-TRACE] EnterpriseCreated event processed successfully at {Timestamp}. EnterpriseId: {EnterpriseId}, Code: {Code}",
                     DateTime.UtcNow,
-                    StoreEvent.EnterpriseId,
-                    StoreEvent.Code);
+                    EnterpriseEvent.EnterpriseId,
+                    EnterpriseEvent.Code);
             }
             catch (Exception ex)
             {
                 _logger.LogInformation("[SUBSCRIPTION-TRACE] EnterpriseCreated event processed successfully at {Timestamp}. EnterpriseId: {EnterpriseId}, Code: {Code}, Error: {ErrorMessage}",
                     DateTime.UtcNow,
-                    StoreEvent.EnterpriseId,
-                    StoreEvent.Code,
+                    EnterpriseEvent.EnterpriseId,
+                    EnterpriseEvent.Code,
                     ex.Message);
                 throw;
             }
         }
 
-        public async Task HandleEnterpriseDeletedAsync(EnterpriseDeletedEvent StoreEvent, CancellationToken cancellationToken = default)
+        public async Task HandleEnterpriseDeletedAsync(EnterpriseDeletedEvent EnterpriseEvent, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public async Task HandleEnterpriseUpdatedAsync(EnterpriseUpdatedEvent StoreEvent, CancellationToken cancellationToken = default)
+        public async Task HandleEnterpriseUpdatedAsync(EnterpriseUpdatedEvent EnterpriseEvent, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("[SUBSCRIPTION-TRACE] EnterpriseUpdated event received at {Timestamp}. Code: {Code}, Name: {Name}, EnterpriseId: {EnterpriseId}",
                 DateTime.UtcNow,
-                StoreEvent.Code,
-                StoreEvent.Name,
-                StoreEvent.EnterpriseId);
+                EnterpriseEvent.Code,
+                EnterpriseEvent.Name,
+                EnterpriseEvent.EnterpriseId);
 
             try
             {
-                await _enterpriseService.Update(StoreEvent.EnterpriseId, new DTOs.Requests.Enterprise.EnterpriseUpdateRequestDto
+                await _enterpriseService.Update(EnterpriseEvent.EnterpriseId, new DTOs.Requests.Enterprise.EnterpriseUpdateRequestDto
                 {
-                    EnterpriseId = StoreEvent.EnterpriseId,
-                    Name = StoreEvent.Name,
-                    Code = StoreEvent.Code,
-                    Address = StoreEvent.Address,
-                    PrimaryColor = StoreEvent.PrimaryColor,
-                    SecondaryColor = StoreEvent.SecondaryColor,
-                    AccentColor = StoreEvent.AccentColor,
-                    BackgroundColor = StoreEvent.BackgroundColor,
-                    TextColor = StoreEvent.TextColor,
-                    LogoData = StoreEvent.LogoData,
-                    LogoContentType = StoreEvent.LogoContentType,
-                    LogoFileName = StoreEvent.LogoFileName
+                    EnterpriseId = EnterpriseEvent.EnterpriseId,
+                    Name = EnterpriseEvent.Name,
+                    Code = EnterpriseEvent.Code,
+                    Address = EnterpriseEvent.Address,
+                    PrimaryColor = EnterpriseEvent.PrimaryColor,
+                    SecondaryColor = EnterpriseEvent.SecondaryColor,
+                    AccentColor = EnterpriseEvent.AccentColor,
+                    BackgroundColor = EnterpriseEvent.BackgroundColor,
+                    TextColor = EnterpriseEvent.TextColor,
+                    LogoData = EnterpriseEvent.LogoData,
+                    LogoContentType = EnterpriseEvent.LogoContentType,
+                    LogoFileName = EnterpriseEvent.LogoFileName
                 });
                 _logger.LogInformation("[SUBSCRIPTION-TRACE] EnterpriseUpdated event processed successfully at {Timestamp}. EnterpriseId: {EnterpriseId}, Code: {Code}",
                    DateTime.UtcNow,
-                   StoreEvent.EnterpriseId,
-                   StoreEvent.Code);
+                   EnterpriseEvent.EnterpriseId,
+                   EnterpriseEvent.Code);
             }
             catch (Exception ex)
             {
                 _logger.LogInformation("[SUBSCRIPTION-TRACE] EnterpriseUpdated event processed successfully at {Timestamp}. EnterpriseId: {EnterpriseId}, Code: {Code}, Error: {ErrorMessage}",
                    DateTime.UtcNow,
-                   StoreEvent.EnterpriseId,
-                   StoreEvent.Code,
+                   EnterpriseEvent.EnterpriseId,
+                   EnterpriseEvent.Code,
                    ex.Message);
                 throw;
             }

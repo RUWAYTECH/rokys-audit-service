@@ -62,6 +62,7 @@ namespace Rokys.Audit.Services.Services
                     var entity = _mapper.Map<Enterprise>(requestDto);
                     entity.CreateAudit(currentUser.UserName);
                     _enterpriseRepository.Insert(entity);
+                    await HandleEnterpriseThemeAsync(entity.EnterpriseId, requestDto, currentUser.UserName, isUpdate: true);
                     await _unitOfWork.CommitAsync();
                     response.Data = _mapper.Map<EnterpriseResponseDto>(entity);
                 }

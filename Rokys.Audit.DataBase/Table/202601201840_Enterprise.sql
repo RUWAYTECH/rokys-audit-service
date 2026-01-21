@@ -22,6 +22,6 @@ CREATE TABLE EnterpriseTheme (
     UpdateDate DATETIME2 NULL,
     
     CONSTRAINT FK_EnterpriseTheme_Enterprise 
-        FOREIGN KEY (EnterpriseId) REFERENCES Enterprise(Id) ON DELETE CASCADE,
+        FOREIGN KEY (EnterpriseId) REFERENCES Enterprise(EnterpriseThemeId) ON DELETE CASCADE,
     CONSTRAINT UQ_EnterpriseTheme_EnterpriseId UNIQUE (EnterpriseId)
 );

@@ -196,18 +196,18 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
             {
                 if (_enterpriseEventService != null)
                     await _enterpriseEventService.HandleEnterpriseCreatedAsync(enterpriseEvent);
-            }, EventConstants.StoreEvents.StoreDeleted);
+            }, EventConstants.EnterpriseEvents.EnterpriseCreated);
 
             await _eventSubscriber.SubscribeAsync<EnterpriseUpdatedEvent>(async (enterpriseEvent) =>
             {
                 if (_enterpriseEventService != null)
                     await _enterpriseEventService.HandleEnterpriseUpdatedAsync(enterpriseEvent);
-            }, EventConstants.StoreEvents.StoreUpdated);
+            }, EventConstants.EnterpriseEvents.EnterpriseUpdated);
             await _eventSubscriber.SubscribeAsync<EnterpriseDeletedEvent>(async (enterpriseEvent) =>
             {
                 if (_enterpriseEventService != null)
                     await _enterpriseEventService.HandleEnterpriseDeletedAsync(enterpriseEvent);
-            }, EventConstants.StoreEvents.StoreDeleted);
+            }, EventConstants.EnterpriseEvents.EnterpriseDeleted);
             _logger.LogInformation("Enterprise event subscriptions configured successfully");
         }
     }
