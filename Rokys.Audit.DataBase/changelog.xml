@@ -14,6 +14,7 @@
 <include file="./Inserts/202510280900-config-forms.sql" relativeToChangelogFile="true"/>
 <include file="./Inserts/202511111131-audit-role-config.sql" relativeToChangelogFile="true"/>
 <include file="./Inserts/202601210918-enterprise-group-insert-by-ruc.sql" relativeToChangelogFile="true"/>
+<include file="./Inserts/202601220914-measure-type.sql" relativeToChangelogFile="true"/>
 
 <!-- TABLES -->
 <include file="./Table/202601081055-store-add-email.sql" relativeToChangelogFile="true"/>
