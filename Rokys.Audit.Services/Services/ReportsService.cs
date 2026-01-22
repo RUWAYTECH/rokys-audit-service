@@ -855,5 +855,61 @@ namespace Rokys.Audit.Services.Services
             }
             return response;
         }
+
+        public async Task<ResponseDto<ExportReportResultDto>> GetAuditDetailedReportAsync(AuditDetailedReportRequestDto request)
+        {
+            var response = ResponseDto.Create<ExportReportResultDto>();
+            try
+            {
+                // Construir filtros dinámicos
+                Expression<Func<PeriodAudit, bool>> baseFilter = x => x.IsActive;
+
+                // Filtro por empresas
+                if (request.EnterpriseIds != null && request.EnterpriseIds.Count > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => request.EnterpriseIds.Contains(x.Store.EnterpriseId));
+                }
+
+                // Filtro por tiendas
+                if (request.StoreIds != null && request.StoreIds.Count > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.StoreId.HasValue && request.StoreIds.Contains(x.StoreId.Value));
+                }
+
+                // Filtro por grupos
+                if (request.GroupIds != null && request.GroupIds.Count > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.PeriodAuditGroupResults.Any(g => request.GroupIds.Contains(g.GroupId)));
+                }
+
+                // Filtro por estado de auditoría
+                if (!string.IsNullOrEmpty(request.AuditStatusCode))
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.AuditStatus != null && x.AuditStatus.Code == request.AuditStatusCode);
+                }
+
+                // Obtener las auditorías con sus relaciones
+                var periodAudits = await _periodAuditRepository.GetWithScaleGroup(
+                    filter: baseFilter
+                );
+
+                // Generar el archivo Excel
+                var fileBase64 = AuditDetailedReportExcelGenerator.GenerateExcelReport(periodAudits.ToList());
+                
+                response.Data = new ExportReportResultDto
+                {
+                    FileBase64 = fileBase64,
+                    FileName = $"Reporte-Detallado-Auditoria-{DateTime.Now:yyyyMMddHHmmss}.xlsx",
+                    MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error obteniendo el reporte detallado de auditorías: {ex.Message}");
+                response = ResponseDto.Error<ExportReportResultDto>(ex.Message);
+            }
+
+            return response;
+        }
     }
 }

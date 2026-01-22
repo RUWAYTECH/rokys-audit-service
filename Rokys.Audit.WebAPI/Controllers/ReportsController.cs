@@ -75,5 +75,21 @@ namespace Rokys.Audit.WebAPI.Controllers
                 return Ok(response);
             return BadRequest(response);
         }
+
+        /// <summary>
+        /// Exporta el reporte detallado de resultados de auditoría en formato Excel
+        /// </summary>
+        /// <param name="request">Filtros para el reporte (empresas, tiendas, grupos, fechas)</param>
+        /// <returns>Archivo Excel con el reporte detallado de auditorías</returns>
+        [HttpGet("detailed/export")]
+        public async Task<IActionResult> GetAuditDetailedReport([FromQuery] AuditDetailedReportRequestDto request)
+        {
+            var response = await _reportsService.GetAuditDetailedReportAsync(request);
+            
+            if (response.IsValid)
+                return Ok(response);
+            
+            return BadRequest(response);
+        }
     }
 }

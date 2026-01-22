@@ -20,5 +20,12 @@ namespace Rokys.Audit.Services.Interfaces
         Task<ResponseDto<DashboardDataResponseDto>> GetDashboardStoresDataAsync(int year, Guid[] enterpriseIds, Guid[] storeIds);
         Task<ResponseDto<PeriodAuditReportResponseDto>> GetReportSearchAsync(ReportSearchFilterRequestDto reportSearchFilterRequestDto);
         Task<ResponseDto<ExportReportResultDto>> ExportReport(ReportSearchFilterRequestDto reportSearchFilterRequestDto);
+        
+        /// <summary>
+        /// Obtiene el reporte detallado de resultados de auditoría en formato Excel
+        /// </summary>
+        /// <param name="request">Filtros para el reporte (empresas, tiendas, grupos, fechas)</param>
+        /// <returns>Archivo Excel con el reporte detallado de auditorías</returns>
+        Task<ResponseDto<ExportReportResultDto>> GetAuditDetailedReportAsync(AuditDetailedReportRequestDto request);
     }
 }
