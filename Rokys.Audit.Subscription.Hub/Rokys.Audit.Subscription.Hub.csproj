@@ -16,10 +16,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../ruway-rabbitmq-events-shared/Ruway.Events.Command.Interfaces/Ruway.Events.Command.Interfaces.csproj" />
-    <ProjectReference Include="../../ruway-rabbitmq-events-shared/Ruway.Events.Command/Ruway.Events.Command.csproj" />
     <ProjectReference Include="..\Rokys.Audit.Services.Interfaces\Rokys.Audit.Services.Interfaces.csproj" />
     <ProjectReference Include="..\Rokys.Audit.DTOs\Rokys.Audit.DTOs.csproj" />
+    <ProjectReference Include="../ruway-rabbitmq-events-shared/Ruway.Events.Command.Interfaces/Ruway.Events.Command.Interfaces.csproj" />
+    <ProjectReference Include="../ruway-rabbitmq-events-shared/Ruway.Events.Command/Ruway.Events.Command.csproj" />
   </ItemGroup>
 
 </Project>

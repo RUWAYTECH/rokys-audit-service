@@ -74,5 +74,7 @@ namespace Rokys.Audit.Model.Tables
         public virtual ICollection<EmployeeStore>? EmployeeStores { get; set; }
 
         public virtual ICollection<InboxItems>? InboxItems { get; set; }
+
+        public virtual ICollection<PeriodAuditActionPlan>? PeriodAuditActionPlans { get; set; }
     }
 }

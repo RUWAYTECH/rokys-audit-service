@@ -42,7 +42,13 @@ namespace Rokys.Audit.Services.Services
         private readonly IScaleCompanyRepository _scaleCompanyRepository;
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly IPeriodAuditRepository _periodAuditRepository;
+        private readonly IPeriodAuditActionPlanRepository _periodAuditActionPlanRepository;
+        private readonly IAuditStatusRepository _auditStatusRepository;
+        private readonly IUserReferenceRepository _userReferenceRepository;
+        private readonly IEnterpriseGroupRepository _enterpriseGroupRepository;
+        private readonly ISystemConfigurationRepository _systemConfigurationRepository;
 
+        private readonly IPeriodAuditActionPlanService _periodAuditActionPlanService;
         public PeriodAuditGroupResultService(
             IPeriodAuditGroupResultRepository repository,
             IValidator<PeriodAuditGroupResultRequestDto> validator,
@@ -62,7 +68,14 @@ namespace Rokys.Audit.Services.Services
             IScoringCriteriaRepository scoringCriteriaRepository,
             IScaleCompanyRepository scaleCompanyRepository,
             IServiceScopeFactory serviceScopeFactory,
-            IPeriodAuditRepository periodAuditRepository)
+            IPeriodAuditRepository periodAuditRepository,
+            IPeriodAuditActionPlanRepository periodAuditActionPlanRepository,
+            IAuditStatusRepository auditStatusRepository,
+            IUserReferenceRepository userReferenceRepository,
+            IEnterpriseGroupRepository enterpriseGroupRepository,
+            ISystemConfigurationRepository systemConfigurationRepository,
+            IPeriodAuditActionPlanService periodAuditActionPlanService
+        )
         {
             _periodAuditGroupResultRepository = repository;
             _validator = validator;
@@ -83,6 +96,12 @@ namespace Rokys.Audit.Services.Services
             _scaleCompanyRepository = scaleCompanyRepository;
             _serviceScopeFactory = serviceScopeFactory;
             _periodAuditRepository = periodAuditRepository;
+            _periodAuditActionPlanRepository = periodAuditActionPlanRepository;
+            _auditStatusRepository = auditStatusRepository;
+            _userReferenceRepository = userReferenceRepository;
+            _enterpriseGroupRepository = enterpriseGroupRepository;
+            _systemConfigurationRepository = systemConfigurationRepository;
+            _periodAuditActionPlanService = periodAuditActionPlanService;
         }
         public async Task<ResponseDto<PeriodAuditGroupResultResponseDto>> Create(PeriodAuditGroupResultRequestDto requestDto, bool isTrasacction = false)
         {
@@ -543,6 +562,189 @@ namespace Rokys.Audit.Services.Services
                     _periodAuditGroupResultRepository.Update(items[i]);
                 }
                 await _unitOfWork.CommitAsync();
+                response.Data = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response = ResponseDto.Error<bool>(ex.Message);
+            }
+            return response;
+        }
+
+        public async Task<ResponseDto<int>> SyncActionPlans(Guid periodAuditGroupResultId, PeriodAuditUpdateActionPlanRequestDto requestDto)
+        {
+            var response = ResponseDto.Create<int>();
+            try
+            {
+                if (requestDto.PeriodAuditActionPlans == null || !requestDto.PeriodAuditActionPlans.Any())
+                {
+                    response = ResponseDto.Error<int>("No se proporcionaron planes de acción para sincronizar.");
+                    return response;
+                }
+
+                var entity = await _periodAuditGroupResultRepository.GetFirstOrDefaultAsync(x => x.PeriodAuditGroupResultId == periodAuditGroupResultId && x.IsActive, includeProperties: [x => x.PeriodAudit.AuditStatus, x => x.PeriodAudit.PeriodAuditParticipants, x => x.PeriodAudit.Store]);
+                if (entity == null)
+                {
+                    response = ResponseDto.Error<int>("No se encontró el registro.");
+                    return response;
+                }
+
+                var currentUser = _httpContextAccessor.CurrentUser();
+                var currentUserName = currentUser.UserName;
+
+                if (entity.PeriodAudit?.ActionPlanCompletedDate != null && !currentUser.RoleCodes.Contains(RoleCodes.JefeDeArea.Code))
+                {
+                    response = ResponseDto.Error<int>("No se pueden gestionar planes de acción en una auditoría que ya ha completado la gestión de planes de acción.");
+                    return response;
+                }
+
+                var resp = await GetAllowedActionPlans(entity.PeriodAuditId);
+
+                if (!resp.IsValid || !resp.Data)
+                {
+                    response = ResponseDto.Error<int>(resp.Messages.FirstOrDefault()?.Message ?? "No se pudo validar si el usuario tiene permisos para gestionar planes de acción.");
+                    return response;
+                }
+
+                // validar que existe una configuracion de puntaje para aplicar planes de acción
+                var enterpriseConfigResponse = await _periodAuditActionPlanService.GetEnterpriseConfigurationByPeriodAuditId(entity.PeriodAuditId);
+                if (!enterpriseConfigResponse.IsValid || enterpriseConfigResponse.Data == null || !enterpriseConfigResponse.Data.HasConfiguration)
+                {
+                    response = ResponseDto.Error<int>("No se encontró la configuración de puntaje para aplicar planes de acción en la empresa asociada a la auditoría.");
+                    return response;
+                }
+
+                var configValue = enterpriseConfigResponse.Data.ConfigurationValue;
+
+                // Validar que todos los usuarios responsables existen
+                var responsibleUserIds = requestDto.PeriodAuditActionPlans
+                    .Select(x => x.ResponsibleUserId)
+                    .Distinct()
+                    .ToList();
+
+                foreach (var userId in responsibleUserIds)
+                {
+                    var userExists = await _userReferenceRepository.GetFirstOrDefaultAsync(filter: x => x.UserReferenceId == userId);
+                    if (userExists == null)
+                    {
+                        response = ResponseDto.Error<int>($"El usuario responsable con ID {userId} no existe en el sistema.");
+                        return response;
+                    }
+                }
+
+                int actionPlansCount = 0;
+                foreach (var actionPlanDto in requestDto.PeriodAuditActionPlans)
+                {
+                    // Validar que el ScoreValue del PeriodAuditScaleResult sea menor al valor configurado
+                    var scaleResult = await _periodAuditScaleResultRepository.GetFirstOrDefaultAsync(filter: x => x.PeriodAuditScaleResultId == actionPlanDto.PeriodAuditScaleResultId && x.IsActive);
+                    if (scaleResult == null)
+                    {
+                        response = ResponseDto.Error<int>($"No se encontró el resultado de escala con ID {actionPlanDto.PeriodAuditScaleResultId}.");
+                        return response;
+                    }
+
+                    if (scaleResult.ScoreValue >= configValue)
+                    {
+                        response = ResponseDto.Error<int>($"El puntaje obtenido ({scaleResult.ScoreValue}) debe ser menor a {configValue} para poder crear o editar planes de acción en este resultado de escala.");
+                        return response;
+                    }
+
+                    var existingActionPlan = await _periodAuditActionPlanRepository.GetFirstOrDefaultAsync(filter: x => x.PeriodAuditScaleResultId == actionPlanDto.PeriodAuditScaleResultId);
+
+                    if (existingActionPlan != null)
+                    {
+                        // Update existing action plan
+                        existingActionPlan.DisiplinaryMeasureTypeId = actionPlanDto.DisiplinaryMeasureTypeId;
+                        existingActionPlan.ResponsibleUserId = actionPlanDto.ResponsibleUserId;
+                        existingActionPlan.Description = actionPlanDto.Description;
+                        existingActionPlan.DueDate = actionPlanDto.DueDate;
+                        existingActionPlan.ApplyMeasure = actionPlanDto.ApplyMeasure;
+
+                        existingActionPlan.UpdateAudit(currentUserName);
+
+                        _periodAuditActionPlanRepository.Update(existingActionPlan);
+                    }
+                    else
+                    {
+                        // Create new action plan
+                        var newActionPlan = new PeriodAuditActionPlan
+                        {
+                            PeriodAuditScaleResultId = actionPlanDto.PeriodAuditScaleResultId,
+                            DisiplinaryMeasureTypeId = actionPlanDto.DisiplinaryMeasureTypeId,
+                            ResponsibleUserId = actionPlanDto.ResponsibleUserId,
+                            Description = actionPlanDto.Description,
+                            DueDate = actionPlanDto.DueDate,
+                            ApplyMeasure = actionPlanDto.ApplyMeasure
+                        };
+
+                        newActionPlan.CreateAudit(currentUserName);
+
+                        _periodAuditActionPlanRepository.Insert(newActionPlan);
+                    }
+                    actionPlansCount++;
+                }
+
+                await _unitOfWork.CommitAsync();
+                response.Data = actionPlansCount;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response = ResponseDto.Error<int>(ex.Message);
+            }
+            return response;
+        }
+    
+        public async Task<ResponseDto<bool>> GetAllowedActionPlans(Guid id)
+        {
+            var response = ResponseDto.Create<bool>();
+            try
+            {
+                var entity = await _periodAuditRepository.GetCustomByIdAsync(filter: x => x.PeriodAuditId == id && x.IsActive);
+                
+                if (entity == null)
+                {
+                    throw new Exception("No se encontró el registro.");
+                }
+
+                var currentUser = _httpContextAccessor.CurrentUser();
+
+                // Definir roles permitidos para crear y editar planes de acción
+                var allowedEditRoles = new List<string> { RoleCodes.JobSupervisor.Code, RoleCodes.Volante.Code, RoleCodes.StoreAdmin.Code, RoleCodes.Auditor.Code };
+
+                if (currentUser == null)
+                {
+                    throw new Exception("No se encontró la información del usuario actual.");
+                }
+
+                // Validar si el usuario es Jefe de Área
+                if (currentUser.RoleCodes.Contains(RoleCodes.JefeDeArea.Code))
+                {
+                    response.Data = true;
+                    return response;
+                }
+
+                // Validar que el usuario sea participante de la auditoría con uno de los roles autorizados
+                if (entity.PeriodAuditParticipants == null || !entity.PeriodAuditParticipants.Any())
+                {
+                   throw new Exception("La auditoría no tiene participantes asignados.");
+                }
+
+                var userParticipant = entity.PeriodAuditParticipants
+                    .FirstOrDefault(p => p.UserReferenceId == currentUser.UserReferenceId && p.IsActive);
+
+                if (userParticipant == null)
+                {
+                    throw new Exception("El usuario actual no es participante de la auditoría.");
+                }
+
+                var userRoleInAudit = userParticipant.RoleCodeSnapshot;
+                if (string.IsNullOrEmpty(userRoleInAudit) || !allowedEditRoles.Contains(userRoleInAudit))
+                {
+                    throw new Exception("El usuario no tiene un rol autorizado para realizar esta acción. Se requiere uno de los siguientes roles: Supervisor (A006), Asistente Administrativo (A004), Administrador de tienda (A002) o Auditor (A005).");
+                }
+
                 response.Data = true;
             }
             catch (Exception ex)

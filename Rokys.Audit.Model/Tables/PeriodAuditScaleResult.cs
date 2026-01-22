@@ -24,6 +24,7 @@ namespace Rokys.Audit.Model.Tables
         // Navigation properties
         public virtual PeriodAuditGroupResult PeriodAuditGroupResult { get; set; } = null!;
         public virtual ScaleGroup ScaleGroup { get; set; } = null!;
+        public virtual ICollection<PeriodAuditActionPlan> PeriodAuditActionPlans { get; set; } = new List<PeriodAuditActionPlan>();
         public virtual ICollection<PeriodAuditTableScaleTemplateResult> PeriodAuditTableScaleTemplateResults { get; set; } = new List<PeriodAuditTableScaleTemplateResult>();
         public virtual ICollection<PeriodAuditScoringCriteriaResult> PeriodAuditScoringCriteriaResults { get; set; } = new List<PeriodAuditScoringCriteriaResult>();
         public virtual ICollection<PeriodAuditScaleSubResult> PeriodAuditScaleSubResults { get; set; } = new List<PeriodAuditScaleSubResult>();

@@ -38,6 +38,24 @@ namespace Rokys.Audit.WebAPI.Controllers
             return BadRequest(response);
         }
 
+        [HttpPost("export")]
+        public async Task<IActionResult> Export([FromBody] PeriodAuditExportRequestDto requestDto)
+        {
+            var response = await _service.Export(requestDto);
+            if (response.IsValid)
+                return Ok(response);
+            return BadRequest(response);
+        }
+
+        [HttpGet("allowed-action-plans/{periodAuditId}")]
+        public async Task<IActionResult> GetAllowedActionPlans([FromRoute] Guid periodAuditId)
+        {
+            var response = await _service.GetAllowedActionPlans(periodAuditId);
+            if (response.IsValid)
+                return Ok(response);
+            return BadRequest(response);
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById([FromRoute] Guid id)
         {
@@ -77,6 +95,15 @@ namespace Rokys.Audit.WebAPI.Controllers
         public async Task<IActionResult> GetLastAuditByStoreId([FromRoute] Guid storeId)
         {
             var response = await _service.GetLasAuditByStoreId(storeId);
+            if (response.IsValid)
+                return Ok(response);
+            return BadRequest(response);
+        }
+
+        [HttpPost("send-action-plans/{periodAuditId}")]
+        public async Task<IActionResult> SendActionPlanCompletedNotification([FromRoute] Guid periodAuditId)
+        {
+            var response = await _service.SendActionPlanCompletedNotification(periodAuditId);
             if (response.IsValid)
                 return Ok(response);
             return BadRequest(response);
