@@ -9,5 +9,11 @@ namespace Rokys.Audit.Infrastructure.Repositories
         Task<List<PeriodAuditScaleResult>> GetByPeriodAuditGroupResultId(Guid periodAuditGroupResultId);
         Task<PeriodAuditScaleResult> GetCustomByIdAsync(Expression<Func<PeriodAuditScaleResult, bool>> filter);
         Task<bool> GetValidatorByScaleGroupIdAsync(Guid periodAuditGroupResultId, Guid scaleGroupId, Guid? excludeId = null);
+        Task<(List<PeriodAuditScaleResult> Items, int TotalRows)> GetPagedCustomAsync(
+            Expression<Func<PeriodAuditScaleResult, bool>> filter = null,
+            Func<IQueryable<PeriodAuditScaleResult>, IOrderedQueryable<PeriodAuditScaleResult>> orderBy = null,
+            int pageNumber = 0,
+            int pageSize = 0
+        );
     }
 }

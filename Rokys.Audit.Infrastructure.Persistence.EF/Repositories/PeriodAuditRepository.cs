@@ -68,8 +68,8 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
                .Include(x => x.AuditStatus)
                .Include(x => x.PeriodAuditParticipants)
                .ThenInclude(p => p.UserReference)
-               .OrderByDescending(a=>a.CreationDate);
-                
+               .OrderByDescending(a => a.CreationDate);
+
 
             int rowsCount = await query.CountAsync();
             if (pageSize <= 0 || pageNumber <= 0)
@@ -79,6 +79,24 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
             }
             var items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
             return (items, rowsCount);
+        }
+
+        public async Task<List<PeriodAudit>> GetWithScaleGroup(Expression<Func<PeriodAudit, bool>>? filter)
+        {
+            var query = Db.PeriodAudits.Where(filter ?? (x => true))
+               .Include(x => x.Store)
+               .ThenInclude(s => s.Enterprise)
+               .Include(x => x.AuditStatus)
+               .Include(x => x.PeriodAuditParticipants)
+               .ThenInclude(p => p.UserReference)
+                .Include(pa => pa.PeriodAuditGroupResults.Where(pagr => pagr.IsActive).OrderBy(pagr => pagr.SortOrder))
+                    .ThenInclude(pagr => pagr.Group)
+                .Include(pa => pa.PeriodAuditGroupResults.Where(pagr => pagr.IsActive).OrderBy(pagr => pagr.SortOrder))
+                    .ThenInclude(pagr => pagr.PeriodAuditScaleResults.Where(pasr => pasr.IsActive).OrderBy(pasr => pasr.SortOrder))
+                        .ThenInclude(pasr => pasr.ScaleGroup)
+               .OrderByDescending(a => a.CreationDate);
+
+            return await query.ToListAsync();
         }
     }
 }

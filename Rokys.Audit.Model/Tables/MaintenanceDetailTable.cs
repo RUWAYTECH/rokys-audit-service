@@ -13,5 +13,6 @@
 
         // Relación
         public MaintenanceTable MaintenanceTable { get; set; } = default!;
+        public virtual ICollection<PeriodAuditActionPlan>? PeriodAuditActionPlans { get; set; } = new List<PeriodAuditActionPlan>();
     }
 }

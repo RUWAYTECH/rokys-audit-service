@@ -407,6 +407,7 @@ namespace Rokys.Audit.Services.Services
                     var searchTerm = paginationRequestDto.Filter.ToLower();
                     filter = x => x.IsActive && (x.FirstName.ToLower().Contains(searchTerm) ||
                                   x.LastName.ToLower().Contains(searchTerm) ||
+                                  (x.FirstName + " " + x.LastName).ToLower().Contains(searchTerm) ||
                                   (x.Email != null && x.Email.ToLower().Contains(searchTerm)) ||
                                   (x.PersonalEmail != null && x.PersonalEmail.ToLower().Contains(searchTerm)) ||
                                   (x.DocumentNumber != null && x.DocumentNumber.ToLower().Contains(searchTerm)) ||

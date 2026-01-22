@@ -28,6 +28,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
         public DbSet<PeriodAudit> PeriodAudits { get; set; }
         //public DbSet<PeriodAuditResult> PeriodAuditResults { get; set; }
         public DbSet<PeriodAuditScaleResult> PeriodAuditScaleResults { get; set; }
+        public DbSet<PeriodAuditActionPlan> PeriodAuditActionPlan { get; set; }
         public DbSet<PeriodAuditScaleSubResult> PeriodAuditScaleSubResults { get; set; }
         public DbSet<PeriodAuditFieldValues> PeriodAuditFieldValues { get; set; }
         public DbSet<PeriodAuditTableScaleTemplateResult> PeriodAuditTableScaleTemplateResults { get; set; }
@@ -80,6 +81,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
             modelBuilder.ApplyConfiguration(new PeriodAuditConfig());
             //modelBuilder.ApplyConfiguration(new PeriodAuditResultConfig());
             modelBuilder.ApplyConfiguration(new PeriodAuditScaleResultConfig());
+            modelBuilder.ApplyConfiguration(new PeriodAuditActionPlanConfig());
             modelBuilder.ApplyConfiguration(new PeriodAuditScaleSubResultConfig());
             modelBuilder.ApplyConfiguration(new PeriodAuditFieldValuesConfig());
 
@@ -97,6 +99,9 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
 
             // Substitution history configuration
             modelBuilder.ApplyConfiguration(new SubstitutionHistoryConfig());
+            modelBuilder.ApplyConfiguration(new SystemConfigurationConfig());
+            modelBuilder.ApplyConfiguration(new EnterpriseGroupingConfig());
+            modelBuilder.ApplyConfiguration(new EnterpriseGroupConfig());
         }
     }
 }

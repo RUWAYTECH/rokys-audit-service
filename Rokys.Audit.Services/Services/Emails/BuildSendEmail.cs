@@ -16,13 +16,14 @@ namespace Rokys.Audit.Services.Services.Emails
             try
             {
                 var bossOfArea =audit.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JefeDeArea.Code);
+                var administrator = audit.PeriodAuditParticipants?.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.StoreAdmin.Code);
                 var auditor = audit.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.Auditor.Code);
                 var supervisor = audit.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code);
                 var headOperations = audit.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JefeDeOperaciones.Code);
 
                 var inputTexts = new Dictionary<string, object>
                 {
-                    ["AdministratorFullName"] = bossOfArea?.UserReference?.FullName ?? string.Empty,
+                    ["AdministratorFullName"] = administrator?.UserReference?.FullName ?? string.Empty,
                     ["AuditorFullName"] = auditor?.UserReference?.FullName ?? string.Empty,
                     ["SupervisorFullName"] = supervisor?.UserReference?.FullName ?? string.Empty,
                     ["CorrelativeNumber"] = audit.CorrelativeNumber,
@@ -177,6 +178,47 @@ namespace Rokys.Audit.Services.Services.Emails
             }
 
             return auditData;
+        }
+
+        public static async Task NotifyActionPlanCompleted(IEmailService emailService, PeriodAudit audit, string urlApp)
+        {
+            try
+            {
+                var jefeDeArea = audit.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JefeDeArea.Code);
+                var auditor = audit.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.Auditor.Code);
+                var gerenteOperaciones = audit.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JefeDeOperaciones.Code);
+
+                var inputTexts = new Dictionary<string, object>
+                {
+                    ["CorrelativeNumber"] = audit.CorrelativeNumber,
+                    ["StoreName"] = audit.Store?.Name ?? "Sin tienda",
+                    ["UrlAplication"] = urlApp + "/store-audit/secure/manageaudits/" + audit.PeriodAuditId + "/action-plan"
+                };
+
+                var templateText = File.ReadAllText(MailTemplate.NotificationActionPlanCompleted);
+                var template = Template.Parse(templateText);
+                var htmlBody = template.Render(inputTexts);
+
+                var emailsTo = new List<string>();
+
+                if (!string.IsNullOrEmpty(jefeDeArea?.UserReference?.Email))
+                    emailsTo.Add(jefeDeArea.UserReference.Email);
+
+                if (!string.IsNullOrEmpty(auditor?.UserReference?.Email))
+                    emailsTo.Add(auditor.UserReference.Email);
+
+                if (!string.IsNullOrEmpty(gerenteOperaciones?.UserReference?.Email))
+                    emailsTo.Add(gerenteOperaciones.UserReference.Email);
+
+                if (emailsTo.Any())
+                {
+                    await emailService.SendEmailAsync(emailsTo, "Planes de Acción Completados", htmlBody, true);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error en NotifyActionPlanCompleted: {ex.Message}", ex);
+            }
         }
 
     }

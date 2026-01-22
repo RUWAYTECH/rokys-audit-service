@@ -24,5 +24,7 @@ namespace Rokys.Audit.Services.Interfaces
         /// <param name="newPosition">Nueva posición</param>
         /// <returns>Resultado del cambio de orden</returns>
         Task<ResponseDto<bool>> ChangeOrder(Guid periodAuditId, int currentPosition, int newPosition);
+        Task<ResponseDto<int>> SyncActionPlans(Guid periodAuditId, PeriodAuditUpdateActionPlanRequestDto requestDto);
+        Task<ResponseDto<bool>> GetAllowedActionPlans(Guid periodAuditId);
     }
 }

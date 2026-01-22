@@ -8,7 +8,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
 {
     public class PeriodAuditScaleResultRepository : EFRepository<PeriodAuditScaleResult>, IPeriodAuditScaleResultRepository
     {
-        
+
         public PeriodAuditScaleResultRepository(ApplicationDbContext context) : base(context)
         {
         }
@@ -44,8 +44,34 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
                             && x.ScaleGroupId == scaleGroupId
                             && x.IsActive
                             && (excludeId == null || x.PeriodAuditScaleResultId != excludeId));
-            
+
             return await query.AnyAsync();
+        }
+
+        public virtual async Task<(List<PeriodAuditScaleResult> Items, int TotalRows)> GetPagedCustomAsync(
+            Expression<Func<PeriodAuditScaleResult, bool>> filter = null,
+            Func<IQueryable<PeriodAuditScaleResult>, IOrderedQueryable<PeriodAuditScaleResult>> orderBy = null,
+            int pageNumber = 0,
+            int pageSize = 0
+        )
+        {
+            var query = CreateDbSetQuery(filter);
+            query = query
+                .Include(x => x.ScaleGroup)
+                .Include(x => x.PeriodAuditGroupResult)
+                .Include(x => x.PeriodAuditActionPlans)
+                    .ThenInclude(pa => pa.ResponsibleUser);
+            if (orderBy != null)
+                query = orderBy(query);
+
+            int rowsCount = await query.CountAsync();
+            if (pageSize <= 0 || pageNumber <= 0)
+            {
+                var allItems = await query.ToListAsync();
+                return (allItems, rowsCount);
+            }
+            var items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+            return (items, rowsCount);
         }
     }
 }

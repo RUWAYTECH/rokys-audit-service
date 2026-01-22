@@ -29,6 +29,7 @@ using Rokys.Audit.DTOs.Responses.AuditRoleConfiguration;
 using Rokys.Audit.DTOs.Responses.PeriodAuditParticipant;
 using Rokys.Audit.DTOs.Responses.SubstitutionHistory;
 using Rokys.Audit.DTOs.Common;
+using Rokys.Audit.DTOs.Requests.PeriodAudit;
 
 namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
 {
@@ -53,6 +54,17 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                         Weighting = src.ScaleGroup.Weighting,
                         IsActive = src.ScaleGroup.IsActive,
                     } : null;
+                    dest.PeriodAuditActionPlans = src.PeriodAuditActionPlans?.Select(p => new PeriodAuditActionPlanResponseDto
+                    {
+                        PeriodAuditActionPlanId = p.PeriodAuditActionPlanId,
+                        PeriodAuditScaleResultId = p.PeriodAuditScaleResultId,
+                        DisiplinaryMeasureTypeId = p.DisiplinaryMeasureTypeId,
+                        ResponsibleUserId = p.ResponsibleUserId,
+                        ResponsibleUserName = p.ResponsibleUser != null ? $"{p.ResponsibleUser.FirstName} {p.ResponsibleUser.LastName}".Trim() : string.Empty,
+                        Description = p.Description,
+                        DueDate = p.DueDate,
+                        ApplyMeasure = p.ApplyMeasure
+                    }).ToList() ?? new List<PeriodAuditActionPlanResponseDto>();
                 });
             CreateMap<Proveedor, ProveedorResponseDto>();
             CreateMap<ScaleCompany, ScaleCompanyResponseDto>()
@@ -86,7 +98,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
             CreateMap<AuditTemplateFields, AuditTemplateFieldResponseDto>()
                 .AfterMap((src, dest) =>
                 {
-                    dest.TableScaleTemplateName= src.TableScaleTemplate.Name;
+                    dest.TableScaleTemplateName = src.TableScaleTemplate.Name;
                     dest.TableScaleTemplateCode = src.TableScaleTemplate.Code;
                 });
             CreateMap<ScoringCriteria, ScoringCriteriaResponseDto>()
@@ -103,6 +115,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                 dest.EnterpriseId = src.Store?.EnterpriseId ?? Guid.Empty;
                 dest.StoreName = src.Store?.Name ?? string.Empty;
                 dest.ScaleCode = src.ScaleCode ?? string.Empty;
+                dest.ActionPlanCompletedDate = src.ActionPlanCompletedDate;
 
                 if (src.AuditStatus != null)
                 {
@@ -271,25 +284,25 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
 
             CreateMap<PeriodAudit, PeriodAuditItemReportResponseDto>().AfterMap((src, dest) =>
             {
-               dest.EnterpriseName = src.Store?.Enterprise?.Name ?? string.Empty;
-               dest.EnterpriseId = src.Store?.EnterpriseId ?? Guid.Empty;
-               dest.StoreName = src.Store?.Name ?? string.Empty;
+                dest.EnterpriseName = src.Store?.Enterprise?.Name ?? string.Empty;
+                dest.EnterpriseId = src.Store?.EnterpriseId ?? Guid.Empty;
+                dest.StoreName = src.Store?.Name ?? string.Empty;
 
-               if (src.AuditStatus != null)
-               {
-                   dest.AuditStatus = new AuditStatusResponseDto
-                   {
-                       AuditStatusId = src.AuditStatus.AuditStatusId,
-                       Name = src.AuditStatus.Name,
-                       ColorCode = src.AuditStatus.ColorCode,
-                       Code = src.AuditStatus.Code,
-                       IsActive = src.AuditStatus.IsActive,
-                       CreatedBy = src.AuditStatus.CreatedBy,
-                       CreationDate = src.AuditStatus.CreationDate,
-                       UpdatedBy = src.AuditStatus.UpdatedBy,
-                       UpdateDate = src.AuditStatus.UpdateDate
-                   };
-               }
+                if (src.AuditStatus != null)
+                {
+                    dest.AuditStatus = new AuditStatusResponseDto
+                    {
+                        AuditStatusId = src.AuditStatus.AuditStatusId,
+                        Name = src.AuditStatus.Name,
+                        ColorCode = src.AuditStatus.ColorCode,
+                        Code = src.AuditStatus.Code,
+                        IsActive = src.AuditStatus.IsActive,
+                        CreatedBy = src.AuditStatus.CreatedBy,
+                        CreationDate = src.AuditStatus.CreationDate,
+                        UpdatedBy = src.AuditStatus.UpdatedBy,
+                        UpdateDate = src.AuditStatus.UpdateDate
+                    };
+                }
             });
 
             CreateMap<SubstitutionHistory, SubstitutionHistoryResponseDto>()
@@ -306,6 +319,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                     dest.NewUserEmail = src.NewUserReference?.Email;
                 });
 
+            CreateMap<PeriodAuditActionPlan, PeriodAuditActionPlanResponseDto>();
         }
     }
 }

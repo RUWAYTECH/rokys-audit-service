@@ -84,5 +84,14 @@ namespace Rokys.Audit.WebAPI.Controllers
                 return Ok(response);
             return BadRequest(response);
         }
+
+        [HttpPost("sync-action-plans/{periodAuditGroupResultId}")]
+        public async Task<IActionResult> SyncActionPlans([FromRoute] Guid periodAuditGroupResultId, [FromBody] PeriodAuditUpdateActionPlanRequestDto requestDto)
+        {
+            var response = await _service.SyncActionPlans(periodAuditGroupResultId, requestDto);
+            if (response.IsValid)
+                return Ok(response);
+            return BadRequest(response);
+        }
     }
 }
