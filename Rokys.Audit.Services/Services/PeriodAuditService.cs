@@ -394,9 +394,9 @@ namespace Rokys.Audit.Services.Services
                 if (paginationRequestDto.DocumentNumber != null)
                     filter = filter.AndAlso(x => x.CorrelativeNumber == paginationRequestDto.DocumentNumber);
 
-                if (currentUser.RoleCodes.Contains(RoleCodes.StoreAdmin.Code))
+                if (currentUser.RoleCodes.Contains(RoleCodes.StoreAdmin.Code) || currentUser.RoleCodes.Contains(RoleCodes.AssistantAdministrative.Code))
                 {
-                    filter = filter.AndAlso(x => x.PeriodAuditParticipants.Any(p => p.UserReferenceId == currentUser.UserReferenceId && p.RoleCodeSnapshot == RoleCodes.StoreAdmin.Code && p.IsActive));
+                    filter = filter.AndAlso(x => x.PeriodAuditParticipants.Any(p => p.UserReferenceId == currentUser.UserReferenceId && (p.RoleCodeSnapshot == RoleCodes.StoreAdmin.Code || p.RoleCodeSnapshot == RoleCodes.AssistantAdministrative.Code) && p.IsActive));
                 }
 
 
