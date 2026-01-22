@@ -711,7 +711,7 @@ namespace Rokys.Audit.Services.Services
                 var currentUser = _httpContextAccessor.CurrentUser();
 
                 // Definir roles permitidos para crear y editar planes de acción
-                var allowedEditRoles = new List<string> { RoleCodes.JobSupervisor.Code, RoleCodes.Volante.Code, RoleCodes.StoreAdmin.Code, RoleCodes.Auditor.Code };
+                var allowedEditRoles = new List<string> { RoleCodes.JobSupervisor.Code, RoleCodes.AssistantAdministrative.Code, RoleCodes.StoreAdmin.Code, RoleCodes.Auditor.Code };
 
                 if (currentUser == null)
                 {
