@@ -5,5 +5,6 @@ namespace Rokys.Audit.Infrastructure.Repositories
 {
     public interface IEnterpriseThemeRepository : IRepository<EnterpriseTheme>
     {
+        Task<EnterpriseTheme?> GetByEnterpriseId(Guid EnterpriseId);
     }
 }

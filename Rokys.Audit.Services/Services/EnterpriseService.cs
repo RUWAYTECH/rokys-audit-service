@@ -48,7 +48,7 @@ namespace Rokys.Audit.Services.Services
             _storeRepository = storeRepository;
         }
 
-        public async Task<ResponseDto<EnterpriseResponseDto>> Create(EnterpriseRequestDto requestDto)
+        public async Task<ResponseDto<EnterpriseResponseDto>> Create(EnterpriseCreateRequestDto requestDto)
         {
             var response = ResponseDto.Create<EnterpriseResponseDto>();
             try
@@ -63,6 +63,11 @@ namespace Rokys.Audit.Services.Services
                 {
                     var currentUser = _httpContextAccessor.CurrentUser();
                     var entity = _mapper.Map<Enterprise>(requestDto);
+                    if (requestDto.EnterpriseId != null)
+                    {
+                        entity.EnterpriseId = requestDto.EnterpriseId.Value;
+                    }
+                    
                     entity.CreateAudit(currentUser.UserName);
                     _enterpriseRepository.Insert(entity);
                     await HandleEnterpriseThemeAsync(entity.EnterpriseId, requestDto, currentUser.UserName, isUpdate: true);
@@ -217,16 +222,17 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<EnterpriseResponseDto>();
             try
             {
-                var entity = _enterpriseRepository.GetByKey(id);
+                var entity = await _enterpriseRepository.GetByEnterpriseId(id);
                 if (entity == null)
                     response.Messages.Add(new ApplicationMessage { Message = ValidationMessage.NotFound, MessageType = ApplicationMessageType.Error });
                 else
                 {
                     var currentUser = _httpContextAccessor.CurrentUser();
                     _mapper.Map(requestDto, entity);
-                    entity.UpdateAudit(currentUser.UserName);
-                    _enterpriseRepository.Update(entity);
 
+                    entity.UpdateAudit(currentUser.UserName);
+
+                    _enterpriseRepository.Update(entity);
                     // Actualizar o crear theme si se envían propiedades de theme
                     await HandleEnterpriseThemeAsync(entity.EnterpriseId, requestDto, currentUser.UserName, isUpdate: true);
 
@@ -244,7 +250,7 @@ namespace Rokys.Audit.Services.Services
 
         private async Task HandleEnterpriseThemeAsync(Guid enterpriseId, EnterpriseRequestDto requestDto, string userName, bool isUpdate = false)
         {
-            var existingTheme = await _enterpriseThemeRepository.GetFirstOrDefaultAsync(t => t.EnterpriseId == enterpriseId);
+            var existingTheme = await _enterpriseThemeRepository.GetByEnterpriseId(enterpriseId);
 
             if (existingTheme != null)
             {

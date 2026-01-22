@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Rokys.Audit.Services.Interfaces;
 using Rokys.Audit.Subscription.Hub.Services.Interfaces;
 using Ruway.Events.Command.Interfaces.Events;
@@ -12,13 +13,16 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
     {
         private readonly ILogger<EnterpriseEventService> _logger;
         private readonly IEnterpriseService _enterpriseService;
+        private readonly IServiceScopeFactory _scopeFactory;
 
         public EnterpriseEventService(
             ILogger<EnterpriseEventService> logger,
-            IEnterpriseService enterpriseService)
+            IEnterpriseService enterpriseService,
+            IServiceScopeFactory serviceScopeFactory)
         {
             _logger = logger;
             _enterpriseService = enterpriseService;
+            _scopeFactory = serviceScopeFactory;
         }
 
         public async Task HandleEnterpriseCreatedAsync(EnterpriseCreatedEvent EnterpriseEvent, CancellationToken cancellationToken = default)
@@ -31,8 +35,9 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
 
             try
             {
-                await _enterpriseService.Create(new DTOs.Requests.Enterprise.EnterpriseRequestDto
+                await _enterpriseService.Create(new DTOs.Requests.Enterprise.EnterpriseCreateRequestDto
                 {
+                    EnterpriseId = EnterpriseEvent.EnterpriseId,
                     Name = EnterpriseEvent.Name,
                     Code = EnterpriseEvent.Code,
                     Address = EnterpriseEvent.Address,
@@ -96,7 +101,6 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
             {
                 await _enterpriseService.Update(EnterpriseEvent.EnterpriseId, new DTOs.Requests.Enterprise.EnterpriseUpdateRequestDto
                 {
-                    EnterpriseId = EnterpriseEvent.EnterpriseId,
                     Name = EnterpriseEvent.Name,
                     Code = EnterpriseEvent.Code,
                     Address = EnterpriseEvent.Address,
@@ -109,6 +113,7 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
                     LogoContentType = EnterpriseEvent.LogoContentType,
                     LogoFileName = EnterpriseEvent.LogoFileName
                 });
+                   
                 _logger.LogInformation("[SUBSCRIPTION-TRACE] EnterpriseUpdated event processed successfully at {Timestamp}. EnterpriseId: {EnterpriseId}, Code: {Code}",
                    DateTime.UtcNow,
                    EnterpriseEvent.EnterpriseId,

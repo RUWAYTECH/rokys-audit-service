@@ -4,6 +4,5 @@ namespace Rokys.Audit.DTOs.Requests.Enterprise
 {
     public class EnterpriseUpdateRequestDto : EnterpriseRequestDto
     {
-        public Guid EnterpriseId { get; set; }
     }
 }
