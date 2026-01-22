@@ -1,6 +1,10 @@
 -- Script para insertar registros en EnterpriseGroup basándose en RUC de Enterprise
 -- Fecha: 2026-01-21
 
+-- Insertar el EnterpriseGrouping
+INSERT INTO EnterpriseGrouping (EnterpriseGroupingId, Code, Name, Description, IsActive, CreatedBy, CreationDate)
+VALUES ('64106CA9-A15A-4D3A-8EAB-58C3930E3A7D', 'GRP_RUC_001', 'Grupo de Empresas por Rokys', 'Agrupación de empresas basada en códigos RUC par Rokys', 1, 'Admin', '2026-01-21 09:18:28.226');
+
 -- Declarar variables para almacenar los IDs
 DECLARE @EnterpriseGroupingId UNIQUEIDENTIFIER = '64106CA9-A15A-4D3A-8EAB-58C3930E3A7D';
 DECLARE @CreatedBy NVARCHAR(50) = 'Admin';
