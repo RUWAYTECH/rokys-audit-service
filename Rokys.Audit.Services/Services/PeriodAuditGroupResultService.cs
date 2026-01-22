@@ -590,18 +590,18 @@ namespace Rokys.Audit.Services.Services
                     return response;
                 }
 
-                if (entity.PeriodAudit?.ActionPlanCompletedDate != null)
+                var currentUser = _httpContextAccessor.CurrentUser();
+                var currentUserName = currentUser.UserName;
+
+                if (entity.PeriodAudit?.ActionPlanCompletedDate != null && !currentUser.RoleCodes.Contains(RoleCodes.JefeDeArea.Code))
                 {
                     response = ResponseDto.Error<int>("No se pueden gestionar planes de acción en una auditoría que ya ha completado la gestión de planes de acción.");
                     return response;
                 }
 
-                var currentUser = _httpContextAccessor.CurrentUser();
-                var currentUserName = currentUser.UserName;
-
                 var resp = await GetAllowedActionPlans(entity.PeriodAuditId);
 
-                if (!resp.IsValid)
+                if (!resp.IsValid || !resp.Data)
                 {
                     response = ResponseDto.Error<int>(resp.Messages.FirstOrDefault()?.Message ?? "No se pudo validar si el usuario tiene permisos para gestionar planes de acción.");
                     return response;
@@ -718,6 +718,7 @@ namespace Rokys.Audit.Services.Services
                     throw new Exception("No se encontró la información del usuario actual.");
                 }
 
+                // Validar si el usuario es Jefe de Área
                 if (currentUser.RoleCodes.Contains(RoleCodes.JefeDeArea.Code))
                 {
                     response.Data = true;

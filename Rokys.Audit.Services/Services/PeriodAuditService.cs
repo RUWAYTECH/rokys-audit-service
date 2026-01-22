@@ -993,7 +993,7 @@ namespace Rokys.Audit.Services.Services
 
                 if (!allHaveActionPlan)
                 {
-                    response = ResponseDto.Error("No todos los resultados de escala que requieren planes de acción tienen uno asignado.");
+                    response = ResponseDto.Error("No se pueden marcar los planes de acción como completados porque no todos los puntos auditables tienen un plan de acción asociado.");
                     return response;
                 }
 
