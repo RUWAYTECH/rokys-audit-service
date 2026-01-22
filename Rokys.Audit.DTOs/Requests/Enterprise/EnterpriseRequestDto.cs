@@ -4,8 +4,6 @@ namespace Rokys.Audit.DTOs.Requests.Enterprise
 {
     public class EnterpriseRequestDto: EnterpriseDto
     {
-
-        public bool IsActive { get; set; }
         // Theme properties - opcionales para crear/actualizar
         public string? PrimaryColor { get; set; }
         public string? SecondaryColor { get; set; }
