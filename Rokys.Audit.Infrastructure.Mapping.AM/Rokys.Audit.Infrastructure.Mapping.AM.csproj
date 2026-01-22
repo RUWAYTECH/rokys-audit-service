@@ -13,6 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Rokys.Audit.DTOs\Rokys.Audit.DTOs.csproj" />
     <ProjectReference Include="..\Rokys.Audit.Infrastructure\Rokys.Audit.Infrastructure.csproj" />
+    <ProjectReference Include="..\Rokys.Audit.Common\Rokys.Audit.Common.csproj" />
   </ItemGroup>
 
 </Project>

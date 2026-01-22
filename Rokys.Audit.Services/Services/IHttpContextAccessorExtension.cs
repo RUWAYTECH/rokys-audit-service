@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Rokys.Audit.Common.Constant;
 using Rokys.Audit.DTOs.Responses.User;
+using Rokys.Audit.Infrastructure.Repositories;
 
 namespace Reatil.Services.Services
 {
@@ -32,7 +34,30 @@ namespace Reatil.Services.Services
             Guid.TryParse(userId, out Guid outUserId);
             response.UserId = outUserId;
 
+            var userRepository = httpContextAccessor?.HttpContext?.RequestServices?.GetService<IUserReferenceRepository>();
 
+            if (userRepository != null && outUserId != Guid.Empty)
+            {
+                try
+                {
+                    // Buscar información adicional del usuario en la base de datos
+                    // Nota: Necesitarás verificar si tu modelo User usa Guid o long como ID
+                    var userEntity = userRepository.GetFirstOrDefault(
+                        u => u.UserId == outUserId && u.IsActive == true
+                    );
+
+                    if (userEntity != null)
+                    {
+                        response.UserReferenceId = userEntity.UserReferenceId;
+                        response.RoleCodes = userEntity.RoleCode?.Split(',', StringSplitOptions.RemoveEmptyEntries)?.ToList() ?? [];
+                    }
+                }
+                catch (Exception)
+                {
+                    throw new Exception("Error al obtener el usuario actual con datos del repositorio");
+                }
+
+            }
 
 
             return response;

@@ -6,6 +6,7 @@
 *.user
 *.userosscache
 *.sln.docstates
+.claude
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -259,3 +260,7 @@ paket-files/
 __pycache__/
 *.pyc
 *.txt
+*publish/
+*Uploads/
+*salida.sql
+*liquibase.properties

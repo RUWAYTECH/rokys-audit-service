@@ -1,0 +1,47 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Rokys.Audit.Infrastructure.Persistence.EF.Storage;
+using Rokys.Audit.Infrastructure.Repositories;
+using Rokys.Audit.Model.Tables;
+
+namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
+{
+    public class AuditTemplateFieldRepository : EFRepository<AuditTemplateFields>, IAuditTemplateFieldRepository
+    {
+        private readonly ApplicationDbContext _context;
+        public AuditTemplateFieldRepository(ApplicationDbContext context) : base(context)
+        {
+            _context = context;
+        }
+        public async Task<bool> ExistsByCodeAsync(string code)
+        {
+            return await _context.AuditTemplateFields
+                .AnyAsync(x => x.FieldCode == code && x.IsActive);
+        }
+        public async Task<bool> ExistsByCodeAsync(string code, Guid? excludeId)
+        {
+            return await _context.AuditTemplateFields
+                .AnyAsync(x => x.FieldCode == code && x.AuditTemplateFieldId != excludeId && x.IsActive);
+        }
+        public async Task<bool> ExistsByCodeAndTemplateIdAsync(
+            string code,
+            Guid tableScaleTemplateId,
+            Guid? excludeId = null)
+        {
+            return await _context.AuditTemplateFields
+                .AnyAsync(x =>
+                    x.FieldCode.ToLower() == code.ToLower() &&
+                    x.TableScaleTemplateId == tableScaleTemplateId &&
+                    (excludeId == null || x.AuditTemplateFieldId != excludeId)
+                    && x.IsActive);
+        }
+
+        public async Task<List<AuditTemplateFields>> GetByTemplateId(Guid tableScaleTemplateId)
+        {
+            return await _context.AuditTemplateFields
+                .Where(x => x.TableScaleTemplateId == tableScaleTemplateId && x.IsActive)
+                .Include(x => x.TableScaleTemplate)
+                .OrderBy(x => x.FieldName)
+                .ToListAsync();
+        }
+    }
+}

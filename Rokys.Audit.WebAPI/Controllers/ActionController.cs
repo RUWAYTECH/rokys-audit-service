@@ -14,13 +14,13 @@ namespace Rokys.Audit.WebAPI.Controllers
             _actionService = actionService;
         }
 
-        [HttpGet]
+        /*[HttpGet]
         public async Task<IActionResult> GetAll()
         {
             var response = await _actionService.GetAsync();
             if (response.IsValid)
                 return Ok(response);
             return BadRequest();
-        }
+        } */
     }
 }

@@ -1,14 +1,17 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Rokys.Audit.DTOs.Requests.Email;
 using Rokys.Audit.Infrastructure.Mapping.AM;
 using Rokys.Audit.Infrastructure.Persistence.Dp;
 using Rokys.Audit.Infrastructure.Persistence.EF.Storage;
+using Rokys.Audit.Subscription.Hub.Extensions;
 using Rokys.Audit.WebAPI.Configuration;
 using Rokys.Audit.WebAPI.DependencyInjection;
 using Rokys.Audit.WebAPI.Filters;
 using Rokys.Audit.WebAPI.Middleware;
 using System.Data;
+using Serilog;
 
 namespace Rokys.Audit.WebAPI
 {
@@ -69,7 +72,7 @@ namespace Rokys.Audit.WebAPI
             {
                 return new SqlConnection(connectionString);
             });
-
+            services.Configure<EmailSettings>(Configuration.GetSection("Email"));
             // Add HttpClient factory
             services.AddHttpClient();
 
@@ -79,6 +82,10 @@ namespace Rokys.Audit.WebAPI
 
             ContextDp.Config();
             this.AddSecurity();
+            
+            // Add Subscription Hub
+            Services.AddSubscriptionHub(Configuration);
+            
             return DependencyConfig.Configure(Services, Configuration);
         }
 
@@ -98,15 +105,16 @@ namespace Rokys.Audit.WebAPI
                 .AllowAnyHeader()
                 );
 
-            //Logger file
-            loggerFactory.AddFile(env.ContentRootPath + "/LogError/log-{Date}.txt");
+            //Logger file - Usando Serilog configurado en Program.cs
+            loggerFactory.AddSerilog();
 
             // Configure the HTTP request pipeline.
             if (env.IsDevelopment())
             {
-                app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseDeveloperExceptionPage();
             }
+            app.UseSwagger();
+            app.UseSwaggerUI();
 
             app.UseHttpsRedirection();
 

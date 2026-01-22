@@ -1,0 +1,2079 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentación Técnica - Sistema de Auditoría Rokys</title>
+    <style>
+        @page {
+            margin: 2cm;
+            size: A4;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .header-logo {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
+        
+        .header-logo img {
+            max-width: 250px;
+            height: auto;
+            margin-bottom: 15px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .header-title {
+            color: white;
+            font-size: 32px;
+            font-weight: 700;
+            margin: 15px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header-subtitle {
+            color: #f0f0f0;
+            font-size: 18px;
+            margin: 5px 0;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            margin-top: 40px;
+            page-break-before: auto;
+            page-break-after: avoid;
+        }
+        
+        h2 {
+            color: #34495e;
+            border-bottom: 2px solid #95a5a6;
+            padding-bottom: 8px;
+            margin-top: 30px;
+            page-break-after: avoid;
+        }
+        
+        h3 {
+            color: #555;
+            margin-top: 20px;
+            background-color: #ecf0f1;
+            padding: 10px;
+            border-left: 4px solid #3498db;
+            page-break-after: avoid;
+        }
+        
+        h4 {
+            color: #666;
+            margin-top: 15px;
+            font-weight: 600;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 11px;
+            page-break-inside: avoid;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        table thead tr {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: left;
+        }
+        
+        table th {
+            padding: 12px;
+            font-weight: 600;
+        }
+        
+        table tbody tr {
+            border-bottom: 1px solid #ddd;
+        }
+        
+        table tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        table tbody tr:hover {
+            background-color: #e9ecef;
+        }
+        
+        table td {
+            padding: 10px;
+        }
+        
+        code {
+            background-color: #f4f4f4;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', Consolas, monospace;
+            font-size: 90%;
+            color: #e74c3c;
+        }
+        
+        pre {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+            border-left: 4px solid #3498db;
+        }
+        
+        pre code {
+            background-color: transparent;
+            color: #f8f8f2;
+            padding: 0;
+        }
+        
+        ul, ol {
+            margin: 10px 0;
+            padding-left: 30px;
+        }
+        
+        li {
+            margin: 5px 0;
+        }
+        
+        hr {
+            border: none;
+            border-top: 2px solid #ecf0f1;
+            margin: 30px 0;
+        }
+        
+        .toc {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .toc h2 {
+            margin-top: 0;
+        }
+        
+        .emoji {
+            font-size: 1.2em;
+        }
+        
+        blockquote {
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+            margin: 20px 0;
+            color: #555;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        
+        .diagram {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            white-space: pre;
+            overflow-x: auto;
+            border: 1px solid #ddd;
+        }
+        
+        @media print {
+            body {
+                background-color: white;
+            }
+            
+            h1, h2, h3, h4 {
+                page-break-after: avoid;
+            }
+            
+            table, pre, .diagram {
+                page-break-inside: avoid;
+            }
+            
+            .header-logo {
+                page-break-after: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="header-logo">
+    <img src="https://www.ruway.tech/static/media/logo.0daae2dc.png" alt="Ruwaytech Logo">
+    <div class="header-title">Documentación Técnica</div>
+    <div class="header-subtitle">Sistema de Auditoría Rokys</div>
+</div>
+<h1>Documentación Técnica - Sistema de Auditoría Rokys</h1>
+<br>
+<h2>📑 Tabla de Contenidos</h2>
+<br>
+<li><a href="#visión-general-del-proyecto">Visión General del Proyecto</a></li>
+<li><a href="#arquitectura-del-sistema">Arquitectura del Sistema</a></li>
+<li><a href="#tecnologías-y-frameworks">Tecnologías y Frameworks</a></li>
+<li><a href="#estructura-del-proyecto">Estructura del Proyecto</a></li>
+<li><a href="#modelo-de-datos">Modelo de Datos</a></li>
+<li><a href="#componentes-principales">Componentes Principales</a></li>
+<li><a href="#api-y-endpoints">API y Endpoints</a></li>
+<li><a href="#seguridad-y-autenticación">Seguridad y Autenticación</a></li>
+<li><a href="#integración-con-microservicios">Integración con Microservicios</a></li>
+<li><a href="#configuración-y-despliegue">Configuración y Despliegue</a></li>
+<li><a href="#guías-de-desarrollo">Guías de Desarrollo</a></li>
+<br>
+<hr>
+<br>
+<h2>Visión General del Proyecto</h2>
+<br>
+<h3>🎯 Propósito</h3>
+<br>
+<p>El <strong>Sistema de Auditoría Rokys</strong> es una aplicación empresarial diseñada para gestionar y ejecutar auditorías periódicas en tiendas de la organización. El sistema permite:</p>
+<br>
+<ul>
+<li>✅ <strong>Configurar criterios de auditoría</strong> personalizados por empresa</li>
+<li>✅ <strong>Ejecutar auditorías periódicas</strong> con plantillas configurables</li>
+<li>✅ <strong>Evaluar resultados</strong> automáticamente según criterios de puntuación</li>
+<li>✅ <strong>Generar reportes</strong> en PDF y Excel</li>
+<li>✅ <strong>Gestionar flujo de aprobaciones</strong> mediante bandeja de entrada</li>
+<li>✅ <strong>Notificar eventos</strong> por email</li>
+<li>✅ <strong>Sincronizar datos</strong> con otros microservicios (Security, Memos)</li>
+</ul>
+<br>
+<h3>🏢 Alcance</h3>
+<br>
+<p>El sistema cubre el ciclo completo de auditorías:</p>
+<li><strong>Configuración</strong>: Empresas, tiendas, escalas, grupos, criterios</li>
+<li><strong>Ejecución</strong>: Creación de auditorías, captura de datos, evidencias</li>
+<li><strong>Evaluación</strong>: Cálculo automático de puntuaciones y escalas</li>
+<li><strong>Aprobación</strong>: Flujo de trabajo con múltiples roles</li>
+<li><strong>Reportería</strong>: Generación de documentos PDF/Excel</li>
+<li><strong>Notificaciones</strong>: Alertas por email en puntos clave del proceso</li>
+<br>
+<hr>
+<br>
+<h2>Arquitectura del Sistema</h2>
+<br>
+<h3>🏗️ Patrón de Arquitectura: Clean Architecture / DDD</h3>
+<br>
+<p>El proyecto sigue los principios de <strong>Clean Architecture</strong> con separación clara de responsabilidades:</p>
+<br>
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│                    Rokys.Audit.WebAPI                       │
+│  (Capa de Presentación - Controllers, Middleware, Filters) │
+└────────────────────────────┬────────────────────────────────┘
+                             │
+┌────────────────────────────┴────────────────────────────────┐
+│                  Rokys.Audit.Services                       │
+│      (Capa de Aplicación - Business Logic, Validators)     │
+└────────────────────────────┬────────────────────────────────┘
+                             │
+┌────────────────────────────┴────────────────────────────────┐
+│              Rokys.Audit.Infrastructure                     │
+│    (Capa de Infraestructura - Repositories, Persistence)   │
+└────────────────────────────┬────────────────────────────────┘
+                             │
+┌────────────────────────────┴────────────────────────────────┐
+│                   Rokys.Audit.Model                         │
+│              (Capa de Dominio - Entities, DTOs)             │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+<br>
+<h3>📦 Capas del Sistema</h3>
+<br>
+<h4>1. **Capa de Presentación** (WebAPI)</h4>
+<ul>
+<li><strong>Responsabilidad</strong>: Exponer endpoints REST, manejar peticiones HTTP</li>
+<li><strong>Componentes</strong>: Controllers, Filters, Middleware, Startup</li>
+<li><strong>Tecnologías</strong>: ASP.NET Core 9.0, Swagger/OpenAPI</li>
+</ul>
+<br>
+<h4>2. **Capa de Aplicación** (Services)</h4>
+<ul>
+<li><strong>Responsabilidad</strong>: Lógica de negocio, orquestación de casos de uso</li>
+<li><strong>Componentes</strong>: Services, Validators, DTOs</li>
+<li><strong>Tecnologías</strong>: FluentValidation, AutoMapper</li>
+</ul>
+<br>
+<h4>3. **Capa de Infraestructura** (Infrastructure/Persistence)</h4>
+<ul>
+<li><strong>Responsabilidad</strong>: Acceso a datos, integración con servicios externos</li>
+<li><strong>Componentes</strong>: Repositories (EF Core, Dapper), Email Service</li>
+<li><strong>Tecnologías</strong>: Entity Framework Core 7, Dapper, SMTP</li>
+</ul>
+<br>
+<h4>4. **Capa de Dominio** (Model)</h4>
+<ul>
+<li><strong>Responsabilidad</strong>: Entidades de negocio, objetos de valor</li>
+<li><strong>Componentes</strong>: Entities, Value Objects</li>
+<li><strong>Tecnologías</strong>: .NET 9.0</li>
+</ul>
+<br>
+<h4>5. **Capa de Integración** (Subscription.Hub)</h4>
+<ul>
+<li><strong>Responsabilidad</strong>: Comunicación con otros microservicios</li>
+<li><strong>Componentes</strong>: Event Handlers, RabbitMQ Consumers</li>
+<li><strong>Tecnologías</strong>: RabbitMQ, Ruway.Events</li>
+</ul>
+<br>
+<h3>🔄 Flujo de Datos</h3>
+<br>
+<pre><code>┌─────────┐      ┌─────────────┐      ┌──────────┐      ┌──────────┐
+│ Client  │─────▶│ Controller  │─────▶│ Service  │─────▶│Repository│
+│ (HTTP)  │◀─────│  (WebAPI)   │◀─────│(Business)│◀─────│  (Data)  │
+└─────────┘      └─────────────┘      └──────────┘      └──────────┘
+                        │                   │
+                        │                   ▼
+                        │            ┌──────────────┐
+                        │            │ External     │
+                        │            │ Services     │
+                        │            │ (Email, etc) │
+                        │            └──────────────┘
+                        ▼
+                 ┌──────────────┐
+                 │ RabbitMQ     │
+                 │ Event Bus    │
+                 └──────────────┘</code></pre>
+<br>
+<hr>
+<br>
+<h2>Tecnologías y Frameworks</h2>
+<br>
+<h3>🛠️ Stack Tecnológico Principal</h3>
+<br>
+<table>
+<thead><tr>
+<th>Categoría</th>
+<th>Tecnología</th>
+<th>Versión</th>
+<th>Uso</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><strong>Framework</strong></td>
+<td>.NET</td>
+<td>9.0</td>
+<td>Runtime y SDK</td>
+</tr>
+<tr>
+<td><strong>Web API</strong></td>
+<td>ASP.NET Core</td>
+<td>9.0</td>
+<td>Framework web</td>
+</tr>
+<tr>
+<td><strong>ORM</strong></td>
+<td>Entity Framework Core</td>
+<td>7.0.2</td>
+<td>Acceso a datos principal</td>
+</tr>
+<tr>
+<td><strong>Micro ORM</strong></td>
+<td>Dapper</td>
+<td>2.1.35</td>
+<td>Consultas optimizadas</td>
+</tr>
+<tr>
+<td><strong>Base de Datos</strong></td>
+<td>SQL Server</td>
+<td>2019+</td>
+<td>Almacenamiento</td>
+</tr>
+<tr>
+<td><strong>Mapeo</strong></td>
+<td>AutoMapper</td>
+<td>12.0.1</td>
+<td>Mapeo DTO-Entity</td>
+</tr>
+<tr>
+<td><strong>Validación</strong></td>
+<td>FluentValidation</td>
+<td>11.4.0</td>
+<td>Validaciones de negocio</td>
+</tr>
+<tr>
+<td><strong>IoC</strong></td>
+<td>Autofac</td>
+<td>6.5.0</td>
+<td>Inyección de dependencias</td>
+</tr>
+<tr>
+<td><strong>Documentación API</strong></td>
+<td>Swagger/Swashbuckle</td>
+<td>6.6.2</td>
+<td>Documentación OpenAPI</td>
+</tr>
+<tr>
+<td><strong>Logging</strong></td>
+<td>Serilog</td>
+<td>2.12.0</td>
+<td>Registro de logs</td>
+</tr>
+<tr>
+<td><strong>Autenticación</strong></td>
+<td>JWT Bearer</td>
+<td>6.0.13</td>
+<td>Autenticación basada en tokens</td>
+</tr>
+<tr>
+<td><strong>Mensajería</strong></td>
+<td>RabbitMQ</td>
+<td>-</td>
+<td>Bus de eventos</td>
+</tr>
+<tr>
+<td><strong>Reportes PDF</strong></td>
+<td>QuestPDF</td>
+<td>2025.7.4</td>
+<td>Generación de PDFs</td>
+</tr>
+<tr>
+<td><strong>Reportes Excel</strong></td>
+<td>ClosedXML</td>
+<td>0.105.0</td>
+<td>Generación de Excel</td>
+</tr>
+<tr>
+<td><strong>Templates</strong></td>
+<td>Scriban</td>
+<td>6.2.1</td>
+<td>Motor de templates</td>
+</tr>
+</tbody></table>
+<br>
+<h3>📚 Librerías Adicionales</h3>
+<br>
+<ul>
+<li><strong>Newtonsoft.Json</strong>: Serialización JSON</li>
+<li><strong>NeuroSpeech.RetroCoreFit</strong>: Cliente HTTP tipado</li>
+<li><strong>Microsoft.Extensions.</strong>*: Extensiones de .NET</li>
+</ul>
+<br>
+<hr>
+<br>
+<h2>Estructura del Proyecto</h2>
+<br>
+<h3>📂 Organización de Proyectos</h3>
+<br>
+<pre><code>rokys-audit-service/
+├── 📁 Rokys.Audit.WebAPI/                    # API REST (Entry Point)
+│   ├── Controllers/                          # Endpoints REST
+│   ├── Middleware/                           # Middleware personalizado
+│   ├── Filters/                              # Filtros de acción
+│   ├── Configuration/                        # Configuraciones
+│   ├── DependencyInjection/                  # Registro de servicios
+│   ├── Template/Mail/                        # Plantillas de email
+│   ├── Program.cs                            # Punto de entrada
+│   └── Startup.cs                            # Configuración de servicios
+│
+├── 📁 Rokys.Audit.Services/                  # Lógica de Negocio
+│   ├── Services/                             # Implementación de servicios
+│   │   ├── *Service.cs                       # Servicios de dominio
+│   │   ├── Emails/                           # Servicios de email
+│   │   ├── Pdf/                              # Generación de PDFs
+│   │   └── ReportUtils/                      # Utilidades de reportes
+│   └── Validations/                          # Validadores FluentValidation
+│
+├── 📁 Rokys.Audit.Services.Interfaces/       # Contratos de Servicios
+│   └── I*Service.cs                          # Interfaces de servicios
+│
+├── 📁 Rokys.Audit.Infrastructure/            # Infraestructura Base
+│   ├── IRepository.cs                        # Contrato genérico de repositorio
+│   └── Common interfaces                     # Interfaces compartidas
+│
+├── 📁 Rokys.Audit.Infrastructure.Persistence/ # Acceso a Datos Base
+│   └── Base repository implementations
+│
+├── 📁 Rokys.Audit.Infrastructure.Persistence.EF/ # Entity Framework
+│   ├── Storage/ApplicationDbContext.cs       # Contexto de EF
+│   ├── Repositories/                         # Repositorios EF
+│   └── Configurations/                       # Configuraciones de entidades
+│
+├── 📁 Rokys.Audit.Infrastructure.Persistence.Dp/ # Dapper
+│   ├── ContextDp.cs                          # Contexto de Dapper
+│   └── Repositories/                         # Repositorios Dapper
+│
+├── 📁 Rokys.Audit.Infrastructure.Mapping.AM/ # AutoMapper
+│   └── AMMapper.cs                           # Perfiles de mapeo
+│
+├── 📁 Rokys.Audit.Model/                     # Entidades de Dominio
+│   └── Tables/                               # Entidades de tablas
+│       ├── AuditEntity.cs                    # Entidad base de auditoría
+│       ├── Enterprise.cs
+│       ├── Stores.cs
+│       ├── PeriodAudit.cs
+│       └── ... (otras entidades)
+│
+├── 📁 Rokys.Audit.DTOs/                      # Data Transfer Objects
+│   ├── Common/                               # DTOs comunes
+│   ├── Requests/                             # DTOs de petición
+│   └── Responses/                            # DTOs de respuesta
+│
+├── 📁 Rokys.Audit.External.Services/         # Servicios Externos
+│   └── EmailService.cs                       # Servicio de correo
+│
+├── 📁 Rokys.Audit.External.Services.Interfaces/ # Contratos Externos
+│   └── IEmailService.cs
+│
+├── 📁 Rokys.Audit.Subscription.Hub/          # Hub de Eventos
+│   ├── Services/                             # Manejadores de eventos
+│   ├── Configuration/                        # Configuración del hub
+│   └── Extensions/                           # Extensiones DI
+│
+├── 📁 Rokys.Audit.Globalization/             # Internacionalización
+│   └── ValidationMessage.resx                # Mensajes de validación
+│
+├── 📁 Rokys.Audit.Common/                    # Utilidades Compartidas
+│   ├── Constant/                             # Constantes
+│   ├── Extensions/                           # Métodos de extensión
+│   └── Helpers/                              # Clases auxiliares
+│
+├── 📁 Rokys.Audit.DataBase/                  # Scripts de Base de Datos
+│   ├── Init/DataInitial.sql                  # Script de creación inicial
+│   ├── Inserts/                              # Scripts de datos iniciales
+│   ├── changelog.xml                         # Changelog de Liquibase
+│   └── liquibase.properties                  # Configuración Liquibase
+│
+├── 📁 publish/                                # Archivos publicados
+├── global.json                                # Versión del SDK
+├── Rokys.Audit.Services.sln                   # Solución Visual Studio
+└── README.md                                  # Documentación general</code></pre>
+<br>
+<h3>🎯 Responsabilidades por Proyecto</h3>
+<br>
+<h4>**Rokys.Audit.WebAPI**</h4>
+<ul>
+<li>Exponer API REST</li>
+<li>Autenticación y autorización</li>
+<li>Validación de entrada</li>
+<li>Manejo de errores HTTP</li>
+<li>Documentación Swagger</li>
+<li>Logging de requests</li>
+</ul>
+<br>
+<h4>**Rokys.Audit.Services**</h4>
+<ul>
+<li>Lógica de negocio</li>
+<li>Validaciones de dominio</li>
+<li>Orquestación de operaciones</li>
+<li>Generación de reportes</li>
+<li>Envío de emails</li>
+<li>Cálculo de puntuaciones</li>
+</ul>
+<br>
+<h4>**Rokys.Audit.Infrastructure.Persistence.EF**</h4>
+<ul>
+<li>Operaciones CRUD con EF Core</li>
+<li>Transacciones de base de datos</li>
+<li>Migraciones</li>
+<li>Configuraciones de entidades</li>
+</ul>
+<br>
+<h4>**Rokys.Audit.Infrastructure.Persistence.Dp**</h4>
+<ul>
+<li>Consultas optimizadas con Dapper</li>
+<li>Reportes complejos</li>
+<li>Operaciones de lectura masiva</li>
+<li>Procedimientos almacenados</li>
+</ul>
+<br>
+<h4>**Rokys.Audit.Subscription.Hub**</h4>
+<ul>
+<li>Escuchar eventos de RabbitMQ</li>
+<li>Sincronizar datos de otros servicios</li>
+<li>Procesar eventos de empleados</li>
+<li>Mantener consistencia eventual</li>
+</ul>
+<br>
+<hr>
+<br>
+<h2>Modelo de Datos</h2>
+<br>
+<h3>🗄️ Esquema de Base de Datos</h3>
+<br>
+<p>Para la documentación completa del modelo de datos, consultar:</p>
+<ul>
+<li><a href="Rokys.Audit.DataBase/README.md">Diccionario de Datos</a></li>
+<li><a href="Rokys.Audit.DataBase/Init/DataInitial.sql">Script de Creación</a></li>
+</ul>
+<br>
+<h3>📊 Diagrama ER Simplificado</h3>
+<br>
+<pre><code>┌─────────────┐       ┌──────────┐       ┌──────────────┐
+│ Enterprise  │──1:N──│  Stores  │──1:N──│ PeriodAudit  │
+└─────────────┘       └──────────┘       └──────────────┘
+      │                                          │
+      │1:N                                       │1:N
+      ▼                                          ▼
+┌─────────────┐                       ┌────────────────────────┐
+│    Group    │                       │ PeriodAuditGroupResult │
+└─────────────┘                       └────────────────────────┘
+      │                                          │
+      │1:N                                       │1:N
+      ▼                                          ▼
+┌─────────────┐                       ┌────────────────────────┐
+│ ScaleGroup  │                       │ PeriodAuditScaleResult │
+└─────────────┘                       └────────────────────────┘
+      │                                          │
+      │1:N                                       │1:N
+      ▼                                          ▼
+┌──────────────────────┐           ┌─────────────────────────────────┐
+│ TableScaleTemplate   │           │ PeriodAuditTableScaleTemplate   │
+└──────────────────────┘           └─────────────────────────────────┘
+      │                                          │
+      │1:N                                       │1:N
+      ▼                                          ▼
+┌──────────────────────┐           ┌──────────────────────────┐
+│ AuditTemplateFields  │           │ PeriodAuditFieldValues   │
+└──────────────────────┘           └──────────────────────────┘</code></pre>
+<br>
+<h3>🔑 Entidades Principales</h3>
+<br>
+<h4>**Enterprise** (Empresa)</h4>
+<p>Representa la organización o empresa que utiliza el sistema.</p>
+<br>
+<h4>**Stores** (Tiendas)</h4>
+<p>Tiendas asociadas a una empresa donde se realizan las auditorías.</p>
+<br>
+<h4>**PeriodAudit** (Auditoría por Período)</h4>
+<p>Encabezado de una auditoría realizada en una tienda durante un período específico.</p>
+<br>
+<h4>**Group** (Grupo)</h4>
+<p>Agrupación de criterios de auditoría (ej: Limpieza, Seguridad, Operaciones).</p>
+<br>
+<h4>**ScaleGroup** (Subgrupo de Escala)</h4>
+<p>Subdivisión de un grupo con criterios específicos de evaluación.</p>
+<br>
+<h4>**TableScaleTemplate** (Plantilla de Tabla)</h4>
+<p>Define la estructura de tablas de captura de datos (horizontal/vertical).</p>
+<br>
+<h4>**AuditTemplateFields** (Campos de Plantilla)</h4>
+<p>Define los campos individuales dentro de una plantilla (texto, número, fecha, etc.).</p>
+<br>
+<h4>**ScoringCriteria** (Criterios de Puntuación)</h4>
+<p>Criterios de evaluación que determinan la puntuación final.</p>
+<br>
+<h4>**PeriodAuditFieldValues** (Valores Capturados)</h4>
+<p>Valores reales capturados durante la ejecución de la auditoría.</p>
+<br>
+<hr>
+<br>
+<h2>Componentes Principales</h2>
+<br>
+<h3>🎮 Controllers (API Layer)</h3>
+<br>
+<h4>Estructura de Controllers</h4>
+<br>
+<p>Todos los controllers heredan de <code>ControllerBase</code> y están decorados con:</p>
+<ul>
+<li><code>[ApiController]</code></li>
+<li><code>[Route("api/[controller]")]</code></li>
+<li><code>[Authorize]</code> (cuando se requiere autenticación)</li>
+</ul>
+<br>
+<h4>Controllers Principales</h4>
+<br>
+<table>
+<thead><tr>
+<th>Controller</th>
+<th>Ruta Base</th>
+<th>Descripción</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><strong>EnterpriseController</strong></td>
+<td><code>/api/Enterprise</code></td>
+<td>CRUD de empresas</td>
+</tr>
+<tr>
+<td><strong>StoreController</strong></td>
+<td><code>/api/Store</code></td>
+<td>CRUD de tiendas</td>
+</tr>
+<tr>
+<td><strong>PeriodAuditController</strong></td>
+<td><code>/api/PeriodAudit</code></td>
+<td>Gestión de auditorías</td>
+</tr>
+<tr>
+<td><strong>GroupController</strong></td>
+<td><code>/api/Group</code></td>
+<td>CRUD de grupos</td>
+</tr>
+<tr>
+<td><strong>ScaleGroupController</strong></td>
+<td><code>/api/ScaleGroup</code></td>
+<td>CRUD de subgrupos</td>
+</tr>
+<tr>
+<td><strong>TableScaleTemplateController</strong></td>
+<td><code>/api/TableScaleTemplate</code></td>
+<td>Gestión de plantillas</td>
+</tr>
+<tr>
+<td><strong>AuditTemplateFieldController</strong></td>
+<td><code>/api/AuditTemplateField</code></td>
+<td>Campos de plantillas</td>
+</tr>
+<tr>
+<td><strong>ScoringCriteriaController</strong></td>
+<td><code>/api/ScoringCriteria</code></td>
+<td>Criterios de puntuación</td>
+</tr>
+<tr>
+<td><strong>InboxItemsController</strong></td>
+<td><code>/api/InboxItems</code></td>
+<td>Bandeja de aprobaciones</td>
+</tr>
+<tr>
+<td><strong>ReportsController</strong></td>
+<td><code>/api/Reports</code></td>
+<td>Generación de reportes</td>
+</tr>
+<tr>
+<td><strong>StorageFilesController</strong></td>
+<td><code>/api/StorageFiles</code></td>
+<td>Gestión de archivos</td>
+</tr>
+<tr>
+<td><strong>UserReferenceController</strong></td>
+<td><code>/api/UserReference</code></td>
+<td>Usuarios sincronizados</td>
+</tr>
+</tbody></table>
+<br>
+<h3>🔧 Services (Business Logic Layer)</h3>
+<br>
+<h4>Patrón de Servicios</h4>
+<br>
+<p>Cada servicio sigue el patrón:</p>
+<pre><code>public interface I[Entity]Service
+{
+    Task&lt;IEnumerable&lt;[Entity]&gt;&gt; GetAll();
+    Task&lt;[Entity]&gt; GetById(Guid id);
+    Task&lt;[Entity]&gt; Create([Entity]Dto dto);
+    Task&lt;[Entity]&gt; Update(Guid id, [Entity]Dto dto);
+    Task&lt;bool&gt; Delete(Guid id);
+}
+
+public class [Entity]Service : I[Entity]Service
+{
+    private readonly IRepository&lt;[Entity]&gt; _repository;
+    private readonly IMapper _mapper;
+    private readonly ILogger&lt;[Entity]Service&gt; _logger;
+
+    // Implementación...
+}</code></pre>
+<br>
+<h4>Servicios Especializados</h4>
+<br>
+<p><strong>PeriodAuditService</strong></p>
+<ul>
+<li>Creación y gestión de auditorías</li>
+<li>Cálculo de puntuaciones</li>
+<li>Aplicación de criterios de evaluación</li>
+<li>Generación de resultados</li>
+</ul>
+<br>
+<p><strong>ReportsService</strong></p>
+<ul>
+<li>Generación de PDFs con QuestPDF</li>
+<li>Generación de Excel con ClosedXML</li>
+<li>Consultas optimizadas para reportes</li>
+</ul>
+<br>
+<p><strong>InboxItemsService</strong></p>
+<ul>
+<li>Gestión de flujo de aprobaciones</li>
+<li>Transiciones de estado</li>
+<li>Notificaciones de cambios</li>
+</ul>
+<br>
+<p><strong>EmailService</strong> (External)</p>
+<ul>
+<li>Envío de emails SMTP</li>
+<li>Plantillas HTML con Scriban</li>
+<li>Manejo de adjuntos</li>
+</ul>
+<br>
+<h3>🗃️ Repositories (Data Access Layer)</h3>
+<br>
+<h4>Patrón Repository</h4>
+<br>
+<pre><code>public interface IRepository&lt;T&gt; where T : class
+{
+    Task&lt;IEnumerable&lt;T&gt;&gt; GetAll();
+    Task&lt;T&gt; GetById(object id);
+    Task&lt;T&gt; Add(T entity);
+    Task&lt;T&gt; Update(T entity);
+    Task&lt;bool&gt; Delete(object id);
+}</code></pre>
+<br>
+<h4>Implementaciones</h4>
+<br>
+<p><strong>Entity Framework Repositories</strong></p>
+<ul>
+<li>Operaciones CRUD estándar</li>
+<li>Soporte de transacciones</li>
+<li>Tracking de cambios</li>
+<li>Navegación de relaciones</li>
+</ul>
+<br>
+<p><strong>Dapper Repositories</strong></p>
+<ul>
+<li>Consultas SQL raw optimizadas</li>
+<li>Mapeo ligero</li>
+<li>Rendimiento superior en lecturas</li>
+<li>Consultas complejas con joins</li>
+</ul>
+<br>
+<h3>🔄 AutoMapper Profiles</h3>
+<br>
+<p><strong>AMMapper.cs</strong> contiene los perfiles de mapeo:</p>
+<br>
+<pre><code>public class AMMapper : Profile
+{
+    public AMMapper()
+    {
+        CreateMap&lt;Enterprise, EnterpriseDto&gt;().ReverseMap();
+        CreateMap&lt;Stores, StoreDto&gt;().ReverseMap();
+        CreateMap&lt;PeriodAudit, PeriodAuditDto&gt;().ReverseMap();
+        // ... más mapeos
+    }
+}</code></pre>
+<br>
+<h3>✅ Validators (FluentValidation)</h3>
+<br>
+<p><strong>Ejemplo de Validator:</strong></p>
+<br>
+<pre><code>public class PeriodAuditValidator : AbstractValidator&lt;PeriodAuditDto&gt;
+{
+    public PeriodAuditValidator()
+    {
+        RuleFor(x =&gt; x.StoreId)
+            .NotEmpty()
+            .WithMessage("La tienda es requerida");
+
+        RuleFor(x =&gt; x.StartDate)
+            .LessThanOrEqualTo(x =&gt; x.EndDate)
+            .WithMessage("La fecha de inicio debe ser menor a la fecha fin");
+
+        RuleFor(x =&gt; x.ScoreValue)
+            .GreaterThanOrEqualTo(0)
+            .WithMessage("El puntaje no puede ser negativo");
+    }
+}</code></pre>
+<br>
+<hr>
+<br>
+<h2>API y Endpoints</h2>
+<br>
+<h3>📡 Documentación de API</h3>
+<br>
+<p>La API está documentada con <strong>Swagger/OpenAPI</strong> y está disponible en:</p>
+<ul>
+<li><strong>Desarrollo</strong>: <code>http://localhost:5000/swagger</code></li>
+<li><strong>QA</strong>: <code>http://172.16.10.12:8084/swagger</code></li>
+</ul>
+<br>
+<h3>🔐 Autenticación</h3>
+<br>
+<p>Todos los endpoints (excepto <code>/api/Diagnostics</code>) requieren autenticación mediante <strong>JWT Bearer Token</strong>.</p>
+<br>
+<p><strong>Header requerido:</strong></p>
+<pre><code>Authorization: Bearer &lt;token&gt;</code></pre>
+<br>
+<h3>📝 Endpoints Principales</h3>
+<br>
+<h4>**Enterprise** (Empresas)</h4>
+<br>
+<pre><code>GET    /api/Enterprise              # Listar todas las empresas
+GET    /api/Enterprise/{id}         # Obtener empresa por ID
+POST   /api/Enterprise              # Crear nueva empresa
+PUT    /api/Enterprise/{id}         # Actualizar empresa
+DELETE /api/Enterprise/{id}         # Eliminar empresa</code></pre>
+<br>
+<p><strong>Request Body (POST/PUT):</strong></p>
+<pre><code>{
+  "name": "Rokys S.A.",
+  "code": "ROKYS01",
+  "address": "Av. Principal 123",
+  "isActive": true
+}</code></pre>
+<br>
+<h4>**Stores** (Tiendas)</h4>
+<br>
+<pre><code>GET    /api/Store                   # Listar todas las tiendas
+GET    /api/Store/{id}              # Obtener tienda por ID
+GET    /api/Store/ByEnterprise/{id} # Tiendas por empresa
+POST   /api/Store                   # Crear nueva tienda
+PUT    /api/Store/{id}              # Actualizar tienda
+DELETE /api/Store/{id}              # Eliminar tienda</code></pre>
+<br>
+<p><strong>Request Body (POST/PUT):</strong></p>
+<pre><code>{
+  "name": "Tienda San Miguel",
+  "code": "TDA001",
+  "address": "Av. La Marina 2000",
+  "enterpriseId": "uuid-empresa",
+  "isActive": true
+}</code></pre>
+<br>
+<h4>**PeriodAudit** (Auditorías)</h4>
+<br>
+<pre><code>GET    /api/PeriodAudit                        # Listar auditorías
+GET    /api/PeriodAudit/{id}                   # Obtener auditoría por ID
+GET    /api/PeriodAudit/ByStore/{storeId}      # Auditorías por tienda
+POST   /api/PeriodAudit                        # Crear nueva auditoría
+PUT    /api/PeriodAudit/{id}                   # Actualizar auditoría
+PUT    /api/PeriodAudit/{id}/Submit            # Enviar a aprobación
+PUT    /api/PeriodAudit/{id}/Approve           # Aprobar auditoría
+PUT    /api/PeriodAudit/{id}/Reject            # Rechazar auditoría
+DELETE /api/PeriodAudit/{id}                   # Eliminar auditoría</code></pre>
+<br>
+<p><strong>Request Body (POST):</strong></p>
+<pre><code>{
+  "storeId": "uuid-tienda",
+  "startDate": "2025-01-01",
+  "endDate": "2025-01-31",
+  "auditedDays": 31,
+  "globalObservations": "Auditoría mensual enero",
+  "participants": [
+    {
+      "userReferenceId": "uuid-usuario",
+      "roleCode": "AUD",
+      "roleName": "Auditor"
+    }
+  ]
+}</code></pre>
+<br>
+<h4>**Reports** (Reportes)</h4>
+<br>
+<pre><code>GET    /api/Reports/Audit/{id}/Pdf              # Generar PDF de auditoría
+GET    /api/Reports/Audit/{id}/Excel            # Generar Excel de auditoría
+GET    /api/Reports/Store/{storeId}/Summary     # Resumen por tienda
+GET    /api/Reports/Enterprise/{id}/Dashboard   # Dashboard empresarial</code></pre>
+<br>
+<p><strong>Respuesta:</strong></p>
+<ul>
+<li>PDF: <code>Content-Type: application/pdf</code></li>
+<li>Excel: <code>Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet</code></li>
+</ul>
+<br>
+<h4>**InboxItems** (Bandeja)</h4>
+<br>
+<pre><code>GET    /api/InboxItems/MyInbox                  # Mi bandeja de entrada
+GET    /api/InboxItems/ByAudit/{auditId}        # Historial de una auditoría
+POST   /api/InboxItems/Approve                  # Aprobar ítem
+POST   /api/InboxItems/Reject                   # Rechazar ítem
+POST   /api/InboxItems/Return                   # Devolver ítem</code></pre>
+<br>
+<h4>**StorageFiles** (Archivos)</h4>
+<br>
+<pre><code>GET    /api/StorageFiles/{id}                   # Obtener archivo
+GET    /api/StorageFiles/ByEntity/{entityId}    # Archivos por entidad
+POST   /api/StorageFiles/Upload                 # Subir archivo
+DELETE /api/StorageFiles/{id}                   # Eliminar archivo</code></pre>
+<br>
+<p><strong>Request (Upload):</strong></p>
+<pre><code>POST /api/StorageFiles/Upload
+Content-Type: multipart/form-data
+
+--boundary
+Content-Disposition: form-data; name="file"; filename="evidencia.pdf"
+Content-Type: application/pdf
+
+[binary data]
+--boundary
+Content-Disposition: form-data; name="entityId"
+
+uuid-entidad
+--boundary
+Content-Disposition: form-data; name="entityName"
+
+PeriodAudit
+--boundary--</code></pre>
+<br>
+<h3>📊 Códigos de Respuesta HTTP</h3>
+<br>
+<table>
+<thead><tr>
+<th>Código</th>
+<th>Descripción</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>200 OK</td>
+<td>Operación exitosa</td>
+</tr>
+<tr>
+<td>201 Created</td>
+<td>Recurso creado exitosamente</td>
+</tr>
+<tr>
+<td>204 No Content</td>
+<td>Operación exitosa sin contenido</td>
+</tr>
+<tr>
+<td>400 Bad Request</td>
+<td>Datos de entrada inválidos</td>
+</tr>
+<tr>
+<td>401 Unauthorized</td>
+<td>No autenticado</td>
+</tr>
+<tr>
+<td>403 Forbidden</td>
+<td>No autorizado</td>
+</tr>
+<tr>
+<td>404 Not Found</td>
+<td>Recurso no encontrado</td>
+</tr>
+<tr>
+<td>409 Conflict</td>
+<td>Conflicto de negocio</td>
+</tr>
+<tr>
+<td>500 Internal Server Error</td>
+<td>Error del servidor</td>
+</tr>
+</tbody></table>
+<br>
+<h3>📋 Formato de Respuesta de Error</h3>
+<br>
+<pre><code>{
+  "type": "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+  "title": "One or more validation errors occurred.",
+  "status": 400,
+  "errors": {
+    "Name": ["El nombre es requerido"],
+    "Code": ["El código ya existe"]
+  },
+  "traceId": "00-trace-id-00"
+}</code></pre>
+<br>
+<hr>
+<br>
+<h2>Seguridad y Autenticación</h2>
+<br>
+<h3>🔐 Estrategia de Seguridad</h3>
+<br>
+<p>El sistema implementa múltiples capas de seguridad:</p>
+<br>
+<li><strong>Autenticación JWT</strong></li>
+<li><strong>Autorización basada en roles</strong></li>
+<li><strong>Validación de tokens con IdentityServer</strong></li>
+<li><strong>CORS configurado</strong></li>
+<li><strong>HTTPS en producción</strong></li>
+<br>
+<h3>🎫 Autenticación JWT</h3>
+<br>
+<p><strong>Configuración en appsettings.json:</strong></p>
+<br>
+<pre><code>{
+  "JwtSettings": {
+    "Issuer": "http://172.16.10.12:8082",
+    "Audience": "rokys-audit-api",
+    "Key": "9ba622c5-cb74-4c01-b33a-d24db6dcd1fc",
+    "ExpirationInMinute": 10
+  }
+}</code></pre>
+<br>
+<p><strong>Configuración en Startup.cs:</strong></p>
+<br>
+<pre><code>services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =&gt;
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtSettings.Issuer,
+            ValidAudience = jwtSettings.Audience,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwtSettings.Key))
+        };
+    });</code></pre>
+<br>
+<h3>🛡️ Integración con IdentityServer</h3>
+<br>
+<p><strong>Configuración:</strong></p>
+<br>
+<pre><code>{
+  "IdentityServer": {
+    "Authority": "http://172.16.10.12:8082/",
+    "Audience": "rokys-audit-api",
+    "ClientId": "rokys-audit-api",
+    "ClientSecret": "rokys-audit-secret",
+    "RequireHttpsMetadata": false
+  }
+}</code></pre>
+<br>
+<p><strong>Middleware de Validación:</strong></p>
+<br>
+<pre><code>// CustomJwtValidationMiddleware.cs
+public class CustomJwtValidationMiddleware
+{
+    public async Task InvokeAsync(HttpContext context)
+    {
+        var token = context.Request.Headers["Authorization"]
+            .FirstOrDefault()?.Split(" ").Last();
+
+        if (token != null)
+        {
+            await ValidateToken(token, context);
+        }
+
+        await _next(context);
+    }
+}</code></pre>
+<br>
+<h3>👥 Autorización basada en Roles</h3>
+<br>
+<p><strong>Roles del Sistema:</strong></p>
+<br>
+<table>
+<thead><tr>
+<th>Código</th>
+<th>Nombre</th>
+<th>Permisos</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><strong>ADM</strong></td>
+<td>Administrador</td>
+<td>Todos los permisos</td>
+</tr>
+<tr>
+<td><strong>AUD</strong></td>
+<td>Auditor</td>
+<td>Crear y ejecutar auditorías</td>
+</tr>
+<tr>
+<td><strong>SUP</strong></td>
+<td>Supervisor</td>
+<td>Aprobar/rechazar auditorías</td>
+</tr>
+<tr>
+<td><strong>OPE</strong></td>
+<td>Operaciones</td>
+<td>Ver reportes</td>
+</tr>
+<tr>
+<td><strong>GER</strong></td>
+<td>Gerente</td>
+<td>Dashboard ejecutivo</td>
+</tr>
+</tbody></table>
+<br>
+<p><strong>Uso en Controllers:</strong></p>
+<br>
+<pre><code>[Authorize(Roles = "ADM,SUP")]
+[HttpPost("Approve/{id}")]
+public async Task&lt;IActionResult&gt; ApproveAudit(Guid id)
+{
+    // Solo administradores y supervisores
+}
+
+[Authorize(Roles = "AUD")]
+[HttpPost]
+public async Task&lt;IActionResult&gt; CreateAudit([FromBody] PeriodAuditDto dto)
+{
+    // Solo auditores
+}</code></pre>
+<br>
+<h3>🌐 Configuración CORS</h3>
+<br>
+<pre><code>// Startup.cs
+app.UseCors(x =&gt; x
+    .WithOrigins(domains) // Configurado en appsettings
+    .AllowAnyMethod()
+    .AllowAnyHeader()
+);</code></pre>
+<br>
+<p><strong>Dominios permitidos (appsettings.json):</strong></p>
+<br>
+<pre><code>{
+  "AllowedHosts": "http://localhost:4200;http://172.16.10.12:8085"
+}</code></pre>
+<br>
+<h3>🔒 Seguridad de Archivos</h3>
+<br>
+<p><strong>Validación de archivos subidos:</strong></p>
+<br>
+<pre><code>{
+  "FileSettings": {
+    "MaxFileSize": 10485760,
+    "AllowedFileTypes": [".pdf", ".xlsx", ".jpg", ".png", ".jpeg"],
+    "Path": "D:\\AuditUploads"
+  }
+}</code></pre>
+<br>
+<p><strong>Validación en código:</strong></p>
+<br>
+<pre><code>public async Task&lt;IActionResult&gt; Upload(IFormFile file)
+{
+    if (file.Length &gt; _fileSettings.MaxFileSize)
+        return BadRequest("Archivo demasiado grande");
+
+    var extension = Path.GetExtension(file.FileName);
+    if (!_fileSettings.AllowedFileTypes.Contains(extension))
+        return BadRequest("Tipo de archivo no permitido");
+
+    // Procesar archivo...
+}</code></pre>
+<br>
+<hr>
+<br>
+<h2>Integración con Microservicios</h2>
+<br>
+<h3>🔗 Arquitectura de Microservicios</h3>
+<br>
+<p>El Sistema de Auditoría forma parte de un ecosistema de microservicios:</p>
+<br>
+<pre><code>┌──────────────────┐       ┌──────────────────┐
+│  Security MS     │◀─────▶│   Audit MS       │
+│  (Usuarios)      │       │  (Este sistema)  │
+└──────────────────┘       └──────────────────┘
+                                    ▲
+                                    │
+                           ┌────────┴────────┐
+                           │   RabbitMQ      │
+                           │   Event Bus     │
+                           └────────┬────────┘
+                                    │
+                                    ▼
+┌──────────────────┐       ┌──────────────────┐
+│   Memos MS       │◀─────▶│   Other MS       │
+│  (Empleados)     │       │                  │
+└──────────────────┘       └──────────────────┘</code></pre>
+<br>
+<h3>🐰 RabbitMQ Event Bus</h3>
+<br>
+<p><strong>Configuración:</strong></p>
+<br>
+<pre><code>{
+  "RabbitMQ": {
+    "HostName": "172.16.10.17",
+    "Port": 5672,
+    "UserName": "owner",
+    "Password": "P4ss@78_#%a9",
+    "EventsExchange": "rokys.events",
+    "MicroserviceName": "audit",
+    "ConnectionTimeout": 30000,
+    "EnableRetries": true,
+    "MaxRetries": 3
+  }
+}</code></pre>
+<br>
+<h3>📨 Eventos Publicados</h3>
+<br>
+<p>El sistema <strong>publica</strong> los siguientes eventos:</p>
+<br>
+<table>
+<thead><tr>
+<th>Evento</th>
+<th>Routing Key</th>
+<th>Descripción</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><strong>AuditCreatedEvent</strong></td>
+<td><code>audit.created</code></td>
+<td>Nueva auditoría creada</td>
+</tr>
+<tr>
+<td><strong>AuditSubmittedEvent</strong></td>
+<td><code>audit.submitted</code></td>
+<td>Auditoría enviada a aprobación</td>
+</tr>
+<tr>
+<td><strong>AuditApprovedEvent</strong></td>
+<td><code>audit.approved</code></td>
+<td>Auditoría aprobada</td>
+</tr>
+<tr>
+<td><strong>AuditRejectedEvent</strong></td>
+<td><code>audit.rejected</code></td>
+<td>Auditoría rechazada</td>
+</tr>
+<tr>
+<td><strong>AuditCompletedEvent</strong></td>
+<td><code>audit.completed</code></td>
+<td>Auditoría completada</td>
+</tr>
+</tbody></table>
+<br>
+<p><strong>Estructura de evento:</strong></p>
+<br>
+<pre><code>{
+  "eventId": "uuid",
+  "eventType": "AuditCreatedEvent",
+  "timestamp": "2025-12-26T10:30:00Z",
+  "source": "audit",
+  "data": {
+    "auditId": "uuid",
+    "storeId": "uuid",
+    "createdBy": "uuid",
+    "status": "Draft"
+  }
+}</code></pre>
+<br>
+<h3>📬 Eventos Suscritos</h3>
+<br>
+<p>El sistema <strong>escucha</strong> los siguientes eventos:</p>
+<br>
+<table>
+<thead><tr>
+<th>Evento</th>
+<th>Routing Key</th>
+<th>Acción</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><strong>EmployeeCreatedEvent</strong></td>
+<td><code>memos.employee.created</code></td>
+<td>Crear UserReference</td>
+</tr>
+<tr>
+<td><strong>EmployeeUpdatedEvent</strong></td>
+<td><code>memos.employee.updated</code></td>
+<td>Actualizar UserReference</td>
+</tr>
+<tr>
+<td><strong>EmployeeDeletedEvent</strong></td>
+<td><code>memos.employee.deleted</code></td>
+<td>Desactivar UserReference</td>
+</tr>
+<tr>
+<td><strong>UserCreatedEvent</strong></td>
+<td><code>security.user.created</code></td>
+<td>Sincronizar usuario</td>
+</tr>
+<tr>
+<td><strong>UserUpdatedEvent</strong></td>
+<td><code>security.user.updated</code></td>
+<td>Actualizar usuario</td>
+</tr>
+</tbody></table>
+<br>
+<p><strong>Configuración de suscripciones:</strong></p>
+<br>
+<pre><code>{
+  "RabbitMQ": {
+    "Subscriptions": [
+      {
+        "RoutingKey": "memos.employee.created",
+        "QueueName": "audit.employee_created_handler",
+        "Description": "Audita cuando se crean empleados en Memos"
+      },
+      {
+        "RoutingKey": "security.user.created",
+        "QueueName": "audit.user_created_handler",
+        "Description": "Audita cuando Security crea usuarios"
+      }
+    ]
+  }
+}</code></pre>
+<br>
+<h3>🔄 Subscription Hub</h3>
+<br>
+<p><strong>EmployeeEventService.cs</strong> maneja los eventos de empleados:</p>
+<br>
+<pre><code>public class EmployeeEventService : IEmployeeEventService
+{
+    private readonly IUserReferenceService _userReferenceService;
+    private readonly ILogger&lt;EmployeeEventService&gt; _logger;
+
+    public async Task HandleEmployeeCreated(EmployeeCreatedEvent evt)
+    {
+        _logger.LogInformation(
+            "Processing EmployeeCreatedEvent for employee {EmployeeId}",
+            evt.EmployeeId);
+
+        var userRef = new UserReferenceDto
+        {
+            EmployeeId = evt.EmployeeId,
+            FirstName = evt.FirstName,
+            LastName = evt.LastName,
+            Email = evt.Email,
+            DocumentNumber = evt.DocumentNumber,
+            IsActive = true
+        };
+
+        await _userReferenceService.Create(userRef);
+
+        _logger.LogInformation(
+            "UserReference created for employee {EmployeeId}",
+            evt.EmployeeId);
+    }
+}</code></pre>
+<br>
+<h3>🔌 Integración con IdentityServer</h3>
+<br>
+<p><strong>IIdentityServerService.cs</strong> permite validar tokens y obtener información de usuarios:</p>
+<br>
+<pre><code>public interface IIdentityServerService
+{
+    Task&lt;bool&gt; ValidateToken(string token);
+    Task&lt;UserInfo&gt; GetUserInfo(string token);
+    Task&lt;List&lt;string&gt;&gt; GetUserRoles(string userId);
+}</code></pre>
+<br>
+<p><strong>Uso:</strong></p>
+<br>
+<pre><code>public class CustomJwtValidationMiddleware
+{
+    private readonly IIdentityServerService _identityServer;
+
+    public async Task InvokeAsync(HttpContext context)
+    {
+        var token = GetTokenFromHeader(context);
+
+        if (token != null)
+        {
+            var isValid = await _identityServer.ValidateToken(token);
+
+            if (!isValid)
+            {
+                context.Response.StatusCode = 401;
+                return;
+            }
+
+            var userInfo = await _identityServer.GetUserInfo(token);
+            context.Items["UserInfo"] = userInfo;
+        }
+
+        await _next(context);
+    }
+}</code></pre>
+<br>
+<hr>
+<br>
+<h2>Configuración y Despliegue</h2>
+<br>
+<h3>⚙️ Configuración de Ambientes</h3>
+<br>
+<p>El proyecto soporta múltiples ambientes:</p>
+<br>
+<ul>
+<li><strong>Development</strong> (appsettings.Development.json)</li>
+<li><strong>Production</strong> (appsettings.Production.json)</li>
+</ul>
+<br>
+<h3>📝 Variables de Configuración</h3>
+<br>
+<h4>**Cadenas de Conexión**</h4>
+<br>
+<pre><code>{
+  "ConnectionStrings": {
+    "Main": "Server=172.16.10.12;Database=DBAuditQA;User=memo;Password=***;TrustServerCertificate=True;"
+  }
+}</code></pre>
+<br>
+<h4>**Seguridad**</h4>
+<br>
+<pre><code>{
+  "Security": {
+    "Enabled": true
+  },
+  "JwtSettings": {
+    "Issuer": "http://172.16.10.12:8082",
+    "Audience": "rokys-audit-api",
+    "Key": "your-secret-key",
+    "ExpirationInMinute": 10
+  }
+}</code></pre>
+<br>
+<h4>**Email**</h4>
+<br>
+<pre><code>{
+  "Email": {
+    "SmtpServer": "smtp.office365.com",
+    "SmtpPort": 587,
+    "Username": "trazabilidad.rrhh.gr@rokys.pe",
+    "Password": "***",
+    "FromName": "Notificacion Rokys",
+    "FromEmail": "trazabilidad.rrhh.gr@rokys.pe"
+  }
+}</code></pre>
+<br>
+<h4>**Archivos**</h4>
+<br>
+<pre><code>{
+  "FileSettings": {
+    "MaxFileSize": 10485760,
+    "AllowedFileTypes": [".pdf", ".xlsx", ".jpg", ".png", ".jpeg"],
+    "Path": "D:\\AuditUploads"
+  }
+}</code></pre>
+<br>
+<h4>**RabbitMQ**</h4>
+<br>
+<pre><code>{
+  "RabbitMQ": {
+    "HostName": "172.16.10.17",
+    "Port": 5672,
+    "UserName": "owner",
+    "Password": "***",
+    "EventsExchange": "rokys.events",
+    "MicroserviceName": "audit"
+  }
+}</code></pre>
+<br>
+<h3>🚀 Despliegue</h3>
+<br>
+<h4>**Requisitos del Sistema**</h4>
+<br>
+<ul>
+<li><strong>.NET 9.0 SDK</strong> o superior</li>
+<li><strong>SQL Server 2019</strong> o superior</li>
+<li><strong>RabbitMQ 3.x</strong> o superior</li>
+<li><strong>Windows Server</strong> o <strong>Linux</strong></li>
+<li><strong>IIS 10</strong> (Windows) o <strong>Nginx/Kestrel</strong> (Linux)</li>
+</ul>
+<br>
+<h4>**Pasos de Despliegue**</h4>
+<br>
+<p><strong>1. Publicar la aplicación:</strong></p>
+<br>
+<pre><code>dotnet publish -c Release -o ./publish</code></pre>
+<br>
+<p><strong>2. Configurar Base de Datos:</strong></p>
+<br>
+<pre><code># Ejecutar scripts SQL
+sqlcmd -S server -d DBAudit -i DataInitial.sql
+
+# O usar Liquibase
+liquibase --changeLogFile=changelog.xml update</code></pre>
+<br>
+<p><strong>3. Configurar IIS (Windows):</strong></p>
+<br>
+<ul>
+<li>Crear Application Pool con .NET CLR: No Managed Code</li>
+<li>Crear Website apuntando a la carpeta publish</li>
+<li>Configurar bindings (puerto, SSL, etc.)</li>
+<li>Asignar permisos a la carpeta de archivos</li>
+</ul>
+<br>
+<p><strong>4. Configurar Kestrel (Linux):</strong></p>
+<br>
+<pre><code># Crear servicio systemd
+sudo nano /etc/systemd/system/rokys-audit.service
+
+[Unit]
+Description=Rokys Audit API
+
+[Service]
+WorkingDirectory=/var/www/rokys-audit
+ExecStart=/usr/bin/dotnet /var/www/rokys-audit/Rokys.Audit.WebAPI.dll
+Restart=always
+RestartSec=10
+KillSignal=SIGINT
+SyslogIdentifier=rokys-audit
+User=www-data
+Environment=ASPNETCORE_ENVIRONMENT=Production
+
+[Install]
+WantedBy=multi-user.target
+
+# Habilitar e iniciar
+sudo systemctl enable rokys-audit.service
+sudo systemctl start rokys-audit.service</code></pre>
+<br>
+<p><strong>5. Configurar Nginx (Reverse Proxy):</strong></p>
+<br>
+<pre><code>server {
+    listen 80;
+    server_name audit.rokys.pe;
+
+    location / {
+        proxy_pass http://localhost:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection keep-alive;
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}</code></pre>
+<br>
+<h3>📦 Docker (Opcional)</h3>
+<br>
+<p><strong>Dockerfile:</strong></p>
+<br>
+<pre><code>FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
+WORKDIR /app
+EXPOSE 80
+EXPOSE 443
+
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+WORKDIR /src
+COPY ["Rokys.Audit.WebAPI/Rokys.Audit.WebAPI.csproj", "Rokys.Audit.WebAPI/"]
+RUN dotnet restore "Rokys.Audit.WebAPI/Rokys.Audit.WebAPI.csproj"
+COPY . .
+WORKDIR "/src/Rokys.Audit.WebAPI"
+RUN dotnet build "Rokys.Audit.WebAPI.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "Rokys.Audit.WebAPI.csproj" -c Release -o /app/publish
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "Rokys.Audit.WebAPI.dll"]</code></pre>
+<br>
+<p><strong>docker-compose.yml:</strong></p>
+<br>
+<pre><code>version: '3.8'
+
+services:
+  audit-api:
+    image: rokys-audit-api:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8084:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__Main=Server=sql-server;Database=DBAudit;User=sa;Password=***
+    depends_on:
+      - sql-server
+      - rabbitmq
+    networks:
+      - rokys-network
+
+  sql-server:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=YourStrong@Passw0rd
+    ports:
+      - "1433:1433"
+    networks:
+      - rokys-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - rokys-network
+
+networks:
+  rokys-network:
+    driver: bridge</code></pre>
+<br>
+<h3>🔍 Monitoreo y Logging</h3>
+<br>
+<p><strong>Serilog</strong> está configurado para escribir logs en:</p>
+<br>
+<ul>
+<li><strong>Consola</strong>: Desarrollo</li>
+<li><strong>Archivo</strong>: <code>LogError/log-{Date}.txt</code></li>
+<li><strong>SQL Server</strong>: (Opcional, configurar Serilog.Sinks.MSSqlServer)</li>
+</ul>
+<br>
+<p><strong>Configuración de Serilog:</strong></p>
+<br>
+<pre><code>// Program.cs
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File("LogError/log-.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();</code></pre>
+<br>
+<h3>🩺 Health Checks</h3>
+<br>
+<p><strong>DiagnosticsController</strong> provee endpoints de diagnóstico:</p>
+<br>
+<pre><code>GET /api/Diagnostics/Health        # Estado del servicio
+GET /api/Diagnostics/Database      # Estado de la BD
+GET /api/Diagnostics/RabbitMQ      # Estado de RabbitMQ
+GET /api/Diagnostics/Version       # Versión de la API</code></pre>
+<br>
+<hr>
+<br>
+<h2>Guías de Desarrollo</h2>
+<br>
+<h3>🛠️ Configuración del Entorno de Desarrollo</h3>
+<br>
+<h4>**Requisitos**</h4>
+<br>
+<ul>
+<li><strong>Visual Studio 2022</strong> o <strong>Visual Studio Code</strong> con extensión de C#</li>
+<li><strong>.NET 9.0 SDK</strong></li>
+<li><strong>SQL Server 2019</strong> o superior (o SQL Server Express)</li>
+<li><strong>SQL Server Management Studio</strong> (SSMS)</li>
+<li><strong>Git</strong></li>
+<li><strong>Postman</strong> o similar (para pruebas de API)</li>
+</ul>
+<br>
+<h4>**Clonar el Repositorio**</h4>
+<br>
+<pre><code>git clone https://github.com/RUWAYTECH/rokys-audit-service.git
+cd rokys-audit-service</code></pre>
+<br>
+<h4>**Restaurar Paquetes NuGet**</h4>
+<br>
+<pre><code>dotnet restore</code></pre>
+<br>
+<h4>**Configurar Base de Datos Local**</h4>
+<br>
+<li>Crear base de datos:</li>
+<pre><code>CREATE DATABASE DBAuditDev;</code></pre>
+<br>
+<li>Ejecutar script inicial:</li>
+<pre><code>sqlcmd -S localhost -d DBAuditDev -i Rokys.Audit.DataBase/Init/DataInitial.sql</code></pre>
+<br>
+<li>Actualizar appsettings.Development.json:</li>
+<pre><code>{
+  "ConnectionStrings": {
+    "Main": "Server=localhost;Database=DBAuditDev;Integrated Security=true;TrustServerCertificate=True;"
+  }
+}</code></pre>
+<br>
+<h4>**Ejecutar la Aplicación**</h4>
+<br>
+<pre><code>cd Rokys.Audit.WebAPI
+dotnet run</code></pre>
+<br>
+<p>La API estará disponible en:</p>
+<ul>
+<li>HTTP: <code>http://localhost:5000</code></li>
+<li>HTTPS: <code>https://localhost:5001</code></li>
+<li>Swagger: <code>http://localhost:5000/swagger</code></li>
+</ul>
+<br>
+<h3>📋 Estándares de Código</h3>
+<br>
+<h4>**Convenciones de Nombres**</h4>
+<br>
+<ul>
+<li><strong>Clases</strong>: PascalCase (<code>PeriodAuditService</code>)</li>
+<li><strong>Métodos</strong>: PascalCase (<code>GetById</code>)</li>
+<li><strong>Variables</strong>: camelCase (<code>userId</code>)</li>
+<li><strong>Constantes</strong>: UPPER_SNAKE_CASE (<code>MAX_FILE_SIZE</code>)</li>
+<li><strong>Interfaces</strong>: I + PascalCase (<code>IRepository</code>)</li>
+</ul>
+<br>
+<h4>**Estructura de Archivos**</h4>
+<br>
+<ul>
+<li>Un archivo por clase</li>
+<li>Nombre del archivo = Nombre de la clase</li>
+<li>Organizar por feature/dominio</li>
+</ul>
+<br>
+<h4>**Comentarios**</h4>
+<br>
+<pre><code>/// &lt;summary&gt;
+/// Obtiene una auditoría por su ID
+/// &lt;/summary&gt;
+/// &lt;param name="id"&gt;ID único de la auditoría&lt;/param&gt;
+/// &lt;returns&gt;Datos de la auditoría&lt;/returns&gt;
+public async Task&lt;PeriodAudit&gt; GetById(Guid id)
+{
+    // Implementación
+}</code></pre>
+<br>
+<h3>🧪 Pruebas</h3>
+<br>
+<h4>**Estructura de Pruebas**</h4>
+<br>
+<pre><code>Rokys.Audit.Tests/
+├── Unit/
+│   ├── Services/
+│   │   └── PeriodAuditServiceTests.cs
+│   └── Validators/
+│       └── PeriodAuditValidatorTests.cs
+├── Integration/
+│   ├── Controllers/
+│   │   └── PeriodAuditControllerTests.cs
+│   └── Repositories/
+│       └── PeriodAuditRepositoryTests.cs
+└── E2E/
+    └── AuditWorkflowTests.cs</code></pre>
+<br>
+<h4>**Ejemplo de Prueba Unitaria**</h4>
+<br>
+<pre><code>[Fact]
+public async Task GetById_WithValidId_ReturnsAudit()
+{
+    // Arrange
+    var mockRepo = new Mock&lt;IRepository&lt;PeriodAudit&gt;&gt;();
+    var audit = new PeriodAudit { PeriodAuditId = Guid.NewGuid() };
+    mockRepo.Setup(r =&gt; r.GetById(It.IsAny&lt;Guid&gt;()))
+            .ReturnsAsync(audit);
+
+    var service = new PeriodAuditService(mockRepo.Object, null, null);
+
+    // Act
+    var result = await service.GetById(audit.PeriodAuditId);
+
+    // Assert
+    Assert.NotNull(result);
+    Assert.Equal(audit.PeriodAuditId, result.PeriodAuditId);
+}</code></pre>
+<br>
+<h3>🔄 Flujo de Trabajo con Git</h3>
+<br>
+<h4>**Branches**</h4>
+<br>
+<ul>
+<li><code>main</code>: Producción</li>
+<li><code>develop</code>: Desarrollo</li>
+<li><code>feature/[nombre]</code>: Nueva funcionalidad</li>
+<li><code>bugfix/[nombre]</code>: Corrección de bug</li>
+<li><code>hotfix/[nombre]</code>: Corrección urgente en producción</li>
+</ul>
+<br>
+<h4>**Workflow**</h4>
+<br>
+<pre><code># Crear feature branch desde develop
+git checkout develop
+git pull origin develop
+git checkout -b feature/nueva-funcionalidad
+
+# Hacer commits
+git add .
+git commit -m "feat: agregar nueva funcionalidad"
+
+# Push y crear Pull Request
+git push origin feature/nueva-funcionalidad
+
+# Después de revisión, merge a develop
+# Cuando esté listo, merge a main para producción</code></pre>
+<br>
+<h4>**Mensajes de Commit**</h4>
+<br>
+<p>Seguir convención <a href="https://www.conventionalcommits.org/">Conventional Commits</a>:</p>
+<br>
+<pre><code>feat: nueva funcionalidad
+fix: corrección de bug
+docs: cambios en documentación
+style: cambios de formato
+refactor: refactorización de código
+test: agregar o modificar tests
+chore: tareas de mantenimiento</code></pre>
+<br>
+<h3>📝 Proceso de Desarrollo de Features</h3>
+<br>
+<h4>**1. Crear Nueva Entidad**</h4>
+<br>
+<p><strong>Modelo (Tables/):</strong></p>
+<pre><code>public class NewEntity : AuditEntity
+{
+    public Guid NewEntityId { get; set; }
+    public string Name { get; set; }
+    // ... otros campos
+}</code></pre>
+<br>
+<p><strong>DTO (DTOs/):</strong></p>
+<pre><code>public class NewEntityDto
+{
+    public Guid? NewEntityId { get; set; }
+    public string Name { get; set; }
+}</code></pre>
+<br>
+<p><strong>Validator (Validations/):</strong></p>
+<pre><code>public class NewEntityValidator : AbstractValidator&lt;NewEntityDto&gt;
+{
+    public NewEntityValidator()
+    {
+        RuleFor(x =&gt; x.Name).NotEmpty();
+    }
+}</code></pre>
+<br>
+<h4>**2. Crear Servicios**</h4>
+<br>
+<p><strong>Interface (Services.Interfaces/):</strong></p>
+<pre><code>public interface INewEntityService
+{
+    Task&lt;IEnumerable&lt;NewEntity&gt;&gt; GetAll();
+    Task&lt;NewEntity&gt; GetById(Guid id);
+    Task&lt;NewEntity&gt; Create(NewEntityDto dto);
+    Task&lt;NewEntity&gt; Update(Guid id, NewEntityDto dto);
+    Task&lt;bool&gt; Delete(Guid id);
+}</code></pre>
+<br>
+<p><strong>Implementación (Services/):</strong></p>
+<pre><code>public class NewEntityService : INewEntityService
+{
+    private readonly IRepository&lt;NewEntity&gt; _repository;
+    private readonly IMapper _mapper;
+
+    public NewEntityService(
+        IRepository&lt;NewEntity&gt; repository,
+        IMapper mapper)
+    {
+        _repository = repository;
+        _mapper = mapper;
+    }
+
+    // Implementar métodos...
+}</code></pre>
+<br>
+<h4>**3. Crear Repository**</h4>
+<br>
+<p><strong>EF Core (Persistence.EF/):</strong></p>
+<pre><code>public class NewEntityRepository : Repository&lt;NewEntity&gt;
+{
+    public NewEntityRepository(ApplicationDbContext context)
+        : base(context)
+    {
+    }
+
+    // Métodos adicionales si es necesario
+}</code></pre>
+<br>
+<h4>**4. Crear Controller**</h4>
+<br>
+<p><strong>Controller (WebAPI/Controllers/):</strong></p>
+<pre><code>[ApiController]
+[Route("api/[controller]")]
+[Authorize]
+public class NewEntityController : ControllerBase
+{
+    private readonly INewEntityService _service;
+
+    public NewEntityController(INewEntityService service)
+    {
+        _service = service;
+    }
+
+    [HttpGet]
+    public async Task&lt;IActionResult&gt; GetAll()
+    {
+        var items = await _service.GetAll();
+        return Ok(items);
+    }
+
+    [HttpGet("{id}")]
+    public async Task&lt;IActionResult&gt; GetById(Guid id)
+    {
+        var item = await _service.GetById(id);
+        if (item == null) return NotFound();
+        return Ok(item);
+    }
+
+    [HttpPost]
+    public async Task&lt;IActionResult&gt; Create([FromBody] NewEntityDto dto)
+    {
+        var item = await _service.Create(dto);
+        return CreatedAtAction(nameof(GetById),
+            new { id = item.NewEntityId }, item);
+    }
+
+    [HttpPut("{id}")]
+    public async Task&lt;IActionResult&gt; Update(
+        Guid id, [FromBody] NewEntityDto dto)
+    {
+        var item = await _service.Update(id, dto);
+        return Ok(item);
+    }
+
+    [HttpDelete("{id}")]
+    public async Task&lt;IActionResult&gt; Delete(Guid id)
+    {
+        await _service.Delete(id);
+        return NoContent();
+    }
+}</code></pre>
+<br>
+<h4>**5. Registrar en DI Container**</h4>
+<br>
+<p><strong>DependencyConfig.cs:</strong></p>
+<pre><code>builder.RegisterType&lt;NewEntityService&gt;()
+       .As&lt;INewEntityService&gt;()
+       .InstancePerLifetimeScope();
+
+builder.RegisterType&lt;NewEntityRepository&gt;()
+       .As&lt;IRepository&lt;NewEntity&gt;&gt;()
+       .InstancePerLifetimeScope();</code></pre>
+<br>
+<h4>**6. Agregar Mapper Profile**</h4>
+<br>
+<p><strong>AMMapper.cs:</strong></p>
+<pre><code>CreateMap&lt;NewEntity, NewEntityDto&gt;().ReverseMap();</code></pre>
+<br>
+<h3>🐛 Debugging</h3>
+<br>
+<h4>**Visual Studio**</h4>
+<br>
+<li>Establecer breakpoints (F9)</li>
+<li>Iniciar debug (F5)</li>
+<li>Inspeccionar variables</li>
+<li>Step Over (F10), Step Into (F11)</li>
+<br>
+<h4>**Logs**</h4>
+<br>
+<pre><code>_logger.LogInformation("Processing audit {AuditId}", auditId);
+_logger.LogWarning("Store {StoreId} not found", storeId);
+_logger.LogError(ex, "Error creating audit");</code></pre>
+<br>
+<h4>**SQL Profiler**</h4>
+<br>
+<p>Usar SQL Server Profiler para analizar queries de EF Core y Dapper.</p>
+<br>
+<h3>📚 Recursos Adicionales</h3>
+<br>
+<ul>
+<li><a href="https://docs.microsoft.com/en-us/aspnet/core/">ASP.NET Core Documentation</a></li>
+<li><a href="https://docs.microsoft.com/en-us/ef/core/">Entity Framework Core Documentation</a></li>
+<li><a href="https://github.com/DapperLib/Dapper">Dapper Documentation</a></li>
+<li><a href="https://docs.automapper.org/">AutoMapper Documentation</a></li>
+<li><a href="https://docs.fluentvalidation.net/">FluentValidation Documentation</a></li>
+<li><a href="https://www.rabbitmq.com/documentation.html">RabbitMQ Documentation</a></li>
+</ul>
+<br>
+<hr>
+<br>
+<h2>📞 Contacto y Soporte</h2>
+<br>
+<p>Para soporte técnico o preguntas sobre el proyecto:</p>
+<br>
+<ul>
+<li><strong>Equipo</strong>: Ruwaytech Development Team</li>
+<li><strong>Repositorio</strong>: https://github.com/RUWAYTECH/rokys-audit-service</li>
+<li><strong>Branch Principal</strong>: <code>main</code></li>
+<li><strong>Branch de Desarrollo</strong>: <code>develop</code></li>
+</ul>
+<br>
+<hr>
+<br>
+<h2>📄 Licencia</h2>
+<br>
+<p>© 2025 Ruwaytech. Todos los derechos reservados.</p>
+<br>
+<hr>
+<br>
+<p><strong>Última actualización</strong>: Diciembre 26, 2025</p>
+<p><strong>Versión del documento</strong>: 1.0.0</p>
+<p><strong>Versión de la aplicación</strong>: 1.0.0</p>
+
+</body>
+</html>

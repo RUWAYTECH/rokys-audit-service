@@ -1,0 +1,20 @@
+namespace Rokys.Audit.Model.Tables
+{
+    public class PeriodAuditTableScaleTemplateResult : AuditEntity
+    {
+        public Guid PeriodAuditTableScaleTemplateResultId { get; set; } = Guid.NewGuid();
+        public Guid PeriodAuditScaleResultId { get; set; }
+        public Guid TableScaleTemplateId { get; set; }
+        public string? TemplateData { get; set; } // JSON almacenado como texto
+        public bool IsActive { get; set; } = true;
+        public string? Code { get; set; }
+        public string? Name { get; set; }
+        public int? SortOrder { get; set; }
+        public string? Orientation { get; set; }
+
+        // Navigation properties
+        public virtual PeriodAuditScaleResult PeriodAuditScaleResult { get; set; } = null!;
+        public virtual TableScaleTemplate TableScaleTemplate { get; set; } = null!;
+        public virtual ICollection<PeriodAuditFieldValues> PeriodAuditFieldValues { get; set; } = new List<PeriodAuditFieldValues>();
+    }
+}

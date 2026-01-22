@@ -1,0 +1,28 @@
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog 
+	http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd
+    http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+	
+
+<!-- INIT -->
+<include file="./Init/DataInitial.sql" relativeToChangelogFile="true"/>
+
+
+<!-- TABLES -->
+<include file="./Table/202601081055-store-add-email.sql" relativeToChangelogFile="true"/>
+<include file="./Table/202601151204-add-action-plan-table.sql" relativeToChangelogFile="true"/>
+<include file="./Table/202601201258-enterprise-group-configurations.sql" relativeToChangelogFile="true"/>
+<include file="./Table/202601211451-period-audit-add-action-plan-completed-date.sql" relativeToChangelogFile="true"/>
+
+<!-- INSERTS -->
+<include file="./Inserts/202510010123-InsertAuditStatus.sql" relativeToChangelogFile="true"/>
+<include file="./Inserts/202510280900-config-forms.sql" relativeToChangelogFile="true"/>
+<include file="./Inserts/202511111131-audit-role-config.sql" relativeToChangelogFile="true"/>
+<include file="./Inserts/202601210918-enterprise-group-insert-by-ruc.sql" relativeToChangelogFile="true"/>
+<include file="./Inserts/202601220914-measure-type.sql" relativeToChangelogFile="true"/>
+<include file="./Inserts/202601221032-system-config.sql" relativeToChangelogFile="true"/>
+
+</databaseChangeLog>

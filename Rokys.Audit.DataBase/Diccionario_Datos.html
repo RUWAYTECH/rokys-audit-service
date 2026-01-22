@@ -1,0 +1,3213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diccionario de Datos - Sistema de Auditoría Rokys</title>
+    <style>
+        @page {
+            margin: 2cm;
+            size: A4;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            margin-top: 30px;
+            page-break-before: avoid;
+        }
+        
+        h2 {
+            color: #34495e;
+            border-bottom: 2px solid #95a5a6;
+            padding-bottom: 8px;
+            margin-top: 25px;
+            page-break-after: avoid;
+        }
+        
+        h3 {
+            color: #555;
+            margin-top: 20px;
+            background-color: #ecf0f1;
+            padding: 10px;
+            border-left: 4px solid #3498db;
+            page-break-after: avoid;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 11px;
+            page-break-inside: avoid;
+        }
+        
+        table thead tr {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: left;
+        }
+        
+        table th {
+            padding: 12px;
+            font-weight: 600;
+        }
+        
+        table tbody tr {
+            border-bottom: 1px solid #ddd;
+        }
+        
+        table tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        table tbody tr:hover {
+            background-color: #e9ecef;
+        }
+        
+        table td {
+            padding: 10px;
+        }
+        
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 90%;
+        }
+        
+        .page-break {
+            page-break-before: always;
+        }
+        
+        .header-logo {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px 0;
+            border-bottom: 3px solid #3498db;
+        }
+        
+        .header-logo img {
+            max-width: 250px;
+            height: auto;
+            margin-bottom: 15px;
+        }
+        
+        .header-title {
+            color: #2c3e50;
+            font-size: 28px;
+            font-weight: 600;
+            margin: 10px 0;
+        }
+        
+        .header-subtitle {
+            color: #7f8c8d;
+            font-size: 16px;
+            margin: 5px 0;
+        }
+        
+        @media print {
+            body {
+                background-color: white;
+            }
+            
+            h1, h2, h3 {
+                page-break-after: avoid;
+            }
+            
+            table {
+                page-break-inside: avoid;
+            }
+            
+            .header-logo {
+                page-break-after: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="header-logo">
+    <img src="https://www.ruway.tech/static/media/logo.0daae2dc.png" alt="Ruwaytech Logo">
+    <div class="header-title">Diccionario de Datos</div>
+    <div class="header-subtitle">Sistema de Auditoría Rokys</div>
+</div>
+<br>
+<h2>Índice de Contenidos</h2>
+<br>
+<p>1. [Tablas de Configuración](#tablas-de-configuración)</p>
+<p>2. [Tablas de Criterios de Puntuación](#tablas-de-criterios-de-puntuación)</p>
+<p>3. [Tablas de Proceso de Auditoría](#tablas-de-proceso-de-auditoría)</p>
+<p>4. [Tablas de Resultados](#tablas-de-resultados)</p>
+<p>5. [Tablas de Gestión de Usuarios](#tablas-de-gestión-de-usuarios)</p>
+<p>6. [Tablas de Almacenamiento](#tablas-de-almacenamiento)</p>
+<br>
+<hr>
+<br>
+<h2>Tablas de Configuración</h2>
+<br>
+<h3>Enterprise</h3>
+<p>Tabla que almacena la información de las empresas del sistema.</p>
+<br>
+<table>
+<thead><tr>
+<th>Campo</th>
+<th>Tipo de Dato</th>
+<th>Nulable</th>
+<th>Descripción</th>
+<th>Constraints</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>EnterpriseId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador único de la empresa</td>
+<td>PRIMARY KEY, DEFAULT NEWID()</td>
+</tr>
+<tr>
+<td>Name</td>
+<td>NVARCHAR(255)</td>
+<td>No</td>
+<td>Nombre de la empresa</td>
+<td></td>
+</tr>
+<tr>
+<td>Code</td>
+<td>NVARCHAR(50)</td>
+<td>No</td>
+<td>Código único de la empresa</td>
+<td>UNIQUE</td>
+</tr>
+<tr>
+<td>Address</td>
+<td>NVARCHAR(500)</td>
+<td>Sí</td>
+<td>Dirección de la empresa</td>
+<td></td>
+</tr>
+<tr>
+<td>IsActive</td>
+<td>BIT</td>
+<td>Sí</td>
+<td>Indica si el registro está activo</td>
+<td>DEFAULT 1</td>
+</tr>
+<tr>
+<td>CreatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que creó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>CreationDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de creación del registro</td>
+<td>DEFAULT GETDATE()</td>
+</tr>
+<tr>
+<td>UpdatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que actualizó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>UpdateDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de actualización del registro</td>
+<td></td>
+</tr>
+</tbody></table>
+<br>
+<hr>
+<br>
+<h3>Stores</h3>
+<p>Tabla que almacena la información de las tiendas asociadas a cada empresa.</p>
+<br>
+<table>
+<thead><tr>
+<th>Campo</th>
+<th>Tipo de Dato</th>
+<th>Nulable</th>
+<th>Descripción</th>
+<th>Constraints</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>StoreId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador único de la tienda</td>
+<td>PRIMARY KEY, DEFAULT NEWID()</td>
+</tr>
+<tr>
+<td>Name</td>
+<td>NVARCHAR(255)</td>
+<td>No</td>
+<td>Nombre de la tienda</td>
+<td></td>
+</tr>
+<tr>
+<td>Code</td>
+<td>NVARCHAR(50)</td>
+<td>No</td>
+<td>Código único de la tienda</td>
+<td>UNIQUE</td>
+</tr>
+<tr>
+<td>Address</td>
+<td>NVARCHAR(500)</td>
+<td>Sí</td>
+<td>Dirección de la tienda</td>
+<td></td>
+</tr>
+<tr>
+<td>EnterpriseId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador de la empresa</td>
+<td>FK a Enterprise</td>
+</tr>
+<tr>
+<td>IsActive</td>
+<td>BIT</td>
+<td>Sí</td>
+<td>Indica si el registro está activo</td>
+<td>DEFAULT 1</td>
+</tr>
+<tr>
+<td>CreatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que creó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>CreationDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de creación del registro</td>
+<td>DEFAULT GETDATE()</td>
+</tr>
+<tr>
+<td>UpdatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que actualizó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>UpdateDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de actualización del registro</td>
+<td></td>
+</tr>
+</tbody></table>
+<br>
+<hr>
+<br>
+<h3>ScaleCompany</h3>
+<p>Tabla que define las escalas de calificación por empresa.</p>
+<br>
+<table>
+<thead><tr>
+<th>Campo</th>
+<th>Tipo de Dato</th>
+<th>Nulable</th>
+<th>Descripción</th>
+<th>Constraints</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>ScaleCompanyId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador único de la escala</td>
+<td>PRIMARY KEY, DEFAULT NEWID()</td>
+</tr>
+<tr>
+<td>EnterpriseId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>Sí</td>
+<td>Identificador de la empresa</td>
+<td>FK a Enterprise</td>
+</tr>
+<tr>
+<td>Code</td>
+<td>NVARCHAR(10)</td>
+<td>No</td>
+<td>Código de la escala</td>
+<td></td>
+</tr>
+<tr>
+<td>Name</td>
+<td>NVARCHAR(200)</td>
+<td>No</td>
+<td>Nombre de la escala</td>
+<td></td>
+</tr>
+<tr>
+<td>MinValue</td>
+<td>DECIMAL(10,2)</td>
+<td>No</td>
+<td>Valor mínimo de la escala</td>
+<td></td>
+</tr>
+<tr>
+<td>MaxValue</td>
+<td>DECIMAL(10,2)</td>
+<td>No</td>
+<td>Valor máximo de la escala</td>
+<td></td>
+</tr>
+<tr>
+<td>ColorCode</td>
+<td>NVARCHAR(20)</td>
+<td>Sí</td>
+<td>Código de color (Hexadecimal)</td>
+<td></td>
+</tr>
+<tr>
+<td>SortOrder</td>
+<td>INT</td>
+<td>Sí</td>
+<td>Orden de la escala</td>
+<td>DEFAULT 0</td>
+</tr>
+<tr>
+<td>IsActive</td>
+<td>BIT</td>
+<td>Sí</td>
+<td>Indica si el registro está activo</td>
+<td>DEFAULT 1</td>
+</tr>
+<tr>
+<td>CreatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que creó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>CreationDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de creación del registro</td>
+<td>DEFAULT GETDATE()</td>
+</tr>
+<tr>
+<td>UpdatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que actualizó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>UpdateDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de actualización del registro</td>
+<td></td>
+</tr>
+</tbody></table>
+<br>
+<hr>
+<br>
+<h3>Group</h3>
+<p>Tabla que define los grupos de auditoría por empresa.</p>
+<br>
+<table>
+<thead><tr>
+<th>Campo</th>
+<th>Tipo de Dato</th>
+<th>Nulable</th>
+<th>Descripción</th>
+<th>Constraints</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>GroupId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador único del grupo</td>
+<td>PRIMARY KEY, DEFAULT NEWID()</td>
+</tr>
+<tr>
+<td>EnterpriseId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador de la empresa</td>
+<td>FK a Enterprise</td>
+</tr>
+<tr>
+<td>Name</td>
+<td>NVARCHAR(200)</td>
+<td>No</td>
+<td>Nombre del grupo</td>
+<td></td>
+</tr>
+<tr>
+<td>Weighting</td>
+<td>DECIMAL(5,2)</td>
+<td>No</td>
+<td>Ponderación del grupo</td>
+<td></td>
+</tr>
+<tr>
+<td>SortOrder</td>
+<td>INT</td>
+<td>No</td>
+<td>Orden del grupo</td>
+<td>DEFAULT 0</td>
+</tr>
+<tr>
+<td>IsActive</td>
+<td>BIT</td>
+<td>Sí</td>
+<td>Indica si el registro está activo</td>
+<td>DEFAULT 1</td>
+</tr>
+<tr>
+<td>CreatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que creó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>CreationDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de creación del registro</td>
+<td>DEFAULT GETDATE()</td>
+</tr>
+<tr>
+<td>UpdatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que actualizó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>UpdateDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de actualización del registro</td>
+<td></td>
+</tr>
+</tbody></table>
+<br>
+<hr>
+<br>
+<h3>ScaleGroup</h3>
+<p>Tabla que define los subgrupos de escala dentro de cada grupo.</p>
+<br>
+<table>
+<thead><tr>
+<th>Campo</th>
+<th>Tipo de Dato</th>
+<th>Nulable</th>
+<th>Descripción</th>
+<th>Constraints</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>ScaleGroupId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador único del grupo de escala</td>
+<td>PRIMARY KEY, DEFAULT NEWID()</td>
+</tr>
+<tr>
+<td>GroupId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador del grupo</td>
+<td>FK a Group</td>
+</tr>
+<tr>
+<td>Code</td>
+<td>NVARCHAR(10)</td>
+<td>No</td>
+<td>Código del grupo de escala</td>
+<td></td>
+</tr>
+<tr>
+<td>Name</td>
+<td>NVARCHAR(200)</td>
+<td>No</td>
+<td>Nombre del grupo de escala</td>
+<td></td>
+</tr>
+<tr>
+<td>HasSourceData</td>
+<td>BIT</td>
+<td>Sí</td>
+<td>Indica si tiene datos fuente</td>
+<td>DEFAULT 0</td>
+</tr>
+<tr>
+<td>SortOrder</td>
+<td>INT</td>
+<td>Sí</td>
+<td>Orden del grupo de escala</td>
+<td>DEFAULT 0</td>
+</tr>
+<tr>
+<td>Weighting</td>
+<td>DECIMAL(5,2)</td>
+<td>No</td>
+<td>Ponderación del grupo</td>
+<td></td>
+</tr>
+<tr>
+<td>Recommendation</td>
+<td>NVARCHAR(1000)</td>
+<td>Sí</td>
+<td>Recomendación</td>
+<td></td>
+</tr>
+<tr>
+<td>Impact</td>
+<td>NVARCHAR(1000)</td>
+<td>Sí</td>
+<td>Impacto</td>
+<td></td>
+</tr>
+<tr>
+<td>IsActive</td>
+<td>BIT</td>
+<td>Sí</td>
+<td>Indica si el registro está activo</td>
+<td>DEFAULT 1</td>
+</tr>
+<tr>
+<td>CreatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que creó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>CreationDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de creación del registro</td>
+<td>DEFAULT GETDATE()</td>
+</tr>
+<tr>
+<td>UpdatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que actualizó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>UpdateDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de actualización del registro</td>
+<td></td>
+</tr>
+</tbody></table>
+<br>
+<hr>
+<br>
+<h3>TableScaleTemplate</h3>
+<p>Tabla que almacena las plantillas de tabla para las escalas.</p>
+<br>
+<table>
+<thead><tr>
+<th>Campo</th>
+<th>Tipo de Dato</th>
+<th>Nulable</th>
+<th>Descripción</th>
+<th>Constraints</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>TableScaleTemplateId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador único de la plantilla</td>
+<td>PRIMARY KEY, DEFAULT NEWID()</td>
+</tr>
+<tr>
+<td>ScaleGroupId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador del grupo de escala</td>
+<td>FK a ScaleGroup</td>
+</tr>
+<tr>
+<td>Code</td>
+<td>NVARCHAR(50)</td>
+<td>No</td>
+<td>Código de la plantilla</td>
+<td></td>
+</tr>
+<tr>
+<td>Name</td>
+<td>NVARCHAR(255)</td>
+<td>No</td>
+<td>Nombre de la plantilla</td>
+<td></td>
+</tr>
+<tr>
+<td>Orientation</td>
+<td>NVARCHAR(2)</td>
+<td>Sí</td>
+<td>Orientación: 'H' (horizontal) o 'V' (vertical)</td>
+<td>DEFAULT 'V', CHECK IN ('H','V')</td>
+</tr>
+<tr>
+<td>SortOrder</td>
+<td>INT</td>
+<td>Sí</td>
+<td>Orden de la plantilla</td>
+<td>DEFAULT 0</td>
+</tr>
+<tr>
+<td>TemplateData</td>
+<td>NVARCHAR(MAX)</td>
+<td>Sí</td>
+<td>Datos de la plantilla en formato JSON</td>
+<td>CHECK ISJSON() = 1</td>
+</tr>
+<tr>
+<td>IsActive</td>
+<td>BIT</td>
+<td>Sí</td>
+<td>Indica si el registro está activo</td>
+<td>DEFAULT 1</td>
+</tr>
+<tr>
+<td>CreatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que creó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>CreationDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de creación del registro</td>
+<td>DEFAULT GETDATE()</td>
+</tr>
+<tr>
+<td>UpdatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que actualizó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>UpdateDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de actualización del registro</td>
+<td></td>
+</tr>
+</tbody></table>
+<br>
+<hr>
+<br>
+<h3>AuditTemplateFields</h3>
+<p>Tabla que define los campos de las plantillas de auditoría.</p>
+<br>
+<table>
+<thead><tr>
+<th>Campo</th>
+<th>Tipo de Dato</th>
+<th>Nulable</th>
+<th>Descripción</th>
+<th>Constraints</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>AuditTemplateFieldId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador único del campo</td>
+<td>PRIMARY KEY, DEFAULT NEWID()</td>
+</tr>
+<tr>
+<td>TableScaleTemplateId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador de la plantilla</td>
+<td>FK a TableScaleTemplate</td>
+</tr>
+<tr>
+<td>FieldCode</td>
+<td>NVARCHAR(100)</td>
+<td>No</td>
+<td>Código del campo</td>
+<td></td>
+</tr>
+<tr>
+<td>FieldName</td>
+<td>NVARCHAR(255)</td>
+<td>No</td>
+<td>Nombre del campo</td>
+<td></td>
+</tr>
+<tr>
+<td>FieldType</td>
+<td>NVARCHAR(50)</td>
+<td>No</td>
+<td>Tipo de campo: numeric, text, date, boolean, select, image</td>
+<td></td>
+</tr>
+<tr>
+<td>IsCalculated</td>
+<td>VARCHAR(50)</td>
+<td>Sí</td>
+<td>Indica si es un campo calculado</td>
+<td></td>
+</tr>
+<tr>
+<td>CalculationFormula</td>
+<td>NVARCHAR(2000)</td>
+<td>Sí</td>
+<td>Fórmula de cálculo</td>
+<td></td>
+</tr>
+<tr>
+<td>AcumulationType</td>
+<td>NVARCHAR(50)</td>
+<td>Sí</td>
+<td>Tipo de acumulación: SUM, COUNT</td>
+<td>CHECK IN ('SUM','COUNT')</td>
+</tr>
+<tr>
+<td>FieldOptions</td>
+<td>NVARCHAR(MAX)</td>
+<td>Sí</td>
+<td>Opciones para campos tipo select (JSON)</td>
+<td>CHECK ISJSON() = 1</td>
+</tr>
+<tr>
+<td>SortOrder</td>
+<td>INT</td>
+<td>Sí</td>
+<td>Orden del campo</td>
+<td>DEFAULT 0</td>
+</tr>
+<tr>
+<td>DefaultValue</td>
+<td>NVARCHAR(MAX)</td>
+<td>Sí</td>
+<td>Valor por defecto</td>
+<td></td>
+</tr>
+<tr>
+<td>IsActive</td>
+<td>BIT</td>
+<td>Sí</td>
+<td>Indica si el registro está activo</td>
+<td>DEFAULT 1</td>
+</tr>
+<tr>
+<td>CreatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que creó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>CreationDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de creación del registro</td>
+<td>DEFAULT GETDATE()</td>
+</tr>
+<tr>
+<td>UpdatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que actualizó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>UpdateDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de actualización del registro</td>
+<td></td>
+</tr>
+</tbody></table>
+<br>
+<p>**Índices:**</p>
+<p>- IX_AuditFieldValues_FieldCode (FieldCode)</p>
+<br>
+<hr>
+<br>
+<h3>MaintenanceTable</h3>
+<p>Tabla que define las tablas de mantenimiento del sistema.</p>
+<br>
+<table>
+<thead><tr>
+<th>Campo</th>
+<th>Tipo de Dato</th>
+<th>Nulable</th>
+<th>Descripción</th>
+<th>Constraints</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>MaintenanceTableId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador único de la tabla de mantenimiento</td>
+<td>PRIMARY KEY, DEFAULT NEWID()</td>
+</tr>
+<tr>
+<td>Code</td>
+<td>NVARCHAR(50)</td>
+<td>No</td>
+<td>Código de la tabla</td>
+<td></td>
+</tr>
+<tr>
+<td>Description</td>
+<td>NVARCHAR(255)</td>
+<td>Sí</td>
+<td>Descripción de la tabla</td>
+<td></td>
+</tr>
+<tr>
+<td>IsSystem</td>
+<td>BIT</td>
+<td>No</td>
+<td>Indica si es una tabla del sistema</td>
+<td>DEFAULT 0</td>
+</tr>
+<tr>
+<td>IsActive</td>
+<td>BIT</td>
+<td>No</td>
+<td>Indica si el registro está activo</td>
+<td>DEFAULT 1</td>
+</tr>
+<tr>
+<td>CreationDate</td>
+<td>DATETIME</td>
+<td>No</td>
+<td>Fecha de creación</td>
+<td>DEFAULT GETDATE()</td>
+</tr>
+<tr>
+<td>CreatedBy</td>
+<td>NVARCHAR(100)</td>
+<td>No</td>
+<td>Usuario que creó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>UpdateDate</td>
+<td>DATETIME</td>
+<td>Sí</td>
+<td>Fecha de actualización</td>
+<td></td>
+</tr>
+<tr>
+<td>UpdatedBy</td>
+<td>NVARCHAR(100)</td>
+<td>Sí</td>
+<td>Usuario que actualizó el registro</td>
+<td></td>
+</tr>
+</tbody></table>
+<br>
+<hr>
+<br>
+<h3>MaintenanceDetailTable</h3>
+<p>Tabla que almacena los detalles de las tablas de mantenimiento.</p>
+<br>
+<table>
+<thead><tr>
+<th>Campo</th>
+<th>Tipo de Dato</th>
+<th>Nulable</th>
+<th>Descripción</th>
+<th>Constraints</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>MaintenanceDetailTableId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador único del detalle</td>
+<td>PRIMARY KEY, DEFAULT NEWID()</td>
+</tr>
+<tr>
+<td>MaintenanceTableId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador de la tabla de mantenimiento</td>
+<td>FK a MaintenanceTable</td>
+</tr>
+<tr>
+<td>Code</td>
+<td>NVARCHAR(50)</td>
+<td>No</td>
+<td>Código del detalle</td>
+<td></td>
+</tr>
+<tr>
+<td>Description</td>
+<td>NVARCHAR(255)</td>
+<td>Sí</td>
+<td>Descripción del detalle</td>
+<td></td>
+</tr>
+<tr>
+<td>JsonData</td>
+<td>NVARCHAR(MAX)</td>
+<td>Sí</td>
+<td>Datos adicionales en formato JSON</td>
+<td></td>
+</tr>
+<tr>
+<td>OrderRow</td>
+<td>INT</td>
+<td>Sí</td>
+<td>Orden de la fila</td>
+<td></td>
+</tr>
+<tr>
+<td>IsDefault</td>
+<td>BIT</td>
+<td>No</td>
+<td>Indica si es el valor por defecto</td>
+<td>DEFAULT 0</td>
+</tr>
+<tr>
+<td>IsActive</td>
+<td>BIT</td>
+<td>No</td>
+<td>Indica si el registro está activo</td>
+<td>DEFAULT 1</td>
+</tr>
+<tr>
+<td>CreationDate</td>
+<td>DATETIME</td>
+<td>No</td>
+<td>Fecha de creación</td>
+<td>DEFAULT GETDATE()</td>
+</tr>
+<tr>
+<td>CreatedBy</td>
+<td>NVARCHAR(100)</td>
+<td>No</td>
+<td>Usuario que creó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>UpdateDate</td>
+<td>DATETIME</td>
+<td>Sí</td>
+<td>Fecha de actualización</td>
+<td></td>
+</tr>
+<tr>
+<td>UpdatedBy</td>
+<td>NVARCHAR(100)</td>
+<td>Sí</td>
+<td>Usuario que actualizó el registro</td>
+<td></td>
+</tr>
+</tbody></table>
+<br>
+<hr>
+<br>
+<h3>AuditStatus</h3>
+<p>Tabla que define los estados posibles de una auditoría.</p>
+<br>
+<table>
+<thead><tr>
+<th>Campo</th>
+<th>Tipo de Dato</th>
+<th>Nulable</th>
+<th>Descripción</th>
+<th>Constraints</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>AuditStatusId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador único del estado</td>
+<td>PRIMARY KEY, DEFAULT NEWID()</td>
+</tr>
+<tr>
+<td>Name</td>
+<td>NVARCHAR(255)</td>
+<td>No</td>
+<td>Nombre del estado</td>
+<td></td>
+</tr>
+<tr>
+<td>Code</td>
+<td>NVARCHAR(10)</td>
+<td>No</td>
+<td>Código único del estado</td>
+<td>UNIQUE</td>
+</tr>
+<tr>
+<td>ColorCode</td>
+<td>NVARCHAR(10)</td>
+<td>Sí</td>
+<td>Código de color del estado</td>
+<td></td>
+</tr>
+<tr>
+<td>IsActive</td>
+<td>BIT</td>
+<td>Sí</td>
+<td>Indica si el registro está activo</td>
+<td>DEFAULT 1</td>
+</tr>
+<tr>
+<td>CreatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que creó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>CreationDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de creación del registro</td>
+<td>DEFAULT GETDATE()</td>
+</tr>
+<tr>
+<td>UpdatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que actualizó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>UpdateDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de actualización del registro</td>
+<td></td>
+</tr>
+</tbody></table>
+<br>
+<hr>
+<br>
+<h2>Tablas de Criterios de Puntuación</h2>
+<br>
+<h3>ScoringCriteria</h3>
+<p>Tabla que define los criterios de puntuación para las auditorías.</p>
+<br>
+<table>
+<thead><tr>
+<th>Campo</th>
+<th>Tipo de Dato</th>
+<th>Nulable</th>
+<th>Descripción</th>
+<th>Constraints</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>ScoringCriteriaId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador único del criterio</td>
+<td>PRIMARY KEY, DEFAULT NEWID()</td>
+</tr>
+<tr>
+<td>ScaleGroupId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador del grupo de escala</td>
+<td>FK a ScaleGroup</td>
+</tr>
+<tr>
+<td>CriteriaCode</td>
+<td>NVARCHAR(10)</td>
+<td>No</td>
+<td>Código del criterio (AUTO: SR-{4 dígitos})</td>
+<td></td>
+</tr>
+<tr>
+<td>CriteriaName</td>
+<td>NVARCHAR(255)</td>
+<td>No</td>
+<td>Nombre del criterio</td>
+<td></td>
+</tr>
+<tr>
+<td>ResultFormula</td>
+<td>NVARCHAR(2000)</td>
+<td>Sí</td>
+<td>Fórmula para calcular el resultado</td>
+<td></td>
+</tr>
+<tr>
+<td>ComparisonOperator</td>
+<td>NVARCHAR(20)</td>
+<td>No</td>
+<td>Operador de comparación: =, !=, >, <, >=, <=, BETWEEN, IN, CONTAINS</td>
+<td></td>
+</tr>
+<tr>
+<td>ExpectedValue</td>
+<td>NVARCHAR(255)</td>
+<td>No</td>
+<td>Valor esperado</td>
+<td></td>
+</tr>
+<tr>
+<td>Score</td>
+<td>DECIMAL(10,2)</td>
+<td>No</td>
+<td>Puntaje otorgado si cumple</td>
+<td></td>
+</tr>
+<tr>
+<td>SortOrder</td>
+<td>INT</td>
+<td>Sí</td>
+<td>Orden de evaluación</td>
+<td>DEFAULT 0</td>
+</tr>
+<tr>
+<td>ErrorMessage</td>
+<td>NVARCHAR(500)</td>
+<td>Sí</td>
+<td>Mensaje si no cumple el criterio</td>
+<td></td>
+</tr>
+<tr>
+<td>SuccessMessage</td>
+<td>NVARCHAR(500)</td>
+<td>Sí</td>
+<td>Mensaje si cumple el criterio</td>
+<td></td>
+</tr>
+<tr>
+<td>IsActive</td>
+<td>BIT</td>
+<td>Sí</td>
+<td>Indica si el registro está activo</td>
+<td>DEFAULT 1</td>
+</tr>
+<tr>
+<td>CreatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que creó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>CreationDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de creación del registro</td>
+<td>DEFAULT GETDATE()</td>
+</tr>
+<tr>
+<td>UpdatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que actualizó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>UpdateDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de actualización del registro</td>
+<td></td>
+</tr>
+</tbody></table>
+<br>
+<p>**Índices:**</p>
+<p>- IX_ScoringCriteria_ScaleGroupId (ScaleGroupId)</p>
+<br>
+<hr>
+<br>
+<h3>CriteriaSubResult</h3>
+<p>Tabla que define los sub-resultados de los criterios.</p>
+<br>
+<table>
+<thead><tr>
+<th>Campo</th>
+<th>Tipo de Dato</th>
+<th>Nulable</th>
+<th>Descripción</th>
+<th>Constraints</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>CriteriaSubResultId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador único del sub-criterio</td>
+<td>PRIMARY KEY, DEFAULT NEWID()</td>
+</tr>
+<tr>
+<td>ScaleGroupId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador del grupo de escala</td>
+<td>FK a ScaleGroup</td>
+</tr>
+<tr>
+<td>CriteriaName</td>
+<td>NVARCHAR(255)</td>
+<td>No</td>
+<td>Nombre del criterio</td>
+<td></td>
+</tr>
+<tr>
+<td>CriteriaCode</td>
+<td>NVARCHAR(10)</td>
+<td>Sí</td>
+<td>Código del criterio (AUTO: CSR-{4 dígitos})</td>
+<td></td>
+</tr>
+<tr>
+<td>ResultFormula</td>
+<td>NVARCHAR(2000)</td>
+<td>Sí</td>
+<td>Fórmula para calcular el resultado</td>
+<td></td>
+</tr>
+<tr>
+<td>ColorCode</td>
+<td>NVARCHAR(20)</td>
+<td>No</td>
+<td>Código de color para la evaluación</td>
+<td></td>
+</tr>
+<tr>
+<td>Score</td>
+<td>DECIMAL(10,2)</td>
+<td>Sí</td>
+<td>Puntaje otorgado si cumple</td>
+<td></td>
+</tr>
+<tr>
+<td>ForSummary</td>
+<td>BIT</td>
+<td>No</td>
+<td>Indica si se incluye en el resumen</td>
+<td>DEFAULT 0</td>
+</tr>
+<tr>
+<td>IsActive</td>
+<td>BIT</td>
+<td>Sí</td>
+<td>Indica si el registro está activo</td>
+<td>DEFAULT 1</td>
+</tr>
+<tr>
+<td>CreatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que creó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>CreationDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de creación del registro</td>
+<td>DEFAULT GETDATE()</td>
+</tr>
+<tr>
+<td>UpdatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que actualizó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>UpdateDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de actualización del registro</td>
+<td></td>
+</tr>
+</tbody></table>
+<br>
+<p>**Índices:**</p>
+<p>- IX_ScoringCriteria_ScaleGroupId (ScaleGroupId)</p>
+<br>
+<hr>
+<br>
+<h2>Tablas de Gestión de Usuarios</h2>
+<br>
+<h3>UserReference</h3>
+<p>Tabla que almacena la referencia de usuarios del sistema.</p>
+<br>
+<table>
+<thead><tr>
+<th>Campo</th>
+<th>Tipo de Dato</th>
+<th>Nulable</th>
+<th>Descripción</th>
+<th>Constraints</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>UserReferenceId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador único del usuario</td>
+<td>PRIMARY KEY, DEFAULT NEWID()</td>
+</tr>
+<tr>
+<td>UserId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>Sí</td>
+<td>Identificador del usuario en Security MS</td>
+<td></td>
+</tr>
+<tr>
+<td>EmployeeId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>Sí</td>
+<td>Identificador del empleado en Memos MS</td>
+<td></td>
+</tr>
+<tr>
+<td>FirstName</td>
+<td>NVARCHAR(200)</td>
+<td>No</td>
+<td>Nombre del usuario</td>
+<td></td>
+</tr>
+<tr>
+<td>LastName</td>
+<td>NVARCHAR(200)</td>
+<td>No</td>
+<td>Apellido del usuario</td>
+<td></td>
+</tr>
+<tr>
+<td>Email</td>
+<td>NVARCHAR(150)</td>
+<td>Sí</td>
+<td>Email corporativo</td>
+<td></td>
+</tr>
+<tr>
+<td>PersonalEmail</td>
+<td>NVARCHAR(150)</td>
+<td>Sí</td>
+<td>Email personal</td>
+<td></td>
+</tr>
+<tr>
+<td>DocumentNumber</td>
+<td>NVARCHAR(20)</td>
+<td>Sí</td>
+<td>Número de documento</td>
+<td></td>
+</tr>
+<tr>
+<td>RoleCode</td>
+<td>NVARCHAR(50)</td>
+<td>Sí</td>
+<td>Código del rol</td>
+<td></td>
+</tr>
+<tr>
+<td>RoleName</td>
+<td>NVARCHAR(100)</td>
+<td>Sí</td>
+<td>Nombre del rol</td>
+<td></td>
+</tr>
+<tr>
+<td>IsActive</td>
+<td>BIT</td>
+<td>No</td>
+<td>Indica si el registro está activo</td>
+<td>DEFAULT 1</td>
+</tr>
+<tr>
+<td>CreatedBy</td>
+<td>NVARCHAR(100)</td>
+<td>Sí</td>
+<td>Usuario que creó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>CreationDate</td>
+<td>DATETIME2</td>
+<td>No</td>
+<td>Fecha de creación del registro</td>
+<td>DEFAULT SYSUTCDATETIME()</td>
+</tr>
+<tr>
+<td>UpdatedBy</td>
+<td>NVARCHAR(100)</td>
+<td>Sí</td>
+<td>Usuario que actualizó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>UpdateDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de actualización del registro</td>
+<td></td>
+</tr>
+</tbody></table>
+<br>
+<hr>
+<br>
+<h3>EmployeeStores</h3>
+<p>Tabla que relaciona empleados con las tiendas asignadas.</p>
+<br>
+<table>
+<thead><tr>
+<th>Campo</th>
+<th>Tipo de Dato</th>
+<th>Nulable</th>
+<th>Descripción</th>
+<th>Constraints</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>EmployeeStoreId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador único de la relación</td>
+<td>PRIMARY KEY, DEFAULT NEWID()</td>
+</tr>
+<tr>
+<td>UserReferenceId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador del usuario</td>
+<td>FK a UserReference</td>
+</tr>
+<tr>
+<td>StoreId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador de la tienda</td>
+<td>FK a Stores</td>
+</tr>
+<tr>
+<td>AssignmentDate</td>
+<td>DATE</td>
+<td>No</td>
+<td>Fecha de asignación</td>
+<td>DEFAULT GETDATE()</td>
+</tr>
+<tr>
+<td>IsActive</td>
+<td>BIT</td>
+<td>Sí</td>
+<td>Indica si el registro está activo</td>
+<td>DEFAULT 1</td>
+</tr>
+<tr>
+<td>CreatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que creó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>CreationDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de creación del registro</td>
+<td>DEFAULT GETDATE()</td>
+</tr>
+<tr>
+<td>UpdatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que actualizó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>UpdateDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de actualización del registro</td>
+<td></td>
+</tr>
+</tbody></table>
+<br>
+<p>**Constraints:**</p>
+<p>- UQ_EmployeeStore UNIQUE (UserReferenceId, StoreId)</p>
+<br>
+<hr>
+<br>
+<h3>AuditRoleConfiguration</h3>
+<p>Tabla que configura los roles requeridos para las auditorías.</p>
+<br>
+<table>
+<thead><tr>
+<th>Campo</th>
+<th>Tipo de Dato</th>
+<th>Nulable</th>
+<th>Descripción</th>
+<th>Constraints</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>AuditRoleConfigurationId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador único de la configuración</td>
+<td>PRIMARY KEY, DEFAULT NEWID()</td>
+</tr>
+<tr>
+<td>RoleCode</td>
+<td>NVARCHAR(10)</td>
+<td>No</td>
+<td>Código del rol</td>
+<td>UNIQUE</td>
+</tr>
+<tr>
+<td>RoleName</td>
+<td>NVARCHAR(100)</td>
+<td>No</td>
+<td>Nombre del rol</td>
+<td></td>
+</tr>
+<tr>
+<td>IsRequired</td>
+<td>BIT</td>
+<td>Sí</td>
+<td>Indica si el rol es requerido</td>
+<td>DEFAULT 1</td>
+</tr>
+<tr>
+<td>AllowMultiple</td>
+<td>BIT</td>
+<td>Sí</td>
+<td>Permite múltiples usuarios con este rol</td>
+<td>DEFAULT 0</td>
+</tr>
+<tr>
+<td>SequenceOrder</td>
+<td>INT</td>
+<td>Sí</td>
+<td>Orden de secuencia</td>
+<td></td>
+</tr>
+<tr>
+<td>IsActive</td>
+<td>BIT</td>
+<td>No</td>
+<td>Indica si el registro está activo</td>
+<td>DEFAULT 1</td>
+</tr>
+<tr>
+<td>CreatedBy</td>
+<td>NVARCHAR(100)</td>
+<td>Sí</td>
+<td>Usuario que creó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>CreationDate</td>
+<td>DATETIME2</td>
+<td>No</td>
+<td>Fecha de creación del registro</td>
+<td>DEFAULT SYSUTCDATETIME()</td>
+</tr>
+<tr>
+<td>UpdatedBy</td>
+<td>NVARCHAR(100)</td>
+<td>Sí</td>
+<td>Usuario que actualizó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>UpdateDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de actualización del registro</td>
+<td></td>
+</tr>
+</tbody></table>
+<br>
+<p>**Índices:**</p>
+<p>- IX_AuditRoleConfiguration_RoleCode (RoleCode)</p>
+<br>
+<hr>
+<br>
+<h3>PeriodAuditParticipant</h3>
+<p>Tabla que almacena los participantes asignados a un período de auditoría.</p>
+<br>
+<table>
+<thead><tr>
+<th>Campo</th>
+<th>Tipo de Dato</th>
+<th>Nulable</th>
+<th>Descripción</th>
+<th>Constraints</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>PeriodAuditParticipantId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador único del participante</td>
+<td>PRIMARY KEY, DEFAULT NEWID()</td>
+</tr>
+<tr>
+<td>PeriodAuditId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador del período de auditoría</td>
+<td>FK a PeriodAudit</td>
+</tr>
+<tr>
+<td>UserReferenceId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador del usuario</td>
+<td>FK a UserReference</td>
+</tr>
+<tr>
+<td>RoleCodeSnapshot</td>
+<td>NVARCHAR(10)</td>
+<td>No</td>
+<td>Código del rol al momento de asignación</td>
+<td></td>
+</tr>
+<tr>
+<td>RoleNameSnapshot</td>
+<td>NVARCHAR(100)</td>
+<td>No</td>
+<td>Nombre del rol al momento de asignación</td>
+<td></td>
+</tr>
+<tr>
+<td>Comments</td>
+<td>NVARCHAR(500)</td>
+<td>Sí</td>
+<td>Comentarios adicionales</td>
+<td></td>
+</tr>
+<tr>
+<td>IsActive</td>
+<td>BIT</td>
+<td>No</td>
+<td>Indica si el registro está activo</td>
+<td>DEFAULT 1</td>
+</tr>
+<tr>
+<td>CreatedBy</td>
+<td>NVARCHAR(100)</td>
+<td>Sí</td>
+<td>Usuario que creó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>CreationDate</td>
+<td>DATETIME2</td>
+<td>No</td>
+<td>Fecha de creación del registro</td>
+<td>DEFAULT SYSUTCDATETIME()</td>
+</tr>
+<tr>
+<td>UpdatedBy</td>
+<td>NVARCHAR(100)</td>
+<td>Sí</td>
+<td>Usuario que actualizó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>UpdateDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de actualización del registro</td>
+<td></td>
+</tr>
+</tbody></table>
+<br>
+<p>**Índices:**</p>
+<p>- IX_PeriodAuditParticipant_PeriodAuditId (PeriodAuditId)</p>
+<p>- IX_PeriodAuditParticipant_UserReferenceId (UserReferenceId)</p>
+<br>
+<hr>
+<br>
+<h3>SubstitutionHistory</h3>
+<p>Tabla que registra la historia de suplencias de usuarios en auditorías.</p>
+<br>
+<table>
+<thead><tr>
+<th>Campo</th>
+<th>Tipo de Dato</th>
+<th>Nulable</th>
+<th>Descripción</th>
+<th>Constraints</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>SubstitutionHistoryId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador único de la suplencia</td>
+<td>PRIMARY KEY, DEFAULT NEWID()</td>
+</tr>
+<tr>
+<td>PeriodAuditId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador del período de auditoría</td>
+<td>FK a PeriodAudit</td>
+</tr>
+<tr>
+<td>RoleName</td>
+<td>NVARCHAR(100)</td>
+<td>No</td>
+<td>Nombre del rol en el contexto de la auditoría</td>
+<td></td>
+</tr>
+<tr>
+<td>PreviousUserReferenceId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>Sí</td>
+<td>Identificador del usuario anterior</td>
+<td>FK a UserReference</td>
+</tr>
+<tr>
+<td>NewUserReferenceId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador del nuevo usuario asignado</td>
+<td>FK a UserReference</td>
+</tr>
+<tr>
+<td>ChangeReason</td>
+<td>NVARCHAR(255)</td>
+<td>Sí</td>
+<td>Razón del cambio</td>
+<td></td>
+</tr>
+<tr>
+<td>IsActive</td>
+<td>BIT</td>
+<td>No</td>
+<td>Indica si el registro está activo</td>
+<td>DEFAULT 1</td>
+</tr>
+<tr>
+<td>CreatedBy</td>
+<td>NVARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que creó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>CreationDate</td>
+<td>DATETIME2</td>
+<td>No</td>
+<td>Fecha de creación del registro</td>
+<td>DEFAULT SYSUTCDATETIME()</td>
+</tr>
+<tr>
+<td>UpdatedBy</td>
+<td>NVARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que actualizó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>UpdateDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de actualización del registro</td>
+<td></td>
+</tr>
+</tbody></table>
+<br>
+<p>**Índices:**</p>
+<p>- IX_SubstitutionHistory_PeriodAuditId (PeriodAuditId)</p>
+<p>- IX_SubstitutionHistory_PreviousUserReferenceId (PreviousUserReferenceId)</p>
+<p>- IX_SubstitutionHistory_NewUserReferenceId (NewUserReferenceId)</p>
+<br>
+<hr>
+<br>
+<h2>Tablas de Proceso de Auditoría</h2>
+<br>
+<h3>PeriodAudit</h3>
+<p>Tabla principal que almacena los períodos de auditoría (encabezado).</p>
+<br>
+<table>
+<thead><tr>
+<th>Campo</th>
+<th>Tipo de Dato</th>
+<th>Nulable</th>
+<th>Descripción</th>
+<th>Constraints</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>PeriodAuditId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador único de la auditoría</td>
+<td>PRIMARY KEY, DEFAULT NEWID()</td>
+</tr>
+<tr>
+<td>StoreId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>Sí</td>
+<td>Identificador de la tienda</td>
+<td>FK a Stores</td>
+</tr>
+<tr>
+<td>StartDate</td>
+<td>DATE</td>
+<td>No</td>
+<td>Fecha de inicio del período</td>
+<td></td>
+</tr>
+<tr>
+<td>EndDate</td>
+<td>DATE</td>
+<td>No</td>
+<td>Fecha de fin del período</td>
+<td></td>
+</tr>
+<tr>
+<td>ReportDate</td>
+<td>DATE</td>
+<td>Sí</td>
+<td>Fecha del reporte</td>
+<td></td>
+</tr>
+<tr>
+<td>AuditedDays</td>
+<td>INT</td>
+<td>Sí</td>
+<td>Días auditados</td>
+<td></td>
+</tr>
+<tr>
+<td>GlobalObservations</td>
+<td>NVARCHAR(MAX)</td>
+<td>No</td>
+<td>Observaciones globales</td>
+<td></td>
+</tr>
+<tr>
+<td>TotalWeighting</td>
+<td>DECIMAL(5,2)</td>
+<td>No</td>
+<td>Ponderación total</td>
+<td></td>
+</tr>
+<tr>
+<td>StatusId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>Sí</td>
+<td>Identificador del estado</td>
+<td>FK a AuditStatus</td>
+</tr>
+<tr>
+<td>CorrelativeNumber</td>
+<td>VARCHAR(50)</td>
+<td>Sí</td>
+<td>Número correlativo de la auditoría</td>
+<td></td>
+</tr>
+<tr>
+<td>ScoreValue</td>
+<td>DECIMAL(10,2)</td>
+<td>No</td>
+<td>Valor de puntuación obtenido</td>
+<td></td>
+</tr>
+<tr>
+<td>ScaleCode</td>
+<td>NVARCHAR(10)</td>
+<td>Sí</td>
+<td>Código de la escala</td>
+<td></td>
+</tr>
+<tr>
+<td>ScaleName</td>
+<td>NVARCHAR(100)</td>
+<td>No</td>
+<td>Nombre de la escala</td>
+<td></td>
+</tr>
+<tr>
+<td>ScaleColor</td>
+<td>NVARCHAR(10)</td>
+<td>No</td>
+<td>Color de la escala</td>
+<td></td>
+</tr>
+<tr>
+<td>ScaleMinValue</td>
+<td>DECIMAL(10,2)</td>
+<td>No</td>
+<td>Valor mínimo de la escala</td>
+<td></td>
+</tr>
+<tr>
+<td>ScaleMaxValue</td>
+<td>DECIMAL(10,2)</td>
+<td>No</td>
+<td>Valor máximo de la escala</td>
+<td></td>
+</tr>
+<tr>
+<td>IsActive</td>
+<td>BIT</td>
+<td>Sí</td>
+<td>Indica si el registro está activo</td>
+<td>DEFAULT 1</td>
+</tr>
+<tr>
+<td>CreatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que creó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>CreationDate</td>
+<td>DATETIME</td>
+<td>Sí</td>
+<td>Fecha de creación del registro</td>
+<td>DEFAULT GETDATE()</td>
+</tr>
+<tr>
+<td>UpdatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que actualizó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>UpdateDate</td>
+<td>DATETIME</td>
+<td>Sí</td>
+<td>Fecha de actualización del registro</td>
+<td></td>
+</tr>
+</tbody></table>
+<br>
+<p>**Índices:**</p>
+<p>- IX_PeriodAudit_ScaleCode_Optimized (ScaleCode, IsActive, StoreId, CreationDate) INCLUDE (ScaleName, ScaleColor, ScoreValue, ScaleMinValue, ScaleMaxValue, StatusId)</p>
+<p>- IX_PeriodAudit_ScaleCode_DateRange (ScaleCode, CreationDate, IsActive) INCLUDE (StoreId, ScoreValue, StatusId) WHERE IsActive = 1</p>
+<p>- IX_PeriodAudit_ScaleCode_Statistics (ScaleCode, StatusId, IsActive) INCLUDE (ScoreValue, StoreId, CreationDate)</p>
+<br>
+<hr>
+<br>
+<h3>InboxItems</h3>
+<p>Tabla que representa la bandeja de auditorías para gestión de flujo de trabajo.</p>
+<br>
+<table>
+<thead><tr>
+<th>Campo</th>
+<th>Tipo de Dato</th>
+<th>Nulable</th>
+<th>Descripción</th>
+<th>Constraints</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>InboxItemId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador único del ítem</td>
+<td>PRIMARY KEY, DEFAULT NEWID()</td>
+</tr>
+<tr>
+<td>PeriodAuditId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>Sí</td>
+<td>Identificador de la auditoría</td>
+<td>FK a PeriodAudit ON DELETE CASCADE</td>
+</tr>
+<tr>
+<td>PrevStatusId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>Sí</td>
+<td>Identificador del estado anterior</td>
+<td>FK a AuditStatus</td>
+</tr>
+<tr>
+<td>NextStatusId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>Sí</td>
+<td>Identificador del siguiente estado</td>
+<td>FK a AuditStatus</td>
+</tr>
+<tr>
+<td>PrevUserId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>Sí</td>
+<td>Identificador del usuario anterior</td>
+<td>FK a UserReference</td>
+</tr>
+<tr>
+<td>NextUserId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>Sí</td>
+<td>Identificador del siguiente usuario</td>
+<td>FK a UserReference</td>
+</tr>
+<tr>
+<td>ApproverId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>Sí</td>
+<td>Identificador del usuario aprobador</td>
+<td>FK a UserReference</td>
+</tr>
+<tr>
+<td>Comments</td>
+<td>NVARCHAR(MAX)</td>
+<td>Sí</td>
+<td>Comentarios</td>
+<td></td>
+</tr>
+<tr>
+<td>UserId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>Sí</td>
+<td>Usuario que registró la acción</td>
+<td>FK a UserReference</td>
+</tr>
+<tr>
+<td>Action</td>
+<td>NVARCHAR(100)</td>
+<td>Sí</td>
+<td>Acción realizada: Aprobada, Cancelada, Devuelta</td>
+<td></td>
+</tr>
+<tr>
+<td>SequenceNumber</td>
+<td>INT</td>
+<td>No</td>
+<td>Número secuencial por PeriodAudit</td>
+<td>DEFAULT 0</td>
+</tr>
+<tr>
+<td>IsActive</td>
+<td>BIT</td>
+<td>Sí</td>
+<td>Indica si el registro está activo</td>
+<td>DEFAULT 1</td>
+</tr>
+<tr>
+<td>CreatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que creó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>CreationDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de creación del registro</td>
+<td>DEFAULT GETDATE()</td>
+</tr>
+<tr>
+<td>UpdatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que actualizó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>UpdateDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de actualización del registro</td>
+<td></td>
+</tr>
+</tbody></table>
+<br>
+<p>**Índices:**</p>
+<p>- IX_InboxItems_PeriodAuditId (PeriodAuditId)</p>
+<p>- IX_InboxItems_NextStatusId (NextStatusId)</p>
+<br>
+<hr>
+<br>
+<h2>Tablas de Resultados</h2>
+<br>
+<h3>PeriodAuditGroupResult</h3>
+<p>Tabla que almacena los resultados por grupo de una auditoría.</p>
+<br>
+<table>
+<thead><tr>
+<th>Campo</th>
+<th>Tipo de Dato</th>
+<th>Nulable</th>
+<th>Descripción</th>
+<th>Constraints</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>PeriodAuditGroupResultId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador único del resultado de grupo</td>
+<td>PRIMARY KEY, DEFAULT NEWID()</td>
+</tr>
+<tr>
+<td>PeriodAuditId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador de la auditoría</td>
+<td>FK a PeriodAudit</td>
+</tr>
+<tr>
+<td>GroupId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador del grupo</td>
+<td>FK a Group</td>
+</tr>
+<tr>
+<td>ScoreValue</td>
+<td>DECIMAL(10,2)</td>
+<td>No</td>
+<td>Valor obtenido</td>
+<td></td>
+</tr>
+<tr>
+<td>SortOrder</td>
+<td>INT</td>
+<td>No</td>
+<td>Orden</td>
+<td>DEFAULT 0</td>
+</tr>
+<tr>
+<td>Observations</td>
+<td>NVARCHAR(150)</td>
+<td>Sí</td>
+<td>Observaciones</td>
+<td></td>
+</tr>
+<tr>
+<td>ScaleDescription</td>
+<td>NVARCHAR(150)</td>
+<td>Sí</td>
+<td>Descripción de la escala</td>
+<td></td>
+</tr>
+<tr>
+<td>TotalWeighting</td>
+<td>DECIMAL(5,2)</td>
+<td>No</td>
+<td>Ponderación total</td>
+<td></td>
+</tr>
+<tr>
+<td>ScaleColor</td>
+<td>NVARCHAR(20)</td>
+<td>Sí</td>
+<td>Código de color del grupo</td>
+<td></td>
+</tr>
+<tr>
+<td>HasEvidence</td>
+<td>BIT</td>
+<td>Sí</td>
+<td>Indica si tiene evidencia</td>
+<td>DEFAULT 0</td>
+</tr>
+<tr>
+<td>IsActive</td>
+<td>BIT</td>
+<td>Sí</td>
+<td>Indica si el registro está activo</td>
+<td>DEFAULT 1</td>
+</tr>
+<tr>
+<td>CreatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que creó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>CreationDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de creación del registro</td>
+<td>DEFAULT GETDATE()</td>
+</tr>
+<tr>
+<td>UpdatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que actualizó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>UpdateDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de actualización del registro</td>
+<td></td>
+</tr>
+</tbody></table>
+<br>
+<hr>
+<br>
+<h3>PeriodAuditScaleResult</h3>
+<p>Tabla que almacena los resultados por escala de grupo de una auditoría.</p>
+<br>
+<table>
+<thead><tr>
+<th>Campo</th>
+<th>Tipo de Dato</th>
+<th>Nulable</th>
+<th>Descripción</th>
+<th>Constraints</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>PeriodAuditScaleResultId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador único del resultado de escala</td>
+<td>PRIMARY KEY, DEFAULT NEWID()</td>
+</tr>
+<tr>
+<td>PeriodAuditGroupResultId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador del resultado de grupo</td>
+<td>FK a PeriodAuditGroupResult</td>
+</tr>
+<tr>
+<td>ScaleGroupId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador del grupo de escala</td>
+<td>FK a ScaleGroup</td>
+</tr>
+<tr>
+<td>ScoreValue</td>
+<td>DECIMAL(10,2)</td>
+<td>No</td>
+<td>Valor total</td>
+<td></td>
+</tr>
+<tr>
+<td>AppliedWeighting</td>
+<td>DECIMAL(5,2)</td>
+<td>No</td>
+<td>Ponderación aplicada</td>
+<td></td>
+</tr>
+<tr>
+<td>SortOrder</td>
+<td>INT</td>
+<td>Sí</td>
+<td>Orden</td>
+<td>DEFAULT 0</td>
+</tr>
+<tr>
+<td>Observations</td>
+<td>NVARCHAR(MAX)</td>
+<td>Sí</td>
+<td>Observaciones</td>
+<td></td>
+</tr>
+<tr>
+<td>Impact</td>
+<td>NVARCHAR(MAX)</td>
+<td>Sí</td>
+<td>Impacto</td>
+<td></td>
+</tr>
+<tr>
+<td>Recommendation</td>
+<td>NVARCHAR(MAX)</td>
+<td>Sí</td>
+<td>Recomendación</td>
+<td></td>
+</tr>
+<tr>
+<td>Valorized</td>
+<td>NVARCHAR(MAX)</td>
+<td>Sí</td>
+<td>Valorizado</td>
+<td></td>
+</tr>
+<tr>
+<td>ScaleDescription</td>
+<td>NVARCHAR(150)</td>
+<td>Sí</td>
+<td>Descripción de la escala</td>
+<td></td>
+</tr>
+<tr>
+<td>ScaleColor</td>
+<td>NVARCHAR(20)</td>
+<td>Sí</td>
+<td>Código de color de la escala</td>
+<td></td>
+</tr>
+<tr>
+<td>IsActive</td>
+<td>BIT</td>
+<td>Sí</td>
+<td>Indica si el registro está activo</td>
+<td>DEFAULT 1</td>
+</tr>
+<tr>
+<td>CreatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que creó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>CreationDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de creación del registro</td>
+<td>DEFAULT GETDATE()</td>
+</tr>
+<tr>
+<td>UpdatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que actualizó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>UpdateDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de actualización del registro</td>
+<td></td>
+</tr>
+</tbody></table>
+<br>
+<hr>
+<br>
+<h3>PeriodAuditTableScaleTemplateResult</h3>
+<p>Tabla que almacena los resultados de plantillas de tabla por escala.</p>
+<br>
+<table>
+<thead><tr>
+<th>Campo</th>
+<th>Tipo de Dato</th>
+<th>Nulable</th>
+<th>Descripción</th>
+<th>Constraints</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>PeriodAuditTableScaleTemplateResultId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador único del resultado de plantilla</td>
+<td>PRIMARY KEY, DEFAULT NEWID()</td>
+</tr>
+<tr>
+<td>PeriodAuditScaleResultId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador del resultado de escala</td>
+<td>FK a PeriodAuditScaleResult ON DELETE CASCADE</td>
+</tr>
+<tr>
+<td>TableScaleTemplateId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>Sí</td>
+<td>Identificador de la plantilla original</td>
+<td></td>
+</tr>
+<tr>
+<td>Code</td>
+<td>NVARCHAR(50)</td>
+<td>No</td>
+<td>Código de la plantilla</td>
+<td></td>
+</tr>
+<tr>
+<td>Name</td>
+<td>NVARCHAR(255)</td>
+<td>No</td>
+<td>Nombre de la plantilla</td>
+<td></td>
+</tr>
+<tr>
+<td>Orientation</td>
+<td>NVARCHAR(2)</td>
+<td>Sí</td>
+<td>Orientación: 'H' o 'V'</td>
+<td>DEFAULT 'V', CHECK IN ('H','V')</td>
+</tr>
+<tr>
+<td>TemplateData</td>
+<td>NVARCHAR(MAX)</td>
+<td>Sí</td>
+<td>Datos de la plantilla en formato JSON</td>
+<td>CHECK ISJSON() = 1</td>
+</tr>
+<tr>
+<td>SortOrder</td>
+<td>INT</td>
+<td>Sí</td>
+<td>Orden</td>
+<td>DEFAULT 0</td>
+</tr>
+<tr>
+<td>IsActive</td>
+<td>BIT</td>
+<td>Sí</td>
+<td>Indica si el registro está activo</td>
+<td>DEFAULT 1</td>
+</tr>
+<tr>
+<td>CreatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que creó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>CreationDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de creación del registro</td>
+<td>DEFAULT GETDATE()</td>
+</tr>
+<tr>
+<td>UpdatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que actualizó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>UpdateDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de actualización del registro</td>
+<td></td>
+</tr>
+</tbody></table>
+<br>
+<hr>
+<br>
+<h3>PeriodAuditFieldValues</h3>
+<p>Tabla que almacena los valores capturados de los campos de auditoría.</p>
+<br>
+<table>
+<thead><tr>
+<th>Campo</th>
+<th>Tipo de Dato</th>
+<th>Nulable</th>
+<th>Descripción</th>
+<th>Constraints</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>PeriodAuditFieldValueId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador único del valor de campo</td>
+<td>PRIMARY KEY, DEFAULT NEWID()</td>
+</tr>
+<tr>
+<td>AuditTemplateFieldId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>Sí</td>
+<td>Identificador del campo de plantilla original</td>
+<td></td>
+</tr>
+<tr>
+<td>PeriodAuditTableScaleTemplateResultId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>Sí</td>
+<td>Identificador del resultado de plantilla</td>
+<td>FK a PeriodAuditTableScaleTemplateResult ON DELETE CASCADE</td>
+</tr>
+<tr>
+<td>FieldCode</td>
+<td>NVARCHAR(100)</td>
+<td>No</td>
+<td>Código del campo</td>
+<td></td>
+</tr>
+<tr>
+<td>FieldName</td>
+<td>NVARCHAR(255)</td>
+<td>No</td>
+<td>Nombre del campo</td>
+<td></td>
+</tr>
+<tr>
+<td>FieldType</td>
+<td>NVARCHAR(50)</td>
+<td>No</td>
+<td>Tipo de campo</td>
+<td></td>
+</tr>
+<tr>
+<td>IsCalculated</td>
+<td>NVARCHAR(50)</td>
+<td>Sí</td>
+<td>Indica si es calculado</td>
+<td></td>
+</tr>
+<tr>
+<td>CalculationFormula</td>
+<td>NVARCHAR(2000)</td>
+<td>Sí</td>
+<td>Fórmula de cálculo</td>
+<td></td>
+</tr>
+<tr>
+<td>AcumulationType</td>
+<td>NVARCHAR(50)</td>
+<td>Sí</td>
+<td>Tipo de acumulación: SUM, COUNT</td>
+<td>CHECK IN ('SUM','COUNT')</td>
+</tr>
+<tr>
+<td>FieldOptions</td>
+<td>NVARCHAR(MAX)</td>
+<td>Sí</td>
+<td>Opciones del campo (JSON)</td>
+<td></td>
+</tr>
+<tr>
+<td>TableDataHorizontal</td>
+<td>NVARCHAR(MAX)</td>
+<td>Sí</td>
+<td>Datos de tabla horizontal (JSON)</td>
+<td></td>
+</tr>
+<tr>
+<td>SortOrder</td>
+<td>INT</td>
+<td>Sí</td>
+<td>Orden</td>
+<td>DEFAULT 0</td>
+</tr>
+<tr>
+<td>TextValue</td>
+<td>NVARCHAR(MAX)</td>
+<td>Sí</td>
+<td>Valor de texto capturado</td>
+<td></td>
+</tr>
+<tr>
+<td>NumericValue</td>
+<td>DECIMAL(18,4)</td>
+<td>Sí</td>
+<td>Valor numérico capturado</td>
+<td></td>
+</tr>
+<tr>
+<td>DefaultValue</td>
+<td>VARCHAR(250)</td>
+<td>Sí</td>
+<td>Valor por defecto</td>
+<td></td>
+</tr>
+<tr>
+<td>DateValue</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Valor de fecha capturado</td>
+<td></td>
+</tr>
+<tr>
+<td>BooleanValue</td>
+<td>BIT</td>
+<td>Sí</td>
+<td>Valor booleano capturado</td>
+<td></td>
+</tr>
+<tr>
+<td>ImageUrl</td>
+<td>NVARCHAR(500)</td>
+<td>Sí</td>
+<td>URL o path de imagen</td>
+<td></td>
+</tr>
+<tr>
+<td>FieldOptionsValue</td>
+<td>NVARCHAR(255)</td>
+<td>Sí</td>
+<td>Valor seleccionado para campos tipo select</td>
+<td></td>
+</tr>
+<tr>
+<td>ValidationStatus</td>
+<td>NVARCHAR(50)</td>
+<td>Sí</td>
+<td>Estado de validación: valid, invalid, pending, warning</td>
+<td></td>
+</tr>
+<tr>
+<td>ValidationMessage</td>
+<td>NVARCHAR(500)</td>
+<td>Sí</td>
+<td>Mensaje de validación</td>
+<td></td>
+</tr>
+<tr>
+<td>IsActive</td>
+<td>BIT</td>
+<td>Sí</td>
+<td>Indica si el registro está activo</td>
+<td>DEFAULT 1</td>
+</tr>
+<tr>
+<td>CreatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que creó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>CreationDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de creación del registro</td>
+<td>DEFAULT GETDATE()</td>
+</tr>
+<tr>
+<td>UpdatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que actualizó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>UpdateDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de actualización del registro</td>
+<td></td>
+</tr>
+</tbody></table>
+<br>
+<p>**Índices:**</p>
+<p>- IX_PeriodAuditFieldValues_FieldCode (FieldCode)</p>
+<p>- IX_PeriodAuditFieldValues_NumericValue (NumericValue) WHERE NumericValue IS NOT NULL</p>
+<br>
+<hr>
+<br>
+<h3>PeriodAuditScoringCriteriaResult</h3>
+<p>Tabla que almacena los resultados de evaluación de criterios de puntuación.</p>
+<br>
+<table>
+<thead><tr>
+<th>Campo</th>
+<th>Tipo de Dato</th>
+<th>Nulable</th>
+<th>Descripción</th>
+<th>Constraints</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>PeriodAuditScoringCriteriaResultId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador único del resultado de criterio</td>
+<td>PRIMARY KEY, DEFAULT NEWID()</td>
+</tr>
+<tr>
+<td>PeriodAuditScaleResultId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador del resultado de escala</td>
+<td>FK a PeriodAuditScaleResult ON DELETE CASCADE</td>
+</tr>
+<tr>
+<td>CriteriaName</td>
+<td>NVARCHAR(255)</td>
+<td>No</td>
+<td>Nombre del criterio</td>
+<td></td>
+</tr>
+<tr>
+<td>CriteriaCode</td>
+<td>NVARCHAR(10)</td>
+<td>Sí</td>
+<td>Código del criterio</td>
+<td></td>
+</tr>
+<tr>
+<td>ResultFormula</td>
+<td>NVARCHAR(2000)</td>
+<td>Sí</td>
+<td>Fórmula para calcular resultado</td>
+<td></td>
+</tr>
+<tr>
+<td>ComparisonOperator</td>
+<td>NVARCHAR(20)</td>
+<td>No</td>
+<td>Operador de comparación</td>
+<td></td>
+</tr>
+<tr>
+<td>ExpectedValue</td>
+<td>NVARCHAR(255)</td>
+<td>No</td>
+<td>Valor esperado</td>
+<td></td>
+</tr>
+<tr>
+<td>Score</td>
+<td>DECIMAL(10,2)</td>
+<td>No</td>
+<td>Puntaje otorgado si cumple</td>
+<td></td>
+</tr>
+<tr>
+<td>SortOrder</td>
+<td>INT</td>
+<td>Sí</td>
+<td>Orden de evaluación</td>
+<td>DEFAULT 0</td>
+</tr>
+<tr>
+<td>ErrorMessage</td>
+<td>NVARCHAR(500)</td>
+<td>Sí</td>
+<td>Mensaje si no cumple</td>
+<td></td>
+</tr>
+<tr>
+<td>SuccessMessage</td>
+<td>NVARCHAR(500)</td>
+<td>Sí</td>
+<td>Mensaje si cumple</td>
+<td></td>
+</tr>
+<tr>
+<td>ResultObtained</td>
+<td>DECIMAL(10,2)</td>
+<td>Sí</td>
+<td>Puntaje obtenido</td>
+<td></td>
+</tr>
+<tr>
+<td>IsActive</td>
+<td>BIT</td>
+<td>Sí</td>
+<td>Indica si el registro está activo</td>
+<td>DEFAULT 1</td>
+</tr>
+<tr>
+<td>CreatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que creó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>CreationDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de creación del registro</td>
+<td>DEFAULT GETDATE()</td>
+</tr>
+<tr>
+<td>UpdatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que actualizó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>UpdateDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de actualización del registro</td>
+<td></td>
+</tr>
+</tbody></table>
+<br>
+<hr>
+<br>
+<h3>PeriodAuditScaleSubResult</h3>
+<p>Tabla que almacena los resultados de evaluación de sub-criterios.</p>
+<br>
+<table>
+<thead><tr>
+<th>Campo</th>
+<th>Tipo de Dato</th>
+<th>Nulable</th>
+<th>Descripción</th>
+<th>Constraints</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>PeriodAuditScaleSubResultId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador único del sub-resultado</td>
+<td>PRIMARY KEY, DEFAULT NEWID()</td>
+</tr>
+<tr>
+<td>PeriodAuditScaleResultId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador del resultado de escala</td>
+<td>FK a PeriodAuditScaleResult ON DELETE CASCADE</td>
+</tr>
+<tr>
+<td>CriteriaSubResultId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador del sub-criterio</td>
+<td>FK a CriteriaSubResult</td>
+</tr>
+<tr>
+<td>CriteriaCode</td>
+<td>NVARCHAR(10)</td>
+<td>Sí</td>
+<td>Código del criterio</td>
+<td></td>
+</tr>
+<tr>
+<td>CriteriaName</td>
+<td>NVARCHAR(255)</td>
+<td>No</td>
+<td>Nombre del criterio</td>
+<td></td>
+</tr>
+<tr>
+<td>EvaluatedValue</td>
+<td>NVARCHAR(255)</td>
+<td>Sí</td>
+<td>Valor que se evaluó</td>
+<td></td>
+</tr>
+<tr>
+<td>CalculatedResult</td>
+<td>NVARCHAR(255)</td>
+<td>Sí</td>
+<td>Resultado de aplicar la fórmula</td>
+<td></td>
+</tr>
+<tr>
+<td>AppliedFormula</td>
+<td>NVARCHAR(2000)</td>
+<td>Sí</td>
+<td>Fórmula que se aplicó</td>
+<td></td>
+</tr>
+<tr>
+<td>ScoreObtained</td>
+<td>DECIMAL(10,2)</td>
+<td>Sí</td>
+<td>Puntaje obtenido</td>
+<td></td>
+</tr>
+<tr>
+<td>ColorCode</td>
+<td>NVARCHAR(20)</td>
+<td>Sí</td>
+<td>Código de color del resultado</td>
+<td></td>
+</tr>
+<tr>
+<td>ForSummary</td>
+<td>BIT</td>
+<td>No</td>
+<td>Indica si se incluye en el resumen</td>
+<td>DEFAULT 0</td>
+</tr>
+<tr>
+<td>IsActive</td>
+<td>BIT</td>
+<td>Sí</td>
+<td>Indica si el registro está activo</td>
+<td>DEFAULT 1</td>
+</tr>
+<tr>
+<td>CreatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que creó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>CreationDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de creación del registro</td>
+<td>DEFAULT GETDATE()</td>
+</tr>
+<tr>
+<td>UpdatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que actualizó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>UpdateDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de actualización del registro</td>
+<td></td>
+</tr>
+</tbody></table>
+<br>
+<p>**Constraints:**</p>
+<p>- UNIQUE (PeriodAuditScaleResultId, CriteriaSubResultId)</p>
+<br>
+<p>**Índices:**</p>
+<p>- IX_PeriodAuditScaleSubResult_ScaleResultId (PeriodAuditScaleResultId)</p>
+<p>- IX_PeriodAuditScaleSubResult_CriteriaId (CriteriaSubResultId)</p>
+<br>
+<hr>
+<br>
+<h2>Tablas de Almacenamiento</h2>
+<br>
+<h3>StorageFiles</h3>
+<p>Tabla que almacena información de archivos adjuntos y evidencias.</p>
+<br>
+<table>
+<thead><tr>
+<th>Campo</th>
+<th>Tipo de Dato</th>
+<th>Nulable</th>
+<th>Descripción</th>
+<th>Constraints</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>StorageFileId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>No</td>
+<td>Identificador único del archivo</td>
+<td>PRIMARY KEY, DEFAULT NEWID()</td>
+</tr>
+<tr>
+<td>EntityId</td>
+<td>UNIQUEIDENTIFIER</td>
+<td>Sí</td>
+<td>Identificador de la entidad relacionada</td>
+<td></td>
+</tr>
+<tr>
+<td>EntityName</td>
+<td>NVARCHAR(255)</td>
+<td>Sí</td>
+<td>Nombre de la entidad relacionada</td>
+<td></td>
+</tr>
+<tr>
+<td>ClassificationType</td>
+<td>NVARCHAR(100)</td>
+<td>Sí</td>
+<td>Tipo de clasificación del archivo</td>
+<td></td>
+</tr>
+<tr>
+<td>OriginalName</td>
+<td>NVARCHAR(255)</td>
+<td>No</td>
+<td>Nombre original del archivo</td>
+<td></td>
+</tr>
+<tr>
+<td>FileName</td>
+<td>NVARCHAR(255)</td>
+<td>No</td>
+<td>Nombre del archivo almacenado</td>
+<td></td>
+</tr>
+<tr>
+<td>FileUrl</td>
+<td>NVARCHAR(500)</td>
+<td>No</td>
+<td>URL o path del archivo</td>
+<td></td>
+</tr>
+<tr>
+<td>FileType</td>
+<td>NVARCHAR(50)</td>
+<td>Sí</td>
+<td>Tipo de archivo (extensión)</td>
+<td></td>
+</tr>
+<tr>
+<td>UploadedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que subió el archivo</td>
+<td></td>
+</tr>
+<tr>
+<td>UploadDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de carga del archivo</td>
+<td>DEFAULT GETDATE()</td>
+</tr>
+<tr>
+<td>IsActive</td>
+<td>BIT</td>
+<td>Sí</td>
+<td>Indica si el registro está activo</td>
+<td>DEFAULT 1</td>
+</tr>
+<tr>
+<td>CreatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que creó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>CreationDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de creación del registro</td>
+<td>DEFAULT GETDATE()</td>
+</tr>
+<tr>
+<td>UpdatedBy</td>
+<td>VARCHAR(120)</td>
+<td>Sí</td>
+<td>Usuario que actualizó el registro</td>
+<td></td>
+</tr>
+<tr>
+<td>UpdateDate</td>
+<td>DATETIME2</td>
+<td>Sí</td>
+<td>Fecha de actualización del registro</td>
+<td></td>
+</tr>
+</tbody></table>
+<br>
+<hr>
+<br>
+<h2>Relaciones Entre Tablas</h2>
+<br>
+<h3>Relaciones Principales</h3>
+<br>
+<p>1. **Enterprise → Stores** (1:N)</p>
+<p>   - Una empresa puede tener múltiples tiendas</p>
+<br>
+<p>2. **Enterprise → ScaleCompany** (1:N)</p>
+<p>   - Una empresa puede tener múltiples escalas de calificación</p>
+<br>
+<p>3. **Enterprise → Group** (1:N)</p>
+<p>   - Una empresa puede tener múltiples grupos de auditoría</p>
+<br>
+<p>4. **Group → ScaleGroup** (1:N)</p>
+<p>   - Un grupo puede tener múltiples subgrupos de escala</p>
+<br>
+<p>5. **ScaleGroup → TableScaleTemplate** (1:N)</p>
+<p>   - Un subgrupo de escala puede tener múltiples plantillas de tabla</p>
+<br>
+<p>6. **TableScaleTemplate → AuditTemplateFields** (1:N)</p>
+<p>   - Una plantilla puede tener múltiples campos</p>
+<br>
+<p>7. **ScaleGroup → ScoringCriteria** (1:N)</p>
+<p>   - Un subgrupo de escala puede tener múltiples criterios de puntuación</p>
+<br>
+<p>8. **ScaleGroup → CriteriaSubResult** (1:N)</p>
+<p>   - Un subgrupo de escala puede tener múltiples sub-criterios</p>
+<br>
+<p>9. **Stores → PeriodAudit** (1:N)</p>
+<p>   - Una tienda puede tener múltiples períodos de auditoría</p>
+<br>
+<p>10. **PeriodAudit → PeriodAuditGroupResult** (1:N)</p>
+<p>    - Una auditoría puede tener múltiples resultados de grupo</p>
+<br>
+<p>11. **PeriodAuditGroupResult → PeriodAuditScaleResult** (1:N)</p>
+<p>    - Un resultado de grupo puede tener múltiples resultados de escala</p>
+<br>
+<p>12. **PeriodAuditScaleResult → PeriodAuditTableScaleTemplateResult** (1:N)</p>
+<p>    - Un resultado de escala puede tener múltiples resultados de plantilla</p>
+<br>
+<p>13. **PeriodAuditTableScaleTemplateResult → PeriodAuditFieldValues** (1:N)</p>
+<p>    - Un resultado de plantilla puede tener múltiples valores de campo</p>
+<br>
+<p>14. **UserReference → EmployeeStores** (1:N)</p>
+<p>    - Un usuario puede estar asignado a múltiples tiendas</p>
+<br>
+<p>15. **PeriodAudit → PeriodAuditParticipant** (1:N)</p>
+<p>    - Una auditoría puede tener múltiples participantes</p>
+<br>
+<p>16. **PeriodAudit → InboxItems** (1:N)</p>
+<p>    - Una auditoría puede tener múltiples ítems en la bandeja</p>
+<br>
+<p>17. **PeriodAudit → SubstitutionHistory** (1:N)</p>
+<p>    - Una auditoría puede tener múltiple historial de suplencias</p>
+<br>
+<hr>
+<br>
+<h2>Notas Adicionales</h2>
+<br>
+<h3>Campos de Auditoría Comunes</h3>
+<p>La mayoría de las tablas incluyen los siguientes campos de auditoría:</p>
+<p>- **IsActive**: Indica si el registro está activo (soft delete)</p>
+<p>- **CreatedBy**: Usuario que creó el registro</p>
+<p>- **CreationDate**: Fecha y hora de creación</p>
+<p>- **UpdatedBy**: Usuario que actualizó el registro por última vez</p>
+<p>- **UpdateDate**: Fecha y hora de la última actualización</p>
+<br>
+<h3>Validaciones JSON</h3>
+<p>Varias tablas incluyen campos que almacenan datos en formato JSON con validación:</p>
+<p>- **TableScaleTemplate.TemplateData**</p>
+<p>- **AuditTemplateFields.FieldOptions**</p>
+<p>- **PeriodAuditTableScaleTemplateResult.TemplateData**</p>
+<p>- **PeriodAuditFieldValues.FieldOptions**</p>
+<p>- **MaintenanceDetailTable.JsonData**</p>
+<br>
+<h3>Estrategia de Desnormalización</h3>
+<p>Para mantener la integridad histórica de las auditorías, varias tablas de resultados almacenan copias desnormalizadas de datos de configuración que pueden cambiar en el tiempo. Esto asegura que los reportes históricos reflejen exactamente los valores y configuraciones que estaban vigentes al momento de la auditoría.</p>
+<br>
+<h3>Índices de Rendimiento</h3>
+<p>Se han creado índices especializados en la tabla **PeriodAudit** para optimizar:</p>
+<p>- Consultas por código de escala</p>
+<p>- Filtrado por rangos de fecha</p>
+<p>- Generación de estadísticas</p>
+<p>- Consultas de reportes</p>
+<br>
+<hr>
+<br>
+<p>**Última actualización**: Diciembre 2025</p>
+<p>**Versión**: 1.0</p>
+
+</body>
+</html>
