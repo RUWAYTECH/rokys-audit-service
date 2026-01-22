@@ -37,6 +37,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\ruway-rabbitmq-events-shared\Ruway.Events.Command.Interfaces\Ruway.Events.Command.Interfaces.csproj" />
+    <ProjectReference Include="..\..\ruway-rabbitmq-events-shared\Ruway.Events.Command\Ruway.Events.Command.csproj" />
     <ProjectReference Include="..\Rokys.Audit.DTOs\Rokys.Audit.DTOs.csproj" />
     <ProjectReference Include="..\Rokys.Audit.Infrastructure.Mapping.AM\Rokys.Audit.Infrastructure.Mapping.AM.csproj" />
     <ProjectReference Include="..\Rokys.Audit.Infrastructure.Persistence.Dp\Rokys.Audit.Infrastructure.Persistence.Dp.csproj" />

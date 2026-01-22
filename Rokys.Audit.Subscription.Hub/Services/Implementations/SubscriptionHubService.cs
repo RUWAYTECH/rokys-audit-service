@@ -15,6 +15,7 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
         private readonly IEmployeeEventService _employeeEventService;
         private readonly IUserEventService _userEventService;
         private readonly IStoreEventService _storeEventService;
+        private readonly IEnterpriseEventService _enterpriseEventService;
         private readonly ILogger<SubscriptionHubService> _logger;
         private bool _isRunning = false;
 
@@ -23,12 +24,14 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
             IEmployeeEventService employeeEventService,
             IUserEventService userEventService,
             IStoreEventService storeEventService,
+            IEnterpriseEventService enterpriseEventService,
             ILogger<SubscriptionHubService> logger)
         {
             _eventSubscriber = eventSubscriber;
             _employeeEventService = employeeEventService;
             _userEventService = userEventService;
             _storeEventService = storeEventService;
+            _enterpriseEventService = enterpriseEventService;
             _logger = logger;
         }
 
@@ -56,6 +59,9 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
 
                 await SubscribeToStoreEvents(cancellationToken);
                 _logger.LogInformation("[SUBSCRIPTION-HUB] Store events subscribed");
+
+                await SubscribeToEnterpriseEvents(cancellationToken);
+                _logger.LogInformation("[SUBSCRIPTION-HUB] Enterprise events subscribed");
 
                 await _eventSubscriber.StartListeningAsync(cancellationToken);
                 _logger.LogInformation("[SUBSCRIPTION-HUB] RabbitMQ listener started");
@@ -181,6 +187,28 @@ namespace Rokys.Audit.Subscription.Hub.Services.Implementations
 
 
             _logger.LogInformation("Store event subscriptions configured successfully");
+        }
+          private async Task SubscribeToEnterpriseEvents(CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Setting up enterprise event subscriptions...");
+            // Configurar handlers específicos por tipo de evento usando los eventos existentes
+            await _eventSubscriber.SubscribeAsync<EnterpriseCreatedEvent>(async (enterpriseEvent) =>
+            {
+                if (_enterpriseEventService != null)
+                    await _enterpriseEventService.HandleEnterpriseCreatedAsync(enterpriseEvent);
+            }, EventConstants.EnterpriseEvents.EnterpriseCreated);
+
+            await _eventSubscriber.SubscribeAsync<EnterpriseUpdatedEvent>(async (enterpriseEvent) =>
+            {
+                if (_enterpriseEventService != null)
+                    await _enterpriseEventService.HandleEnterpriseUpdatedAsync(enterpriseEvent);
+            }, EventConstants.EnterpriseEvents.EnterpriseUpdated);
+            await _eventSubscriber.SubscribeAsync<EnterpriseDeletedEvent>(async (enterpriseEvent) =>
+            {
+                if (_enterpriseEventService != null)
+                    await _enterpriseEventService.HandleEnterpriseDeletedAsync(enterpriseEvent);
+            }, EventConstants.EnterpriseEvents.EnterpriseDeleted);
+            _logger.LogInformation("Enterprise event subscriptions configured successfully");
         }
     }
 }

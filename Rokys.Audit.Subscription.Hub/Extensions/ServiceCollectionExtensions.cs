@@ -40,6 +40,7 @@ namespace Rokys.Audit.Subscription.Hub.Extensions
             services.AddSingleton<ISubscriptionHubService, SubscriptionHubService>();
             services.AddSingleton<IUserEventService, UserEventService>();
             services.AddSingleton<IStoreEventService, StoreEventService>();
+            services.AddSingleton<IEnterpriseEventService, EnterpriseEventService>();
             // Registrar como servicio hospedado
             services.AddHostedService<SubscriptionHubHostedService>();
 
