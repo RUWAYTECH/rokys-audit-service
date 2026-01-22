@@ -48,6 +48,8 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
         // Substitution history
         public DbSet<SubstitutionHistory> SubstitutionHistories { get; set; }
 
+        public DbSet<EnterpriseTheme> EnterpriseThemes { get; set; }
+
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
@@ -58,6 +60,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
             
             // Core business configurations
             modelBuilder.ApplyConfiguration(new EnterpriseConfig());
+            modelBuilder.ApplyConfiguration(new EnterpriseThemeConfig());
             modelBuilder.ApplyConfiguration(new StoresConfig());
             
             // User and employee management configurations
