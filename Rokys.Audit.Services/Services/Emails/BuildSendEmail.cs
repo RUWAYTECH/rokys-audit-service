@@ -15,6 +15,7 @@ namespace Rokys.Audit.Services.Services.Emails
         {
             try
             {
+                var bossOfArea = audit.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JefeDeArea.Code);
                 var administrator = audit.PeriodAuditParticipants?.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.StoreAdmin.Code);
                 var auditor = audit.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.Auditor.Code);
                 var supervisor = audit.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code);
