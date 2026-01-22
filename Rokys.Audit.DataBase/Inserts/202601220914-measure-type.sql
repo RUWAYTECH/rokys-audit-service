@@ -1,8 +1,6 @@
 -- Script para insertar registros de tipo de medida disciplinaria
 -- Fecha: 2026-01-22
 DECLARE @MeasureTypeId UNIQUEIDENTIFIER = NEWID();
--- Insert Escala into MaintenanceTable
-DECLARE @MeasureTypeId UNIQUEIDENTIFIER = NEWID();
 INSERT INTO MaintenanceTable (MaintenanceTableId, Code, Description, IsSystem, IsActive, CreatedBy, CreationDate, UpdatedBy, UpdateDate)
 VALUES (@MeasureTypeId, 'TMD', 'Tipo de medida disciplinaria', 1, 1, 'Admin', GETDATE(), 'Admin', GETDATE());
 
