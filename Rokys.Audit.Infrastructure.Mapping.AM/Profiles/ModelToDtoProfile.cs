@@ -76,6 +76,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
             CreateMap<Group, GroupResponseDto>().AfterMap((src, dest) =>
             {
                 dest.EnterpriseName = src.Enterprise?.Name;
+                dest.EnterpriseGroupingName = src.EnterpriseGrouping?.Name;
             });
             CreateMap<CriteriaSubResult, CriteriaSubResultResponseDto>();
             CreateMap<PeriodAuditFieldValues, PeriodAuditFieldValuesResponseDto>();

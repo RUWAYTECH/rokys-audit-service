@@ -7,15 +7,24 @@ namespace Rokys.Audit.Services.Validations
     {
         public GroupValidator() 
         {
-            RuleFor(x => x.EnterpriseId).NotEmpty().WithMessage("La empresa es requerida.")
-                .NotNull().WithMessage("La empresa es requerida.");
-            
             RuleFor(x => x.Name)
                 .MaximumLength(200).WithMessage("La descripción solo acepta como máximo 200 caracteres.")
                 .NotNull().WithMessage("La descripción es requerida")
                 .NotEmpty().WithMessage("La descripción es requerida");
+            
             RuleFor(x => x.Weighting)
                 .NotNull().WithMessage("El ponderador es requerido.");
+
+            RuleFor(x => x.Code)
+                .MaximumLength(10).WithMessage("El código solo acepta como máximo 10 caracteres.");
+
+            RuleFor(x => x.ScaleType)
+                .Must(x => x == null || x == "Escala Ponderada" || x == "Escala Normal")
+                .WithMessage("El tipo de escala debe ser 'Escala Ponderada' o 'Escala Normal'.");
+
+            RuleFor(x => x)
+                .Must(x => x.EnterpriseId.HasValue || x.EnterpriseGroupingId.HasValue)
+                .WithMessage("Debe especificar una Empresa o un Grupo de Empresas.");
         }
     }
 }
