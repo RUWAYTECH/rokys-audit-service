@@ -34,21 +34,6 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .IsRequired()
                 .HasColumnType("decimal(5,2)");
 
-            builder.Property(g => g.NormalizedScore)
-                .HasColumnType("decimal(10,2)")
-                .IsRequired(false);
-
-            builder.Property(g => g.ExpectedDistribution)
-                .HasColumnType("decimal(10,2)")
-                .IsRequired(false);
-
-            builder.Property(g => g.LevelOrder)
-                .HasDefaultValue(1);
-
-            builder.Property(g => g.ScaleType)
-                .HasMaxLength(50)
-                .IsRequired(false);
-
             builder.Property(g => g.IsActive)
                 .HasDefaultValue(true);
 

@@ -196,6 +196,9 @@ namespace Rokys.Audit.Services.Services
                 if (groupFilterRequestDto.EnterpriseId.HasValue)
                     filter = filter.AndAlso(x => x.EnterpriseId == groupFilterRequestDto.EnterpriseId.Value);
 
+                if (groupFilterRequestDto.EnterpriseGroupingId.HasValue)
+                    filter = filter.AndAlso(x => x.EnterpriseGroupingId == groupFilterRequestDto.EnterpriseGroupingId.Value);
+
                 Func<IQueryable<Group>, IOrderedQueryable<Group>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 
                 var entities = await _groupRepository.GetPagedAsync(

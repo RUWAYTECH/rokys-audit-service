@@ -18,10 +18,6 @@ namespace Rokys.Audit.Services.Validations
             RuleFor(x => x.Code)
                 .MaximumLength(10).WithMessage("El código solo acepta como máximo 10 caracteres.");
 
-            RuleFor(x => x.ScaleType)
-                .Must(x => x == null || x == "Escala Ponderada" || x == "Escala Normal")
-                .WithMessage("El tipo de escala debe ser 'Escala Ponderada' o 'Escala Normal'.");
-
             RuleFor(x => x)
                 .Must(x => x.EnterpriseId.HasValue || x.EnterpriseGroupingId.HasValue)
                 .WithMessage("Debe especificar una Empresa o un Grupo de Empresas.");
