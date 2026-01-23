@@ -110,46 +110,58 @@ namespace Rokys.Audit.Services.Services
         }
 
         public async Task<ResponseDto<PaginationResponseDto<AuditRoleConfigurationResponseDto>>> GetPaged(AuditRoleConfigurationFilterRequestDto requestDto)
-        {
-            var response = ResponseDto.Create<PaginationResponseDto<AuditRoleConfigurationResponseDto>>();
-            try
-            {
-                Expression<Func<AuditRoleConfiguration, bool>> filter = x => x.IsActive;
+				{
+						var response = ResponseDto.Create<PaginationResponseDto<AuditRoleConfigurationResponseDto>>();
+						try
+						{
+								Expression<Func<AuditRoleConfiguration, bool>> filter = x => x.IsActive;
 
-                Func<IQueryable<AuditRoleConfiguration>, IOrderedQueryable<AuditRoleConfiguration>> orderBy = 
-                    q => q.OrderBy(x => x.SequenceOrder ?? int.MaxValue).ThenBy(x => x.RoleName);
+								Func<IQueryable<AuditRoleConfiguration>, IOrderedQueryable<AuditRoleConfiguration>> orderBy = 
+										q => q.OrderBy(x => x.SequenceOrder ?? int.MaxValue).ThenBy(x => x.RoleName);
 
-                if (!string.IsNullOrEmpty(requestDto.Filter))
-                    filter = filter.AndAlso(x => x.RoleCode.Contains(requestDto.Filter) || x.RoleName.Contains(requestDto.Filter));
+								if (!string.IsNullOrEmpty(requestDto.Filter))
+										filter = filter.AndAlso(x => x.RoleCode.Contains(requestDto.Filter) || x.RoleName.Contains(requestDto.Filter));
 
-                if (requestDto.EnterpriseId.HasValue)
-                    filter = filter.AndAlso(x => x.EnterpriseId == requestDto.EnterpriseId.Value);
+								// Lógica del filtro de EnterpriseId
+								if (requestDto.EnterpriseId.HasValue)
+								{
+										if (requestDto.EnterpriseId.Value == Guid.Empty)
+										{
+												// Guid.Empty significa "filtrar solo los que tienen EnterpriseId null"
+												filter = filter.AndAlso(x => x.EnterpriseId == null);
+										}
+										else
+										{
+												// Cualquier otro Guid: filtrar por ese valor específico
+												filter = filter.AndAlso(x => x.EnterpriseId == requestDto.EnterpriseId.Value);
+										}
+								}
 
-                var entities = await _auditRoleConfigurationRepository.GetPagedAsync(
-                    filter: filter,
-                    orderBy: orderBy,
-                    pageNumber: requestDto.PageNumber,
-                    pageSize: requestDto.PageSize,
-                    includeProperties: [e => e.Enterprise]
-                );
+								var entities = await _auditRoleConfigurationRepository.GetPagedAsync(
+										filter: filter,
+										orderBy: orderBy,
+										pageNumber: requestDto.PageNumber,
+										pageSize: requestDto.PageSize,
+										includeProperties: [e => e.Enterprise]
+								);
 
-                var pagedResult = new PaginationResponseDto<AuditRoleConfigurationResponseDto>
-                {
-                    Items = _mapper.Map<IEnumerable<AuditRoleConfigurationResponseDto>>(entities.Items),
-                    TotalCount = entities.TotalRows,
-                    PageNumber = requestDto.PageNumber,
-                    PageSize = requestDto.PageSize
-                };
+								var pagedResult = new PaginationResponseDto<AuditRoleConfigurationResponseDto>
+								{
+										Items = _mapper.Map<IEnumerable<AuditRoleConfigurationResponseDto>>(entities.Items),
+										TotalCount = entities.TotalRows,
+										PageNumber = requestDto.PageNumber,
+										PageSize = requestDto.PageSize
+								};
 
-                response.Data = pagedResult;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving paged audit role configurations");
-                response = ResponseDto.Error<PaginationResponseDto<AuditRoleConfigurationResponseDto>>("Error al obtener las configuraciones de roles de auditoría");
-            }
-            return response;
-        }
+								response.Data = pagedResult;
+						}
+						catch (Exception ex)
+						{
+								_logger.LogError(ex, "Error retrieving paged audit role configurations");
+								response = ResponseDto.Error<PaginationResponseDto<AuditRoleConfigurationResponseDto>>("Error al obtener las configuraciones de roles de auditoría");
+						}
+						return response;
+				}
 
         public async Task<ResponseDto<AuditRoleConfigurationResponseDto>> GetById(Guid id)
         {
