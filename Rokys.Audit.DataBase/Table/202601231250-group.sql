@@ -25,19 +25,3 @@ END
 -- Paso 6: Agregar columna Code
 IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('[dbo].[Group]') AND name = 'Code')
     ALTER TABLE [dbo].[Group] ADD Code NVARCHAR(10) NULL;
-
--- Paso 7: Agregar columna NormalizedScore
-IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('[dbo].[Group]') AND name = 'NormalizedScore')
-    ALTER TABLE [dbo].[Group] ADD NormalizedScore DECIMAL(10,2) NULL;
-
--- Paso 8: Agregar columna ExpectedDistribution
-IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('[dbo].[Group]') AND name = 'ExpectedDistribution')
-    ALTER TABLE [dbo].[Group] ADD ExpectedDistribution DECIMAL(10,2) NULL;
-
--- Paso 9: Agregar columna LevelOrder
-IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('[dbo].[Group]') AND name = 'LevelOrder')
-    ALTER TABLE [dbo].[Group] ADD LevelOrder INT NOT NULL DEFAULT 1;
-
--- Paso 10: Agregar columna ScaleType
-IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('[dbo].[Group]') AND name = 'ScaleType')
-    ALTER TABLE [dbo].[Group] ADD ScaleType NVARCHAR(50) NOT NULL DEFAULT 'Escala Normal' WITH VALUES;
