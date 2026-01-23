@@ -26,6 +26,8 @@ using Rokys.Audit.DTOs.Requests.InboxItems;
 using Rokys.Audit.DTOs.Requests.AuditRoleConfiguration;
 using Rokys.Audit.DTOs.Requests.SubstitutionHistory;
 using Rokys.Audit.DTOs.Common;
+using Rokys.Audit.DTOs.Requests.EnterpriseGrouping;
+using Rokys.Audit.DTOs.Requests.EnterpriseGroup;
 
 namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
 {
@@ -60,6 +62,8 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
             CreateMap<PeriodAuditParticipantDto, PeriodAuditParticipant>();
             CreateMap<AuditRoleConfigurationRequestDto, AuditRoleConfiguration>();
             CreateMap<SubstitutionHistoryRequestDto, SubstitutionHistory>();
+            CreateMap<EnterpriseGroupRequestDto, EnterpriseGroup>();
+            CreateMap<EnterpriseGroupingRequestDto, EnterpriseGrouping>();
         }
     }
 }

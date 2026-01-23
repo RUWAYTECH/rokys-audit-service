@@ -30,6 +30,8 @@ using Rokys.Audit.DTOs.Responses.PeriodAuditParticipant;
 using Rokys.Audit.DTOs.Responses.SubstitutionHistory;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.PeriodAudit;
+using Rokys.Audit.DTOs.Responses.EnterpriseGrouping;
+using Rokys.Audit.DTOs.Responses.EnterpriseGroup;
 
 namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
 {
@@ -320,6 +322,24 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                 });
 
             CreateMap<PeriodAuditActionPlan, PeriodAuditActionPlanResponseDto>();
+            CreateMap<EnterpriseGroup, EnterpriseGroupResponseDto>();
+            CreateMap<EnterpriseGrouping, EnterpriseGroupingResponseDto>()
+                .AfterMap((src, dest) =>
+                {
+                    dest.Groupings = src.EnterpriseGroups.Select(EnterpriseGroup => new EnterpriseGroupResponseDto
+                    {
+                        EnterpriseGroupId = EnterpriseGroup.EnterpriseGroupId,
+                        EnterpriseId = EnterpriseGroup.EnterpriseId,
+                        EnterpriseName = EnterpriseGroup.Enterprise != null ? EnterpriseGroup.Enterprise.Name : string.Empty,
+                        EnterpriseCode = EnterpriseGroup.Enterprise != null ? EnterpriseGroup.Enterprise.Code : string.Empty,
+                        EnterpriseGroupingId = EnterpriseGroup.EnterpriseGroupingId,
+                        IsActive = EnterpriseGroup.IsActive,
+                        CreatedBy = EnterpriseGroup.CreatedBy,
+                        CreationDate = EnterpriseGroup.CreationDate,
+                        UpdatedBy = EnterpriseGroup.UpdatedBy,
+                        UpdateDate = EnterpriseGroup.UpdateDate
+                    }).ToList();
+                });
         }
     }
 }
