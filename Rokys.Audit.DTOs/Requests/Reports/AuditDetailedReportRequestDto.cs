@@ -20,10 +20,14 @@ namespace Rokys.Audit.DTOs.Requests.Reports
         public List<Guid>? StoreIds { get; set; }
 
         /// <summary>
-        /// Lista de IDs de grupos para filtrar
+        /// Lista de IDs de estados de auditoría para filtrar
         /// </summary>
-        public List<Guid>? GroupIds { get; set; }
+        public List<Guid>? StatusIds { get; set; }
 
-        public string? AuditStatusCode { get; set; }
+        /// <summary>
+        /// Fechas de auditoría para filtrar (fecha de creación de la auditoría)
+        /// </summary>
+        public DateTime? BeginDate { get; set; }
+        public DateTime? EndDate { get; set; }
     }
 }

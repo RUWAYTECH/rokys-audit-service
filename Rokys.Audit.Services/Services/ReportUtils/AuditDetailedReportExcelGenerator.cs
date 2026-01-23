@@ -1,77 +1,64 @@
-using Rokys.Audit.DTOs.Responses.Reports;
 using System.Drawing;
 using ClosedXML.Excel;
+using Rokys.Audit.Common.Constant;
 using Rokys.Audit.Model.Tables;
+using System.Text.Json;
 
 namespace Rokys.Audit.Services.Services.ReportUtils
 {
     public class AuditDetailedReportExcelGenerator
     {
-        public static string GenerateExcelReport(List<PeriodAudit> items)
+        public static string GenerateExcelReport(List<PeriodAuditTableScaleTemplateResult> tables)
         {
-            using var workbook = new XLWorkbook();
-
-            // Obtener todos los puntos auditables únicos (ScaleGroups) de las auditorías
-            var allScaleGroups = items
-                .SelectMany(a => a.PeriodAuditGroupResults ?? new List<PeriodAuditGroupResult>())
-                .SelectMany(gr => gr.PeriodAuditScaleResults ?? new List<PeriodAuditScaleResult>())
-                .Where(sr => sr.ScaleGroup != null && sr.ScaleGroup.Group != null)
-                .GroupBy(sr => sr.ScaleGroup!.Code)
-                .Select(g => g.First())
-                .Select(sr => new { 
-                    sr.ScaleGroup!.ScaleGroupId, 
-                    sr.ScaleGroup.Code, 
-                    sr.ScaleGroup.Name, 
-                    sr.ScaleGroup.SortOrder,
-                    GroupSortOrder = sr.ScaleGroup.Group!.SortOrder,
-                    GroupName = sr.ScaleGroup.Group.Name
-                })
-                .OrderBy(sg => sg.GroupSortOrder)
-                .ThenBy(sg => sg.GroupName)
-                .ThenBy(sg => sg.SortOrder)
-                .ThenBy(sg => sg.Name)
-                .ToList();
-
-            // Crear una hoja por cada punto auditable (ScaleGroup)
-            foreach (var scaleGroup in allScaleGroups)
+            if (tables == null || tables.Count == 0)
             {
-                // Filtrar auditorías que tienen este punto auditable
-                var auditsForScaleGroup = items
-                    .Where(a => a.PeriodAuditGroupResults != null && 
-                                a.PeriodAuditGroupResults.Any(gr => 
-                                    gr.PeriodAuditScaleResults != null &&
-                                    gr.PeriodAuditScaleResults.Any(sr => sr.ScaleGroup != null && sr.ScaleGroup.Code == scaleGroup.Code)))
-                    .ToList();
-
-                if (auditsForScaleGroup.Any())
-                {
-                    // Crear nombre de hoja: "Código - Nombre"
-                    var sheetName = SanitizeSheetName($"{scaleGroup.Code} - {scaleGroup.Name}");
-                    var worksheet = workbook.Worksheets.Add(sheetName);
-
-                    // Configurar encabezados
-                    SetupHeaders(worksheet);
-
-                    // TODO: Llenar datos del punto auditable (temporalmente deshabilitado para pruebas)
-                    // FillScaleGroupData(worksheet, auditsForScaleGroup, scaleGroup.Code);
-
-                    // Aplicar formato solo a encabezados
-                    ApplyFormatting(worksheet, 0);
-
-                    // Configurar columnas
-                    ConfigureColumns(worksheet);
-                }
+                throw new ArgumentException("No hay datos para generar el reporte.");
             }
 
-            using var stream = new MemoryStream();
-            workbook.SaveAs(stream);
-            var result = stream.ToArray();
-            return Convert.ToBase64String(result);
+            try
+            {
+                using var workbook = new XLWorkbook();
+
+                // Agrupar las tablas por ScaleGroup Code (punto auditable)
+                var tablesByScaleGroup = tables
+                    .Where(t => t.PeriodAuditScaleResult?.ScaleGroup != null && t.IsActive)
+                    .OrderBy(t => t.PeriodAuditScaleResult.PeriodAuditGroupResult?.SortOrder ?? int.MaxValue)
+                    .ThenBy(t => t.PeriodAuditScaleResult?.SortOrder ?? int.MaxValue)
+                    .GroupBy(t => t.PeriodAuditScaleResult!.ScaleGroup!.Code ?? "")
+                    .ToList();
+
+                if (tablesByScaleGroup.Count == 0)
+                {
+                    throw new InvalidOperationException("No se encontraron datos válidos para generar el reporte.");
+                }
+
+                // Crear una hoja por cada código de punto auditable (ScaleGroup Code)
+                foreach (var scaleGroupTables in tablesByScaleGroup)
+                {
+                    var code = scaleGroupTables.Key;
+                    var name = scaleGroupTables.First().PeriodAuditScaleResult?.ScaleGroup?.Name ?? "";
+                    
+                    // Crear nombre de hoja usando solo el código y nombre del grupo de escala
+                    var sheetName = SanitizeSheetName(code + (name != ""? $" - {name}": ""));
+                    var worksheet = workbook.Worksheets.Add(sheetName);
+
+                    // Llenar datos del punto auditable
+                    FillScaleGroupData(worksheet, scaleGroupTables.ToList());
+                }
+
+                using var stream = new MemoryStream();
+                workbook.SaveAs(stream);
+                var result = stream.ToArray();
+                return Convert.ToBase64String(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error generando el archivo Excel: {ex.Message}", ex);
+            }
         }
 
         private static string SanitizeSheetName(string name)
         {
-            // Excel no permite ciertos caracteres en nombres de hojas: : \ / ? * [ ]
             var sanitized = name
                 .Replace(":", "-")
                 .Replace("\\", "-")
@@ -81,7 +68,6 @@ namespace Rokys.Audit.Services.Services.ReportUtils
                 .Replace("[", "(")
                 .Replace("]", ")");
 
-            // Excel limita los nombres de hojas a 31 caracteres
             if (sanitized.Length > 31)
             {
                 sanitized = sanitized.Substring(0, 31);
@@ -90,168 +76,208 @@ namespace Rokys.Audit.Services.Services.ReportUtils
             return sanitized;
         }
 
-        private static void SetupHeaders(IXLWorksheet worksheet)
+        private static void FillScaleGroupData(IXLWorksheet worksheet, List<PeriodAuditTableScaleTemplateResult> tables)
         {
-            var headers = new[]
+            int currentRow = 1;
+
+            // Agrupar por PeriodAuditTableScaleTemplateResult
+            var groupedTables = tables
+                .GroupBy(t => t.Code)
+                .OrderBy(g => g.Key)
+                .ToList();
+
+            foreach (var group in groupedTables)
             {
-                "Código Auditoría",
-                "Fecha",
-                "Empresa",
-                "Tienda",
-                "Código Tienda",
-                "Punto Auditable",
-                "Estado",
-                "Puntuación Punto Auditable",
-                "Puntuación Máxima",
-                "Porcentaje (%)",
-                "Escala",
-                "Auditores",
-                "Supervisores",
-                "Gerentes de Operaciones"
-            };
+                var table = group.First();
+                var tableFields = table.PeriodAuditFieldValues?
+                    .Where(f => f.IsActive)
+                    .OrderBy(f => f.SortOrder)
+                    .ToList() ?? new List<PeriodAuditFieldValues>();
 
-            for (int i = 0; i < headers.Length; i++)
-            {
-                worksheet.Cell(1, i + 1).Value = headers[i];
-            }
-        }
+                // Encabezados específicos para cada tabla
+                worksheet.Cell(currentRow, 1).Value = table.Name;
+                worksheet.Range(currentRow, 1, currentRow, 4 + tableFields.Count).Merge();
+                worksheet.Cell(currentRow, 1).Style.Font.Bold = true;
+                worksheet.Cell(currentRow, 1).Style.Fill.BackgroundColor = XLColor.FromArgb(220, 230, 241);
+                currentRow++;
 
-        private static void FillScaleGroupData(IXLWorksheet worksheet, List<PeriodAudit> audits, string scaleGroupCode)
-        {
-            int row = 2;
-            foreach (var audit in audits)
-            {
-                // Buscar el resultado del punto auditable específico
-                var scaleResult = audit.PeriodAuditGroupResults?
-                    .SelectMany(gr => gr.PeriodAuditScaleResults ?? new List<PeriodAuditScaleResult>())
-                    .FirstOrDefault(sr => sr.ScaleGroup != null && sr.ScaleGroup.Code == scaleGroupCode);
+                worksheet.Cell(currentRow, 1).Value = "Empresa";
+                worksheet.Cell(currentRow, 1).Style.Font.Bold = true;
+                worksheet.Cell(currentRow, 1).Style.Fill.BackgroundColor = XLColor.FromArgb(220, 230, 241);
+                worksheet.Cell(currentRow, 2).Value = "Tienda";
+                worksheet.Cell(currentRow, 2).Style.Font.Bold = true;
+                worksheet.Cell(currentRow, 2).Style.Fill.BackgroundColor = XLColor.FromArgb(220, 230, 241);
+                worksheet.Cell(currentRow, 3).Value = "Auditoría";
+                worksheet.Cell(currentRow, 3).Style.Font.Bold = true;
+                worksheet.Cell(currentRow, 3).Style.Fill.BackgroundColor = XLColor.FromArgb(220, 230, 241);
+                worksheet.Cell(currentRow, 4).Value = "Estado auditoría";
+                worksheet.Cell(currentRow, 4).Style.Font.Bold = true;
+                worksheet.Cell(currentRow, 4).Style.Fill.BackgroundColor = XLColor.FromArgb(220, 230, 241);
 
-                if (scaleResult == null) continue;
+                int col = 5;
 
-                worksheet.Cell(row, 1).Value = audit.CorrelativeNumber;
-                worksheet.Cell(row, 2).Value = audit.CreationDate.ToString("dd/MM/yyyy HH:mm");
-                worksheet.Cell(row, 3).Value = audit.Store?.Enterprise?.Name ?? string.Empty;
-                worksheet.Cell(row, 4).Value = audit.Store?.Name ?? string.Empty;
-                worksheet.Cell(row, 5).Value = audit.Store?.Code ?? string.Empty;
-                
-                // Nombre del punto auditable actual
-                worksheet.Cell(row, 6).Value = scaleResult.ScaleGroup?.Name ?? string.Empty;
-
-                worksheet.Cell(row, 7).Value = audit.AuditStatus?.Name ?? string.Empty;
-                
-                // Puntuaciones del punto auditable específico
-                worksheet.Cell(row, 8).Value = scaleResult.ScoreValue;
-                worksheet.Cell(row, 9).Value = scaleResult.AppliedWeighting;
-                
-                // Calcular porcentaje del punto auditable
-                decimal scalePercentage = scaleResult.AppliedWeighting > 0 
-                    ? (scaleResult.ScoreValue / scaleResult.AppliedWeighting) * 100 
-                    : 0;
-                worksheet.Cell(row, 10).Value = scalePercentage;
-                
-                worksheet.Cell(row, 11).Value = scaleResult.ScaleDescription ?? string.Empty;
-
-                // Aplicar color de escala del punto auditable
-                if (!string.IsNullOrEmpty(scaleResult.ScaleColor))
+                foreach (var field in tableFields)
                 {
-                    try
-                    {
-                        var scaleColor = ColorTranslator.FromHtml(scaleResult.ScaleColor);
-                        worksheet.Cell(row, 11).Style.Fill.BackgroundColor = XLColor.FromColor(scaleColor);
-                        
-                        if (IsColorDark(scaleColor))
-                        {
-                            worksheet.Cell(row, 11).Style.Font.FontColor = XLColor.White;
-                        }
-                    }
-                    catch
-                    {
-                        // Ignorar si el color no es válido
-                    }
+                    worksheet.Cell(currentRow, col).Value = field.FieldName;
+                    worksheet.Cell(currentRow, col).Style.Font.Bold = true;
+                    worksheet.Cell(currentRow, col).Style.Fill.BackgroundColor = XLColor.FromArgb(220, 230, 241);
+                    col++;
                 }
 
-                // Auditores
-                var auditors = audit.PeriodAuditParticipants?
-                    .Where(p => p.RoleCodeSnapshot == "AUDITOR" && p.UserReference != null)
-                    .Select(p => p.UserReference!.FullName)
-                    .ToList() ?? new List<string>();
-                worksheet.Cell(row, 12).Value = string.Join(", ", auditors);
+                currentRow++;
 
-                // Supervisores
-                var supervisors = audit.PeriodAuditParticipants?
-                    .Where(p => p.RoleCodeSnapshot == "SUPERVISOR" && p.UserReference != null)
-                    .Select(p => p.UserReference!.FullName)
-                    .ToList() ?? new List<string>();
-                worksheet.Cell(row, 13).Value = string.Join(", ", supervisors);
-
-                // Gerentes de Operaciones
-                var managers = audit.PeriodAuditParticipants?
-                    .Where(p => p.RoleCodeSnapshot == "OPERATION_MANAGER" && p.UserReference != null)
-                    .Select(p => p.UserReference!.FullName)
-                    .ToList() ?? new List<string>();
-                worksheet.Cell(row, 14).Value = string.Join(", ", managers);
-
-                row++;
+                // if orientation is horizontal, we need to handle differently
+                if (table.Orientation != null && table.Orientation.Equals(TableOrientationCode.Horizontal, StringComparison.OrdinalIgnoreCase))
+                {
+                    HandleHorizontalOrientation(group, worksheet, ref currentRow, ref col);
+                }
+                else
+                {
+                    HandleVerticalOrientation(group, worksheet, ref currentRow, ref col);
+                }
+                currentRow++; // Fila extra entre registros
             }
         }
 
-        private static void ApplyFormatting(IXLWorksheet worksheet, int recordCount)
+        private static void HandleHorizontalOrientation(
+            IGrouping<string?, PeriodAuditTableScaleTemplateResult> group,
+            IXLWorksheet worksheet,
+            ref int currentRow,
+            ref int col)
         {
-            var dataRange = worksheet.Range(1, 1, recordCount + 1, 14);
-
-            // Formato general
-            dataRange.Style.Font.FontName = "Arial";
-            dataRange.Style.Font.FontSize = 10;
-            dataRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-            dataRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
-
-            // Formato de encabezados
-            var headerRange = worksheet.Range(1, 1, 1, 14);
-            headerRange.Style.Font.Bold = true;
-            headerRange.Style.Fill.BackgroundColor = XLColor.FromArgb(84, 130, 53);
-            headerRange.Style.Font.FontColor = XLColor.White;
-            headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            headerRange.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-
-            // Formato de números
-            if (recordCount > 0)
+            foreach (var item in group)
             {
-                worksheet.Range(2, 8, recordCount + 1, 10).Style.NumberFormat.Format = "0.00";
+                // 1️⃣ Tomamos un field solo para saber cuántas filas existen
+                var firstFieldJson = item.PeriodAuditFieldValues?
+                    .FirstOrDefault()?
+                    .TableDataHorizontal ?? "[]";
+
+                var firstFieldData = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(firstFieldJson);
+
+                if (firstFieldData == null || !firstFieldData.Any())
+                    return;
+
+                // 2️⃣ Recorremos filas
+                foreach (var rowIndex in firstFieldData
+                    .Select(h => ((JsonElement)h["row"]).GetInt32())
+                    .Distinct()
+                    .OrderBy(x => x))
+                {
+                    col = 1;
+                    worksheet.Cell(currentRow, col).Value = item.PeriodAuditScaleResult?.PeriodAuditGroupResult?.PeriodAudit?.Store?.Enterprise?.Name ?? "";
+                    col++;
+                    worksheet.Cell(currentRow, col).Value = item.PeriodAuditScaleResult?.PeriodAuditGroupResult?.PeriodAudit?.Store?.Name ?? "";
+                    col++;
+                    worksheet.Cell(currentRow, col).Value = item.PeriodAuditScaleResult?.PeriodAuditGroupResult?.PeriodAudit?.CorrelativeNumber ?? "";
+                    col++;
+                    worksheet.Cell(currentRow, col).Value = item.PeriodAuditScaleResult?.PeriodAuditGroupResult?.PeriodAudit?.AuditStatus?.Name ?? "";
+                    col++;
+
+                    var tbFields = item.PeriodAuditFieldValues?
+                        .OrderBy(f => f.SortOrder)
+                        .ToList() ?? new List<PeriodAuditFieldValues>();
+
+                    // 3️⃣ Recorremos campos
+                    foreach (var field in tbFields)
+                    {
+                        var fieldJson = field.TableDataHorizontal ?? "[]";
+
+                        var fieldData = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(fieldJson);
+
+                        var cellData = fieldData?
+                            .FirstOrDefault(h => ((JsonElement)h["row"]).GetInt32() == rowIndex);
+
+                        object? value = cellData?.GetValueOrDefault("value");
+
+                        if (value is JsonElement je)
+                        {
+                            value = ConvertJsonElementToObject(je);
+                        }
+
+                        worksheet.Cell(currentRow, col).Value = ObjectToXLCellValue(value);
+                        col++;
+                    }
+
+                    currentRow++;
+                }
             }
         }
 
-        private static void ConfigureColumns(IXLWorksheet worksheet)
+
+        private static void HandleVerticalOrientation(
+            IGrouping<string?, PeriodAuditTableScaleTemplateResult> group,
+            IXLWorksheet worksheet,
+            ref int currentRow,
+            ref int col)
         {
-            worksheet.Column(1).Width = 18;  // Código Auditoría
-            worksheet.Column(2).Width = 16;  // Fecha
-            worksheet.Column(3).Width = 20;  // Empresa
-            worksheet.Column(4).Width = 30;  // Tienda
-            worksheet.Column(5).Width = 15;  // Código Tienda
-            worksheet.Column(6).Width = 30;  // Punto Auditable
-            worksheet.Column(7).Width = 15;  // Estado
-            worksheet.Column(8).Width = 18;  // Puntuación Punto Auditable
-            worksheet.Column(9).Width = 20;  // Puntuación Máxima
-            worksheet.Column(10).Width = 12; // Porcentaje
-            worksheet.Column(11).Width = 20; // Escala
-            worksheet.Column(12).Width = 40; // Auditores
-            worksheet.Column(13).Width = 40; // Supervisores
-            worksheet.Column(14).Width = 40; // Gerentes de Operaciones
-
-            // Congelar fila de encabezados
-            worksheet.SheetView.FreezeRows(1);
-
-            // Filtros automáticos
-            if (worksheet.LastRowUsed() != null)
+            foreach (var item in group)
             {
-                var tableRange = worksheet.Range(1, 1, worksheet.LastRowUsed().RowNumber(), 14);
-                tableRange.SetAutoFilter();
+                col = 1;
+                worksheet.Cell(currentRow, col).Value = item.PeriodAuditScaleResult?.PeriodAuditGroupResult?.PeriodAudit?.Store?.Enterprise?.Name ?? "";
+                col++;
+                worksheet.Cell(currentRow, col).Value = item.PeriodAuditScaleResult?.PeriodAuditGroupResult?.PeriodAudit?.Store?.Name ?? "";
+                col++;
+                worksheet.Cell(currentRow, col).Value = item.PeriodAuditScaleResult?.PeriodAuditGroupResult?.PeriodAudit?.CorrelativeNumber ?? "";
+                col++;
+                worksheet.Cell(currentRow, col).Value = item.PeriodAuditScaleResult?.PeriodAuditGroupResult?.PeriodAudit?.AuditStatus?.Name ?? "";  
+                col++;
+
+                var tbFields = item.PeriodAuditFieldValues?
+                    .OrderBy(f => f.SortOrder)
+                    .ToList() ?? new List<PeriodAuditFieldValues>();
+
+                foreach (var field in tbFields)
+                {
+                    worksheet.Cell(currentRow, col).Value =  GetFieldValue(field);
+                    col++;
+                }
+
+                currentRow++;
             }
         }
 
-        private static bool IsColorDark(Color color)
+
+        private static XLCellValue GetFieldValue(PeriodAuditFieldValues field)
         {
-            var luminance = (0.299 * color.R + 0.587 * color.G + 0.114 * color.B) / 255;
-            return luminance < 0.5;
+            // Valores por defecto
+            object? value = field.FieldType switch
+            {
+                FieldTypeCode.Text => field.TextValue,
+                FieldTypeCode.Number => field.NumericValue,
+                FieldTypeCode.Date => field.DateValue,
+                FieldTypeCode.List => field.FieldOptionsValue,
+                _ => string.Empty,
+            };
+
+            return ObjectToXLCellValue(value);
+        }
+
+        private static XLCellValue ObjectToXLCellValue(object? value)
+        {
+            return value == null ? string.Empty : value switch
+            {
+                string s     => s,
+                int i        => i,
+                long l       => l,
+                decimal d   => d,
+                double db   => db,
+                DateTime dt => dt,
+                bool b      => b,
+                _ => value.ToString()
+            };
+        }
+
+        private static object? ConvertJsonElementToObject(JsonElement element)
+        {
+            return element.ValueKind switch
+            {
+                JsonValueKind.String => element.GetString(),
+                JsonValueKind.Number => element.TryGetInt32(out var intValue) ? intValue : element.GetDouble(),
+                JsonValueKind.True => true,
+                JsonValueKind.False => false,
+                JsonValueKind.Null => null,
+                _ => element.ToString()
+            };
         }
     }
 }
