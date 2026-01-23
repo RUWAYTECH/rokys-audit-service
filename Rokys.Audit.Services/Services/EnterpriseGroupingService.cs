@@ -157,7 +157,7 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<EnterpriseGroupingResponseDto>();
             try
             {
-                var entity = await _enterpriseGroupingRepository.GetFirstOrDefaultAsync(filter: e => e.EnterpriseGroupingId == id, includeProperties: x => x.EnterpriseGroups);
+                var entity = await _enterpriseGroupingRepository.GetByEnterpriseGroupingId(id);
                 if (entity == null)
                     response.Messages.Add(new ApplicationMessage { Message = ValidationMessage.NotFound, MessageType = ApplicationMessageType.Error });
                 else
@@ -188,12 +188,11 @@ namespace Rokys.Audit.Services.Services
                     filter = filter.AndAlso(x => x.Name.Contains(requestDto.Filter) || x.Description.Contains(requestDto.Filter) || x.Code.Contains(requestDto.Filter));
 
 
-                var result = await _enterpriseGroupingRepository.GetPagedAsync(
+                var result = await _enterpriseGroupingRepository.GetPagedCustomAsync(
                     filter,
                     orderBy,
                     requestDto.PageNumber,
-                    requestDto.PageSize,
-                    includeProperties: [x => x.EnterpriseGroups]
+                    requestDto.PageSize
                 );
                 response.Data = new PaginationResponseDto<EnterpriseGroupingResponseDto>
                 {
