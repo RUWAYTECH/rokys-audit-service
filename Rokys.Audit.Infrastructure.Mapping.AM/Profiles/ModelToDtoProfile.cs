@@ -9,6 +9,7 @@ using Rokys.Audit.DTOs.Responses.MaintenanceTable;
 using Rokys.Audit.DTOs.Responses.MaintenanceDetailTable;
 using Rokys.Audit.DTOs.Responses.Proveedor;
 using Rokys.Audit.DTOs.Responses.ScaleCompany;
+using Rokys.Audit.DTOs.Responses.SubScale;
 using Rokys.Audit.DTOs.Responses.ScaleGroup;
 using Rokys.Audit.DTOs.Responses.ScoringCriteria;
 using Rokys.Audit.DTOs.Responses.Store;
@@ -71,6 +72,11 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                 .AfterMap((src, dest) =>
                 {
                     dest.EnterpriseName = src.Enterprise?.Name;
+                });
+            CreateMap<SubScale, SubScaleResponseDto>()
+                .AfterMap((src, dest) =>
+                {
+                    dest.ScaleCompanyName = src.ScaleCompany?.Name;
                 });
             CreateMap<ScaleGroup, ScaleGroupResponseDto>();
             CreateMap<Group, GroupResponseDto>().AfterMap((src, dest) =>

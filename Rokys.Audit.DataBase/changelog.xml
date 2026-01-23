@@ -20,6 +20,7 @@
 <include file="./Table/202601231250-group.sql" relativeToChangelogFile="true"/>
 <include file="./Table/202601231500-scale-company.sql" relativeToChangelogFile="true"/>
 <include file="./Table/202601231501-scale-company-constraint-scaletype.sql" relativeToChangelogFile="true"/>
+<include file="./Table/202601231502-sub-scale.sql" relativeToChangelogFile="true"/>
 
 <!-- INSERTS -->
 <include file="./Inserts/202510010123-InsertAuditStatus.sql" relativeToChangelogFile="true"/>
