@@ -39,6 +39,9 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .IsRequired()
                 .HasDefaultValue(true);
 
+            builder.Property(a => a.EnterpriseId)
+                .IsRequired(false);
+
             // Unique constraint for RoleCode
             builder.HasIndex(a => a.RoleCode)
                 .IsUnique()
@@ -47,6 +50,15 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             // Index for performance
             builder.HasIndex(a => new { a.IsActive, a.SequenceOrder })
                 .HasDatabaseName("IX_AuditRoleConfiguration_Active_Sequence");
+
+            // Navigation properties
+            builder.HasOne(sc => sc.Enterprise)
+                .WithMany(e => e.AuditRoleConfigurations)
+                .HasForeignKey(sc => sc.EnterpriseId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Indexes
+            builder.HasIndex(sc => sc.EnterpriseId);
         }
     }
 }

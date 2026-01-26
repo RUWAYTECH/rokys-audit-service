@@ -56,7 +56,7 @@ namespace Rokys.Audit.WebAPI.Controllers
                 return Ok(response);
             return BadRequest(response);
         }
-        [HttpDelete("/delete-enterprise-group/{id}")]
+        [HttpDelete("delete-enterprise-group/{id}")]
         public async Task<IActionResult> DeleteEnterpriseGroup([FromRoute] Guid id)
         {
             var response = await _enterpriseGroupingService.DeleteEnterpriseGroupById(id);
