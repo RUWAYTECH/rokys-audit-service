@@ -157,7 +157,7 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<EnterpriseGroupingResponseDto>();
             try
             {
-                var entity = await _enterpriseGroupingRepository.GetByEnterpriseGroupingId(id);
+                var entity = await _enterpriseGroupingRepository.GetFirstByEnterpriseGroupingId(id);
                 if (entity == null)
                     response.Messages.Add(new ApplicationMessage { Message = ValidationMessage.NotFound, MessageType = ApplicationMessageType.Error });
                 else

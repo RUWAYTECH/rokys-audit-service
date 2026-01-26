@@ -310,9 +310,11 @@ namespace Rokys.Audit.Services.Services
                 var clonedGroup = new Group
                 {
                     GroupId = Guid.NewGuid(),
-                    EnterpriseId = requestDto.EnterpriseId,
+                    EnterpriseId = requestDto.EnterpriseId ?? null,
                     SortOrder = originalGroup.SortOrder,
                     Name = requestDto.Name,
+                    Code = requestDto.Code,
+                    EnterpriseGroupingId = requestDto.EnterpriseGroupingId,
                     Weighting = requestDto.Weighting,
                     IsActive = true
                 };
@@ -548,7 +550,7 @@ namespace Rokys.Audit.Services.Services
                 {
                     OriginalGroupId = requestDto.GroupId,
                     ClonedGroupId = clonedGroup.GroupId,
-                    EnterpriseId = requestDto.EnterpriseId,
+                    EnterpriseId = requestDto.EnterpriseId ?? null,
                     GroupName = clonedGroup.Name,
                     ScaleGroupsCloned = scaleGroupsCount,
                     TableScaleTemplatesCloned = tableScaleTemplatesCount,
