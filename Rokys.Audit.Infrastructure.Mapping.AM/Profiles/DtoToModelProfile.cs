@@ -10,6 +10,7 @@ using Rokys.Audit.DTOs.Requests.MaintenanceTable;
 using Rokys.Audit.DTOs.Requests.MaintenanceDetailTable;
 using Rokys.Audit.DTOs.Requests.Proveedor;
 using Rokys.Audit.DTOs.Requests.ScaleCompany;
+using Rokys.Audit.DTOs.Requests.SubScale;
 using Rokys.Audit.DTOs.Requests.ScaleGroup;
 using Rokys.Audit.DTOs.Requests.ScoringCriteria;
 using Rokys.Audit.DTOs.Requests.Store;
@@ -26,6 +27,8 @@ using Rokys.Audit.DTOs.Requests.InboxItems;
 using Rokys.Audit.DTOs.Requests.AuditRoleConfiguration;
 using Rokys.Audit.DTOs.Requests.SubstitutionHistory;
 using Rokys.Audit.DTOs.Common;
+using Rokys.Audit.DTOs.Requests.EnterpriseGrouping;
+using Rokys.Audit.DTOs.Requests.EnterpriseGroup;
 
 namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
 {
@@ -37,6 +40,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
             CreateMap<PeriodAuditScaleResultRequestDto, PeriodAuditScaleResult>();
             CreateMap<ProveedorRequestDto, Proveedor>();
             CreateMap<ScaleCompanyRequestDto, ScaleCompany>();
+            CreateMap<SubScaleRequestDto, SubScale>();
             CreateMap<ScaleGroupRequestDto, ScaleGroup>();
             CreateMap<GroupRequestDto, Group>();
             CreateMap<CriteriaSubResultRequestDto, CriteriaSubResult>();
@@ -60,6 +64,8 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
             CreateMap<PeriodAuditParticipantDto, PeriodAuditParticipant>();
             CreateMap<AuditRoleConfigurationRequestDto, AuditRoleConfiguration>();
             CreateMap<SubstitutionHistoryRequestDto, SubstitutionHistory>();
+            CreateMap<EnterpriseGroupRequestDto, EnterpriseGroup>();
+            CreateMap<EnterpriseGroupingRequestDto, EnterpriseGrouping>();
         }
     }
 }

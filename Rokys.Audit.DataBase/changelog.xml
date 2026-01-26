@@ -8,7 +8,7 @@
 	
 
 <!-- INIT -->
-<include file="./Init/DataInitial.sql" relativeToChangelogFile="true"/>
+<!-- <include file="./Init/DataInitial.sql" relativeToChangelogFile="true"/> -->
 
 
 <!-- TABLES -->
@@ -16,6 +16,11 @@
 <include file="./Table/202601151204-add-action-plan-table.sql" relativeToChangelogFile="true"/>
 <include file="./Table/202601201258-enterprise-group-configurations.sql" relativeToChangelogFile="true"/>
 <include file="./Table/202601211451-period-audit-add-action-plan-completed-date.sql" relativeToChangelogFile="true"/>
+<include file="./Table/202601201840-enterprise-theme.sql" relativeToChangelogFile="true"/>
+<include file="./Table/202601231250-group.sql" relativeToChangelogFile="true"/>
+<include file="./Table/202601231500-scale-company.sql" relativeToChangelogFile="true"/>
+<include file="./Table/202601231501-scale-company-constraint-scaletype.sql" relativeToChangelogFile="true"/>
+<include file="./Table/202601231502-sub-scale.sql" relativeToChangelogFile="true"/>
 
 <!-- INSERTS -->
 <include file="./Inserts/202510010123-InsertAuditStatus.sql" relativeToChangelogFile="true"/>
