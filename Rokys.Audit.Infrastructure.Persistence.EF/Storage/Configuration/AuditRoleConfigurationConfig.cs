@@ -42,6 +42,9 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.Property(a => a.EnterpriseId)
                 .IsRequired(false);
 
+            builder.Property(a => a.EnterpriseGroupingId)
+                .IsRequired();
+
             // Unique constraint for RoleCode
             builder.HasIndex(a => a.RoleCode)
                 .IsUnique()
@@ -57,8 +60,14 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .HasForeignKey(sc => sc.EnterpriseId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            builder.HasOne(sc => sc.EnterpriseGrouping)
+                .WithMany(eg => eg.AuditRoleConfigurations)
+                .HasForeignKey(sc => sc.EnterpriseGroupingId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             // Indexes
             builder.HasIndex(sc => sc.EnterpriseId);
+            builder.HasIndex(sc => sc.EnterpriseGroupingId);
         }
     }
 }
