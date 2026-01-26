@@ -10,5 +10,6 @@ namespace Rokys.Audit.Model.Tables
 
         // Navigation properties
         public virtual ICollection<EnterpriseGroup> EnterpriseGroups { get; set; } = new List<EnterpriseGroup>();
+        public virtual ICollection<ScaleCompany> ScaleCompanies { get; set; } = new List<ScaleCompany>();
     }
 }

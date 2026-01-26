@@ -115,21 +115,25 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<PaginationResponseDto<ScaleCompanyResponseDto>>();
             try
             {
-                int totalRows;
                 Expression<Func<ScaleCompany, bool>> filter = x => x.IsActive;
                 if (!string.IsNullOrEmpty(paginationRequestDto.Filter))
                     filter = filter.AndAlso(x => x.Name.Contains(paginationRequestDto.Filter));
 
-                if (paginationRequestDto.EnterpriseId.HasValue)
+                if (paginationRequestDto.EnterpriseGroupingId.HasValue)
                 {
-                    if (paginationRequestDto.EnterpriseId == new Guid("11111111-1111-1111-1111-111111111111"))
+                    if (paginationRequestDto.EnterpriseGroupingId == new Guid("11111111-1111-1111-1111-111111111111"))
                     {
-                        filter = filter.AndAlso(x => x.EnterpriseId == null);
+                        filter = filter.AndAlso(x => x.EnterpriseGroupingId == null);
                     }
                     else
                     {
-                        filter = filter.AndAlso(x => x.EnterpriseId == paginationRequestDto.EnterpriseId.Value);
+                        filter = filter.AndAlso(x => x.EnterpriseGroupingId == paginationRequestDto.EnterpriseGroupingId.Value);
                     }
+                }
+
+                if (paginationRequestDto.EnterpriseId.HasValue)
+                {
+                    filter = filter.AndAlso(x => x.EnterpriseId == paginationRequestDto.EnterpriseId.Value);
                 }
                     
 

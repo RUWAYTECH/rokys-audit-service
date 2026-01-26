@@ -4,15 +4,22 @@
     {
         public Guid ScaleCompanyId { get; set; } = Guid.NewGuid();
         public Guid? EnterpriseId { get; set; }
+        public Guid? EnterpriseGroupingId { get; set; }
         public string Code { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public decimal MinValue { get; set; }
         public decimal MaxValue { get; set; }
         public string? ColorCode { get; set; }
         public int SortOrder { get; set; }
+        public decimal? NormalizedScore { get; set; }
+        public decimal? ExpectedDistribution { get; set; }
+        public int LevelOrder { get; set; }
+        public string ScaleType { get; set; } = string.Empty;
         public bool IsActive { get; set; } = true;
 
         // Navigation properties
         public virtual Enterprise Enterprise { get; set; } = null!;
+        public virtual EnterpriseGrouping? EnterpriseGrouping { get; set; }
+        public virtual ICollection<SubScale> SubScales { get; set; } = new List<SubScale>();
     }
 }
