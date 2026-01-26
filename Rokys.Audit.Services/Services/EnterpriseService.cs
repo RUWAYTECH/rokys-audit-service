@@ -163,6 +163,9 @@ namespace Rokys.Audit.Services.Services
                 if (!string.IsNullOrEmpty(requestDto.Filter))
                     filter = x => x.Name.Contains(requestDto.Filter);
 
+                if (requestDto.EnterpriseGroupingId.HasValue)
+                    filter = filter.AndAlso(x => x.EnterpriseGroups.Any(eg => eg.EnterpriseGroupingId == requestDto.EnterpriseGroupingId.Value && eg.IsActive));
+
                 if (requestDto.StartDate.HasValue)
                     filter = filter.AndAlso(x => x.CreationDate >= requestDto.StartDate.Value);
 

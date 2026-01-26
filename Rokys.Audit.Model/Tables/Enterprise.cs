@@ -12,6 +12,7 @@ namespace Rokys.Audit.Model.Tables
         public virtual ICollection<Stores> Stores { get; set; } = new List<Stores>();
         public virtual ICollection<ScaleCompany> ScaleCompanies { get; set; } = new List<ScaleCompany>();
         public virtual ICollection<Group> Groups { get; set; } = new List<Group>();
+        public virtual ICollection<EnterpriseGroup> EnterpriseGroups { get; set; } = new List<EnterpriseGroup>();
         public EnterpriseTheme? Theme { get; set; }
     }
 }
