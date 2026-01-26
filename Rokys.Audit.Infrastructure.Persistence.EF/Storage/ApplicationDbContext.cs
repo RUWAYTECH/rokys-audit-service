@@ -14,6 +14,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
         
         // Existing entities
         public DbSet<ScaleCompany> ScaleCompanies { get; set; }
+        public DbSet<SubScale> SubScales { get; set; }
         public DbSet<Group> Groups { get; set; }
         public DbSet<ScaleGroup> ScaleGroups { get; set; }
         //public DbSet<Proveedor> Proveedores { get; set; }
@@ -77,6 +78,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
             
             // Existing configurations
             modelBuilder.ApplyConfiguration(new ScaleCompanyConfig());
+            modelBuilder.ApplyConfiguration(new SubScaleConfig());
             modelBuilder.ApplyConfiguration(new GroupConfig());
             modelBuilder.ApplyConfiguration(new ScaleGroupConfig());
             //modelBuilder.ApplyConfiguration(new ProveedorConfig());
