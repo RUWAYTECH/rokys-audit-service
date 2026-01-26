@@ -125,16 +125,8 @@ namespace Rokys.Audit.Services.Services
 								// Lógica del filtro de EnterpriseId
 								if (requestDto.EnterpriseId.HasValue)
 								{
-										if (requestDto.EnterpriseId.Value == Guid.Empty)
-										{
-												// Guid.Empty significa "filtrar solo los que tienen EnterpriseId null"
-												filter = filter.AndAlso(x => x.EnterpriseId == null);
-										}
-										else
-										{
-												// Cualquier otro Guid: filtrar por ese valor específico
-												filter = filter.AndAlso(x => x.EnterpriseId == requestDto.EnterpriseId.Value);
-										}
+                                    filter = filter.AndAlso(x => x.EnterpriseId == requestDto.EnterpriseId.Value || x.EnterpriseGrouping.EnterpriseGroups.Any(eg => eg.EnterpriseId == requestDto.EnterpriseId.Value));
+                            
 								}
 
 								var entities = await _auditRoleConfigurationRepository.GetPagedAsync(
