@@ -1,4 +1,5 @@
 ﻿using Rokys.Audit.DTOs.Common;
+using Rokys.Audit.DTOs.Requests.EnterpriseGroup;
 using Rokys.Audit.DTOs.Requests.EnterpriseGrouping;
 using Rokys.Audit.DTOs.Responses.Common;
 using Rokys.Audit.DTOs.Responses.EnterpriseGrouping;
@@ -10,5 +11,6 @@ namespace Rokys.Audit.Services.Interfaces
         Task<ResponseDto<EnterpriseGroupingResponseDto>> Create(EnterpriseGroupingCreateRequestDto requestDto);
         Task<ResponseDto<PaginationResponseDto<EnterpriseGroupingResponseDto>>> GetPaged(EnterpriseGroupingFilterRequestDto requestDto);
         Task<ResponseDto> DeleteEnterpriseGroupById(Guid id);
+        Task<ResponseDto<EnterpriseGroupingResponseDto>> CreateEnterpriseGroup(Guid enterpriseGroupingId, EnterpriseGroupCreateRequestDto enterpriseGroupCreateRequestDto);
     }
 }
