@@ -14,6 +14,6 @@ namespace Rokys.Audit.DTOs.Responses.ScaleCompany
         public string? UpdatedBy { get; set; }
         public string? EnterpriseName { get; set; }
         public string? EnterpriseGroupingName { get; set; }
-            
+        public List<string> EnterpriseNames { get; set; } = new List<string>();
     }
 }
