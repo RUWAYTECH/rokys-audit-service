@@ -368,7 +368,7 @@ namespace Rokys.Audit.Services.Services
             {
                 var entity = await _periodAuditGroupResultRepository.GetFirstOrDefaultAsync(
                     filter: x => x.PeriodAuditGroupResultId == periodAuditGroupResultId && x.IsActive,
-                    includeProperties: [x => x.Group, y => y.PeriodAudit.Store]);
+                    includeProperties: [x => x.Group, y => y.PeriodAudit.Store.Enterprise.EnterpriseGroups]);
 
                 var periodAuditScaleResult = await _periodAuditScaleResultRepository.GetByPeriodAuditGroupResultId(periodAuditGroupResultId);
                 decimal acumulatedScore = 0;
