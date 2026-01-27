@@ -121,31 +121,18 @@ namespace Rokys.Audit.Services.Services
 
                 if (paginationRequestDto.EnterpriseGroupingId.HasValue)
                 {
-                    if (paginationRequestDto.EnterpriseGroupingId == new Guid("11111111-1111-1111-1111-111111111111"))
-                    {
-                        filter = filter.AndAlso(x => x.EnterpriseGroupingId == null);
-                    }
-                    else
-                    {
-                        filter = filter.AndAlso(x => x.EnterpriseGroupingId == paginationRequestDto.EnterpriseGroupingId.Value);
-                    }
+                    filter = filter.AndAlso(x => x.EnterpriseGroupingId == paginationRequestDto.EnterpriseGroupingId.Value);
                 }
 
                 if (paginationRequestDto.EnterpriseId.HasValue)
                 {
                     filter = filter.AndAlso(x => x.EnterpriseId == paginationRequestDto.EnterpriseId.Value);
                 }
-                    
 
-
-                Func<IQueryable<ScaleCompany>, IOrderedQueryable<ScaleCompany>> orderBy = q => q.OrderByDescending(x => x.EnterpriseId).ThenByDescending(x => x.Code);
-
-                var entities = await _scaleCompanyRepository.GetPagedAsync(
+                var entities = await _scaleCompanyRepository.GetCustomPagedAsync(
                     filter: filter,
-                    orderBy: orderBy,
                     pageNumber: paginationRequestDto.PageNumber,
-                    pageSize: paginationRequestDto.PageSize,
-                    includeProperties: [e => e.Enterprise, e => e.EnterpriseGrouping]
+                    pageSize: paginationRequestDto.PageSize
                 );
 
                 var pagedResult = new PaginationResponseDto<ScaleCompanyResponseDto>

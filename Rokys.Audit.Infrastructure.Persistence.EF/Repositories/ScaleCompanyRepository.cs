@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
 using Rokys.Audit.Infrastructure.Persistence.EF.Storage;
 using Rokys.Audit.Infrastructure.Repositories;
 using Rokys.Audit.Model.Tables;
@@ -18,6 +19,27 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
                 .Include(enterpriseId => enterpriseId.Enterprise)
                 .Where(sc => sc.EnterpriseId == enterpriseId && sc.IsActive)
                 .ToListAsync();
+        }
+
+        public async Task<(List<ScaleCompany> Items, int TotalRows)> GetCustomPagedAsync(Expression<Func<ScaleCompany, bool>> filter, int pageNumber, int pageSize)
+        {
+            var query = Db.ScaleCompanies.Where(filter)
+               .Include(x => x.Enterprise)
+               .Include(x => x.EnterpriseGrouping)
+               .ThenInclude(eg => eg.EnterpriseGroups.Where(eg => eg.IsActive))
+               .ThenInclude(e => e.Enterprise)
+               .OrderByDescending(a => a.EnterpriseGroupingId)
+               .ThenByDescending(a => a.Code);
+
+
+            int rowsCount = await query.CountAsync();
+            if (pageSize <= 0 || pageNumber <= 0)
+            {
+                var allItems = await query.ToListAsync();
+                return (allItems, rowsCount);
+            }
+            var items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+            return (items, rowsCount);
         }
 
         public async Task<List<ScaleCompany>> GetConfiguredForEnterprise(
