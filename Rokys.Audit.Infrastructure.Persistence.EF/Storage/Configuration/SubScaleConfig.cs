@@ -45,7 +45,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
 
             // Relaciones
             builder.HasOne(x => x.ScaleCompany)
-                .WithMany()
+                .WithMany(x => x.SubScales)
                 .HasForeignKey(x => x.ScaleCompanyId)
                 .OnDelete(DeleteBehavior.Restrict);
         }

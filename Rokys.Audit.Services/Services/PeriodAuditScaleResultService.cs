@@ -46,6 +46,7 @@ namespace Rokys.Audit.Services.Services
         private readonly ICriteriaSubResultRepository _criteriaSubResultRepository;
         private readonly IPeriodAuditRepository _periodAuditRepository;
         private readonly IScaleGroupRepository _scaleGroupRepository;
+        private readonly IEnterpriseGroupRepository _enterpriseGroupRepository;
 
         public PeriodAuditScaleResultService(
             IPeriodAuditScaleResultRepository repository,
@@ -70,7 +71,8 @@ namespace Rokys.Audit.Services.Services
             IPeriodAuditFieldValuesRepository periodAuditFieldValuesRepository,
             ICriteriaSubResultRepository criteriaSubResultRepository,
             IPeriodAuditRepository periodAuditRepository,
-            IScaleGroupRepository scaleGroupRepository)
+            IScaleGroupRepository scaleGroupRepository,
+            IEnterpriseGroupRepository enterpriseGroupRepository)
         {
             _repository = repository;
             _validator = validator;
@@ -95,6 +97,7 @@ namespace Rokys.Audit.Services.Services
             _criteriaSubResultRepository = criteriaSubResultRepository;
             _periodAuditRepository = periodAuditRepository;
             _scaleGroupRepository = scaleGroupRepository;
+            _enterpriseGroupRepository = enterpriseGroupRepository;
         }
 
         public async Task<ResponseDto<PeriodAuditScaleResultResponseDto>> Create(PeriodAuditScaleResultRequestDto requestDto)
@@ -484,15 +487,13 @@ namespace Rokys.Audit.Services.Services
                 }
 
                 var customResponse = await this.GetByIdCustomData(periodAuditScaleResultId);
-                var scaleCompany = await _scaleCompanyRepository.GetAsync(x => x.EnterpriseId == customResponse.Data.PeriodAudit.EnterpriseId && x.IsActive);
+
+                var enterpriseGrouping = await _enterpriseGroupRepository.GetFirstOrDefaultAsync(filter: e => e.EnterpriseId == customResponse.Data.PeriodAudit.EnterpriseId && e.IsActive);
+                var scaleCompany = await _scaleCompanyRepository.GetConfiguredForEnterprise(enterpriseGrouping?.EnterpriseGroupingId, customResponse.Data.PeriodAudit.EnterpriseId.Value);
                 if (scaleCompany == null || !scaleCompany.Any())
                 {
-                    scaleCompany = await _scaleCompanyRepository.GetAsync(filter: e => e.EnterpriseId == null);
-                    if (scaleCompany == null || !scaleCompany.Any())
-                    {
-                        response = ResponseDto.Error<bool>("No se encontró la escala asociada a la empresa ni la escala por defecto.");
-                        return response;
-                    }
+                    response = ResponseDto.Error<bool>("No se encontró la escala asociada a la empresa ni la escala por defecto.");
+                    return response;
                 }
 
                 periodAuditScaleResults.ScoreValue = scoringCriteriaResult.Score;
