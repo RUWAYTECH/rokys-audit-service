@@ -19,6 +19,6 @@ namespace Rokys.Audit.DTOs.Requests.Group
 
         public decimal Weighting { get; set; }
         public string Code { get; set; }
-        public Guid EnterpriseGroupingId { get; set; }
+        public Guid? EnterpriseGroupingId { get; set; }
     }
 }

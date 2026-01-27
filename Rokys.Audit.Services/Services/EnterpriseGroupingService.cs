@@ -184,7 +184,7 @@ namespace Rokys.Audit.Services.Services
             {
                 Expression<Func<EnterpriseGrouping, bool>> filter = x => x.IsActive;
 
-                Func<IQueryable<EnterpriseGrouping>, IOrderedQueryable<EnterpriseGrouping>> orderBy = q => q.OrderBy(x => x.Name);
+                Func<IQueryable<EnterpriseGrouping>, IOrderedQueryable<EnterpriseGrouping>> orderBy = q => q.OrderBy(x => x.Code);
 
                 if (!string.IsNullOrEmpty(requestDto.Filter))
                     filter = filter.AndAlso(x => x.Name.Contains(requestDto.Filter) || x.Description.Contains(requestDto.Filter) || x.Code.Contains(requestDto.Filter));
@@ -284,22 +284,22 @@ namespace Rokys.Audit.Services.Services
                 var currentUser = _httpContextAccessor.CurrentUser();
                 foreach (var enterpriseId in enterpriseGroupCreateRequestDto.EnterpriseIds)
                 {
+
                     var relation = await _enterpriseGroupRepository.GetFirstOrDefaultAsync(
-                            eg => eg.EnterpriseId == enterpriseId &&
-                                  eg.EnterpriseGroupingId == enterpriseGroupingId,
-                            includeProperties: [e => e.Enterprise]
-                        );
+                        eg => eg.EnterpriseId == enterpriseId,
+                        includeProperties: [e => e.Enterprise]
+                    );
 
                     if (relation != null && relation.IsActive)
                     {
                         response.Messages.Add(new ApplicationMessage
                         {
-                            Message = $"La empresa {relation.Enterprise.Name} ya existe en el grupo.",
+                            Message = $"La empresa {relation.Enterprise.Name} ya esta asignado a un grupo.",
                             MessageType = ApplicationMessageType.Error
                         });
                         return response;
                     }
-                    if (relation != null && !relation.IsActive)
+                    if (relation != null && !relation.IsActive && relation.EnterpriseGroupingId == enterpriseGroupingId)
                     {
                         relation.IsActive = true;
                         relation.UpdateAudit(currentUser.UserName);
