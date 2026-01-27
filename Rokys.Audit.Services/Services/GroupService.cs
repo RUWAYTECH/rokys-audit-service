@@ -206,7 +206,7 @@ namespace Rokys.Audit.Services.Services
                     orderBy: orderBy,
                     pageNumber: groupFilterRequestDto.PageNumber,
                     pageSize: groupFilterRequestDto.PageSize,
-                    includeProperties: [ x => x.Enterprise]
+                    includeProperties: [ x => x.Enterprise, eg => eg.EnterpriseGrouping]
                 );
 
                 var pagedResult = new PaginationResponseDto<GroupResponseDto>
@@ -233,7 +233,7 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<GroupResponseDto>();
             try
             {
-                var entity = await _groupRepository.GetFirstOrDefaultAsync(filter: x => x.GroupId == id && x.IsActive, includeProperties: [x => x.Enterprise]);
+                var entity = await _groupRepository.GetFirstOrDefaultAsync(filter: x => x.GroupId == id && x.IsActive, includeProperties: [x => x.Enterprise, eg => eg.EnterpriseGrouping]);
                 if (entity == null)
                 {
                     response = ResponseDto.Error<GroupResponseDto>("No se encontró el grupo.");
@@ -310,9 +310,11 @@ namespace Rokys.Audit.Services.Services
                 var clonedGroup = new Group
                 {
                     GroupId = Guid.NewGuid(),
-                    EnterpriseId = requestDto.EnterpriseId,
+                    EnterpriseId = requestDto.EnterpriseId ?? null,
                     SortOrder = originalGroup.SortOrder,
                     Name = requestDto.Name,
+                    Code = requestDto.Code,
+                    EnterpriseGroupingId = requestDto.EnterpriseGroupingId,
                     Weighting = requestDto.Weighting,
                     IsActive = true
                 };
@@ -548,7 +550,7 @@ namespace Rokys.Audit.Services.Services
                 {
                     OriginalGroupId = requestDto.GroupId,
                     ClonedGroupId = clonedGroup.GroupId,
-                    EnterpriseId = requestDto.EnterpriseId,
+                    EnterpriseId = requestDto.EnterpriseId ?? null,
                     GroupName = clonedGroup.Name,
                     ScaleGroupsCloned = scaleGroupsCount,
                     TableScaleTemplatesCloned = tableScaleTemplatesCount,

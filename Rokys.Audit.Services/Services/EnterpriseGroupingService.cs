@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Reatil.Services.Services;
 using Rokys.Audit.Common.Extensions;
 using Rokys.Audit.DTOs.Common;
+using Rokys.Audit.DTOs.Requests.EnterpriseGroup;
 using Rokys.Audit.DTOs.Requests.EnterpriseGrouping;
 using Rokys.Audit.DTOs.Responses.Common;
 using Rokys.Audit.DTOs.Responses.Enterprise;
@@ -85,21 +86,20 @@ namespace Rokys.Audit.Services.Services
                             return response;
                         }
 
-                        var existingEnterpriseIds = await _enterpriseGroupRepository.ExistsEnterpriseInOtherGroupAsync(requestDto.EnterpriseIds, entity.EnterpriseGroupingId);
-
-                        if (existingEnterpriseIds)
-                        {
-                            response.Messages.Add(new ApplicationMessage
-                            {
-                                Message = "Una o más empresas ya pertenecen a otro grupo.",
-                                MessageType = ApplicationMessageType.Error
-                            });
-                            return response;
-                        }
-
-
                         foreach (var enterpriseId in requestDto.EnterpriseIds)
                         {
+                            var activeRelation = await _enterpriseGroupRepository.GetFirstOrDefaultAsync(eg => eg.EnterpriseId == enterpriseId && eg.IsActive, includeProperties: [e => e.Enterprise]);
+
+                            if (activeRelation != null)
+                            {
+                                response.Messages.Add(new ApplicationMessage
+                                {
+                                    Message = $"La empresa {activeRelation.Enterprise.Name} ya existe en otro grupo.",
+                                    MessageType = ApplicationMessageType.Error
+                                });
+                                return response;
+                            }
+
                             var enterpriseGroup = new EnterpriseGroup
                             {
                                 EnterpriseGroupingId = entity.EnterpriseGroupingId,
@@ -137,10 +137,12 @@ namespace Rokys.Audit.Services.Services
                     {
                         foreach (var enterpriseGroup in getEnterpriseGroups)
                         {
-                            _enterpriseGroupRepository.Delete(enterpriseGroup);
+                            enterpriseGroup.IsActive = false;
+                            _enterpriseGroupRepository.Update(enterpriseGroup);
                         }
                     }
-                    _enterpriseGroupingRepository.Delete(entity);
+                    entity.IsActive = false;
+                    _enterpriseGroupingRepository.Update(entity);
                     await _unitOfWork.CommitAsync();
                 }
             }
@@ -157,7 +159,7 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<EnterpriseGroupingResponseDto>();
             try
             {
-                var entity = await _enterpriseGroupingRepository.GetByEnterpriseGroupingId(id);
+                var entity = await _enterpriseGroupingRepository.GetFirstByEnterpriseGroupingId(id);
                 if (entity == null)
                     response.Messages.Add(new ApplicationMessage { Message = ValidationMessage.NotFound, MessageType = ApplicationMessageType.Error });
                 else
@@ -182,7 +184,7 @@ namespace Rokys.Audit.Services.Services
             {
                 Expression<Func<EnterpriseGrouping, bool>> filter = x => x.IsActive;
 
-                Func<IQueryable<EnterpriseGrouping>, IOrderedQueryable<EnterpriseGrouping>> orderBy = q => q.OrderBy(x => x.Name);
+                Func<IQueryable<EnterpriseGrouping>, IOrderedQueryable<EnterpriseGrouping>> orderBy = q => q.OrderBy(x => x.Code);
 
                 if (!string.IsNullOrEmpty(requestDto.Filter))
                     filter = filter.AndAlso(x => x.Name.Contains(requestDto.Filter) || x.Description.Contains(requestDto.Filter) || x.Code.Contains(requestDto.Filter));
@@ -256,7 +258,8 @@ namespace Rokys.Audit.Services.Services
                     response.Messages.Add(new ApplicationMessage { Message = ValidationMessage.NotFound, MessageType = ApplicationMessageType.Error });
                     return response;
                 }
-                _enterpriseGroupRepository.Delete(entity);
+                entity.IsActive = false;
+                _enterpriseGroupRepository.Update(entity);
                 await _unitOfWork.CommitAsync();
             }
             catch (Exception ex)
@@ -266,6 +269,82 @@ namespace Rokys.Audit.Services.Services
             }
             return response;
         }
+        public async Task<ResponseDto<EnterpriseGroupingResponseDto>> CreateEnterpriseGroup(Guid enterpriseGroupingId, EnterpriseGroupCreateRequestDto enterpriseGroupCreateRequestDto)
+        {
+            var response = ResponseDto.Create<EnterpriseGroupingResponseDto>();
+            try
+            {
+                var entity = await _enterpriseGroupingRepository.GetByKeyAsync(enterpriseGroupingId);
+                if (entity == null)
+                {
+                    response.Messages.Add(new ApplicationMessage { Message = ValidationMessage.NotFound, MessageType = ApplicationMessageType.Error });
+                    return response;
+                }
 
+                var currentUser = _httpContextAccessor.CurrentUser();
+                foreach (var enterpriseId in enterpriseGroupCreateRequestDto.EnterpriseIds)
+                {
+
+                    var relations = await _enterpriseGroupRepository.GetAsync(
+                                        eg => eg.EnterpriseId == enterpriseId,
+                                        includeProperties: [e => e.Enterprise]
+                                    );
+
+                    var activeRelation = relations.FirstOrDefault(r => r.IsActive);
+                    var sameGroupRelation = relations
+                        .FirstOrDefault(r => r.EnterpriseGroupingId == enterpriseGroupingId);
+
+                    if (activeRelation != null && activeRelation.EnterpriseGroupingId != enterpriseGroupingId)
+                    {
+                        response.Messages.Add(new ApplicationMessage
+                        {
+                            Message = $"La empresa {activeRelation.Enterprise.Name} ya está asignada a otro grupo.",
+                            MessageType = ApplicationMessageType.Error
+                        });
+                        return response;
+                    }
+
+                    if (sameGroupRelation != null && sameGroupRelation.IsActive)
+                    {
+                        response.Messages.Add(new ApplicationMessage
+                        {
+                            Message = $"La empresa {sameGroupRelation.Enterprise.Name} ya está asignada a este grupo.",
+                            MessageType = ApplicationMessageType.Error
+                        });
+                        return response;
+                    }
+
+                    if (sameGroupRelation != null && !sameGroupRelation.IsActive)
+                    {
+                        sameGroupRelation.IsActive = true;
+                        sameGroupRelation.UpdateAudit(currentUser.UserName);
+                        _enterpriseGroupRepository.Update(sameGroupRelation);
+                        continue;
+                    }
+
+                    var newEnterpriseGroup = new EnterpriseGroup
+                    {
+                        EnterpriseGroupingId = enterpriseGroupingId,
+                        EnterpriseId = enterpriseId,
+                        IsActive = true
+                    };
+
+                    newEnterpriseGroup.CreateAudit(currentUser.UserName);
+                    _enterpriseGroupRepository.Insert(newEnterpriseGroup);
+                }
+
+                entity.UpdateAudit(currentUser.UserName);
+                _enterpriseGroupingRepository.Update(entity);
+                await _unitOfWork.CommitAsync();
+                var updatedGrouping = await _enterpriseGroupingRepository.GetFirstOrDefaultAsync(filter: eg => eg.EnterpriseGroupingId == enterpriseGroupingId, includeProperties: x => x.EnterpriseGroups);
+                response.Data = _mapper.Map<EnterpriseGroupingResponseDto>(updatedGrouping);
+            }
+            catch (Exception ex)
+            {
+                response = ResponseDto.Error<EnterpriseGroupingResponseDto>(ex.Message);
+                _logger.LogError(ex.Message);
+            }
+            return response;
+        }
     }
 }

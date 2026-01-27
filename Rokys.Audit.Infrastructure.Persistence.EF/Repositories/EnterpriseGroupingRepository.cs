@@ -27,7 +27,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
         {
             var query = CreateDbSetQuery(filter);
             query = query
-                .Include(x => x.EnterpriseGroups)
+                .Include(x => x.EnterpriseGroups.Where(eg => eg.IsActive))
                     .ThenInclude(pa => pa.Enterprise);
             if (orderBy != null)
                 query = orderBy(query);
@@ -40,6 +40,14 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
             }
             var items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
             return (items, rowsCount);
+        }
+        public async Task<EnterpriseGrouping> GetFirstByEnterpriseGroupingId(Guid id)
+        {
+            return await Db.EnterpriseGroupings
+                .Include(x => x.EnterpriseGroups.Where(eg => eg.IsActive))
+                .ThenInclude(pa => pa.Enterprise)
+                .Where(x => x.EnterpriseGroupingId == id && x.IsActive)
+                .FirstOrDefaultAsync();
         }
     }
 }
