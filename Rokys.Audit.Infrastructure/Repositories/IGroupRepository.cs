@@ -5,5 +5,6 @@ namespace Rokys.Audit.Infrastructure.Repositories
 {
     public interface IGroupRepository : IRepository<Group>
     {
+        Task<List<Group>> GetConfiguredForEnterprise(Guid? enterpriseGroupingId, Guid enterpriseId);
     }
 }
