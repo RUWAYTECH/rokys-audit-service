@@ -21,6 +21,9 @@
 <include file="./Table/202601231500-scale-company.sql" relativeToChangelogFile="true"/>
 <include file="./Table/202601231501-scale-company-constraint-scaletype.sql" relativeToChangelogFile="true"/>
 <include file="./Table/202601231502-sub-scale.sql" relativeToChangelogFile="true"/>
+<include file="./Table/202601201643-01-audit-role-configuration-add-columns.sql" relativeToChangelogFile="true"/>
+<include file="./Table/202601201643-02-audit-role-configuration-add-fks.sql" relativeToChangelogFile="true"/>
+<include file="./Table/202601201643-03-audit-role-configuration-update-constraints.sql" relativeToChangelogFile="true"/>
 
 <!-- INSERTS -->
 <include file="./Inserts/202510010123-InsertAuditStatus.sql" relativeToChangelogFile="true"/>
@@ -29,5 +32,6 @@
 <include file="./Inserts/202601210918-enterprise-group-insert-by-ruc.sql" relativeToChangelogFile="true"/>
 <include file="./Inserts/202601220914-measure-type.sql" relativeToChangelogFile="true"/>
 <include file="./Inserts/202601221032-system-config.sql" relativeToChangelogFile="true"/>
+<include file="./Inserts/202601261840-update-audit-role-configuration-enterprise-grouping.sql" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

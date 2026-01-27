@@ -86,7 +86,7 @@ namespace Rokys.Audit.WebAPI.Controllers
         [HttpPut("change-order")]
         public async Task<IActionResult> ChangeOrder([FromBody] ChangeAuditRoleConfigurationOrderRequestDto request)
         {
-            var response = await _auditRoleConfigurationService.ChangeOrder(request.CurrentPosition, request.NewPosition);
+            var response = await _auditRoleConfigurationService.ChangeOrder(request.CurrentPosition, request.NewPosition, request.EnterpriseId);
             if (response.IsValid)
                 return Ok(response);
             return BadRequest(response);
