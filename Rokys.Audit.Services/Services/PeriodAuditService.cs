@@ -446,7 +446,7 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<bool>();
             try
             {
-                var entity = await _periodAuditRepository.GetFirstOrDefaultAsync(x => x.PeriodAuditId == periodAuditId && x.IsActive, includeProperties: [x => x.Store]);
+                var entity = await _periodAuditRepository.GetFirstOrDefaultAsync(x => x.PeriodAuditId == periodAuditId && x.IsActive, includeProperties: [x => x.Store!.Enterprise!.EnterpriseGroups]);
                 if (entity == null)
                 {
                     response = ResponseDto.Error<bool>("No se encontró el registro.");
@@ -459,16 +459,12 @@ namespace Rokys.Audit.Services.Services
                     var score = groupResult.ScoreValue * (groupResult.TotalWeighting / 100);
                     acumulatedScore += score;
                 }
-                var scaleCompany = await _scaleCompanyRepository.GetByEnterpriseIdAsync(entity.Store!.EnterpriseId);
+
+                var scaleCompany = await _scaleCompanyRepository.GetConfiguredForEnterprise(entity.Store!.Enterprise!.EnterpriseGroups!.FirstOrDefault(e => e.IsActive)!.EnterpriseGroupingId, entity.Store.EnterpriseId);
                 if (scaleCompany == null || !scaleCompany.Any())
                 {
-                    scaleCompany = await _scaleCompanyRepository.GetAsync(filter: e => e.EnterpriseId == null);
-
-                    if (scaleCompany == null || !scaleCompany.Any())
-                    {
-                        response = ResponseDto.Error<bool>("No se encontró la escala asociada a la empresa ni la escala por defecto.");
-                        return response;
-                    }
+                    response = ResponseDto.Error<bool>("No se encontró la escala asociada a la empresa ni la escala por defecto.");
+                    return response;
                 }
 
                 bool scaleFound = false;

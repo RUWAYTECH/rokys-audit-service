@@ -6,5 +6,9 @@ namespace Rokys.Audit.Infrastructure.Repositories
     public interface IScaleCompanyRepository : IRepository<ScaleCompany>
     {
         Task<List<ScaleCompany>> GetByEnterpriseIdAsync(Guid enterpriseId);
+        Task<List<ScaleCompany>> GetConfiguredForEnterprise(
+            Guid? enterpriseGroupingId,
+            Guid enterpriseId
+        );
     }
 }
