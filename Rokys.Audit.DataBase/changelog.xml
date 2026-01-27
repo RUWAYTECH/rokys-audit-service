@@ -32,5 +32,6 @@
 <include file="./Inserts/202601210918-enterprise-group-insert-by-ruc.sql" relativeToChangelogFile="true"/>
 <include file="./Inserts/202601220914-measure-type.sql" relativeToChangelogFile="true"/>
 <include file="./Inserts/202601221032-system-config.sql" relativeToChangelogFile="true"/>
+<include file="./Inserts/202601261840-update-audit-role-configuration-enterprise-grouping.sql" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>
