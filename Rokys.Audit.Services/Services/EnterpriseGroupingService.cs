@@ -285,33 +285,50 @@ namespace Rokys.Audit.Services.Services
                 foreach (var enterpriseId in enterpriseGroupCreateRequestDto.EnterpriseIds)
                 {
 
-                    var relation = await _enterpriseGroupRepository.GetFirstOrDefaultAsync(
-                        eg => eg.EnterpriseId == enterpriseId,
-                        includeProperties: [e => e.Enterprise]
-                    );
+                    var relations = await _enterpriseGroupRepository.GetAsync(
+                                        eg => eg.EnterpriseId == enterpriseId,
+                                        includeProperties: [e => e.Enterprise]
+                                    );
 
-                    if (relation != null && relation.IsActive)
+                    var activeRelation = relations.FirstOrDefault(r => r.IsActive);
+                    var sameGroupRelation = relations
+                        .FirstOrDefault(r => r.EnterpriseGroupingId == enterpriseGroupingId);
+
+                    if (activeRelation != null && activeRelation.EnterpriseGroupingId != enterpriseGroupingId)
                     {
                         response.Messages.Add(new ApplicationMessage
                         {
-                            Message = $"La empresa {relation.Enterprise.Name} ya esta asignado a un grupo.",
+                            Message = $"La empresa {activeRelation.Enterprise.Name} ya está asignada a otro grupo.",
                             MessageType = ApplicationMessageType.Error
                         });
                         return response;
                     }
-                    if (relation != null && !relation.IsActive && relation.EnterpriseGroupingId == enterpriseGroupingId)
+
+                    if (sameGroupRelation != null && sameGroupRelation.IsActive)
                     {
-                        relation.IsActive = true;
-                        relation.UpdateAudit(currentUser.UserName);
-                        _enterpriseGroupRepository.Update(relation);
+                        response.Messages.Add(new ApplicationMessage
+                        {
+                            Message = $"La empresa {sameGroupRelation.Enterprise.Name} ya está asignada a este grupo.",
+                            MessageType = ApplicationMessageType.Error
+                        });
+                        return response;
+                    }
+
+                    if (sameGroupRelation != null && !sameGroupRelation.IsActive)
+                    {
+                        sameGroupRelation.IsActive = true;
+                        sameGroupRelation.UpdateAudit(currentUser.UserName);
+                        _enterpriseGroupRepository.Update(sameGroupRelation);
                         continue;
                     }
+
                     var newEnterpriseGroup = new EnterpriseGroup
                     {
                         EnterpriseGroupingId = enterpriseGroupingId,
                         EnterpriseId = enterpriseId,
                         IsActive = true
                     };
+
                     newEnterpriseGroup.CreateAudit(currentUser.UserName);
                     _enterpriseGroupRepository.Insert(newEnterpriseGroup);
                 }
