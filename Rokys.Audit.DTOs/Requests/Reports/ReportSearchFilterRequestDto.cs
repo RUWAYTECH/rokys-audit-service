@@ -15,5 +15,6 @@ namespace Rokys.Audit.DTOs.Requests.Reports
         public string? ReportDate { get; set; }  // Cambiar a string para soportar formato "YYYY-MM" o "YYYY-MM-DD"
         public DateTime? ReportDateInit { get; set; }
         public DateTime? ReportDateFinish { get; set; }
+        public Guid? EnterpriseGroupingId { get; set; }
     }
 }
