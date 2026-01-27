@@ -18,7 +18,7 @@ namespace Rokys.Audit.DTOs.Responses.Group
         /// <summary>
         /// ID de la empresa donde se creó el grupo clonado
         /// </summary>
-        public Guid EnterpriseId { get; set; }
+        public Guid? EnterpriseId { get; set; }
 
         /// <summary>
         /// Nombre del grupo clonado

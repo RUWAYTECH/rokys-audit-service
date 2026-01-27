@@ -13,5 +13,6 @@ namespace Rokys.Audit.Infrastructure.Repositories
            int pageSize = 0
        );
         Task<List<EnterpriseGrouping>> GetByEnterpriseGroupingId(Guid id);
+        Task<EnterpriseGrouping> GetFirstByEnterpriseGroupingId(Guid id);
     }
 }

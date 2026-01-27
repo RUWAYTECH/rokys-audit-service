@@ -10,11 +10,9 @@ namespace Rokys.Audit.Services.Validations
     {
         public GroupCloneRequestDtoValidator()
         {
-            RuleFor(x => x.EnterpriseId)
-                .NotEmpty()
-                .WithMessage("El ID de la empresa es requerido")
-                .NotEqual(Guid.Empty)
-                .WithMessage("El ID de la empresa no puede ser un GUID vacío");
+            RuleFor(x => x)
+                .Must(x => x.EnterpriseId.HasValue || x.EnterpriseGroupingId.HasValue)
+                .WithMessage("Debe especificar una Empresa o un Grupo de Empresas.");
 
             RuleFor(x => x.GroupId)
                 .NotEmpty()

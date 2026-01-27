@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Rokys.Audit.DTOs.Requests.EnterpriseGroup;
 using Rokys.Audit.DTOs.Requests.EnterpriseGrouping;
 using Rokys.Audit.Services.Interfaces;
 
@@ -60,6 +61,14 @@ namespace Rokys.Audit.WebAPI.Controllers
         public async Task<IActionResult> DeleteEnterpriseGroup([FromRoute] Guid id)
         {
             var response = await _enterpriseGroupingService.DeleteEnterpriseGroupById(id);
+            if (response.IsValid)
+                return Ok(response);
+            return BadRequest(response);
+        }
+        [HttpPost("{enterpriseGroupingId}/enterprise-group")]
+        public async Task<IActionResult> CreateEnterpriseGroup([FromRoute] Guid enterpriseGroupingId, [FromBody] EnterpriseGroupCreateRequestDto enterpriseGroupCreateRequestDto)
+        {
+            var response = await _enterpriseGroupingService.CreateEnterpriseGroup(enterpriseGroupingId, enterpriseGroupCreateRequestDto);
             if (response.IsValid)
                 return Ok(response);
             return BadRequest(response);
