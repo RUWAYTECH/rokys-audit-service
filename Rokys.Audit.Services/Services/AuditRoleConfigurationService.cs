@@ -122,7 +122,13 @@ namespace Rokys.Audit.Services.Services
 								if (!string.IsNullOrEmpty(requestDto.Filter))
 										filter = filter.AndAlso(x => x.RoleCode.Contains(requestDto.Filter) || x.RoleName.Contains(requestDto.Filter));
 
-								// Lógica del filtro de EnterpriseId
+								if (requestDto.EnterpriseGroupingId.HasValue)
+								{
+                                    filter = filter.AndAlso(x => x.EnterpriseGroupingId == requestDto.EnterpriseGroupingId.Value );
+                            
+								}
+
+                                // Lógica del filtro de EnterpriseId
 								if (requestDto.EnterpriseId.HasValue)
 								{
                                     filter = filter.AndAlso(x => x.EnterpriseId == requestDto.EnterpriseId.Value || x.EnterpriseGrouping.EnterpriseGroups.Any(eg => eg.EnterpriseId == requestDto.EnterpriseId.Value));
