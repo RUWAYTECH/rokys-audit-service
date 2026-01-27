@@ -19,5 +19,38 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
                 .Where(sc => sc.EnterpriseId == enterpriseId && sc.IsActive)
                 .ToListAsync();
         }
+
+        public async Task<List<ScaleCompany>> GetConfiguredForEnterprise(
+            Guid? enterpriseGroupingId,
+            Guid enterpriseId
+        )
+        {
+            // If: there are ScaleCompanies linked to the Enterprise, return them
+            var byEnterprise = await _context.ScaleCompanies
+                .Include(enterpriseId => enterpriseId.Enterprise)
+                .Where(sc => sc.EnterpriseId == enterpriseId && sc.IsActive)
+                .ToListAsync();
+            if (byEnterprise != null && byEnterprise.Count > 0)
+            {
+                return byEnterprise;
+            }
+
+            // If: there are ScaleCompanies linked to the Enterprise's Grouping, return them
+            if (enterpriseGroupingId.HasValue)
+            {
+                var byGroup = await _context.ScaleCompanies
+                .Include(sc => sc.Enterprise)
+                .Where(sc => sc.EnterpriseGroupingId == enterpriseGroupingId && sc.IsActive)
+                .ToListAsync();
+
+                if (byGroup != null && byGroup.Count > 0)
+                {
+                    return byGroup;
+                }
+            }
+
+            // Else: return the default ScaleCompanies (not linked to any Enterprise or Grouping)
+            return await GetAsync(filter: e => e.EnterpriseId == null && e.EnterpriseGroupingId == null);
+        }
     }
 }

@@ -378,17 +378,13 @@ namespace Rokys.Audit.Services.Services
                     acumulatedScore += scaleScore;
                 }
 
-                var scaleCompany = await _scaleCompanyRepository.GetByEnterpriseIdAsync(entity.PeriodAudit.Store!.EnterpriseId);
+                var scaleCompany = await _scaleCompanyRepository.GetConfiguredForEnterprise(entity.PeriodAudit.Store!.Enterprise!.EnterpriseGroups!.FirstOrDefault(e => e.IsActive)!.EnterpriseGroupingId, entity.PeriodAudit.Store.EnterpriseId);
                 if (scaleCompany == null || !scaleCompany.Any())
                 {
-                    scaleCompany = await _scaleCompanyRepository.GetAsync(filter: e => e.EnterpriseId == null);
-
-                    if (scaleCompany == null || !scaleCompany.Any())
-                    {
-                        response = ResponseDto.Error<bool>("No se encontró la escala asociada a la empresa ni la escala por defecto.");
-                        return response;
-                    }
+                    response = ResponseDto.Error<bool>("No se encontró la escala asociada a la empresa ni la escala por defecto.");
+                    return response;
                 }
+
                 bool scaleFound = false;
                 foreach (var scale in scaleCompany)
                 {
