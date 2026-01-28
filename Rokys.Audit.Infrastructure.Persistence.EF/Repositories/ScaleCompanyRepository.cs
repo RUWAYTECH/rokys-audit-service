@@ -72,7 +72,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
             }
 
             // Else: return the default ScaleCompanies (not linked to any Enterprise or Grouping)
-            return await GetAsync(filter: e => e.EnterpriseId == null && e.EnterpriseGroupingId == null);
+            return await GetAsync(filter: e => e.EnterpriseId == null && e.EnterpriseGroupingId == null && e.IsActive);
         }
     }
 }
