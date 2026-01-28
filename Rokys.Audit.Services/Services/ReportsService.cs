@@ -610,6 +610,12 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<PeriodAuditReportResponseDto>();
             try
             {
+                if (!reportSearchFilterRequestDto.EnterpriseGroupingId.HasValue)
+                {
+                    response = ResponseDto.Error<PeriodAuditReportResponseDto>("El campo EnterpriseGroupingId es obligatorio.");
+                    return response;
+                }
+
                 Expression<Func<PeriodAudit, bool>> filter = x => x.IsActive;
 
                 if (reportSearchFilterRequestDto.StoreId.HasValue)
@@ -678,14 +684,10 @@ namespace Rokys.Audit.Services.Services
                     filter: filter
                 );
 
-                IEnumerable<ScaleCompany> scaleCompanies = [];
-
-                if (reportSearchFilterRequestDto.EnterpriseId.HasValue)
-                {
-                    scaleCompanies = await _scaleCompanyRepository.GetAsync(
-                        filter: x => x.EnterpriseId == reportSearchFilterRequestDto.EnterpriseId.Value && x.IsActive
-                    );
-                }
+                IEnumerable<ScaleCompany> scaleCompanies = await _scaleCompanyRepository.GetConfiguredForEnterprise(
+                    enterpriseGroupingId: reportSearchFilterRequestDto.EnterpriseGroupingId,
+                    enterpriseId: reportSearchFilterRequestDto.EnterpriseId ?? Guid.Empty
+                );
 
 
                 var storeGroups = entities.GroupBy(e => e.StoreId);
@@ -704,12 +706,12 @@ namespace Rokys.Audit.Services.Services
                     decimal averageScore = totalAudits > 0 ? totalScore / totalAudits : 0;
                     IEnumerable<ScaleCompany> currentScales = scaleCompanies;
 
-                    if (currentScales == null || !currentScales.Any())
+                    /* if (currentScales == null || !currentScales.Any())
                     {
                         currentScales = await _scaleCompanyRepository.GetAsync(
                             filter: x => x.EnterpriseId == storeEntity.Store.EnterpriseId || x.EnterpriseId == null && x.IsActive
                         );
-                    }
+                    } */
                     string riskLevel = "Sin Escala";
                     string riskColor = "#FFFFFF";
                     foreach (var scale in currentScales)
