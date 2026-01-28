@@ -382,6 +382,9 @@ namespace Rokys.Audit.Services.Services
                 if (paginationRequestDto.StoreId.HasValue)
                     filter = filter.AndAlso(x => x.StoreId == paginationRequestDto.StoreId.Value && x.IsActive);
 
+                if (paginationRequestDto.EnterpriseGroupingId.HasValue)
+                    filter = filter.AndAlso(x => x.Store.Enterprise.EnterpriseGroups.Any(eg => eg.EnterpriseGroupingId == paginationRequestDto.EnterpriseGroupingId.Value && eg.IsActive));
+
                 if (paginationRequestDto.EnterpriseId.HasValue)
                     filter = filter.AndAlso(x => x.Store.EnterpriseId == paginationRequestDto.EnterpriseId.Value && x.IsActive);
 
@@ -760,12 +763,15 @@ namespace Rokys.Audit.Services.Services
                         endDate = parsedEnd;
                 }
 
-
                 if (!string.IsNullOrEmpty(requestDto.Filter))
                     filter = filter.AndAlso(x => x.GlobalObservations.Contains(requestDto.Filter) && x.IsActive);
 
                 if (requestDto.StoreId.HasValue)
                     filter = filter.AndAlso(x => x.StoreId == requestDto.StoreId.Value && x.IsActive);
+
+                if (requestDto.EnterpriseGroupingId.HasValue)
+                    filter = filter.AndAlso(x => x.Store.Enterprise.EnterpriseGroups.Any(eg => eg.EnterpriseGroupingId == requestDto.EnterpriseGroupingId.Value && eg.IsActive));
+
                 if (requestDto.EnterpriseId.HasValue)
                     filter = filter.AndAlso(x => x.Store.EnterpriseId == requestDto.EnterpriseId.Value && x.IsActive);
 
