@@ -13,7 +13,7 @@ VALUES
     'B8F3A2D1-6C4E-4F2B-9C71-1D4A8E9F0A21',
     'EG002',
     'Grupo de Empresas Multimarca',
-    'Agrupación de empresas bajo el esquema Multimarca',
+    'AgrupaciÃ³n de empresas bajo el esquema Multimarca',
     1,
     'Admin',
     '2026-01-26 16:36:26.116'
@@ -35,7 +35,7 @@ VALUES
     'C3A91F4E-2D7B-4C8F-9A6E-1E52D8B4F101',
     'EG003',
     'Grupo de Empresas Brass',
-    'Agrupación de empresas bajo el esquema Brass',
+    'Agrupaciï¿½n de empresas bajo el esquema Brass',
     1,
     'Admin',
     '2026-01-26 16:36:26.116'
@@ -56,7 +56,7 @@ VALUES
     'D7E84B21-9F3A-4E6C-8B52-4C9E1A6F2B88',
     'EG004',
     'Grupo de Empresas Scencia',
-    'Agrupación de empresas bajo el esquema Scencia',
+    'Agrupaciï¿½n de empresas bajo el esquema Scencia',
     1,
     'Admin',
     '2026-01-26 16:36:26.116'
@@ -64,7 +64,7 @@ VALUES
 
 declare @EnterpriseGroupingId uniqueidentifier = (SELECT EnterpriseGroupingId FROM dbo.EnterpriseGrouping WHERE Code = 'EG002')
 
-INSERT INTO [DBAuditDev].[dbo].[EnterpriseGroup]
+INSERT INTO [dbo].[EnterpriseGroup]
 (
     EnterpriseGroupId,
     EnterpriseId,
@@ -87,7 +87,9 @@ VALUES
     NULL                    -- UpdateDate
 );
 
-INSERT INTO [DBAuditDev].[dbo].[EnterpriseGroup]
+
+
+INSERT INTO [dbo].[EnterpriseGroup]
 (
     EnterpriseGroupId,
     EnterpriseId,
@@ -101,7 +103,7 @@ INSERT INTO [DBAuditDev].[dbo].[EnterpriseGroup]
 VALUES
 (
     NEWID(),                -- EnterpriseGroupId
-    (SELECT EnterpriseId FROM dbo.Enterprise WHERE Code = '20601824625'),
+    (SELECT EnterpriseId FROM dbo.Enterprise WHERE Code = '20601824265'),
     @EnterpriseGroupingId,  -- EnterpriseGroupingId (GUID)
     1,                      -- IsActive
     'Admin',                -- CreatedBy
@@ -110,7 +112,7 @@ VALUES
     NULL                    -- UpdateDate
 );
 
-INSERT INTO [DBAuditDev].[dbo].[EnterpriseGroup]
+INSERT INTO [dbo].[EnterpriseGroup]
 (
     EnterpriseGroupId,
     EnterpriseId,
@@ -133,7 +135,7 @@ VALUES
     NULL                    -- UpdateDate
 );
 
-INSERT INTO [DBAuditDev].[dbo].[EnterpriseGroup]
+INSERT INTO [dbo].[EnterpriseGroup]
 (
     EnterpriseGroupId,
     EnterpriseId,
