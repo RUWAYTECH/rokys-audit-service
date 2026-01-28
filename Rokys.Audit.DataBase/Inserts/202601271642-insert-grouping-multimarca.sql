@@ -35,7 +35,7 @@ VALUES
     'C3A91F4E-2D7B-4C8F-9A6E-1E52D8B4F101',
     'EG003',
     'Grupo de Empresas Brass',
-    'Agrupaci�n de empresas bajo el esquema Brass',
+    'Agrupación de empresas bajo el esquema Brass',
     1,
     'Admin',
     '2026-01-26 16:36:26.116'
@@ -56,7 +56,7 @@ VALUES
     'D7E84B21-9F3A-4E6C-8B52-4C9E1A6F2B88',
     'EG004',
     'Grupo de Empresas Scencia',
-    'Agrupaci�n de empresas bajo el esquema Scencia',
+    'Agrupación de empresas bajo el esquema Scencia',
     1,
     'Admin',
     '2026-01-26 16:36:26.116'
