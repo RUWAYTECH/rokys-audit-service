@@ -796,11 +796,27 @@ namespace Rokys.Audit.Services.Services
                 var worksheet = workbook.Worksheets.Add("Auditorías");
 
                 // Configurar encabezados
-                var headers = new[]
-                {
-                    "Nº auditoría", "Empresa", "Tienda", "Jefe de área", "Administrador de tienda", "Jefe de operaciones", "Auditor responsable", "Supervisor", "Asistente administrativo", "Fecha de registro", "Fecha inicio", "Fecha fin", "Fecha auditoria anterior", "Fecha de corte", "Días auditados", "Estado", "Nivel de riesgo general", "Calificación general",
+                // Obtener todos los roles únicos de los participantes del primer item
+                var firstItem = exportData.First(t => t.IsActive);
+                var participantRoles = firstItem.PeriodAuditParticipants
+                    .Select(p => new { p.RoleCodeSnapshot, p.RoleNameSnapshot })
+                    .Distinct()
+                    .OrderBy(p => p.RoleCodeSnapshot)
+                    .ToList();
+                // Construir headers dinámicamente
+                var baseHeaders = new[] { "Nº auditoría", "Empresa", "Tienda" };
+
+                var participantHeaders = participantRoles
+                    .Select(r => r.RoleNameSnapshot)
+                    .ToArray();
+
+                var restHeaders = new[] 
+                { 
+                    "Fecha de registro", "Fecha inicio", "Fecha fin", "Fecha auditoria anterior", "Fecha de corte", "Días auditados", "Estado", "Nivel de riesgo general", "Calificación general",
                     "Grupo", "Nivel de riesgo de grupo", "Calificación de grupo", "Peso/Ponderación de grupo", "Código de punto auditable", "Punto auditable", "Nivel de riesgo de punto auditable", "Calificación de punto auditable", "Peso/Ponderación de punto auditable"
                 };
+
+                var headers = baseHeaders.Concat(participantHeaders).Concat(restHeaders).ToArray();
 
                 for (int i = 0; i < headers.Length; i++)
                 {
@@ -821,52 +837,54 @@ namespace Rokys.Audit.Services.Services
                             worksheet.Cell(row, 1).Value = item.CorrelativeNumber ?? "";
                             worksheet.Cell(row, 2).Value = item.Store?.Enterprise?.Name ?? "";
                             worksheet.Cell(row, 3).Value = item.Store?.Name;
-                            worksheet.Cell(row, 4).Value = item.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JefeDeArea.Code)?.UserReference?.FullName ?? "";
-                            worksheet.Cell(row, 5).Value = item.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.StoreAdmin.Code)?.UserReference?.FullName ?? "";
-                            worksheet.Cell(row, 6).Value = item.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JefeDeOperaciones.Code)?.UserReference?.FullName ?? "";
-                            worksheet.Cell(row, 7).Value = item.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.Auditor.Code)?.UserReference?.FullName ?? "";
-                            worksheet.Cell(row, 8).Value = item.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code)?.UserReference?.FullName ?? "";
-                            worksheet.Cell(row, 9).Value = item.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.AssistantAdministrative.Code)?.UserReference?.FullName ?? "";
-                            worksheet.Cell(row, 10).Value = item.CreationDate.ToString("dd/MM/yyyy") ?? "";
-                            worksheet.Cell(row, 11).Value = inboxItems
+                            int col = 4;
+                            // Llenar participantes dinámicamente según los roles obtenidos
+                            foreach (var role in participantRoles)
+                            {
+                                var participant = item.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == role.RoleCodeSnapshot);
+                                worksheet.Cell(row, col).Value = participant?.UserReference?.FullName ?? "";
+                                col++;
+                            }
+                            // worksheet.Cell(row, 4).Value = item.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JefeDeArea.Code)?.UserReference?.FullName ?? "";
+                            // worksheet.Cell(row, 5).Value = item.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.StoreAdmin.Code)?.UserReference?.FullName ?? "";
+                            // worksheet.Cell(row, 6).Value = item.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JefeDeOperaciones.Code)?.UserReference?.FullName ?? "";
+                            // worksheet.Cell(row, 7).Value = item.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.Auditor.Code)?.UserReference?.FullName ?? "";
+                            // worksheet.Cell(row, 8).Value = item.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code)?.UserReference?.FullName ?? "";
+                            // worksheet.Cell(row, 9).Value = item.PeriodAuditParticipants.FirstOrDefault(p => p.RoleCodeSnapshot == RoleCodes.AssistantAdministrative.Code)?.UserReference?.FullName ?? "";
+                            worksheet.Cell(row, col).Value = item.CreationDate.ToString("dd/MM/yyyy") ?? "";
+                            col++;
+                            worksheet.Cell(row, col).Value = inboxItems
                                 .Where(ii => ii.IsActive && ii.NextStatus?.Code == AuditStatusCode.InProgress)
                                 .OrderBy(ii => ii.CreationDate)
                                 .Select(ii => ii.CreationDate.ToString("dd/MM/yyyy"))
                                 .FirstOrDefault() ?? "";
-                            worksheet.Cell(row, 12).Value = inboxItems
+                                col++;
+                            worksheet.Cell(row, col).Value = inboxItems
                                 .Where(ii => ii.IsActive && ii.NextStatus?.Code == AuditStatusCode.Completed)
                                 .OrderBy(ii => ii.CreationDate)
                                 .Select(ii => ii.CreationDate.ToString("dd/MM/yyyy"))
                                 .FirstOrDefault() ?? "";
-                            worksheet.Cell(row, 13).Value = item.StartDate.ToString("dd/MM/yyyy");
-                            worksheet.Cell(row, 14).Value = item.EndDate.ToString("dd/MM/yyyy");
-                            worksheet.Cell(row, 15).Value = item.AuditedDays;
-                            worksheet.Cell(row, 16).Value = item.AuditStatus?.Name ?? "";
-                            worksheet.Cell(row, 17).Value = item.ScaleName ?? "";
-                            worksheet.Cell(row, 18).Value = item.ScoreValue;
-                            worksheet.Cell(row, 19).Value = groupResult?.Group?.Name ?? "";
-                            worksheet.Cell(row, 20).Value = groupResult?.ScaleDescription ?? "";
-                            worksheet.Cell(row, 21).Value = groupResult?.ScoreValue ?? 0;
-                            worksheet.Cell(row, 22).Value = groupResult?.TotalWeighting ?? 0;
-                            worksheet.Cell(row, 23).Value = scaResult.ScaleGroup?.Code ?? "";
-                            worksheet.Cell(row, 24).Value = scaResult.ScaleGroup?.Name ?? "";
-                            worksheet.Cell(row, 25).Value = scaResult.ScaleDescription ?? "";
-                            worksheet.Cell(row, 26).Value = scaResult.ScoreValue;
-                            worksheet.Cell(row, 27).Value = scaResult.AppliedWeighting;
-
+                                col++;
+                            worksheet.Cell(row, col).Value = item.StartDate.ToString("dd/MM/yyyy");
+                            col++;
+                            worksheet.Cell(row, col).Value = item.EndDate.ToString("dd/MM/yyyy");
+                            col++;
+                            worksheet.Cell(row, col).Value = item.AuditedDays;
+                            col++;
+                            worksheet.Cell(row, col).Value = item.AuditStatus?.Name ?? "";
                             // Aplicar color al estado si existe
                             if (!string.IsNullOrEmpty(item.AuditStatus?.ColorCode))
                             {
                                 try
                                 {
                                     var statusColor = System.Drawing.ColorTranslator.FromHtml(item.AuditStatus?.ColorCode ?? "#FFFFFF");
-                                    worksheet.Cell(row, 16).Style.Fill.BackgroundColor = XLColor.FromColor(statusColor);
+                                    worksheet.Cell(row, col).Style.Fill.BackgroundColor = XLColor.FromColor(statusColor);
 
                                     // Texto blanco si el color de fondo es oscuro
                                     var luminance = (0.299 * statusColor.R + 0.587 * statusColor.G + 0.114 * statusColor.B) / 255;
                                     if (luminance < 0.5)
                                     {
-                                        worksheet.Cell(row, 16).Style.Font.FontColor = XLColor.White;
+                                        worksheet.Cell(row, col).Style.Font.FontColor = XLColor.White;
                                     }
                                 }
                                 catch
@@ -874,6 +892,28 @@ namespace Rokys.Audit.Services.Services
                                     // Ignorar si el color no es válido
                                 }
                             }
+                            col++;
+                            worksheet.Cell(row, col).Value = item.ScaleName ?? "";
+                            col++;
+                            worksheet.Cell(row, col).Value = item.ScoreValue;
+                            col++;
+                            worksheet.Cell(row, col).Value = groupResult?.Group?.Name ?? "";
+                            col++;
+                            worksheet.Cell(row, col).Value = groupResult?.ScaleDescription ?? "";
+                            col++;
+                            worksheet.Cell(row, col).Value = groupResult?.ScoreValue ?? 0;
+                            col++;
+                            worksheet.Cell(row, col).Value = groupResult?.TotalWeighting ?? 0;
+                            col++;
+                            worksheet.Cell(row, col).Value = scaResult.ScaleGroup?.Code ?? "";
+                            col++;
+                            worksheet.Cell(row, col).Value = scaResult.ScaleGroup?.Name ?? "";
+                            col++;
+                            worksheet.Cell(row, col).Value = scaResult.ScaleDescription ?? "";
+                            col++;
+                            worksheet.Cell(row, col).Value = scaResult.ScoreValue;
+                            col++;
+                            worksheet.Cell(row, col).Value = scaResult.AppliedWeighting;
 
                             row++;
                         }

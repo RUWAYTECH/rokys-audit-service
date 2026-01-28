@@ -28,6 +28,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IAMapper _mapper;
         private readonly IScaleCompanyRepository _scaleCompanyRepository;
         private readonly IPeriodAuditParticipantRepository _periodAuditParticipantRepository;
+        private readonly IPeriodAuditTableScaleTemplateResultRepository _periodAuditTableScaleTemplateResultRepository;
 
         public ReportsService(
             IPeriodAuditRepository periodAuditRepository,
@@ -35,7 +36,8 @@ namespace Rokys.Audit.Services.Services
             IAuditStatusRepository auditStatusRepository,
             IAMapper mapper,
             IScaleCompanyRepository scaleCompanyRepository,
-            IPeriodAuditParticipantRepository periodAuditParticipantRepository)
+            IPeriodAuditParticipantRepository periodAuditParticipantRepository,
+            IPeriodAuditTableScaleTemplateResultRepository periodAuditTableScaleTemplateResultRepository)
         {
             _periodAuditRepository = periodAuditRepository;
             _logger = logger;
@@ -43,6 +45,7 @@ namespace Rokys.Audit.Services.Services
             _mapper = mapper;
             _periodAuditParticipantRepository = periodAuditParticipantRepository;
             _scaleCompanyRepository = scaleCompanyRepository;
+            _periodAuditTableScaleTemplateResultRepository = periodAuditTableScaleTemplateResultRepository;
         }
 
         public async Task<ResponseDto<DashboardDataResponseDto>> GetDashboardEvolutionsDataAsync(int year, Guid[] enterpriseIds)
@@ -853,6 +856,91 @@ namespace Rokys.Audit.Services.Services
                 _logger.LogError(ex, $"Error exportando el reporte: {ex.Message}");
                 response = ResponseDto.Error<ExportReportResultDto>(ex.Message);
             }
+            return response;
+        }
+
+        public async Task<ResponseDto<ExportReportResultDto>> GetAuditDetailedReportAsync(AuditDetailedReportRequestDto request)
+        {
+            var response = ResponseDto.Create<ExportReportResultDto>();
+            try
+            {
+                // Construir filtros dinámicos
+                Expression<Func<PeriodAuditTableScaleTemplateResult, bool>> baseFilter = x => x.IsActive
+                    && x.PeriodAuditScaleResult != null
+                    && x.PeriodAuditScaleResult.PeriodAuditGroupResult != null
+                    && x.PeriodAuditScaleResult.PeriodAuditGroupResult.PeriodAudit != null;
+
+                // Filtro por empresas
+                if (request.EnterpriseIds != null && request.EnterpriseIds.Count > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => request.EnterpriseIds.Contains(x.PeriodAuditScaleResult!.PeriodAuditGroupResult!.PeriodAudit!.Store!.EnterpriseId));
+                }
+
+                // Filtro por tiendas
+                if (request.StoreIds != null && request.StoreIds.Count > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => request.StoreIds.Contains(x.PeriodAuditScaleResult!.PeriodAuditGroupResult!.PeriodAudit!.StoreId!.Value));
+                }
+
+                // Filtro por estado de auditoría
+                if (request.StatusIds != null && request.StatusIds.Count > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => request.StatusIds.Contains(x.PeriodAuditScaleResult!.PeriodAuditGroupResult!.PeriodAudit!.StatusId!.Value));
+                }
+
+                // Filtro por rango de fechas (fecha de creación de la auditoría)
+                if (request.BeginDate.HasValue && request.EndDate.HasValue)
+                {
+                    var beginDate = request.BeginDate.Value.Date;
+                    var endDate = request.EndDate.Value.Date.AddDays(1).AddTicks(-1);
+
+                    baseFilter = baseFilter.AndAlso(x =>
+                        x.PeriodAuditScaleResult!.PeriodAuditGroupResult!.PeriodAudit!.CreationDate >= beginDate &&
+                        x.PeriodAuditScaleResult!.PeriodAuditGroupResult!.PeriodAudit!.CreationDate <= endDate
+                    );
+                }
+                else if (request.BeginDate.HasValue)
+                {
+                    var beginDate = request.BeginDate.Value.Date;
+                    baseFilter = baseFilter.AndAlso(x =>
+                        x.PeriodAuditScaleResult!.PeriodAuditGroupResult!.PeriodAudit!.CreationDate >= beginDate
+                    );
+                }
+                else if (request.EndDate.HasValue)
+                {
+                    var endDate = request.EndDate.Value.Date.AddDays(1).AddTicks(-1);
+                    baseFilter = baseFilter.AndAlso(x =>
+                        x.PeriodAuditScaleResult!.PeriodAuditGroupResult!.PeriodAudit!.CreationDate <= endDate
+                    );
+                }
+
+                // Obtener las auditorías con sus relaciones
+                var periodAudits = await _periodAuditTableScaleTemplateResultRepository.GetForReport(
+                    filter: baseFilter
+                );
+
+                // Validar que existan datos
+                if (periodAudits == null || !periodAudits.Any())
+                {
+                    return ResponseDto.Error<ExportReportResultDto>("No se encontraron datos para los filtros especificados.");
+                }
+
+                // Generar el archivo Excel
+                var fileBase64 = AuditDetailedReportExcelGenerator.GenerateExcelReport(periodAudits);
+                
+                response.Data = new ExportReportResultDto
+                {
+                    FileBase64 = fileBase64,
+                    FileName = $"Reporte-Detallado-Auditoria-{DateTime.Now:yyyyMMddHHmmss}.xlsx",
+                    MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error obteniendo el reporte detallado de auditorías: {ex.Message}");
+                response = ResponseDto.Error<ExportReportResultDto>(ex.Message);
+            }
+
             return response;
         }
     }
