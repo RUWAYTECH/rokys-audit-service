@@ -3,6 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using Rokys.Audit.Infrastructure.Persistence.EF.Storage;
 using Rokys.Audit.Infrastructure.Repositories;
 using Rokys.Audit.Model.Tables;
+using System.Linq.Expressions;
 
 namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
 {
@@ -69,6 +70,27 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
                 query = query.Where(x => x.AuditRoleConfigurationId != excludeId.Value);
 
             return await query.AnyAsync();
+        }
+
+        public async Task<(List<AuditRoleConfiguration> Items, int TotalRows)> GetCustomPagedAsync(Expression<Func<AuditRoleConfiguration, bool>> filter, int pageNumber, int pageSize)
+        {
+            var query = Db.AuditRoleConfigurations.Where(filter)
+               .Include(x => x.Enterprise)
+               .Include(x => x.EnterpriseGrouping)
+               .ThenInclude(eg => eg.EnterpriseGroups.Where(eg => eg.IsActive))
+               .ThenInclude(e => e.Enterprise)
+               .OrderByDescending(a => a.SequenceOrder)
+               .ThenByDescending(a => a.RoleName);
+
+
+            int rowsCount = await query.CountAsync();
+            if (pageSize <= 0 || pageNumber <= 0)
+            {
+                var allItems = await query.ToListAsync();
+                return (allItems, rowsCount);
+            }
+            var items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+            return (items, rowsCount);
         }
     }
 }

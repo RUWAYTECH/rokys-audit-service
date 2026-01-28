@@ -135,12 +135,10 @@ namespace Rokys.Audit.Services.Services
                             
 								}
 
-								var entities = await _auditRoleConfigurationRepository.GetPagedAsync(
+								var entities = await _auditRoleConfigurationRepository.GetCustomPagedAsync(
 										filter: filter,
-										orderBy: orderBy,
 										pageNumber: requestDto.PageNumber,
-										pageSize: requestDto.PageSize,
-										includeProperties: [e => e.Enterprise]
+										pageSize: requestDto.PageSize
 								);
 
 								var pagedResult = new PaginationResponseDto<AuditRoleConfigurationResponseDto>
@@ -167,7 +165,7 @@ namespace Rokys.Audit.Services.Services
             try
             {
                 var entity = await _auditRoleConfigurationRepository.GetFirstOrDefaultAsync(
-                    filter: x => x.AuditRoleConfigurationId == id && x.IsActive, includeProperties: [e => e.Enterprise]
+                    filter: x => x.AuditRoleConfigurationId == id && x.IsActive, includeProperties: [e => e.Enterprise, eg => eg.EnterpriseGrouping]
                 );
                 
                 if (entity == null)

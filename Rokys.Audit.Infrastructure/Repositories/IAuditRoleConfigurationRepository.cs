@@ -1,5 +1,6 @@
 using Rokys.Audit.Infrastructure.Persistence.Abstract;
 using Rokys.Audit.Model.Tables;
+using System.Linq.Expressions;
 
 namespace Rokys.Audit.Infrastructure.Repositories
 {
@@ -9,5 +10,6 @@ namespace Rokys.Audit.Infrastructure.Repositories
         Task<bool> ExistsByRoleCodeAsync(string roleCode, Guid? enterpriseId, Guid? excludeId = null);
         Task<IEnumerable<AuditRoleConfiguration>> GetActiveConfigurationsOrderedAsync();
         Task<bool> ExistsBySequenceOrderAsync(int sequenceOrder, Guid? enterpriseId, Guid? excludeId = null);
+        Task<(List<AuditRoleConfiguration> Items, int TotalRows)> GetCustomPagedAsync(Expression<Func<AuditRoleConfiguration, bool>> filter, int pageNumber, int pageSize);
     }
 }
