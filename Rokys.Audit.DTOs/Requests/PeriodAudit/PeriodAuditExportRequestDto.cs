@@ -4,6 +4,7 @@ namespace Rokys.Audit.DTOs.Requests.PeriodAudit
 {
     public class PeriodAuditExportRequestDto
     {
+        public Guid? EnterpriseGroupingId { get; set; }
         public Guid? EnterpriseId { get; set; }
         public Guid? StoreId { get; set; }
         public Guid? ResponsibleAuditorId { get; set; }
