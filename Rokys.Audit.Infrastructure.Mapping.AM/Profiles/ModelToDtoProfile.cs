@@ -97,7 +97,12 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                     dest.ScaleGroupName = src.ScaleGroup.Name;
                 });
             CreateMap<Enterprise, EnterpriseResponseDto>();
-            CreateMap<AuditRoleConfiguration, AuditRoleConfigurationResponseDto>();
+            CreateMap<AuditRoleConfiguration, AuditRoleConfigurationResponseDto>()
+                .AfterMap((src, dest) =>
+                {
+                    dest.EnterpriseGroupingName = src.EnterpriseGrouping.Name;
+                    dest.EnterpriseNames = src.EnterpriseGrouping?.EnterpriseGroups?.Where(eg => eg.IsActive).Select(eg => eg.Enterprise != null ? eg.Enterprise.Name : string.Empty).ToList() ?? new List<string>();
+                });
             CreateMap<PeriodAuditParticipant, PeriodAuditParticipantDto>();
             CreateMap<PeriodAuditParticipant, PeriodAuditParticipantResponseDto>()
                 .AfterMap((src, dest) =>

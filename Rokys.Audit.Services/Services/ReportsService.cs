@@ -48,7 +48,7 @@ namespace Rokys.Audit.Services.Services
             _periodAuditTableScaleTemplateResultRepository = periodAuditTableScaleTemplateResultRepository;
         }
 
-        public async Task<ResponseDto<DashboardDataResponseDto>> GetDashboardEvolutionsDataAsync(int year, Guid[] enterpriseIds)
+        public async Task<ResponseDto<DashboardDataResponseDto>> GetDashboardEvolutionsDataAsync(int year, Guid[] enterpriseIds, Guid? enterpriseGroupingId)
         {
             var response = ResponseDto.Create<DashboardDataResponseDto>();
             try
@@ -65,6 +65,10 @@ namespace Rokys.Audit.Services.Services
                     baseFilter = baseFilter.AndAlso(x => enterpriseIds.Contains(x.Store.EnterpriseId));
                 }
 
+                if (enterpriseGroupingId != null && enterpriseGroupingId.HasValue)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.Store.Enterprise.EnterpriseGroups.Any(eg => eg.EnterpriseGroupingId == enterpriseGroupingId && eg.IsActive));
+                }
 
                 var periodAudits = await _periodAuditRepository.GetAsync(
                     filter: baseFilter, includeProperties:
@@ -214,7 +218,7 @@ namespace Rokys.Audit.Services.Services
 
 
 
-        public async Task<ResponseDto<DashboardDataResponseDto>> GetDashboardSupervisorsDataAsync(int year, Guid[] enterpriseIds, Guid[] supervisorIds)
+        public async Task<ResponseDto<DashboardDataResponseDto>> GetDashboardSupervisorsDataAsync(int year, Guid[] enterpriseIds, Guid[] supervisorIds, Guid? enterpriseGroupingId)
         {
             var response = ResponseDto.Create<DashboardDataResponseDto>();
             try
@@ -232,6 +236,11 @@ namespace Rokys.Audit.Services.Services
                 if (enterpriseIds != null && enterpriseIds.Length > 0)
                 {
                     baseFilter = baseFilter.AndAlso(x => enterpriseIds.Contains(x.Store.EnterpriseId));
+                }
+
+                if (enterpriseGroupingId.HasValue)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.Store.Enterprise.EnterpriseGroups.Any(eg => eg.EnterpriseGroupingId == enterpriseGroupingId && eg.IsActive));
                 }
 
                 // Obtener TODAS las auditorías de la empresa para el promedio general
@@ -407,7 +416,7 @@ namespace Rokys.Audit.Services.Services
             return response;
         }
 
-        public async Task<ResponseDto<DashboardDataResponseDto>> GetDashboardStoresDataAsync(int year, Guid[] enterpriseIds, Guid[] storeIds)
+        public async Task<ResponseDto<DashboardDataResponseDto>> GetDashboardStoresDataAsync(int year, Guid[] enterpriseIds, Guid[] storeIds, Guid? enterpriseGroupingId)
         {
             var response = ResponseDto.Create<DashboardDataResponseDto>();
             try
@@ -427,6 +436,11 @@ namespace Rokys.Audit.Services.Services
                 if (enterpriseIds != null && enterpriseIds.Length > 0)
                 {
                     baseFilter = baseFilter.AndAlso(x => enterpriseIds.Contains(x.Store.EnterpriseId));
+                }
+
+                if (enterpriseGroupingId.HasValue)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.Store.Enterprise.EnterpriseGroups.Any(eg => eg.EnterpriseGroupingId == enterpriseGroupingId && eg.IsActive));
                 }
 
                 // Obtener TODAS las auditorías de la empresa para el promedio general
@@ -609,6 +623,9 @@ namespace Rokys.Audit.Services.Services
 
                 if (reportSearchFilterRequestDto.SupervisorId.HasValue)
                     filter = filter.AndAlso(x => x.PeriodAuditParticipants.Any(p => p.UserReferenceId == reportSearchFilterRequestDto.SupervisorId.Value && p.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code) && x.IsActive);
+
+                if (reportSearchFilterRequestDto.EnterpriseGroupingId.HasValue)
+                    filter = filter.AndAlso(x => x.Store.Enterprise.EnterpriseGroups.Any(eg => eg.EnterpriseGroupingId == reportSearchFilterRequestDto.EnterpriseGroupingId.Value && eg.IsActive));
 
                 // Filtro por rango de fechas
                 if (reportSearchFilterRequestDto.ReportDateInit.HasValue && reportSearchFilterRequestDto.ReportDateFinish.HasValue)

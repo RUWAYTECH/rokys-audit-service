@@ -9,6 +9,7 @@ namespace Rokys.Audit.DTOs.Responses.AuditRoleConfiguration
         public DateTime CreationDate { get; set; }
         public string? UpdatedBy { get; set; }
         public DateTime? UpdateDate { get; set; }
-        public string EnterpriseName { get; set; }
+        public List<string> EnterpriseNames { get; set; } = new List<string>();
+        public string? EnterpriseGroupingName { get; set; }
     }
 }
