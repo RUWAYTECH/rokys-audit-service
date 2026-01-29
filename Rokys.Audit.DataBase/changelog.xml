@@ -23,6 +23,7 @@
 <include file="./Table/202601201643-01-audit-role-configuration-add-columns.sql" relativeToChangelogFile="true"/>
 <include file="./Table/202601201643-02-audit-role-configuration-add-fks.sql" relativeToChangelogFile="true"/>
 <include file="./Table/202601201643-03-audit-role-configuration-update-constraints.sql" relativeToChangelogFile="true"/>
+<include file="./Table/202601291503-grouping-user-table.sql" relativeToChangelogFile="true"/>
 <include file="./Table/202601291259-enterprise-grouping.sql" relativeToChangelogFile="true"/>
 <include file="./Table/202601291303-enteprise-groping-constraint-scaletype.sql" relativeToChangelogFile="true"/>
 
@@ -37,5 +38,6 @@
 <include file="./Inserts/202601271005-update-scale-company-enterprise-grouping.sql" relativeToChangelogFile="true"/>
 <include file="./Inserts/202601271642-insert-grouping-multimarca.sql" relativeToChangelogFile="true"/>
 <include file="./Inserts/202601280930-update-group-by-enterprise-grouping.sql" relativeToChangelogFile="true"/>
+<include file="./Inserts/202601291511-insert-new-audit-role-configuration-multimarca.sql" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

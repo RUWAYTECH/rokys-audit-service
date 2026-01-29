@@ -14,6 +14,7 @@ using Rokys.Audit.Infrastructure.IMapping;
 using Rokys.Audit.DTOs.Responses.AuditStatus;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Rokys.Audit.Services.Services.ReportUtils;
+using System.Linq;
 
 namespace Rokys.Audit.Services.Services
 {
@@ -889,6 +890,19 @@ namespace Rokys.Audit.Services.Services
                     && x.PeriodAuditScaleResult.PeriodAuditGroupResult != null
                     && x.PeriodAuditScaleResult.PeriodAuditGroupResult.PeriodAudit != null;
 
+                if (request.EnterpriseGroupingId != Guid.Empty)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.PeriodAuditScaleResult!.PeriodAuditGroupResult!.PeriodAudit!.Store!.Enterprise.EnterpriseGroups.Any(eg => eg.EnterpriseGroupingId == request.EnterpriseGroupingId && eg.IsActive));
+                }
+                else
+                {
+                    response = ResponseDto.Error<ExportReportResultDto>("El campo Grupo de Empresa es obligatorio.");
+                    return response;
+                }
+                if (request.GroupsIds != null && request.GroupsIds.Count > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => request.GroupsIds.Contains(x.PeriodAuditScaleResult!.PeriodAuditGroupResult!.GroupId));
+                }
                 // Filtro por empresas
                 if (request.EnterpriseIds != null && request.EnterpriseIds.Count > 0)
                 {

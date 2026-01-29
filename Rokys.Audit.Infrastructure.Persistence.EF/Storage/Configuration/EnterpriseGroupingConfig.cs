@@ -49,6 +49,11 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .WithOne(eg => eg.EnterpriseGrouping)
                 .HasForeignKey(eg => eg.EnterpriseGroupingId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(e => e.GroupingUsers)
+                .WithOne(gu => gu.EnterpriseGrouping)
+                .HasForeignKey(gu => gu.EnterpriseGroupingId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Inserts\202601280930-update-group-by-enterprise-grouping.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Index\" />
     <Folder Include="Init\" />
     <Folder Include="Procedure\" />

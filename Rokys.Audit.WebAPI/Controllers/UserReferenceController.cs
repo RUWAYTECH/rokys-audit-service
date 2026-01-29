@@ -79,5 +79,13 @@ namespace Rokys.Audit.WebAPI.Controllers
                 return Ok(response);
             return BadRequest(response);
         }
+        [HttpGet("by-enterprise-grouping-id/{enterpriseGroupingId}")]
+        public async Task<IActionResult> GetUsersByEnterpriseGroupingId([FromRoute] Guid enterpriseGroupingId)
+        {
+            var response = await _userReferenceService.GetUsersByEnterpriseGroupingId(enterpriseGroupingId);
+            if (response.IsValid)
+                return Ok(response);
+            return BadRequest(response);
+        }
     }
 }

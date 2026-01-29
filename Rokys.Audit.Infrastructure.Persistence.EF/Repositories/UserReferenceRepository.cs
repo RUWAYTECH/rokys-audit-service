@@ -76,5 +76,24 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
             
             return await query.AnyAsync();
         }
+
+        public async Task<List<UserReference>> GetByRoleCodesAsync(List<string> roleCodes)
+        {
+            if (roleCodes == null || !roleCodes.Any())
+            {
+                return new List<UserReference>();
+            }
+
+            // Traer todos los usuarios activos
+            var activeUsers = await DbSet
+                .Where(u => u.IsActive)
+                .ToListAsync();
+
+            // Filtrar en memoria los que tengan alguno de los roles
+            return activeUsers
+                .Where(u => !string.IsNullOrEmpty(u.RoleCode) &&
+                           roleCodes.Any(role => u.RoleCode.Contains(role)))
+                .ToList();
+        }
     }
 }
