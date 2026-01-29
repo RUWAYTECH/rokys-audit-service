@@ -14,7 +14,6 @@
         public decimal? NormalizedScore { get; set; }
         public decimal? ExpectedDistribution { get; set; }
         public int LevelOrder { get; set; }
-        public string ScaleType { get; set; } = string.Empty;
         public bool IsActive { get; set; } = true;
 
         // Navigation properties

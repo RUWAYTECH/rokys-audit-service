@@ -22,7 +22,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
 
             builder.HasIndex(e => e.Code)
                 .IsUnique();
-
+            builder.Property(x => x.ScaleType).IsRequired().HasMaxLength(50);
             builder.Property(e => e.Name)
                 .IsRequired()
                 .HasMaxLength(200);
