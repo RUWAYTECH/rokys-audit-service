@@ -12,11 +12,11 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
         {
             _context = context;
         }
-        public async Task<List<SubScale>> GetByScaleCompanyIdAsync(Guid scaleCompanyId)
+        public async Task<List<SubScale>> GetByEnterpriseGroupingIdAsync(Guid enterpriseGroupingId)
         {
             return await _context.SubScales
-                .Include(s => s.ScaleCompany)
-                .Where(s => s.ScaleCompanyId == scaleCompanyId && s.IsActive)
+                .Include(s => s.EnterpriseGrouping)
+                .Where(s => s.EnterpriseGroupingId == enterpriseGroupingId && s.IsActive)
                 .ToListAsync();
         }
     }

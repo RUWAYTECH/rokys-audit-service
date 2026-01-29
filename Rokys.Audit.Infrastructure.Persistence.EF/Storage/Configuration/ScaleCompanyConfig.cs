@@ -21,7 +21,6 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.Property(x => x.NormalizedScore).HasColumnType("decimal(10,2)");
             builder.Property(x => x.ExpectedDistribution).HasColumnType("decimal(10,2)");
             builder.Property(x => x.LevelOrder).IsRequired();
-            builder.Property(x => x.ScaleType).IsRequired().HasMaxLength(50);
             builder.Property(x => x.IsActive).HasDefaultValue(true);
             builder.Property(x => x.CreationDate).IsRequired();
             builder.Property(x => x.CreatedBy).HasMaxLength(100);
@@ -39,10 +38,6 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .HasForeignKey(sc => sc.EnterpriseGroupingId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasMany(sc => sc.SubScales)
-                .WithOne(ss => ss.ScaleCompany)
-                .HasForeignKey(ss => ss.ScaleCompanyId)
-                .OnDelete(DeleteBehavior.Restrict);
 
             // Indexes
             builder.HasIndex(sc => sc.EnterpriseId);

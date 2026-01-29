@@ -1,12 +1,15 @@
 -- Script para insertar registros en EnterpriseGroup basándose en RUC de Enterprise
 -- Fecha: 2026-01-21
+DECLARE @EnterpriseGroupingId UNIQUEIDENTIFIER = '64106CA9-A15A-4D3A-8EAB-58C3930E3A7D';
 
--- Insertar el EnterpriseGrouping
-INSERT INTO EnterpriseGrouping (EnterpriseGroupingId, Code, Name, Description, IsActive, CreatedBy, CreationDate)
-VALUES ('64106CA9-A15A-4D3A-8EAB-58C3930E3A7D', 'EG001', 'Grupo de Empresas por Rokys', 'Agrupación de empresas basada en códigos RUC par Rokys', 1, 'Admin', '2026-01-21 09:18:28.226');
+IF NOT EXISTS (SELECT 1 FROM EnterpriseGrouping WHERE EnterpriseGroupingId = @EnterpriseGroupingId)
+BEGIN
+    INSERT INTO EnterpriseGrouping (EnterpriseGroupingId, Code, Name, Description, IsActive, CreatedBy, CreationDate)
+    VALUES (@EnterpriseGroupingId, 'EG001', 'Grupo de Empresas por Rokys', 'Agrupación de empresas basada en códigos RUC par Rokys', 1, 'Admin', '2026-01-21 09:18:28.226');
+END
 
 -- Declarar variables para almacenar los IDs
-DECLARE @EnterpriseGroupingId UNIQUEIDENTIFIER = '64106CA9-A15A-4D3A-8EAB-58C3930E3A7D';
+
 DECLARE @CreatedBy NVARCHAR(50) = 'Admin';
 DECLARE @CreationDate DATETIME = '2026-01-21 09:18:28.226';
 
