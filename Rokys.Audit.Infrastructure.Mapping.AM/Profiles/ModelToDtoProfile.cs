@@ -33,6 +33,7 @@ using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.PeriodAudit;
 using Rokys.Audit.DTOs.Responses.EnterpriseGrouping;
 using Rokys.Audit.DTOs.Responses.EnterpriseGroup;
+using Rokys.Audit.DTOs.Responses.GroupingUser;
 
 namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
 {
@@ -353,6 +354,33 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                         UpdatedBy = EnterpriseGroup.UpdatedBy,
                         UpdateDate = EnterpriseGroup.UpdateDate
                     }).ToList();
+                });
+            CreateMap<GroupingUser, GroupingUserResponseDto>()
+                .AfterMap((src, dest) =>
+                {
+                    dest.EnterpriseGrouping = src.EnterpriseGrouping != null ? new EnterpriseGroupingResponseDto
+                    {
+                        EnterpriseGroupingId = src.EnterpriseGrouping.EnterpriseGroupingId,
+                        Name = src.EnterpriseGrouping.Name,
+                        Code = src.EnterpriseGrouping.Code,
+                        IsActive = src.EnterpriseGrouping.IsActive,
+                        CreatedBy = src.EnterpriseGrouping.CreatedBy,
+                        CreationDate = src.EnterpriseGrouping.CreationDate,
+                        UpdatedBy = src.EnterpriseGrouping.UpdatedBy,
+                        UpdateDate = src.EnterpriseGrouping.UpdateDate
+                    } : null;
+                    dest.UserReference = src.UserReference != null ? new UserReferenceResponseDto
+                    {
+                        UserReferenceId = src.UserReference.UserReferenceId,
+                        FirstName = src.UserReference.FirstName,
+                        LastName = src.UserReference.LastName,
+                        Email = src.UserReference.Email,
+                        IsActive = src.UserReference.IsActive,
+                        CreatedBy = src.UserReference.CreatedBy,
+                        CreationDate = src.UserReference.CreationDate,
+                        UpdatedBy = src.UserReference.UpdatedBy,
+                        UpdateDate = src.UserReference.UpdateDate
+                    } : null;
                 });
         }
     }

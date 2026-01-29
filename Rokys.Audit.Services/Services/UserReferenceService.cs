@@ -15,6 +15,7 @@ using Rokys.Audit.Services.Interfaces;
 using System.Linq.Expressions;
 using Rokys.Audit.Common.Extensions;
 using Rokys.Audit.DTOs.Requests.EmployeeStore;
+using System.Security.AccessControl;
 
 namespace Rokys.Audit.Services.Services
 {
@@ -27,6 +28,8 @@ namespace Rokys.Audit.Services.Services
         private readonly IAMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IEmployeeStoreRepository _employeeStoreRepository;
+        private readonly IAuditRoleConfigurationRepository _auditRoleConfigurationRepository;
+        private readonly IStoreRepository _storeRepository;
 
         public UserReferenceService(
             IUserReferenceRepository userReferenceRepository,
@@ -35,7 +38,9 @@ namespace Rokys.Audit.Services.Services
             IUnitOfWork unitOfWork,
             IAMapper mapper,
             IHttpContextAccessor httpContextAccessor,
-            IEmployeeStoreRepository employeeStoreRepository)
+            IEmployeeStoreRepository employeeStoreRepository,
+            IAuditRoleConfigurationRepository auditRoleConfigurationRepository,
+            IStoreRepository storeRepository)
         {
             _userReferenceRepository = userReferenceRepository;
             _fluentValidator = fluentValidator;
@@ -44,6 +49,8 @@ namespace Rokys.Audit.Services.Services
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
             _employeeStoreRepository = employeeStoreRepository;
+            _auditRoleConfigurationRepository = auditRoleConfigurationRepository;
+            _storeRepository = storeRepository;
         }
 
         public async Task<ResponseDto<UserReferenceResponseDto>> Create(UserReferenceRequestDto requestDto)
@@ -605,6 +612,28 @@ namespace Rokys.Audit.Services.Services
                 });
             }
 
+            return response;
+        }
+
+        public async Task<ResponseDto<List<UserReferenceResponseDto>>> GetUsersByEnterpriseGroupingId(Guid enterpriseGroupingId)
+        {
+            var response = ResponseDto.Create<List<UserReferenceResponseDto>>();
+            try
+            {
+                var auditRoles = await _auditRoleConfigurationRepository.GetAsync(filter: x => x.EnterpriseGroupingId == enterpriseGroupingId, includeProperties: x=>x.EnterpriseGrouping.EnterpriseGroups);
+                var roleCodes = auditRoles.Select(ar => ar.RoleCode).Distinct().ToList();
+                var users = await _userReferenceRepository.GetByRoleCodesAsync(roleCodes);
+                response.Data = _mapper.Map<List<UserReferenceResponseDto>>(users);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all active UserReferences");
+                response.Messages.Add(new ApplicationMessage
+                {
+                    Message = "Error interno del servidor al obtener todos los usuarios activos",
+                    MessageType = ApplicationMessageType.Error
+                });
+            }
             return response;
         }
     }

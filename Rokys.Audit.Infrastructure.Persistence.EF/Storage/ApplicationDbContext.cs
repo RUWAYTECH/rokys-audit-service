@@ -53,6 +53,8 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
 
         public DbSet<EnterpriseTheme> EnterpriseThemes { get; set; }
 
+        public DbSet<GroupingUser> GroupingUsers { get; set; }
+
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
@@ -111,6 +113,8 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
             modelBuilder.ApplyConfiguration(new SystemConfigurationConfig());
             modelBuilder.ApplyConfiguration(new EnterpriseGroupingConfig());
             modelBuilder.ApplyConfiguration(new EnterpriseGroupConfig());
+
+            modelBuilder.ApplyConfiguration(new GroupingUserConfig());
         }
     }
 }

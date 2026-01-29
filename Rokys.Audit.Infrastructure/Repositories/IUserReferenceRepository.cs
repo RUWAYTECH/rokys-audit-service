@@ -61,5 +61,7 @@ namespace Rokys.Audit.Infrastructure.Repositories
         /// <param name="excludeId">ID a excluir de la búsqueda (para updates)</param>
         /// <returns>True si existe, False en caso contrario</returns>
         Task<bool> ExistsByEmployeeIdAsync(Guid employeeId, Guid? excludeId = null);
+
+        Task<List<UserReference>> GetByRoleCodesAsync(List<string> roleCodes);
     }
 }

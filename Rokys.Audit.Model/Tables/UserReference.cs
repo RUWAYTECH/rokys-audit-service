@@ -76,5 +76,7 @@ namespace Rokys.Audit.Model.Tables
         public virtual ICollection<InboxItems>? InboxItems { get; set; }
 
         public virtual ICollection<PeriodAuditActionPlan>? PeriodAuditActionPlans { get; set; }
+        public virtual ICollection<GroupingUser> GroupingUsers { get; set; } = new List<GroupingUser>();
+
     }
 }
