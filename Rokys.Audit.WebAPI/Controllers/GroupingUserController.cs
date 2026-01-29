@@ -16,7 +16,7 @@ namespace Rokys.Audit.WebAPI.Controllers
             _groupingUserService = groupingUserService;
         }
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] GroupingUserRequestDto requestDto)
+        public async Task<IActionResult> Create([FromBody] GroupingUserUpsertRequestDto requestDto)
         {
             var response = await _groupingUserService.Create(requestDto);
             if (response.IsValid)

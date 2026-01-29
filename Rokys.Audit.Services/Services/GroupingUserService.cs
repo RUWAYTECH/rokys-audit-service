@@ -20,7 +20,7 @@ namespace Rokys.Audit.Services.Services
     public class GroupingUserService : IGroupingUserService
     {
         private readonly IGroupingUserRepository _groupingUserRepository;
-        private readonly IValidator<GroupingUserRequestDto> _fluentValidator;
+        private readonly IValidator<GroupingUserUpsertRequestDto> _fluentValidator;
         private readonly ILogger<GroupingUserService> _logger;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAMapper _mapper;
@@ -28,7 +28,7 @@ namespace Rokys.Audit.Services.Services
 
         public GroupingUserService(
             IGroupingUserRepository groupingUserRepository,
-            IValidator<GroupingUserRequestDto> idValidator,
+            IValidator<GroupingUserUpsertRequestDto> idValidator,
             ILogger<GroupingUserService> logger,
             IUnitOfWork unitOfWork,
             IAMapper mapper,
@@ -42,23 +42,50 @@ namespace Rokys.Audit.Services.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<ResponseDto<GroupingUserResponseDto>> Create(GroupingUserRequestDto requestDto)
+        public async Task<ResponseDto<List<GroupingUserResponseDto>>> Create(GroupingUserUpsertRequestDto requestDto)
         {
-            var response = ResponseDto.Create<GroupingUserResponseDto>();
+            var response = ResponseDto.Create<List<GroupingUserResponseDto>>();
+
             try
             {
+                var validate = _fluentValidator.Validate(requestDto);
+                if (!validate.IsValid)
+                {
+                    response.Messages.AddRange(
+                        validate.Errors.Select(e =>
+                            new ApplicationMessage
+                            {
+                                Message = e.ErrorMessage,
+                                MessageType = ApplicationMessageType.Error
+                            })
+                    );
+
+                    return response;
+                }
+
                 var currentUser = _httpContextAccessor.CurrentUser();
-                var entity = _mapper.Map<GroupingUser>(requestDto);
-                entity.CreateAudit(currentUser.UserName);
-                _groupingUserRepository.Insert(entity);
+                var entities = new List<GroupingUser>();
+
+                foreach (var userId in requestDto.UserReferenceIds)
+                {
+                    var entity = _mapper.Map<GroupingUser>(requestDto);
+                    entity.UserReferenceId = userId;
+                    entity.CreateAudit(currentUser.UserName);
+
+                    entities.Add(entity);
+                    _groupingUserRepository.Insert(entity);
+                }
                 await _unitOfWork.CommitAsync();
-                response.Data = _mapper.Map<GroupingUserResponseDto>(entity);
+
+                response.Data = _mapper.Map<List<GroupingUserResponseDto>>(entities);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ocurrio un error al intentar crear el grupo de usuario.");
-                response = ResponseDto.Error<GroupingUserResponseDto>("Ocurrio un error al intentar crear el grupo de usuario.");
+                _logger.LogError(ex, "Ocurrió un error al intentar crear el grupo de usuario.");
+                response = ResponseDto.Error<List<GroupingUserResponseDto>>(
+                    "Ocurrió un error al intentar crear el grupo de usuario.");
             }
+
             return response;
         }
         public async Task<ResponseDto<GroupingUserResponseDto>> Update(Guid id, GroupingUserRequestDto requestDto)
@@ -66,12 +93,6 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<GroupingUserResponseDto>();
             try
             {
-                var validate = _fluentValidator.Validate(requestDto);
-                if (!validate.IsValid)
-                {
-                    response.Messages.AddRange(validate.Errors.Select(e => new ApplicationMessage { Message = e.ErrorMessage, MessageType = ApplicationMessageType.Error }));
-                    return response;
-                }
                 var entity = await _groupingUserRepository.GetFirstOrDefaultAsync(filter: x => x.GroupingUserId == id && x.IsActive);
                 if (entity == null)
                 {

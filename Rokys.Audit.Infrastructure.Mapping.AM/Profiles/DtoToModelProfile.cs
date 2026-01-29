@@ -68,6 +68,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
             CreateMap<EnterpriseGroupRequestDto, EnterpriseGroup>();
             CreateMap<EnterpriseGroupingRequestDto, EnterpriseGrouping>();
             CreateMap<GroupingUserRequestDto, GroupingUser>();
+            CreateMap<GroupingUserUpsertRequestDto, GroupingUser>();
         }
     }
 }

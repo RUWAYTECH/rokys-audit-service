@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 
 namespace Rokys.Audit.Services.Validations
 {
-    public class GroupingUserValidator : AbstractValidator<GroupingUserRequestDto>
+    public class GroupingUserValidator : AbstractValidator<GroupingUserUpsertRequestDto>
     {
         public GroupingUserValidator() 
         {
             RuleFor(x => x.EnterpriseGroupingId)
                 .NotNull().WithMessage("El Id del Grupo de Empresas es requerido.")
                 .NotEmpty().WithMessage("El Id del Grupo de Empresas es requerido.");
-            RuleFor(x => x.UserReferenceId)
+            RuleFor(x => x.UserReferenceIds)
                 .NotNull().WithMessage("El Id del Usuario es requerido.")
                 .NotEmpty().WithMessage("El Id del Usuario es requerido.");
         }
