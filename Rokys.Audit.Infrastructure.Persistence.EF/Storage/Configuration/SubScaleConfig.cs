@@ -16,7 +16,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .IsRequired()
                 .ValueGeneratedOnAdd();
 
-            builder.Property(x => x.ScaleCompanyId)
+            builder.Property(x => x.EnterpriseGroupingId)
                 .IsRequired();
 
             builder.Property(x => x.Code)
@@ -26,6 +26,14 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.Property(x => x.Name)
                 .IsRequired()
                 .HasMaxLength(100);
+
+            builder.Property(x => x.Value)
+                .IsRequired()
+                .HasMaxLength(10);
+
+            builder.Property(x => x.ColorCode)
+                .IsRequired()
+                .HasMaxLength(10);
 
             builder.Property(x => x.IsActive)
                 .HasDefaultValue(true);
@@ -44,9 +52,9 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.Property(x => x.UpdateDate);
 
             // Relaciones
-            builder.HasOne(x => x.ScaleCompany)
+            builder.HasOne(x => x.EnterpriseGrouping)
                 .WithMany(x => x.SubScales)
-                .HasForeignKey(x => x.ScaleCompanyId)
+                .HasForeignKey(x => x.EnterpriseGroupingId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

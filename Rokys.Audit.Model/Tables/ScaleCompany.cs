@@ -20,6 +20,6 @@
         // Navigation properties
         public virtual Enterprise Enterprise { get; set; } = null!;
         public virtual EnterpriseGrouping? EnterpriseGrouping { get; set; }
-        public virtual ICollection<SubScale> SubScales { get; set; } = new List<SubScale>();
+
     }
 }

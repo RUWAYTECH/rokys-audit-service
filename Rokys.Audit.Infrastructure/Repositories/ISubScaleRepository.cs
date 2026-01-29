@@ -5,6 +5,6 @@ namespace Rokys.Audit.Infrastructure.Repositories
 {
     public interface ISubScaleRepository : IRepository<SubScale>
     {
-        Task<List<SubScale>> GetByScaleCompanyIdAsync(Guid scaleCompanyId);
+        Task<List<SubScale>> GetByEnterpriseGroupingIdAsync(Guid enterpriseGroupingId);
     }
 }

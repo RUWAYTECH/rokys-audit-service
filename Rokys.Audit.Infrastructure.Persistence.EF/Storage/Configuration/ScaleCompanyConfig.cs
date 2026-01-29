@@ -39,10 +39,6 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .HasForeignKey(sc => sc.EnterpriseGroupingId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasMany(sc => sc.SubScales)
-                .WithOne(ss => ss.ScaleCompany)
-                .HasForeignKey(ss => ss.ScaleCompanyId)
-                .OnDelete(DeleteBehavior.Restrict);
 
             // Indexes
             builder.HasIndex(sc => sc.EnterpriseId);

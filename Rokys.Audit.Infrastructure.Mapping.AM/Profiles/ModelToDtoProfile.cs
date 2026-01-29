@@ -80,7 +80,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
             CreateMap<SubScale, SubScaleResponseDto>()
                 .AfterMap((src, dest) =>
                 {
-                    dest.ScaleCompanyName = src.ScaleCompany?.Name;
+                    dest.EnterpriseGroupingName = src.EnterpriseGrouping?.Name;
                 });
             CreateMap<ScaleGroup, ScaleGroupResponseDto>();
             CreateMap<Group, GroupResponseDto>().AfterMap((src, dest) =>

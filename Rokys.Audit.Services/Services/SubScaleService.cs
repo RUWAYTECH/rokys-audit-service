@@ -61,7 +61,7 @@ namespace Rokys.Audit.Services.Services
                 
                 var entityCreate = await _subScaleRepository.GetFirstOrDefaultAsync(
                     filter: x => x.SubScaleId == entity.SubScaleId && x.IsActive, 
-                    includeProperties: [t => t.ScaleCompany]);
+                    includeProperties: [t => t.EnterpriseGrouping]);
                 response.Data = _mapper.Map<SubScaleResponseDto>(entityCreate);
             }
             catch (Exception ex)
@@ -105,19 +105,19 @@ namespace Rokys.Audit.Services.Services
                 if (!string.IsNullOrEmpty(paginationRequestDto.Filter))
                     filter = filter.AndAlso(x => x.Name.Contains(paginationRequestDto.Filter) || x.Code.Contains(paginationRequestDto.Filter));
 
-                if (paginationRequestDto.ScaleCompanyId.HasValue)
+                if (paginationRequestDto.EnterpriseGroupingId.HasValue)
                 {
-                    filter = filter.AndAlso(x => x.ScaleCompanyId == paginationRequestDto.ScaleCompanyId.Value);
+                    filter = filter.AndAlso(x => x.EnterpriseGroupingId == paginationRequestDto.EnterpriseGroupingId.Value);
                 }
 
-                Func<IQueryable<SubScale>, IOrderedQueryable<SubScale>> orderBy = q => q.OrderBy(x => x.ScaleCompanyId).ThenBy(x => x.Code);
+                Func<IQueryable<SubScale>, IOrderedQueryable<SubScale>> orderBy = q => q.OrderBy(x => x.EnterpriseGroupingId).ThenBy(x => x.Code);
 
                 var entities = await _subScaleRepository.GetPagedAsync(
                     filter: filter,
                     orderBy: orderBy,
                     pageNumber: paginationRequestDto.PageNumber,
                     pageSize: paginationRequestDto.PageSize,
-                    includeProperties: [e => e.ScaleCompany]
+                    includeProperties: [e => e.EnterpriseGrouping]
                 );
 
                 var pagedResult = new PaginationResponseDto<SubScaleResponseDto>
@@ -145,7 +145,7 @@ namespace Rokys.Audit.Services.Services
             {
                 var entity = await _subScaleRepository.GetFirstOrDefaultAsync(
                     filter: x => x.SubScaleId == id && x.IsActive, 
-                    includeProperties: [e => e.ScaleCompany]);
+                    includeProperties: [e => e.EnterpriseGrouping]);
                 if (entity == null)
                 {
                     response = ResponseDto.Error<SubScaleResponseDto>("No se encontró la sub escala.");
@@ -186,7 +186,7 @@ namespace Rokys.Audit.Services.Services
                 
                 var entityUpdate = await _subScaleRepository.GetFirstOrDefaultAsync(
                     filter: x => x.SubScaleId == id && x.IsActive, 
-                    includeProperties: [e => e.ScaleCompany]);
+                    includeProperties: [e => e.EnterpriseGrouping]);
                 response.Data = _mapper.Map<SubScaleResponseDto>(entityUpdate);
             }
             catch (Exception ex)

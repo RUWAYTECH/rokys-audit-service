@@ -34,6 +34,3 @@ IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('[dbo].[Sca
 IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('[dbo].[ScaleCompany]') AND name = 'LevelOrder')
     ALTER TABLE [dbo].[ScaleCompany] ADD LevelOrder INT NOT NULL DEFAULT 1;
 
--- Paso 8: Agregar columna ScaleType
-IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('[dbo].[ScaleCompany]') AND name = 'ScaleType')
-    ALTER TABLE [dbo].[ScaleCompany] ADD ScaleType NVARCHAR(50) NOT NULL DEFAULT 'Escala Normal' WITH VALUES;
