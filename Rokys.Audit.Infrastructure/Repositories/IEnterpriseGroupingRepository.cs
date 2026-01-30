@@ -14,5 +14,6 @@ namespace Rokys.Audit.Infrastructure.Repositories
        );
         Task<List<EnterpriseGrouping>> GetByEnterpriseGroupingId(Guid id);
         Task<EnterpriseGrouping> GetFirstByEnterpriseGroupingId(Guid id);
+        Task<EnterpriseGrouping> GetFirstEnterpriseGroupingByEnterpriseId(Guid enterpriseId);
     }
 }

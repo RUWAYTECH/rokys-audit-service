@@ -229,7 +229,6 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                             NormalizedScore = sc.NormalizedScore,
                             ExpectedDistribution = sc.ExpectedDistribution,
                             LevelOrder = sc.LevelOrder,
-                            ScaleType = sc.ScaleType,
                             CreationDate = sc.CreationDate,
                             CreatedBy = sc.CreatedBy,
                         })

@@ -17,6 +17,7 @@ using Rokys.Audit.Infrastructure.Persistence.Abstract;
 using Rokys.Audit.Infrastructure.Repositories;
 using Rokys.Audit.Model.Tables;
 using Rokys.Audit.Services.Interfaces;
+using Scriban.Parsing;
 using System.Linq.Expressions;
 
 namespace Rokys.Audit.Services.Services
@@ -49,6 +50,8 @@ namespace Rokys.Audit.Services.Services
         private readonly ISystemConfigurationRepository _systemConfigurationRepository;
 
         private readonly IPeriodAuditActionPlanService _periodAuditActionPlanService;
+        private readonly IEnterpriseGroupingRepository _enterpriseGroupingRepository;
+        private readonly ISubScaleRepository _subScaleRepository;
         public PeriodAuditGroupResultService(
             IPeriodAuditGroupResultRepository repository,
             IValidator<PeriodAuditGroupResultRequestDto> validator,
@@ -74,7 +77,9 @@ namespace Rokys.Audit.Services.Services
             IUserReferenceRepository userReferenceRepository,
             IEnterpriseGroupRepository enterpriseGroupRepository,
             ISystemConfigurationRepository systemConfigurationRepository,
-            IPeriodAuditActionPlanService periodAuditActionPlanService
+            IPeriodAuditActionPlanService periodAuditActionPlanService,
+            IEnterpriseGroupingRepository enterpriseGroupingRepository,
+            ISubScaleRepository subScaleRepository
         )
         {
             _periodAuditGroupResultRepository = repository;
@@ -102,6 +107,8 @@ namespace Rokys.Audit.Services.Services
             _enterpriseGroupRepository = enterpriseGroupRepository;
             _systemConfigurationRepository = systemConfigurationRepository;
             _periodAuditActionPlanService = periodAuditActionPlanService;
+            _enterpriseGroupingRepository = enterpriseGroupingRepository;
+            _subScaleRepository = subScaleRepository;
         }
         public async Task<ResponseDto<PeriodAuditGroupResultResponseDto>> Create(PeriodAuditGroupResultRequestDto requestDto, bool isTrasacction = false)
         {
@@ -378,13 +385,18 @@ namespace Rokys.Audit.Services.Services
                     acumulatedScore += scaleScore;
                 }
 
-                var scaleCompany = await _scaleCompanyRepository.GetConfiguredForEnterprise(entity.PeriodAudit.Store!.Enterprise!.EnterpriseGroups!.FirstOrDefault(e => e.IsActive)!.EnterpriseGroupingId, entity.PeriodAudit.Store.EnterpriseId);
-                if (scaleCompany == null || !scaleCompany.Any())
+                var enterpriseGrouping = await _enterpriseGroupingRepository.GetFirstEnterpriseGroupingByEnterpriseId(entity.PeriodAudit.Store.EnterpriseId);
+
+                var scaleCompany = await _scaleCompanyRepository.GetConfiguredForEnterprise(enterpriseGrouping!.EnterpriseGroupingId, entity.PeriodAudit.Store.EnterpriseId);
+                var subScales = await _subScaleRepository.GetAsync(x => x.EnterpriseGroupingId == enterpriseGrouping.EnterpriseGroupingId && x.IsActive);
+                if (scaleCompany == null || !scaleCompany.Any() || subScales == null || !subScales.Any())
                 {
                     response = ResponseDto.Error<bool>("No se encontró la escala asociada a la empresa ni la escala por defecto.");
                     return response;
                 }
-                scaleCompany = scaleCompany.OrderBy(sc => sc.LevelOrder).ToList();
+
+                var firstCalValue = Decimal.TryParse(subScales.Max(s => s.Value), out var result) ? result : 0;
+
                 var calculatesScaleCompany = scaleCompany.Select(sc => new
                 {
                     sc.Name,
@@ -393,10 +405,11 @@ namespace Rokys.Audit.Services.Services
                     sc.MaxValue,
                     sc.NormalizedScore,
                     sc.ExpectedDistribution,
+                    sc.LevelOrder,
                     CalculatedValue = null as Decimal?
-                }).ToList();
+                }).OrderBy(sc => sc.LevelOrder).ToList();
 
-                if (scaleCompany.FirstOrDefault()?.ScaleType == ScaleType.Weighted)
+                if (enterpriseGrouping.ScaleType == ScaleType.Weighted)
                 {
                     var lastScaleCompany = null as ScaleCompany;
 
@@ -405,7 +418,7 @@ namespace Rokys.Audit.Services.Services
                         Decimal? calculatedValue = null;
                         if (index == 0)
                         {
-                            calculatedValue = acumulatedScore > sc.NormalizedScore ? ((acumulatedScore - sc.NormalizedScore) / (2 - sc.NormalizedScore)) * sc.ExpectedDistribution : null;
+                            calculatedValue = acumulatedScore > sc.NormalizedScore ? ((acumulatedScore - sc.NormalizedScore) / (firstCalValue - sc.NormalizedScore)) * sc.ExpectedDistribution : null;
                         }
                         else if (index != scaleCompany.Count() - 1)
                         {
@@ -420,6 +433,7 @@ namespace Rokys.Audit.Services.Services
                             sc.MaxValue,
                             sc.NormalizedScore,
                             sc.ExpectedDistribution,
+                            sc.LevelOrder,
                             CalculatedValue = calculatedValue
                         };
                     }).ToList();
@@ -427,30 +441,37 @@ namespace Rokys.Audit.Services.Services
                     // modificar CalculatedValue solo para el ultimo elemento de la lista
                     // calculatedvalue = si al menos uno de los anteriores elementos calculatedValue != normalizedScore, entonces calculatedValue = expectedDistribution
                     // caso contrario calculatedValue = acumuladedScore >= lastElement.NormalizedScore ? ((acumulatedScore - lastElement.NormalizedScore) / (secondLastElement.NormalizedScore - lastElement.NormalizedScore)) * lastElement.ExpectedDistribution : null;
-                    var secondLastElement = calculatesScaleCompany[calculatesScaleCompany.Count - 2];
-                    var lastElement = calculatesScaleCompany.Last();
-                    var hasCalculatedValueDifferent = calculatesScaleCompany
-                        .Take(calculatesScaleCompany.Count - 1)
-                        .Any(c => c.CalculatedValue != c.NormalizedScore);
-                    var calculatedValueLast = hasCalculatedValueDifferent ?
-                        lastElement.ExpectedDistribution :
-                        (acumulatedScore >= lastElement.NormalizedScore ? ((acumulatedScore - lastElement.NormalizedScore) / (secondLastElement.NormalizedScore - lastElement.NormalizedScore)) * lastElement.ExpectedDistribution : null);
-                    calculatesScaleCompany[calculatesScaleCompany.Count - 1] = new
+                    if (calculatesScaleCompany.Count > 1)
                     {
-                        lastElement.Name,
-                        lastElement.ColorCode,
-                        lastElement.MinValue,
-                        lastElement.MaxValue,
-                        lastElement.NormalizedScore,
-                        lastElement.ExpectedDistribution,
-                        CalculatedValue = calculatedValueLast,
-                    };
+                        var secondLastElement = calculatesScaleCompany[calculatesScaleCompany.Count - 2];
+                        var lastElement = calculatesScaleCompany.Last();
+                        var hasCalculatedValueDifferent = calculatesScaleCompany
+                            .Take(calculatesScaleCompany.Count - 1)
+                            .Any(c => c.CalculatedValue != c.NormalizedScore);
+                        var calculatedValueLast = hasCalculatedValueDifferent ?
+                            lastElement.ExpectedDistribution :
+                            (acumulatedScore >= lastElement.NormalizedScore ? ((acumulatedScore - lastElement.NormalizedScore) / (secondLastElement.NormalizedScore - lastElement.NormalizedScore)) * lastElement.ExpectedDistribution : null);
+                        calculatesScaleCompany[calculatesScaleCompany.Count - 1] = new
+                        {
+                            lastElement.Name,
+                            lastElement.ColorCode,
+                            lastElement.MinValue,
+                            lastElement.MaxValue,
+                            lastElement.NormalizedScore,
+                            lastElement.ExpectedDistribution,
+                            lastElement.LevelOrder,
+                            CalculatedValue = calculatedValueLast,
+                        };
+                    }
                 }
+
+                var score = calculatesScaleCompany.Aggregate(0m, (total, sc) => total + (sc.CalculatedValue ?? 0));
+                score = score > 100 ? 100 : Math.Round(score, 2);
 
                 bool scaleFound = false;
                 foreach (var scale in calculatesScaleCompany)
                 {
-                    if (acumulatedScore >= scale.MinValue && acumulatedScore <= scale.MaxValue)
+                    if (score >= scale.MinValue && score <= scale.MaxValue)
                     {
                         entity.ScaleDescription = scale.Name;
                         entity.ScaleColor = scale.ColorCode;
@@ -464,7 +485,7 @@ namespace Rokys.Audit.Services.Services
                     return response;
                 }
 
-                entity.ScoreValue = acumulatedScore;
+                entity.ScoreValue = score;
                 _periodAuditGroupResultRepository.Update(entity);
 
                 await _unitOfWork.CommitAsync();

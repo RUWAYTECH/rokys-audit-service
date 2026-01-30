@@ -49,5 +49,14 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
                 .Where(x => x.EnterpriseGroupingId == id && x.IsActive)
                 .FirstOrDefaultAsync();
         }
+
+        public async Task<EnterpriseGrouping> GetFirstEnterpriseGroupingByEnterpriseId(Guid enterpriseId)
+        {
+            return await Db.EnterpriseGroupings
+                .Include(x => x.EnterpriseGroups.Where(eg => eg.IsActive))
+                .ThenInclude(pa => pa.Enterprise)
+                .Where(x => x.EnterpriseGroups.Any(eg => eg.EnterpriseId == enterpriseId && eg.IsActive) && x.IsActive)
+                .FirstOrDefaultAsync();
+        }
     }
 }
