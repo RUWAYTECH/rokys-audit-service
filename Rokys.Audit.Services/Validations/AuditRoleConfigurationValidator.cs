@@ -14,13 +14,7 @@ namespace Rokys.Audit.Services.Validations
             
             RuleFor(x => x.RoleCode)
                 .NotEmpty().WithMessage("El código de rol es requerido.")
-                .MaximumLength(10).WithMessage("El código de rol acepta como máximo 10 caracteres.")
-                .MustAsync(async (dto, code, _) =>
-                {
-                    var exists = await _auditRoleConfigurationRepository.ExistsByRoleCodeAsync(code, dto.EnterpriseId, id);
-                    return !exists;
-                })
-                .WithMessage("Ya existe una configuración de rol con este código.");
+                .MaximumLength(10).WithMessage("El código de rol acepta como máximo 10 caracteres.");
                 
             RuleFor(x => x.RoleName)
                 .NotEmpty().WithMessage("El nombre del rol es requerido.")

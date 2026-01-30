@@ -8,6 +8,5 @@ namespace Rokys.Audit.Services.Interfaces
     public interface IGroupingUserService : IBaseService<GroupingUserRequestDto, GroupingUserResponseDto>
     {
         Task<ResponseDto<PaginationResponseDto<GroupingUserResponseDto>>> GetPaged(GroupingUserFilterRequestDto filterRequest);
-        Task<ResponseDto<List<GroupingUserResponseDto>>> Create(GroupingUserUpsertRequestDto requestDto);
     }
 }

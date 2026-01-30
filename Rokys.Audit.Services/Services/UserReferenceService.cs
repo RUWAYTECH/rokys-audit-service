@@ -30,6 +30,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IEmployeeStoreRepository _employeeStoreRepository;
         private readonly IAuditRoleConfigurationRepository _auditRoleConfigurationRepository;
         private readonly IStoreRepository _storeRepository;
+        private readonly IGroupingUserRepository _groupingUserRepository;
 
         public UserReferenceService(
             IUserReferenceRepository userReferenceRepository,
@@ -40,7 +41,8 @@ namespace Rokys.Audit.Services.Services
             IHttpContextAccessor httpContextAccessor,
             IEmployeeStoreRepository employeeStoreRepository,
             IAuditRoleConfigurationRepository auditRoleConfigurationRepository,
-            IStoreRepository storeRepository)
+            IStoreRepository storeRepository,
+            IGroupingUserRepository groupingUserRepository)
         {
             _userReferenceRepository = userReferenceRepository;
             _fluentValidator = fluentValidator;
@@ -51,6 +53,7 @@ namespace Rokys.Audit.Services.Services
             _employeeStoreRepository = employeeStoreRepository;
             _auditRoleConfigurationRepository = auditRoleConfigurationRepository;
             _storeRepository = storeRepository;
+            _groupingUserRepository = groupingUserRepository;
         }
 
         public async Task<ResponseDto<UserReferenceResponseDto>> Create(UserReferenceRequestDto requestDto)
@@ -428,6 +431,15 @@ namespace Rokys.Audit.Services.Services
                         x.RoleCode != null && x.RoleCode.ToLower().Contains(roleCode)
                     );
                 }
+
+                if (paginationRequestDto.EnterpriseGroupingId.HasValue)
+                {
+                    var groupingUsers = await _groupingUserRepository.GetAsync(filter: x => x.EnterpriseGroupingId == paginationRequestDto.EnterpriseGroupingId.Value);
+                    var userReferenceIds = groupingUsers.Select(gu => gu.UserReferenceId).ToList();
+                    filter = filter.AndAlso(x => userReferenceIds.Contains(x.UserReferenceId));
+                }
+
+
                 Func<IQueryable<UserReference>, IOrderedQueryable<UserReference>> orderBy = q => q.OrderBy(x => x.FirstName).ThenBy(x => x.LastName);
 
                 var entities = await _userReferenceRepository.GetPagedAsync(
