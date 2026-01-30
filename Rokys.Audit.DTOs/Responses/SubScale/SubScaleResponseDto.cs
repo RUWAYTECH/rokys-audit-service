@@ -7,7 +7,7 @@ namespace Rokys.Audit.DTOs.Responses.SubScale
         public string? EnterpriseGroupingName { get; set; }
         public string Code { get; set; }
         public string Name { get; set; }
-        public string Value { get; set; }
+        public decimal Value { get; set; }
         public string ColorCode { get; set; }
         public string CreatedBy { get; set; }
         public DateTime CreationDate { get; set; }

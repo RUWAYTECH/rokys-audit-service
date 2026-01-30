@@ -28,8 +28,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
                 .HasMaxLength(100);
 
             builder.Property(x => x.Value)
-                .IsRequired()
-                .HasMaxLength(10);
+                .IsRequired();
 
             builder.Property(x => x.ColorCode)
                 .IsRequired()
