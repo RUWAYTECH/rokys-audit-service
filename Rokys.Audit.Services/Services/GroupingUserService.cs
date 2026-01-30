@@ -21,7 +21,7 @@ namespace Rokys.Audit.Services.Services
     public class GroupingUserService : IGroupingUserService
     {
         private readonly IGroupingUserRepository _groupingUserRepository;
-        private readonly IValidator<GroupingUserUpsertRequestDto> _fluentValidator;
+        private readonly IValidator<GroupingUserRequestDto> _fluentValidator;
         private readonly ILogger<GroupingUserService> _logger;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAMapper _mapper;
@@ -29,7 +29,7 @@ namespace Rokys.Audit.Services.Services
 
         public GroupingUserService(
             IGroupingUserRepository groupingUserRepository,
-            IValidator<GroupingUserUpsertRequestDto> idValidator,
+            IValidator<GroupingUserRequestDto> idValidator,
             ILogger<GroupingUserService> logger,
             IUnitOfWork unitOfWork,
             IAMapper mapper,
@@ -43,9 +43,9 @@ namespace Rokys.Audit.Services.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<ResponseDto<List<GroupingUserResponseDto>>> Create(GroupingUserUpsertRequestDto requestDto)
+        public async Task<ResponseDto<GroupingUserResponseDto>> Create(GroupingUserRequestDto requestDto)
         {
-            var response = ResponseDto.Create<List<GroupingUserResponseDto>>();
+            var response = ResponseDto.Create<GroupingUserResponseDto>();
 
             try
             {
@@ -66,32 +66,28 @@ namespace Rokys.Audit.Services.Services
 
                 var currentUser = _httpContextAccessor.CurrentUser();
                 var entities = new List<GroupingUser>();
-
-                foreach (var userId in requestDto.UserReferenceIds)
-                {
-                    var getByUserId = await _groupingUserRepository.GetFirstOrDefaultAsync(
-                        filter: x => x.UserReferenceId == userId
+                var getByUserId = await _groupingUserRepository.GetFirstOrDefaultAsync(
+                        filter: x => x.UserReferenceId == requestDto.UserReferenceId
                             && x.EnterpriseGroupingId == requestDto.EnterpriseGroupingId
                             && x.IsActive);
-                    if (getByUserId != null)
-                    {
-                        continue;
-                    }
-                    var entity = _mapper.Map<GroupingUser>(requestDto);
-                    entity.UserReferenceId = userId;
-                    entity.CreateAudit(currentUser.UserName);
-
-                    entities.Add(entity);
-                    _groupingUserRepository.Insert(entity);
+                if (getByUserId != null)
+                {
+                    response = ResponseDto.Error<GroupingUserResponseDto>("El usuario que trata de asignar ya existe en este grupo de empresas.");
+                    return response;
                 }
+                var entity = _mapper.Map<GroupingUser>(requestDto);
+                entity.CreateAudit(currentUser.UserName);
+
+                entities.Add(entity);
+                _groupingUserRepository.Insert(entity);
                 await _unitOfWork.CommitAsync();
 
-                response.Data = _mapper.Map<List<GroupingUserResponseDto>>(entities);
+                response.Data = _mapper.Map<GroupingUserResponseDto>(entities);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Ocurrió un error al intentar crear el grupo de usuario.");
-                response = ResponseDto.Error<List<GroupingUserResponseDto>>(
+                response = ResponseDto.Error<GroupingUserResponseDto>(
                     "Ocurrió un error al intentar crear el grupo de usuario.");
             }
 

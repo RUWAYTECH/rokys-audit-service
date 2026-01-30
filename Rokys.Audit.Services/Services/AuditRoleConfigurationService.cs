@@ -68,7 +68,7 @@ namespace Rokys.Audit.Services.Services
                 _auditRoleConfigurationRepository.Insert(entity);
                 await _unitOfWork.CommitAsync();
 
-                var entityCreate = await _auditRoleConfigurationRepository.GetFirstOrDefaultAsync(filter: x => x.AuditRoleConfigurationId == entity.AuditRoleConfigurationId && x.IsActive, includeProperties: [t => t.Enterprise]);
+                var entityCreate = await _auditRoleConfigurationRepository.GetFirstOrDefaultAsync(filter: x => x.AuditRoleConfigurationId == entity.AuditRoleConfigurationId && x.IsActive, includeProperties: [t => t.Enterprise, x => x.EnterpriseGrouping]);
                 response.Data = _mapper.Map<AuditRoleConfigurationResponseDto>(entityCreate);
                 _logger.LogInformation("Created audit role configuration with ID: {Id}", entity.AuditRoleConfigurationId);
             }
@@ -211,7 +211,7 @@ namespace Rokys.Audit.Services.Services
                 _auditRoleConfigurationRepository.Update(entity);
                 await _unitOfWork.CommitAsync();
 
-                var entityUpdate = await _auditRoleConfigurationRepository.GetFirstOrDefaultAsync(filter: x => x.AuditRoleConfigurationId == id && x.IsActive, includeProperties: [e => e.Enterprise]);
+                var entityUpdate = await _auditRoleConfigurationRepository.GetFirstOrDefaultAsync(filter: x => x.AuditRoleConfigurationId == id && x.IsActive, includeProperties: [e => e.Enterprise, x=>x.EnterpriseGrouping]);
                 response.Data = _mapper.Map<AuditRoleConfigurationResponseDto>(entityUpdate);
                 _logger.LogInformation("Updated audit role configuration with ID: {Id}", id);
             }
