@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Reatil.Services.Services;
+using Rokys.Audit.Common.Extensions;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.GroupingUser;
 using Rokys.Audit.DTOs.Responses.Common;
@@ -68,6 +69,14 @@ namespace Rokys.Audit.Services.Services
 
                 foreach (var userId in requestDto.UserReferenceIds)
                 {
+                    var getByUserId = await _groupingUserRepository.GetFirstOrDefaultAsync(
+                        filter: x => x.UserReferenceId == userId
+                            && x.EnterpriseGroupingId == requestDto.EnterpriseGroupingId
+                            && x.IsActive);
+                    if (getByUserId != null)
+                    {
+                        continue;
+                    }
                     var entity = _mapper.Map<GroupingUser>(requestDto);
                     entity.UserReferenceId = userId;
                     entity.CreateAudit(currentUser.UserName);
@@ -166,6 +175,19 @@ namespace Rokys.Audit.Services.Services
                 Expression<Func<GroupingUser, bool>> filter = x => x.IsActive;
 
                 Func<IQueryable<GroupingUser>, IOrderedQueryable<GroupingUser>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
+
+                if (filterRequest.UserReferenceId.HasValue)
+                {
+                    filter = filter.AndAlso(x => x.UserReferenceId == filterRequest.UserReferenceId.Value);
+                }
+                if (filterRequest.EnterpriseGroupingId == Guid.Empty)
+                {
+                    throw new ArgumentException("El filtro espera al menos un Gropo de Empresa.");
+                }
+
+                filter = filter.AndAlso(
+                    x => x.EnterpriseGroupingId == filterRequest.EnterpriseGroupingId
+                );
 
                 var entities = await _groupingUserRepository.GetPagedAsync(
                     filter: filter,
