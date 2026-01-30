@@ -375,7 +375,7 @@ namespace Rokys.Audit.Services.Services
             {
                 var entity = await _periodAuditGroupResultRepository.GetFirstOrDefaultAsync(
                     filter: x => x.PeriodAuditGroupResultId == periodAuditGroupResultId && x.IsActive,
-                    includeProperties: [x => x.Group, y => y.PeriodAudit.Store.Enterprise.EnterpriseGroups]);
+                    includeProperties: [x => x.Group]);
 
                 var periodAuditScaleResult = await _periodAuditScaleResultRepository.GetByPeriodAuditGroupResultId(periodAuditGroupResultId);
                 decimal acumulatedScore = 0;
@@ -395,7 +395,7 @@ namespace Rokys.Audit.Services.Services
                     return response;
                 }
 
-                var firstCalValue = Decimal.TryParse(subScales.Max(s => s.Value), out var result) ? result : 0;
+                var firstCalValue = subScales.Max(s => s.Value);
 
                 var calculatesScaleCompany = scaleCompany.Select(sc => new
                 {
@@ -407,7 +407,8 @@ namespace Rokys.Audit.Services.Services
                     sc.ExpectedDistribution,
                     sc.LevelOrder,
                     CalculatedValue = null as Decimal?
-                }).OrderBy(sc => sc.LevelOrder).ToList();
+                }).ToList();
+                calculatesScaleCompany = [.. calculatesScaleCompany.OrderBy(sc => sc.LevelOrder)];
 
                 if (enterpriseGrouping.ScaleType == ScaleType.Weighted)
                 {

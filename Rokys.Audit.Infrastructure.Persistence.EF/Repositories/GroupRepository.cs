@@ -32,7 +32,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
             if (enterpriseGroupingId.HasValue)
             {
                 var byGroup = await _context.Groups
-                .Where(sc => sc.EnterpriseGroupingId == enterpriseGroupingId && sc.IsActive)
+                .Where(sc => sc.EnterpriseGroupingId == enterpriseGroupingId && sc.EnterpriseId == null && sc.IsActive)
                 .OrderBy(x => x.SortOrder)
                 .ToListAsync();
 

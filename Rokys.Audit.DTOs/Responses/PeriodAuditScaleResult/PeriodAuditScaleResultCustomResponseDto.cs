@@ -10,6 +10,7 @@ namespace Rokys.Audit.DTOs.Responses.PeriodAuditScaleResult
 {
     public class PeriodAuditScaleResultCustomResponseDto : PeriodAuditScaleResultDto
     {
+        public string ScaleType { get; set; } = string.Empty;
         public ScaleGroupPartialResponseDto ScaleGroup { get; set; }
         public List<ScaleCompanyResponseDto> ScaleCompany { get; set; } = new List<ScaleCompanyResponseDto>();
         public List<SubScaleResponseDto> SubScales { get; set; } = new List<SubScaleResponseDto>();

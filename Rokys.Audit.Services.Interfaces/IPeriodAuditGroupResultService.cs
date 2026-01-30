@@ -5,6 +5,7 @@ using Rokys.Audit.DTOs.Responses.Common;
 using Rokys.Audit.DTOs.Responses.ScaleGroup;
 using Rokys.Audit.DTOs.Responses.PeriodAuditScaleResult;
 using Rokys.Audit.DTOs.Responses.PeriodAudit;
+using Rokys.Audit.DTOs.Responses.Group;
 
 namespace Rokys.Audit.Services.Interfaces
 {
