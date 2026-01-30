@@ -1,0 +1,1 @@
+﻿ALTER TABLE dbo.SubScale ALTER COLUMN [Value] DECIMAL(18,2) NULL;

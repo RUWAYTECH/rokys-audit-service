@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Compile Include="Inserts\202601280930-update-group-by-enterprise-grouping.sql" />
+    <Compile Include="Table\202601300924-alter-table-sub-scale-value.sql" />
   </ItemGroup>
 
   <ItemGroup>
