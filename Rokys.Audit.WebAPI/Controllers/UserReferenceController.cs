@@ -87,5 +87,13 @@ namespace Rokys.Audit.WebAPI.Controllers
                 return Ok(response);
             return BadRequest(response);
         }
+        [HttpGet("get-by-enterprise-id-and-roles/{enterpriseId}")]
+        public async Task<IActionResult> GetUsersByEnterpriseIdAndRoleCodes([FromRoute] Guid enterpriseId, [FromQuery] string? roleCodes)
+        {
+            var response = await _userReferenceService.GetUsersByEnterpriseIdAndRoleCodes(enterpriseId, roleCodes);
+            if (response.IsValid)
+                return Ok(response);
+            return BadRequest(response);
+        }
     }
 }
