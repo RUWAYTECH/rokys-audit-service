@@ -356,7 +356,7 @@ namespace Rokys.Audit.Services.Services
                     response.Messages.Add(new ApplicationMessage { Message = "No se encontro la entidad", MessageType = ApplicationMessageType.Error });
                     return response;
                 }
-                if (entity.PeriodAuditGroupResult.PeriodAudit.Store.Enterprise.ScaleCompanies == null ||
+                /* if (entity.PeriodAuditGroupResult.PeriodAudit.Store.Enterprise.ScaleCompanies == null ||
                     !entity.PeriodAuditGroupResult.PeriodAudit.Store.Enterprise.ScaleCompanies.Any())
                 {
                     var defaultScaleCompanies = await _scaleCompanyRepository.GetAsync(filter: e => e.EnterpriseId == null);
@@ -364,7 +364,36 @@ namespace Rokys.Audit.Services.Services
                     {
                         entity.PeriodAuditGroupResult.PeriodAudit.Store.Enterprise.ScaleCompanies = defaultScaleCompanies.ToList();
                     }
-                }
+                } */
+                var scaleCompanies = await _scaleCompanyRepository.GetConfiguredForEnterprise(
+                    enterpriseGroupingId: entity.PeriodAuditGroupResult.PeriodAudit.Store.Enterprise.EnterpriseGroups.FirstOrDefault(x => x.IsActive)?.EnterpriseGroupingId,
+                    enterpriseId: entity.PeriodAuditGroupResult.PeriodAudit.Store.EnterpriseId
+                );
+
+                entity.PeriodAuditGroupResult.PeriodAudit.Store.Enterprise.ScaleCompanies = scaleCompanies.ToList();
+
+                var subScales = new List<SubScaleResDto>();
+                subScales = [
+                    new SubScaleResDto
+                    {
+                        Value = 0,
+                        Name = "Malo",
+                        ColorCode = "#FF0000" // Rojo
+                    },
+                    new SubScaleResDto
+                    {
+                        Value = 1,
+                        Name = "Regular",
+                        ColorCode = "#FFA500" // Naranja
+                    },
+                    new SubScaleResDto
+                    {
+                        Value = 2,
+                        Name = "Bueno",
+                        ColorCode = "#008000" // Verde
+                    }
+                ];
+
                 var fileDataSourceTemplate = (DataSourceFiles?)null;
                 var fileDataSource = (DataSourceFiles?)null;
                 if (entity.ScaleGroup.HasSourceData == true)
@@ -414,6 +443,7 @@ namespace Rokys.Audit.Services.Services
                     }
                 }
                 var customDto = _mapper.Map<PeriodAuditScaleResultCustomResponseDto>(entity);
+                customDto.SubScales = subScales;
                 customDto.ScaleGroup.DataSourceTemplate = fileDataSourceTemplate;
                 customDto.ScaleGroup.DataSource = fileDataSource;
                 var currentUser = _httpContextAccessor.CurrentUser();

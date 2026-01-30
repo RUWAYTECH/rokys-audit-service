@@ -132,7 +132,7 @@ namespace Rokys.Audit.Services.Services
                 var scaleGroups = await _scaleGroupRepository.GetByGroupIdAsync(requestDto.GroupId);
                 var currentPeriodAuditGroupResult = await _periodAuditGroupResultRepository.GetByPeriodAuditIdAsync(requestDto.PeriodAuditId);
                 var currentWeighting = currentPeriodAuditGroupResult.Sum(x => x.TotalWeighting);
-                if(currentWeighting + requestDto.TotalWeighting > 100)
+                if (currentWeighting + requestDto.TotalWeighting > 100)
                 {
                     response = ResponseDto.Error<PeriodAuditGroupResultResponseDto>($"Ya tiene asignado {currentWeighting}% de ponderación, no se puede asignar una ponderación total de {requestDto.TotalWeighting + currentWeighting}%.");
                     return response;
@@ -264,8 +264,8 @@ namespace Rokys.Audit.Services.Services
             try
             {
                 var entity = await _periodAuditGroupResultRepository.GetFirstOrDefaultAsync(
-                    filter: x => x.PeriodAuditGroupResultId == id && x.IsActive, 
-                    includeProperties: [ x => x.Group, y => y.PeriodAudit]);
+                    filter: x => x.PeriodAuditGroupResultId == id && x.IsActive,
+                    includeProperties: [x => x.Group, y => y.PeriodAudit]);
                 if (entity == null)
                 {
                     response = ResponseDto.Error<PeriodAuditGroupResultResponseDto>("No se encontró el registro.");
@@ -304,7 +304,7 @@ namespace Rokys.Audit.Services.Services
                 entity.TotalWeighting = requestDto.TotalWeighting;
                 entity.UpdateAudit(currentUser.UserName);
                 _periodAuditGroupResultRepository.Update(entity);
-                
+
                 await _unitOfWork.CommitAsync();
                 response.Data = _mapper.Map<PeriodAuditGroupResultResponseDto>(entity);
             }
@@ -341,7 +341,7 @@ namespace Rokys.Audit.Services.Services
                     orderBy: orderBy,
                     pageNumber: filterRequestDto.PageNumber,
                     pageSize: filterRequestDto.PageSize,
-                    includeProperties: [ x => x.Group, x => x.PeriodAudit]
+                    includeProperties: [x => x.Group, x => x.PeriodAudit]
 
                 );
                 var pagedResult = new PaginationResponseDto<PeriodAuditGroupResultResponseDto>
@@ -374,7 +374,7 @@ namespace Rokys.Audit.Services.Services
                 decimal acumulatedScore = 0;
                 foreach (var scaleResult in periodAuditScaleResult)
                 {
-                    var scaleScore = (scaleResult.AppliedWeighting / 100) *  scaleResult.ScoreValue;
+                    var scaleScore = (scaleResult.AppliedWeighting / 100) * scaleResult.ScoreValue;
                     acumulatedScore += scaleScore;
                 }
 
@@ -384,9 +384,71 @@ namespace Rokys.Audit.Services.Services
                     response = ResponseDto.Error<bool>("No se encontró la escala asociada a la empresa ni la escala por defecto.");
                     return response;
                 }
+                scaleCompany = scaleCompany.OrderBy(sc => sc.LevelOrder).ToList();
+                var calculatesScaleCompany = scaleCompany.Select(sc => new
+                {
+                    sc.Name,
+                    sc.ColorCode,
+                    sc.MinValue,
+                    sc.MaxValue,
+                    sc.NormalizedScore,
+                    sc.ExpectedDistribution,
+                    CalculatedValue = null as Decimal?
+                }).ToList();
+
+                if (scaleCompany.FirstOrDefault()?.ScaleType == ScaleType.Weighted)
+                {
+                    var lastScaleCompany = null as ScaleCompany;
+
+                    calculatesScaleCompany = scaleCompany.Select((sc, index) =>
+                    {
+                        Decimal? calculatedValue = null;
+                        if (index == 0)
+                        {
+                            calculatedValue = acumulatedScore > sc.NormalizedScore ? ((acumulatedScore - sc.NormalizedScore) / (2 - sc.NormalizedScore)) * sc.ExpectedDistribution : null;
+                        }
+                        else if (index != scaleCompany.Count() - 1)
+                        {
+                            calculatedValue = acumulatedScore > sc.NormalizedScore ? ((acumulatedScore - sc.NormalizedScore) / (lastScaleCompany.NormalizedScore - sc.NormalizedScore)) * sc.ExpectedDistribution : null;
+                        }
+                        lastScaleCompany = sc;
+                        return new
+                        {
+                            sc.Name,
+                            sc.ColorCode,
+                            sc.MinValue,
+                            sc.MaxValue,
+                            sc.NormalizedScore,
+                            sc.ExpectedDistribution,
+                            CalculatedValue = calculatedValue
+                        };
+                    }).ToList();
+
+                    // modificar CalculatedValue solo para el ultimo elemento de la lista
+                    // calculatedvalue = si al menos uno de los anteriores elementos calculatedValue != normalizedScore, entonces calculatedValue = expectedDistribution
+                    // caso contrario calculatedValue = acumuladedScore >= lastElement.NormalizedScore ? ((acumulatedScore - lastElement.NormalizedScore) / (secondLastElement.NormalizedScore - lastElement.NormalizedScore)) * lastElement.ExpectedDistribution : null;
+                    var secondLastElement = calculatesScaleCompany[calculatesScaleCompany.Count - 2];
+                    var lastElement = calculatesScaleCompany.Last();
+                    var hasCalculatedValueDifferent = calculatesScaleCompany
+                        .Take(calculatesScaleCompany.Count - 1)
+                        .Any(c => c.CalculatedValue != c.NormalizedScore);
+                    var calculatedValueLast = hasCalculatedValueDifferent ?
+                        lastElement.ExpectedDistribution :
+                        (acumulatedScore >= lastElement.NormalizedScore ? ((acumulatedScore - lastElement.NormalizedScore) / (secondLastElement.NormalizedScore - lastElement.NormalizedScore)) * lastElement.ExpectedDistribution : null);
+                    calculatesScaleCompany[calculatesScaleCompany.Count - 1] = new
+                    {
+                        lastElement.Name,
+                        lastElement.ColorCode,
+                        lastElement.MinValue,
+                        lastElement.MaxValue,
+                        lastElement.NormalizedScore,
+                        lastElement.ExpectedDistribution,
+                        CalculatedValue = calculatedValueLast,
+                    };
+                }
 
                 bool scaleFound = false;
-                foreach (var scale in scaleCompany)
+                foreach (var scale in calculatesScaleCompany)
                 {
                     if (acumulatedScore >= scale.MinValue && acumulatedScore <= scale.MaxValue)
                     {
@@ -691,14 +753,14 @@ namespace Rokys.Audit.Services.Services
             }
             return response;
         }
-    
+
         public async Task<ResponseDto<bool>> GetAllowedActionPlans(Guid id)
         {
             var response = ResponseDto.Create<bool>();
             try
             {
                 var entity = await _periodAuditRepository.GetCustomByIdAsync(filter: x => x.PeriodAuditId == id && x.IsActive);
-                
+
                 if (entity == null)
                 {
                     throw new Exception("No se encontró el registro.");
@@ -724,7 +786,7 @@ namespace Rokys.Audit.Services.Services
                 // Validar que el usuario sea participante de la auditoría con uno de los roles autorizados
                 if (entity.PeriodAuditParticipants == null || !entity.PeriodAuditParticipants.Any())
                 {
-                   throw new Exception("La auditoría no tiene participantes asignados.");
+                    throw new Exception("La auditoría no tiene participantes asignados.");
                 }
 
                 var userParticipant = entity.PeriodAuditParticipants
