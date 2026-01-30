@@ -6,11 +6,15 @@ namespace Rokys.Audit.Model.Tables
         public string Code { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
+
+        public string ScaleType { get; set; } = string.Empty;
         public bool IsActive { get; set; } = true;
 
         // Navigation properties
         public virtual ICollection<EnterpriseGroup> EnterpriseGroups { get; set; } = new List<EnterpriseGroup>();
         public virtual ICollection<ScaleCompany> ScaleCompanies { get; set; } = new List<ScaleCompany>();
+        public virtual ICollection<SubScale> SubScales { get; set; } = new List<SubScale>();
         public virtual ICollection<AuditRoleConfiguration> AuditRoleConfigurations { get; set; } = new List<AuditRoleConfiguration>();
+        public virtual ICollection<GroupingUser> GroupingUsers { get; set; } = new List<GroupingUser>();
     }
 }

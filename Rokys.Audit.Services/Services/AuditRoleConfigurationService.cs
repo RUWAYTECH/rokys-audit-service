@@ -125,13 +125,12 @@ namespace Rokys.Audit.Services.Services
 								if (requestDto.EnterpriseGroupingId.HasValue)
 								{
                                     filter = filter.AndAlso(x => x.EnterpriseGroupingId == requestDto.EnterpriseGroupingId.Value );
-                            
 								}
 
                                 // Lógica del filtro de EnterpriseId
 								if (requestDto.EnterpriseId.HasValue)
 								{
-                                    filter = filter.AndAlso(x => x.EnterpriseId == requestDto.EnterpriseId.Value || x.EnterpriseGrouping.EnterpriseGroups.Any(eg => eg.EnterpriseId == requestDto.EnterpriseId.Value));
+                                    filter = filter.AndAlso(x => x.EnterpriseId == requestDto.EnterpriseId.Value || x.EnterpriseGrouping.EnterpriseGroups.Any(eg =>eg.IsActive && eg.EnterpriseId == requestDto.EnterpriseId.Value));
                             
 								}
 

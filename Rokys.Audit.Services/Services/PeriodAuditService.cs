@@ -171,6 +171,7 @@ namespace Rokys.Audit.Services.Services
                     var newPeriodAuditGroupResult = new PeriodAuditGroupResultRequestDto
                     {
                         PeriodAuditId = entity.PeriodAuditId,
+                        Code = grp.Code,
                         GroupId = grp.GroupId,
                         ScoreValue = 0,
                         TotalWeighting = grp.Weighting,

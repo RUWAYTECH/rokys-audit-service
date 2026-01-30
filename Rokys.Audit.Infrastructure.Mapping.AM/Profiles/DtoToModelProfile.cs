@@ -29,6 +29,7 @@ using Rokys.Audit.DTOs.Requests.SubstitutionHistory;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.EnterpriseGrouping;
 using Rokys.Audit.DTOs.Requests.EnterpriseGroup;
+using Rokys.Audit.DTOs.Requests.GroupingUser;
 
 namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
 {
@@ -66,6 +67,8 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
             CreateMap<SubstitutionHistoryRequestDto, SubstitutionHistory>();
             CreateMap<EnterpriseGroupRequestDto, EnterpriseGroup>();
             CreateMap<EnterpriseGroupingRequestDto, EnterpriseGrouping>();
+            CreateMap<GroupingUserRequestDto, GroupingUser>();
+            CreateMap<GroupingUserUpsertRequestDto, GroupingUser>();
         }
     }
 }

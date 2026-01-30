@@ -10,5 +10,6 @@ namespace Rokys.Audit.DTOs.Requests.EnterpriseGrouping
     public class EnterpriseGroupingFilterRequestDto : PaginationRequestDto
     {
         public Guid? EnterpriseGroupingId { get; set; }
+        public string? ScaleType { get; set; }
     }
 }

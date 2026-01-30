@@ -22,7 +22,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
 
             builder.HasIndex(e => e.Code)
                 .IsUnique();
-
+            builder.Property(x => x.ScaleType).IsRequired().HasMaxLength(50);
             builder.Property(e => e.Name)
                 .IsRequired()
                 .HasMaxLength(200);
@@ -48,6 +48,11 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
             builder.HasMany(e => e.EnterpriseGroups)
                 .WithOne(eg => eg.EnterpriseGrouping)
                 .HasForeignKey(eg => eg.EnterpriseGroupingId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(e => e.GroupingUsers)
+                .WithOne(gu => gu.EnterpriseGrouping)
+                .HasForeignKey(gu => gu.EnterpriseGroupingId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }
