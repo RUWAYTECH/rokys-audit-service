@@ -19,12 +19,6 @@ namespace Rokys.Audit.Services.Services.PeriodAuditUtils
         )
         {
             var score = acumulatedScore;
-            if (scaleCompany == null || !scaleCompany.Any() || subScales == null || !subScales.Any())
-            {
-                throw new ArgumentException("No se encontró la escala asociada a la empresa ni la escala por defecto.");
-            }
-
-            var firstCalValue = subScales.Max(s => s.Value);
 
             // Ordenar scaleCompany primero para mantener el orden en todos los cálculos
             var orderedScaleCompany = scaleCompany.OrderBy(sc => sc.LevelOrder).ToList();
@@ -43,6 +37,7 @@ namespace Rokys.Audit.Services.Services.PeriodAuditUtils
 
             if (scaleType == ScaleType.Weighted)
             {
+                var firstCalValue = subScales.Max(s => s.Value);
                 decimal? lastNormalizedScore = null;
 
                 calculatedScaleCompany = orderedScaleCompany.Select((sc, index) =>
@@ -103,7 +98,7 @@ namespace Rokys.Audit.Services.Services.PeriodAuditUtils
             string scaleDescription = string.Empty;
             string scaleColor = string.Empty;
 
-            foreach (var scale in calculatedScaleCompany)
+            foreach (var scale in scaleCompany)
             {
                 if (roundedScore >= scale.MinValue && roundedScore <= scale.MaxValue)
                 {

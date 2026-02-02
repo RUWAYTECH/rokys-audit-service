@@ -392,9 +392,15 @@ namespace Rokys.Audit.Services.Services
                 var scaleCompany = await _scaleCompanyRepository.GetConfiguredForEnterprise(enterpriseGrouping!.EnterpriseGroupingId, entity.PeriodAudit.Store.EnterpriseId);
                 var subScales = await _subScaleRepository.GetAsync(x => x.EnterpriseGroupingId == enterpriseGrouping.EnterpriseGroupingId && x.IsActive);
                 
-                if (scaleCompany == null || !scaleCompany.Any() || subScales == null || !subScales.Any())
+                if (scaleCompany == null || !scaleCompany.Any())
                 {
                     response = ResponseDto.Error<bool>("No se encontró la escala asociada a la empresa ni la escala por defecto.");
+                    return response;
+                }
+
+                if (enterpriseGrouping.ScaleType == ScaleType.Weighted && (subScales == null || !subScales.Any()))
+                {
+                    response = ResponseDto.Error<bool>("La escala de la empresa es de tipo ponderado, pero no se encontraron subescalas definidas.");
                     return response;
                 }
 
