@@ -64,6 +64,7 @@ namespace Rokys.Audit.Infrastructure.Repositories
 
         Task<(List<UserReference> items, int totalCount)> GetByEnterpriseIdAndRoleCodesAsync(
             List<string> roleCodes,
+            List<Guid> userIds,
             string? filter = null,
             Func<IQueryable<UserReference>, IOrderedQueryable<UserReference>>? orderBy = null,
             int pageNumber = 0,

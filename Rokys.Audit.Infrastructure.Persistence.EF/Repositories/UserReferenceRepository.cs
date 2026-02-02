@@ -79,10 +79,12 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
 
         public async Task<(List<UserReference> items, int totalCount)> GetByEnterpriseIdAndRoleCodesAsync(
             List<string> roleCodes,
+            List<Guid> userIds,
             string? filter = null,
             Func<IQueryable<UserReference>, IOrderedQueryable<UserReference>>? orderBy = null,
             int pageNumber = 0,
-            int pageSize = 0)
+            int pageSize = 0
+            )
         {
             if (roleCodes == null || !roleCodes.Any())
             {
@@ -91,7 +93,8 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
 
             var query = DbSet.Where(u => u.IsActive &&
                                         !string.IsNullOrEmpty(u.RoleCode) &&
-                                        roleCodes.Contains(u.RoleCode));
+                                        roleCodes.Contains(u.RoleCode) &&
+                                        userIds.Contains(u.UserReferenceId));
 
             // Aplicar filtro de búsqueda si existe
             if (!string.IsNullOrEmpty(filter))
@@ -106,6 +109,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
                     (x.DocumentNumber != null && x.DocumentNumber.ToLower().Contains(searchTerm)) ||
                     (x.RoleName != null && x.RoleName.ToLower().Contains(searchTerm)));
             }
+
 
             // Contar total antes de aplicar paginación
             int rowsCount = await query.CountAsync();

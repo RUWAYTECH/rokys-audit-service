@@ -4,6 +4,6 @@ namespace Rokys.Audit.DTOs.Requests.UserReference
 {
     public class UserReferenceFilterEnterpriseRequestDto : PaginationRequestDto
     {
-        public string? roleCode { get; set; }
+        public string? RoleCode { get; set; }
     }
 }

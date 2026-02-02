@@ -17,6 +17,7 @@ using Rokys.Audit.Common.Extensions;
 using Rokys.Audit.DTOs.Requests.EmployeeStore;
 using System.Security.AccessControl;
 using DocumentFormat.OpenXml.Spreadsheet;
+using System.Linq;
 
 namespace Rokys.Audit.Services.Services
 {
@@ -654,13 +655,28 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<PaginationResponseDto<UserReferenceResponseDto>>();
             try
             {
-                var auditRoles = await _auditRoleConfigurationRepository.GetByEnterpriseId(enterpriseId);
-                if (requestDto.roleCode == null)
+                var auditRoles = await _auditRoleConfigurationRepository.GetByEnterpriseIdAsync(enterpriseId);
+                if (requestDto.RoleCode == null)
                 {
-                    requestDto.roleCode = string.Join(',', auditRoles.Select(ar => ar.RoleCode).Distinct());
+                    requestDto.RoleCode = string.Join(',', auditRoles.Select(ar => ar.RoleCode).Distinct());
                 }
-                var listRoleCodes = requestDto.roleCode.Split(',').Select(rc => rc.Trim()).ToList();
-                var users = await _userReferenceRepository.GetByEnterpriseIdAndRoleCodesAsync(listRoleCodes, requestDto.Filter, pageNumber: requestDto.PageNumber,
+                var listRoleCodes = requestDto.RoleCode.Split(',').Select(rc => rc.Trim()).ToList();
+                var enterpriseGroupingId = auditRoles
+                    .Where(ar => listRoleCodes.Contains(ar.RoleCode))
+                    .Select(ar => ar.EnterpriseGroupingId)
+                    .FirstOrDefault();
+
+                var groupingUsers = await _groupingUserRepository.GetAsync(
+                    filter: x => x.EnterpriseGroupingId == enterpriseGroupingId && x.IsActive
+                );
+
+                var userReferenceIdsToRoleCode = groupingUsers
+                    .Where(gu => listRoleCodes.Any(rc => gu.RolesCodes.Contains(rc)))
+                    .Select(gu => gu.UserReferenceId)
+                    .Distinct()
+                    .ToList();
+
+                var users = await _userReferenceRepository.GetByEnterpriseIdAndRoleCodesAsync(listRoleCodes, userReferenceIdsToRoleCode, requestDto.Filter, pageNumber: requestDto.PageNumber,
                     pageSize: requestDto.PageSize);
                 var pagedResult = new PaginationResponseDto<UserReferenceResponseDto>
                 {
