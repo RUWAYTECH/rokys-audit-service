@@ -88,9 +88,9 @@ namespace Rokys.Audit.WebAPI.Controllers
             return BadRequest(response);
         }
         [HttpGet("get-by-enterprise-id-and-roles/{enterpriseId}")]
-        public async Task<IActionResult> GetUsersByEnterpriseIdAndRoleCodes([FromRoute] Guid enterpriseId, [FromQuery] string? roleCodes, [FromQuery] string? filter)
+        public async Task<IActionResult> GetUsersByEnterpriseIdAndRoleCodes([FromRoute] Guid enterpriseId, [FromQuery] UserReferenceFilterEnterpriseRequestDto userReferenceFilterEnterpriseRequestDto)
         {
-            var response = await _userReferenceService.GetUsersByEnterpriseIdAndRoleCodes(enterpriseId, roleCodes, filter);
+            var response = await _userReferenceService.GetUsersByEnterpriseIdAndRoleCodes(enterpriseId, userReferenceFilterEnterpriseRequestDto);
             if (response.IsValid)
                 return Ok(response);
             return BadRequest(response);

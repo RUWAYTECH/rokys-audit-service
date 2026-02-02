@@ -16,6 +16,7 @@ using System.Linq.Expressions;
 using Rokys.Audit.Common.Extensions;
 using Rokys.Audit.DTOs.Requests.EmployeeStore;
 using System.Security.AccessControl;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace Rokys.Audit.Services.Services
 {
@@ -648,19 +649,27 @@ namespace Rokys.Audit.Services.Services
             }
             return response;
         }
-        public async Task<ResponseDto<List<UserReferenceResponseDto>>> GetUsersByEnterpriseIdAndRoleCodes(Guid enterpriseId, string? roleCodes, string? filter)
+        public async Task<ResponseDto<PaginationResponseDto<UserReferenceResponseDto>>> GetUsersByEnterpriseIdAndRoleCodes(Guid enterpriseId, UserReferenceFilterEnterpriseRequestDto requestDto)
         {
-            var response = ResponseDto.Create<List<UserReferenceResponseDto>>();
+            var response = ResponseDto.Create<PaginationResponseDto<UserReferenceResponseDto>>();
             try
             {
                 var auditRoles = await _auditRoleConfigurationRepository.GetByEnterpriseId(enterpriseId);
-                if (roleCodes == null)
+                if (requestDto.roleCode == null)
                 {
-                    roleCodes = string.Join(',', auditRoles.Select(ar => ar.RoleCode).Distinct());
+                    requestDto.roleCode = string.Join(',', auditRoles.Select(ar => ar.RoleCode).Distinct());
                 }
-                var listRoleCodes = roleCodes.Split(',').Select(rc => rc.Trim()).ToList();
-                var users = await _userReferenceRepository.GetByRoleCodesAsync(listRoleCodes, filter);
-                response.Data = _mapper.Map<List<UserReferenceResponseDto>>(users);
+                var listRoleCodes = requestDto.roleCode.Split(',').Select(rc => rc.Trim()).ToList();
+                var users = await _userReferenceRepository.GetByRoleCodesAsync(listRoleCodes, requestDto.Filter, pageNumber: requestDto.PageNumber,
+                    pageSize: requestDto.PageSize);
+                var pagedResult = new PaginationResponseDto<UserReferenceResponseDto>
+                {
+                    Items = _mapper.Map<IEnumerable<UserReferenceResponseDto>>(users.items),
+                    TotalCount = users.totalCount,
+                    PageNumber = requestDto.PageNumber,
+                    PageSize = requestDto.PageSize
+                };
+                response.Data = pagedResult;
             }
             catch (Exception ex)
             {

@@ -59,6 +59,6 @@ namespace Rokys.Audit.Services.Interfaces
         Task<ResponseDto<UserReferenceResponseDto>> UpdateByUser(Guid userReferenceId, UserReferenceRequestDto requestDto);
 
         Task<ResponseDto<List<UserReferenceResponseDto>>> GetUsersByEnterpriseGroupingId(Guid enterpriseGroupingId);
-        Task<ResponseDto<List<UserReferenceResponseDto>>> GetUsersByEnterpriseIdAndRoleCodes(Guid enterpriseId, string? roleCodes, string? filter);
+        Task<ResponseDto<PaginationResponseDto<UserReferenceResponseDto>>> GetUsersByEnterpriseIdAndRoleCodes(Guid enterpriseId, UserReferenceFilterEnterpriseRequestDto requestDto);
     }
 }

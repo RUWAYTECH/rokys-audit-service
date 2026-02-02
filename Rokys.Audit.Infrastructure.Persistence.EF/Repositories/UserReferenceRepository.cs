@@ -77,16 +77,22 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
             return await query.AnyAsync();
         }
 
-        public async Task<List<UserReference>> GetByRoleCodesAsync(List<string> roleCodes, string? filter)
+        public async Task<(List<UserReference> items, int totalCount)> GetByRoleCodesAsync(
+            List<string> roleCodes,
+            string? filter = null,
+            Func<IQueryable<UserReference>, IOrderedQueryable<UserReference>>? orderBy = null,
+            int pageNumber = 0,
+            int pageSize = 0)
         {
             if (roleCodes == null || !roleCodes.Any())
             {
-                return new List<UserReference>();
+                return (new List<UserReference>(), 0);
             }
 
             var query = DbSet.Where(u => u.IsActive &&
-                               !string.IsNullOrEmpty(u.RoleCode) &&
-                               roleCodes.Contains(u.RoleCode));
+                                        !string.IsNullOrEmpty(u.RoleCode) &&
+                                        roleCodes.Contains(u.RoleCode));
+
             // Aplicar filtro de búsqueda si existe
             if (!string.IsNullOrEmpty(filter))
             {
@@ -101,7 +107,28 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
                     (x.RoleName != null && x.RoleName.ToLower().Contains(searchTerm)));
             }
 
-            return await query.ToListAsync();
+            // Contar total antes de aplicar paginación
+            int rowsCount = await query.CountAsync();
+
+            // Aplicar ordenamiento si existe
+            if (orderBy != null)
+            {
+                query = orderBy(query);
+            }
+
+            // Aplicar paginación si se especifica
+            if (pageSize > 0 && pageNumber > 0)
+            {
+                var items = await query
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+                return (items, rowsCount);
+            }
+
+            // Sin paginación, devolver todos
+            var allItems = await query.ToListAsync();
+            return (allItems, rowsCount);
         }
     }
 }
