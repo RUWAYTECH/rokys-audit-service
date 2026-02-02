@@ -77,23 +77,31 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
             return await query.AnyAsync();
         }
 
-        public async Task<List<UserReference>> GetByRoleCodesAsync(List<string> roleCodes)
+        public async Task<List<UserReference>> GetByRoleCodesAsync(List<string> roleCodes, string? filter)
         {
             if (roleCodes == null || !roleCodes.Any())
             {
                 return new List<UserReference>();
             }
 
-            // Traer todos los usuarios activos
-            var activeUsers = await DbSet
-                .Where(u => u.IsActive)
-                .ToListAsync();
+            var query = DbSet.Where(u => u.IsActive &&
+                               !string.IsNullOrEmpty(u.RoleCode) &&
+                               roleCodes.Contains(u.RoleCode));
+            // Aplicar filtro de búsqueda si existe
+            if (!string.IsNullOrEmpty(filter))
+            {
+                var searchTerm = filter.ToLower();
+                query = query.Where(x =>
+                    x.FirstName.ToLower().Contains(searchTerm) ||
+                    x.LastName.ToLower().Contains(searchTerm) ||
+                    (x.FirstName + " " + x.LastName).ToLower().Contains(searchTerm) ||
+                    (x.Email != null && x.Email.ToLower().Contains(searchTerm)) ||
+                    (x.PersonalEmail != null && x.PersonalEmail.ToLower().Contains(searchTerm)) ||
+                    (x.DocumentNumber != null && x.DocumentNumber.ToLower().Contains(searchTerm)) ||
+                    (x.RoleName != null && x.RoleName.ToLower().Contains(searchTerm)));
+            }
 
-            // Filtrar en memoria los que tengan alguno de los roles
-            return activeUsers
-                .Where(u => !string.IsNullOrEmpty(u.RoleCode) &&
-                           roleCodes.Any(role => u.RoleCode.Contains(role)))
-                .ToList();
+            return await query.ToListAsync();
         }
     }
 }

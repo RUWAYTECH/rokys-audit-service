@@ -634,7 +634,7 @@ namespace Rokys.Audit.Services.Services
             {
                 var auditRoles = await _auditRoleConfigurationRepository.GetAsync(filter: x => x.EnterpriseGroupingId == enterpriseGroupingId, includeProperties: x=>x.EnterpriseGrouping.EnterpriseGroups);
                 var roleCodes = auditRoles.Select(ar => ar.RoleCode).Distinct().ToList();
-                var users = await _userReferenceRepository.GetByRoleCodesAsync(roleCodes);
+                var users = await _userReferenceRepository.GetByRoleCodesAsync(roleCodes, null);
                 response.Data = _mapper.Map<List<UserReferenceResponseDto>>(users);
             }
             catch (Exception ex)
@@ -648,7 +648,7 @@ namespace Rokys.Audit.Services.Services
             }
             return response;
         }
-        public async Task<ResponseDto<List<UserReferenceResponseDto>>> GetUsersByEnterpriseIdAndRoleCodes(Guid enterpriseId, string? roleCodes)
+        public async Task<ResponseDto<List<UserReferenceResponseDto>>> GetUsersByEnterpriseIdAndRoleCodes(Guid enterpriseId, string? roleCodes, string? filter)
         {
             var response = ResponseDto.Create<List<UserReferenceResponseDto>>();
             try
@@ -659,7 +659,7 @@ namespace Rokys.Audit.Services.Services
                     roleCodes = string.Join(',', auditRoles.Select(ar => ar.RoleCode).Distinct());
                 }
                 var listRoleCodes = roleCodes.Split(',').Select(rc => rc.Trim()).ToList();
-                var users = await _userReferenceRepository.GetByRoleCodesAsync(listRoleCodes);
+                var users = await _userReferenceRepository.GetByRoleCodesAsync(listRoleCodes, filter);
                 response.Data = _mapper.Map<List<UserReferenceResponseDto>>(users);
             }
             catch (Exception ex)
