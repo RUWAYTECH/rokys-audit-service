@@ -648,5 +648,30 @@ namespace Rokys.Audit.Services.Services
             }
             return response;
         }
+        public async Task<ResponseDto<List<UserReferenceResponseDto>>> GetUsersByEnterpriseIdAndRoleCodes(Guid enterpriseId, string? roleCodes)
+        {
+            var response = ResponseDto.Create<List<UserReferenceResponseDto>>();
+            try
+            {
+                var auditRoles = await _auditRoleConfigurationRepository.GetByEnterpriseId(enterpriseId);
+                if (roleCodes == null)
+                {
+                    roleCodes = string.Join(',', auditRoles.Select(ar => ar.RoleCode).Distinct());
+                }
+                var listRoleCodes = roleCodes.Split(',').Select(rc => rc.Trim()).ToList();
+                var users = await _userReferenceRepository.GetByRoleCodesAsync(listRoleCodes);
+                response.Data = _mapper.Map<List<UserReferenceResponseDto>>(users);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting UserReferences by EnterpriseId and RoleCodes");
+                response.Messages.Add(new ApplicationMessage
+                {
+                    Message = "Error interno del servidor al obtener los usuarios por empresa y roles",
+                    MessageType = ApplicationMessageType.Error
+                });
+            }
+            return response;
+        }
     }
 }

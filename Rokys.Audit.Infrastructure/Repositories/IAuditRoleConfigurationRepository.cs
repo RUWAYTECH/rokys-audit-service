@@ -11,5 +11,6 @@ namespace Rokys.Audit.Infrastructure.Repositories
         Task<IEnumerable<AuditRoleConfiguration>> GetActiveConfigurationsOrderedAsync();
         Task<bool> ExistsBySequenceOrderAsync(int sequenceOrder, Guid? enterpriseId, Guid? excludeId = null);
         Task<(List<AuditRoleConfiguration> Items, int TotalRows)> GetCustomPagedAsync(Expression<Func<AuditRoleConfiguration, bool>> filter, int pageNumber, int pageSize);
+        Task<List<AuditRoleConfiguration>> GetByEnterpriseId(Guid? enterpriseId);
     }
 }
