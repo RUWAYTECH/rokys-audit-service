@@ -81,8 +81,12 @@ namespace Rokys.Audit.Services.Services
                 entities.Add(entity);
                 _groupingUserRepository.Insert(entity);
                 await _unitOfWork.CommitAsync();
-
-                response.Data = _mapper.Map<GroupingUserResponseDto>(entities);
+                var newEntity = await _groupingUserRepository.GetFirstOrDefaultAsync(
+                        filter: x => x.UserReferenceId == requestDto.UserReferenceId
+                            && x.EnterpriseGroupingId == requestDto.EnterpriseGroupingId
+                            && x.IsActive,
+                        includeProperties: [x => x.EnterpriseGrouping, e => e.UserReference]);
+                response.Data = _mapper.Map<GroupingUserResponseDto>(newEntity);
             }
             catch (Exception ex)
             {

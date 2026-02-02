@@ -92,5 +92,37 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
             var items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
             return (items, rowsCount);
         }
+
+        public async Task<List<AuditRoleConfiguration>> GetByEnterpriseId(Guid? enterpriseId)
+        {
+            var query = DbSet
+                .Where(x =>
+                    x.IsActive &&
+                    (
+                        (enterpriseId == null && x.EnterpriseId == null) ||
+                        (enterpriseId != null && x.EnterpriseId == enterpriseId)
+                    )
+                )
+                .OrderBy(x => x.SequenceOrder ?? int.MaxValue)
+                .ThenBy(x => x.RoleName);
+            return await query.ToListAsync();
+        }
+        public async Task<List<AuditRoleConfiguration>> GetByEnterpriseIdAsync(Guid? enterpriseId)
+        {
+            var query = Db.AuditRoleConfigurations
+               .Include(x => x.EnterpriseGrouping)
+                   .ThenInclude(eg => eg.EnterpriseGroups.Where(g => g.IsActive))
+                       .ThenInclude(g => g.Enterprise)
+               .Where(x =>
+                   x.IsActive &&
+                   x.EnterpriseGrouping != null &&
+                   x.EnterpriseGrouping.EnterpriseGroups
+                       .Any(g => g.IsActive && g.EnterpriseId == enterpriseId)
+               )
+               .OrderByDescending(x => x.SequenceOrder ?? int.MinValue)
+               .ThenByDescending(x => x.RoleName);
+
+            return await query.ToListAsync();
+        }
     }
 }

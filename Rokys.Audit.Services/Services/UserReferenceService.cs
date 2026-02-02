@@ -16,6 +16,8 @@ using System.Linq.Expressions;
 using Rokys.Audit.Common.Extensions;
 using Rokys.Audit.DTOs.Requests.EmployeeStore;
 using System.Security.AccessControl;
+using DocumentFormat.OpenXml.Spreadsheet;
+using System.Linq;
 
 namespace Rokys.Audit.Services.Services
 {
@@ -634,7 +636,7 @@ namespace Rokys.Audit.Services.Services
             {
                 var auditRoles = await _auditRoleConfigurationRepository.GetAsync(filter: x => x.EnterpriseGroupingId == enterpriseGroupingId, includeProperties: x=>x.EnterpriseGrouping.EnterpriseGroups);
                 var roleCodes = auditRoles.Select(ar => ar.RoleCode).Distinct().ToList();
-                var users = await _userReferenceRepository.GetByRoleCodesAsync(roleCodes);
+                var users = await _userReferenceRepository.GetByRoleCode(roleCodes);
                 response.Data = _mapper.Map<List<UserReferenceResponseDto>>(users);
             }
             catch (Exception ex)
@@ -643,6 +645,54 @@ namespace Rokys.Audit.Services.Services
                 response.Messages.Add(new ApplicationMessage
                 {
                     Message = "Error interno del servidor al obtener todos los usuarios activos",
+                    MessageType = ApplicationMessageType.Error
+                });
+            }
+            return response;
+        }
+        public async Task<ResponseDto<PaginationResponseDto<UserReferenceResponseDto>>> GetUsersByEnterpriseIdAndRoleCodes(Guid enterpriseId, UserReferenceFilterEnterpriseRequestDto requestDto)
+        {
+            var response = ResponseDto.Create<PaginationResponseDto<UserReferenceResponseDto>>();
+            try
+            {
+                var auditRoles = await _auditRoleConfigurationRepository.GetByEnterpriseIdAsync(enterpriseId);
+                if (requestDto.RoleCode == null)
+                {
+                    requestDto.RoleCode = string.Join(',', auditRoles.Select(ar => ar.RoleCode).Distinct());
+                }
+                var listRoleCodes = requestDto.RoleCode.Split(',').Select(rc => rc.Trim()).ToList();
+                var enterpriseGroupingId = auditRoles
+                    .Where(ar => listRoleCodes.Contains(ar.RoleCode))
+                    .Select(ar => ar.EnterpriseGroupingId)
+                    .FirstOrDefault();
+
+                var groupingUsers = await _groupingUserRepository.GetAsync(
+                    filter: x => x.EnterpriseGroupingId == enterpriseGroupingId && x.IsActive
+                );
+
+                var userReferenceIdsToRoleCode = groupingUsers
+                    .Where(gu => listRoleCodes.Any(rc => gu.RolesCodes.Contains(rc)))
+                    .Select(gu => gu.UserReferenceId)
+                    .Distinct()
+                    .ToList();
+
+                var users = await _userReferenceRepository.GetByEnterpriseIdAndRoleCodesAsync(listRoleCodes, userReferenceIdsToRoleCode, requestDto.Filter, pageNumber: requestDto.PageNumber,
+                    pageSize: requestDto.PageSize);
+                var pagedResult = new PaginationResponseDto<UserReferenceResponseDto>
+                {
+                    Items = _mapper.Map<IEnumerable<UserReferenceResponseDto>>(users.items),
+                    TotalCount = users.totalCount,
+                    PageNumber = requestDto.PageNumber,
+                    PageSize = requestDto.PageSize
+                };
+                response.Data = pagedResult;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting UserReferences by EnterpriseId and RoleCodes");
+                response.Messages.Add(new ApplicationMessage
+                {
+                    Message = "Error interno del servidor al obtener los usuarios por empresa y roles",
                     MessageType = ApplicationMessageType.Error
                 });
             }

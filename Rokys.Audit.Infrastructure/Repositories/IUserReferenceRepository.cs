@@ -62,6 +62,13 @@ namespace Rokys.Audit.Infrastructure.Repositories
         /// <returns>True si existe, False en caso contrario</returns>
         Task<bool> ExistsByEmployeeIdAsync(Guid employeeId, Guid? excludeId = null);
 
-        Task<List<UserReference>> GetByRoleCodesAsync(List<string> roleCodes);
+        Task<(List<UserReference> items, int totalCount)> GetByEnterpriseIdAndRoleCodesAsync(
+            List<string> roleCodes,
+            List<Guid> userIds,
+            string? filter = null,
+            Func<IQueryable<UserReference>, IOrderedQueryable<UserReference>>? orderBy = null,
+            int pageNumber = 0,
+            int pageSize = 0);
+        Task<List<UserReference>> GetByRoleCode(List<string> roleCodes);
     }
 }
