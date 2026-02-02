@@ -11,5 +11,6 @@ namespace Rokys.Audit.DTOs.Requests.GroupingUser
     {
         public Guid EnterpriseGroupingId { get; set; }
         public Guid? UserReferenceId { get; set; }
+        public string? RoleCode { get; set; }
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Reatil.Services.Services;
+using Rokys.Audit.Common.Constant;
 using Rokys.Audit.Common.Extensions;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.GroupingUser;
@@ -14,6 +15,7 @@ using Rokys.Audit.Infrastructure.Repositories;
 using Rokys.Audit.Model.Tables;
 using Rokys.Audit.Services.Interfaces;
 using Rokys.Audit.Services.Interfaces.Validations;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace Rokys.Audit.Services.Services
@@ -183,14 +185,33 @@ namespace Rokys.Audit.Services.Services
                 {
                     filter = filter.AndAlso(x => x.UserReferenceId == filterRequest.UserReferenceId.Value);
                 }
+
                 if (filterRequest.EnterpriseGroupingId == Guid.Empty)
                 {
                     throw new ArgumentException("El filtro espera al menos un Gropo de Empresa.");
                 }
 
+                if (!string.IsNullOrEmpty(filterRequest.RoleCode))
+                {
+                    filter = filter.AndAlso(x => x.RolesCodes.Contains(filterRequest.RoleCode));
+                }
+
                 filter = filter.AndAlso(
                     x => x.EnterpriseGroupingId == filterRequest.EnterpriseGroupingId
                 );
+
+                if (!string.IsNullOrEmpty(filterRequest.Filter))
+                {
+                    var searchTerm = filterRequest.Filter.ToLower();
+                    filter = filter.AndAlso(x =>
+                        x.UserReference.FirstName.ToLower().Contains(searchTerm) ||
+                        x.UserReference.LastName.ToLower().Contains(searchTerm) ||
+                        (x.UserReference.FirstName + " " + x.UserReference.LastName).ToLower().Contains(searchTerm) ||
+                        (x.UserReference.Email != null && x.UserReference.Email.ToLower().Contains(searchTerm)) ||
+                        (x.UserReference.PersonalEmail != null && x.UserReference.PersonalEmail.ToLower().Contains(searchTerm)) ||
+                        (x.UserReference.DocumentNumber != null && x.UserReference.DocumentNumber.ToLower().Contains(searchTerm))
+                    );
+                }
 
                 var entities = await _groupingUserRepository.GetPagedAsync(
                     filter: filter,
