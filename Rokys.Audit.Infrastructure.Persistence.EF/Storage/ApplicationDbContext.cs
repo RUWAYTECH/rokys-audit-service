@@ -44,6 +44,8 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
 
         public DbSet<PeriodAuditGroupResult> PeriodAuditGroupResults { get; set; }
 
+        public DbSet<AuditPeriodPreEvaluation> AuditPeriodPreEvaluations { get; set; }
+
         // Audit role configuration
         public DbSet<AuditRoleConfiguration> AuditRoleConfigurations { get; set; }
         public DbSet<PeriodAuditParticipant> PeriodAuditParticipants { get; set; }
@@ -107,6 +109,8 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage
             modelBuilder.ApplyConfiguration(new MaintenanceDetailTableConfig());
 
             modelBuilder.ApplyConfiguration(new PeriodAuditGroupResultConfig());
+
+            modelBuilder.ApplyConfiguration(new AuditPeriodPreEvaluationConfig());
 
             // Substitution history configuration
             modelBuilder.ApplyConfiguration(new SubstitutionHistoryConfig());

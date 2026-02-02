@@ -13,7 +13,6 @@ END
 DECLARE @CreatedBy NVARCHAR(50) = 'Admin';
 DECLARE @CreationDate DATETIME = '2026-01-21 09:18:28.226';
 
--- Insertar registros en EnterpriseGroup utilizando los RUC de Enterprise
 INSERT INTO EnterpriseGroup (EnterpriseGroupId, EnterpriseId, EnterpriseGroupingId, IsActive, CreatedBy, CreationDate)
 SELECT 
     NEWID() AS EnterpriseGroupId,
@@ -34,4 +33,9 @@ WHERE e.Code IN (
     '20601824265',  -- INVERSIONES VIENA DEL PERU S.A.C
     '20517656641',  -- INVERSIONES PLAZA SAN MARTIN SAC
     '20607478695'   -- BISHAMONTEN E.I.R.L.
+)
+AND NOT EXISTS (
+    SELECT 1 FROM EnterpriseGroup eg
+    WHERE eg.EnterpriseId = e.EnterpriseId
+      AND eg.EnterpriseGroupingId = @EnterpriseGroupingId
 );
