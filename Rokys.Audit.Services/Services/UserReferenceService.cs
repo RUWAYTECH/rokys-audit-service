@@ -635,7 +635,7 @@ namespace Rokys.Audit.Services.Services
             {
                 var auditRoles = await _auditRoleConfigurationRepository.GetAsync(filter: x => x.EnterpriseGroupingId == enterpriseGroupingId, includeProperties: x=>x.EnterpriseGrouping.EnterpriseGroups);
                 var roleCodes = auditRoles.Select(ar => ar.RoleCode).Distinct().ToList();
-                var users = await _userReferenceRepository.GetByRoleCodesAsync(roleCodes, null);
+                var users = await _userReferenceRepository.GetByRoleCode(roleCodes);
                 response.Data = _mapper.Map<List<UserReferenceResponseDto>>(users);
             }
             catch (Exception ex)
@@ -660,7 +660,7 @@ namespace Rokys.Audit.Services.Services
                     requestDto.roleCode = string.Join(',', auditRoles.Select(ar => ar.RoleCode).Distinct());
                 }
                 var listRoleCodes = requestDto.roleCode.Split(',').Select(rc => rc.Trim()).ToList();
-                var users = await _userReferenceRepository.GetByRoleCodesAsync(listRoleCodes, requestDto.Filter, pageNumber: requestDto.PageNumber,
+                var users = await _userReferenceRepository.GetByEnterpriseIdAndRoleCodesAsync(listRoleCodes, requestDto.Filter, pageNumber: requestDto.PageNumber,
                     pageSize: requestDto.PageSize);
                 var pagedResult = new PaginationResponseDto<UserReferenceResponseDto>
                 {
