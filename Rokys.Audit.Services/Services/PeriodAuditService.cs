@@ -52,6 +52,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IEmailService _emailService;
         private readonly IPeriodAuditParticipantRepository _periodAuditParticipantRepository;
         private readonly IAuditRoleConfigurationRepository _auditRoleConfigurationRepository;
+        private readonly IGroupingUserRepository _groupingUserRepository;
         private readonly WebAppSettings _webAppSettings;
         private readonly FileSettings _fileSettings;
         private readonly IServiceScopeFactory _serviceScopeFactory;
@@ -76,11 +77,13 @@ namespace Rokys.Audit.Services.Services
             IPeriodAuditScaleSubResultRepository periodAuditScaleSubResultRepository,
             IPeriodAuditScoringCriteriaResultRepository periodAuditScoringCriteriaResultRepository,
             IGroupRepository groupRepository,
+            IEnterpriseRepository enterpriseRepository,
             IPeriodAuditGroupResultService periodAuditGroupResultService,
             IStoreRepository storeRepository,
             IEmailService emailService,
             IPeriodAuditParticipantRepository periodAuditParticipantRepository,
             IAuditRoleConfigurationRepository auditRoleConfigurationRepository,
+            IGroupingUserRepository groupingUserRepository,
             WebAppSettings webAppSettings,
             FileSettings fileSettings,
             IServiceScopeFactory serviceScopeFactory)
@@ -104,11 +107,13 @@ namespace Rokys.Audit.Services.Services
             _periodAuditScaleSubResultRepository = periodAuditScaleSubResultRepository;
             _periodAuditScoringCriteriaResultRepository = periodAuditScoringCriteriaResultRepository;
             _groupRepository = groupRepository;
+            _enterpriseRepository = enterpriseRepository;
             _periodAuditGroupResultService = periodAuditGroupResultService;
             _storeRepository = storeRepository;
             _emailService = emailService;
             _periodAuditParticipantRepository = periodAuditParticipantRepository;
             _auditRoleConfigurationRepository = auditRoleConfigurationRepository;
+            _groupingUserRepository = groupingUserRepository;
             _webAppSettings = webAppSettings;
             _fileSettings = fileSettings;
             _serviceScopeFactory = serviceScopeFactory;
@@ -406,6 +411,20 @@ namespace Rokys.Audit.Services.Services
                     filter = filter.AndAlso(x => x.PeriodAuditParticipants.Any(p => p.UserReferenceId == currentUser.UserReferenceId && (p.RoleCodeSnapshot == RoleCodes.StoreAdmin.Code || p.RoleCodeSnapshot == RoleCodes.AssistantAdministrative.Code) && p.IsActive));
                 }
 
+                // START: Filtro - solo listar las auditorías asociadas a los GroupingUser del usuario actual
+                // 1. Recuperar los GroupingUser activos para el usuario actual
+                var userGroupings = await _groupingUserRepository.GetAsync(
+                    filter: gu => gu.UserReferenceId == currentUser.UserReferenceId && gu.IsActive
+                );
+
+                // 2. Extraer los EnterpriseGroupingId de esos GroupingUser
+                var enterpriseGroupingIds = userGroupings?.Select(ug => ug.EnterpriseGroupingId).Distinct().ToList() ?? new List<Guid>();
+                
+                // 3. Aplicar el filtro para que la auditoría pertenezca a una empresa
+                filter = filter.AndAlso(x => x.Store.Enterprise.EnterpriseGroups.Any(eg => 
+                    enterpriseGroupingIds.Contains(eg.EnterpriseGroupingId) && eg.IsActive
+                ));
+                // END: Filtro
 
                 Func<IQueryable<PeriodAudit>, IOrderedQueryable<PeriodAudit>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 
