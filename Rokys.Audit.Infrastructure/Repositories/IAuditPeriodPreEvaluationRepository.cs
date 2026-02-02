@@ -4,8 +4,8 @@ using System.Linq.Expressions;
 
 namespace Rokys.Audit.Infrastructure.Repositories
 {
-    public interface IAuditPeriodPreEvaluationRepository : IRepository<AuditPeriodPreEvaluation>
+    public interface IPeriodAuditPreEvaluationRepository : IRepository<PeriodAuditPreEvaluation>
     {
-        Task<List<AuditPeriodPreEvaluation>> GetByPeriodAuditGroupResultIdAsync(Guid periodAuditGroupResultId);
+        Task<List<PeriodAuditPreEvaluation>> GetByPeriodAuditGroupResultIdAsync(Guid periodAuditGroupResultId);
     }
 }

@@ -4,12 +4,12 @@ using Rokys.Audit.Model.Tables;
 
 namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
 {
-    public class AuditPeriodPreEvaluationConfig : IEntityTypeConfiguration<AuditPeriodPreEvaluation>
+    public class PeriodAuditPreEvaluationConfig : IEntityTypeConfiguration<PeriodAuditPreEvaluation>
     {
-        public void Configure(EntityTypeBuilder<AuditPeriodPreEvaluation> builder)
+        public void Configure(EntityTypeBuilder<PeriodAuditPreEvaluation> builder)
         {
-            builder.ToTable("AuditPeriodPreEvaluation");
-            builder.HasKey(x => x.AuditPeriodPreEvaluationId);
+            builder.ToTable("PeriodAuditPreEvaluation");
+            builder.HasKey(x => x.PeriodAuditPreEvaluationId);
             builder.Property(x => x.TotalWeighted).HasColumnType("decimal(10,2)").IsRequired();
             builder.Property(x => x.ScaleValueJSON).HasColumnType("nvarchar(max)");
             builder.Property(x => x.TotalAcumulation).HasColumnType("decimal(10,2)").IsRequired();

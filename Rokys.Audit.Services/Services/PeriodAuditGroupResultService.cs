@@ -8,7 +8,6 @@ using Rokys.Audit.Common.Extensions;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.PeriodAuditGroupResult;
 using Rokys.Audit.DTOs.Responses.Common;
-using Rokys.Audit.DTOs.Responses.PeriodAudit;
 using Rokys.Audit.DTOs.Responses.PeriodAuditGroupResult;
 using Rokys.Audit.DTOs.Responses.PeriodAuditScaleResult;
 using Rokys.Audit.DTOs.Responses.ScaleGroup;
@@ -17,7 +16,7 @@ using Rokys.Audit.Infrastructure.Persistence.Abstract;
 using Rokys.Audit.Infrastructure.Repositories;
 using Rokys.Audit.Model.Tables;
 using Rokys.Audit.Services.Interfaces;
-using Scriban.Parsing;
+using Rokys.Audit.Services.Services.PeriodAuditUtils;
 using System.Linq.Expressions;
 
 namespace Rokys.Audit.Services.Services
@@ -52,6 +51,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IPeriodAuditActionPlanService _periodAuditActionPlanService;
         private readonly IEnterpriseGroupingRepository _enterpriseGroupingRepository;
         private readonly ISubScaleRepository _subScaleRepository;
+        private readonly IPeriodAuditPreEvaluationRepository _periodAuditPreEvaluationRepository;
         public PeriodAuditGroupResultService(
             IPeriodAuditGroupResultRepository repository,
             IValidator<PeriodAuditGroupResultRequestDto> validator,
@@ -79,7 +79,8 @@ namespace Rokys.Audit.Services.Services
             ISystemConfigurationRepository systemConfigurationRepository,
             IPeriodAuditActionPlanService periodAuditActionPlanService,
             IEnterpriseGroupingRepository enterpriseGroupingRepository,
-            ISubScaleRepository subScaleRepository
+            ISubScaleRepository subScaleRepository,
+            IPeriodAuditPreEvaluationRepository periodAuditPreEvaluationRepository
         )
         {
             _periodAuditGroupResultRepository = repository;
@@ -109,6 +110,7 @@ namespace Rokys.Audit.Services.Services
             _periodAuditActionPlanService = periodAuditActionPlanService;
             _enterpriseGroupingRepository = enterpriseGroupingRepository;
             _subScaleRepository = subScaleRepository;
+            _periodAuditPreEvaluationRepository = periodAuditPreEvaluationRepository;
         }
         public async Task<ResponseDto<PeriodAuditGroupResultResponseDto>> Create(PeriodAuditGroupResultRequestDto requestDto, bool isTrasacction = false)
         {
@@ -375,7 +377,7 @@ namespace Rokys.Audit.Services.Services
             {
                 var entity = await _periodAuditGroupResultRepository.GetFirstOrDefaultAsync(
                     filter: x => x.PeriodAuditGroupResultId == periodAuditGroupResultId && x.IsActive,
-                    includeProperties: [x => x.Group]);
+                    includeProperties: [x => x.Group, x => x.PeriodAudit, x => x.PeriodAudit.Store]);
 
                 var periodAuditScaleResult = await _periodAuditScaleResultRepository.GetByPeriodAuditGroupResultId(periodAuditGroupResultId);
                 decimal acumulatedScore = 0;
@@ -389,105 +391,56 @@ namespace Rokys.Audit.Services.Services
 
                 var scaleCompany = await _scaleCompanyRepository.GetConfiguredForEnterprise(enterpriseGrouping!.EnterpriseGroupingId, entity.PeriodAudit.Store.EnterpriseId);
                 var subScales = await _subScaleRepository.GetAsync(x => x.EnterpriseGroupingId == enterpriseGrouping.EnterpriseGroupingId && x.IsActive);
+                
                 if (scaleCompany == null || !scaleCompany.Any() || subScales == null || !subScales.Any())
                 {
                     response = ResponseDto.Error<bool>("No se encontró la escala asociada a la empresa ni la escala por defecto.");
                     return response;
                 }
 
-                var firstCalValue = subScales.Max(s => s.Value);
+                var (score, roundedScore, scaleDescription, scaleColor, calculationDetails) = PeriodAuditCalculator.CalculateScoreAndScale(
+                    acumulatedScore,
+                    scaleCompany,
+                    subScales,
+                    enterpriseGrouping.ScaleType
+                );
 
-                var calculatesScaleCompany = scaleCompany.Select(sc => new
-                {
-                    sc.Name,
-                    sc.ColorCode,
-                    sc.MinValue,
-                    sc.MaxValue,
-                    sc.NormalizedScore,
-                    sc.ExpectedDistribution,
-                    sc.LevelOrder,
-                    CalculatedValue = null as Decimal?
-                }).ToList();
-                calculatesScaleCompany = [.. calculatesScaleCompany.OrderBy(sc => sc.LevelOrder)];
+                entity.ScaleDescription = scaleDescription;
+                entity.ScaleColor = scaleColor;
+                entity.ScoreValue = roundedScore;
+                _periodAuditGroupResultRepository.Update(entity);
 
+                // Guardar información de pre-evaluación si la escala es de tipo ponderado
                 if (enterpriseGrouping.ScaleType == ScaleType.Weighted)
                 {
-                    var lastScaleCompany = null as ScaleCompany;
+                    var existingPreEvaluation = await _periodAuditPreEvaluationRepository.GetFirstOrDefaultAsync(
+                    filter: x => x.PeriodAuditGroupResultId == periodAuditGroupResultId && x.IsActive);
 
-                    calculatesScaleCompany = scaleCompany.Select((sc, index) =>
-                    {
-                        Decimal? calculatedValue = null;
-                        if (index == 0)
-                        {
-                            calculatedValue = acumulatedScore > sc.NormalizedScore ? ((acumulatedScore - sc.NormalizedScore) / (firstCalValue - sc.NormalizedScore)) * sc.ExpectedDistribution : null;
-                        }
-                        else if (index != scaleCompany.Count() - 1)
-                        {
-                            calculatedValue = acumulatedScore > sc.NormalizedScore ? ((acumulatedScore - sc.NormalizedScore) / (lastScaleCompany.NormalizedScore - sc.NormalizedScore)) * sc.ExpectedDistribution : null;
-                        }
-                        lastScaleCompany = sc;
-                        return new
-                        {
-                            sc.Name,
-                            sc.ColorCode,
-                            sc.MinValue,
-                            sc.MaxValue,
-                            sc.NormalizedScore,
-                            sc.ExpectedDistribution,
-                            sc.LevelOrder,
-                            CalculatedValue = calculatedValue
-                        };
-                    }).ToList();
+                    var scaleValueJSON = System.Text.Json.JsonSerializer.Serialize(calculationDetails);
+                    var currentUser = _httpContextAccessor.CurrentUser();
 
-                    // modificar CalculatedValue solo para el ultimo elemento de la lista
-                    // calculatedvalue = si al menos uno de los anteriores elementos calculatedValue != normalizedScore, entonces calculatedValue = expectedDistribution
-                    // caso contrario calculatedValue = acumuladedScore >= lastElement.NormalizedScore ? ((acumulatedScore - lastElement.NormalizedScore) / (secondLastElement.NormalizedScore - lastElement.NormalizedScore)) * lastElement.ExpectedDistribution : null;
-                    if (calculatesScaleCompany.Count > 1)
+                    if (existingPreEvaluation != null)
                     {
-                        var secondLastElement = calculatesScaleCompany[calculatesScaleCompany.Count - 2];
-                        var lastElement = calculatesScaleCompany.Last();
-                        var hasCalculatedValueDifferent = calculatesScaleCompany
-                            .Take(calculatesScaleCompany.Count - 1)
-                            .Any(c => c.CalculatedValue != c.NormalizedScore);
-                        var calculatedValueLast = hasCalculatedValueDifferent ?
-                            lastElement.ExpectedDistribution :
-                            (acumulatedScore >= lastElement.NormalizedScore ? ((acumulatedScore - lastElement.NormalizedScore) / (secondLastElement.NormalizedScore - lastElement.NormalizedScore)) * lastElement.ExpectedDistribution : null);
-                        calculatesScaleCompany[calculatesScaleCompany.Count - 1] = new
+                        existingPreEvaluation.TotalWeighted = acumulatedScore;
+                        existingPreEvaluation.ScaleValueJSON = scaleValueJSON;
+                        existingPreEvaluation.TotalAcumulation = score;
+                        existingPreEvaluation.UpdateAudit(currentUser.UserName);
+                        _periodAuditPreEvaluationRepository.Update(existingPreEvaluation);
+                    }
+                    else
+                    {
+                        var preEvaluation = new PeriodAuditPreEvaluation
                         {
-                            lastElement.Name,
-                            lastElement.ColorCode,
-                            lastElement.MinValue,
-                            lastElement.MaxValue,
-                            lastElement.NormalizedScore,
-                            lastElement.ExpectedDistribution,
-                            lastElement.LevelOrder,
-                            CalculatedValue = calculatedValueLast,
+                            PeriodAuditGroupResultId = periodAuditGroupResultId,
+                            TotalWeighted = acumulatedScore,
+                            ScaleValueJSON = scaleValueJSON,
+                            TotalAcumulation = score,
+                            IsActive = true
                         };
+                        preEvaluation.CreateAudit(currentUser.UserName);
+                        _periodAuditPreEvaluationRepository.Insert(preEvaluation);
                     }
                 }
-
-                var score = calculatesScaleCompany.Aggregate(0m, (total, sc) => total + (sc.CalculatedValue ?? 0));
-                score = score > 100 ? 100 : Math.Round(score, 2);
-
-                bool scaleFound = false;
-                foreach (var scale in calculatesScaleCompany)
-                {
-                    if (score >= scale.MinValue && score <= scale.MaxValue)
-                    {
-                        entity.ScaleDescription = scale.Name;
-                        entity.ScaleColor = scale.ColorCode;
-                        scaleFound = true;
-                        break;
-                    }
-                }
-                if (!scaleFound)
-                {
-                    response = ResponseDto.Error<bool>("No se encontró una escala que coincida con el puntaje obtenido.");
-                    return response;
-                }
-
-                entity.ScoreValue = score;
-                _periodAuditGroupResultRepository.Update(entity);
 
                 await _unitOfWork.CommitAsync();
 

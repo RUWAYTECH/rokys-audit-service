@@ -6,7 +6,7 @@ using Rokys.Audit.Common.Constant;
 
 namespace Rokys.Audit.DTOs.Common
 {
-    public class AuditPeriodPreEvaluationDto
+    public class PeriodAuditPreEvaluationDto
     {
         public string FieldName { get; set; }
         public string FieldValue { get; set; }

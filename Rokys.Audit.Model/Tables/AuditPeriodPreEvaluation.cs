@@ -2,9 +2,9 @@ using System;
 
 namespace Rokys.Audit.Model.Tables
 {
-    public class AuditPeriodPreEvaluation : AuditEntity
+    public class PeriodAuditPreEvaluation : AuditEntity
     {
-        public Guid AuditPeriodPreEvaluationId { get; set; }
+        public Guid PeriodAuditPreEvaluationId { get; set; }
         public Guid PeriodAuditGroupResultId { get; set; }
         public decimal TotalWeighted { get; set; }
         public string? ScaleValueJSON { get; set; }

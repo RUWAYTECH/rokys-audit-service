@@ -7,14 +7,14 @@ using System.Linq.Expressions;
 
 namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
 {
-    public class AuditPeriodPreEvaluationRepository : EFRepository<AuditPeriodPreEvaluation>, IAuditPeriodPreEvaluationRepository
+    public class PeriodAuditPreEvaluationRepository : EFRepository<PeriodAuditPreEvaluation>, IPeriodAuditPreEvaluationRepository
     {
-        public AuditPeriodPreEvaluationRepository(ApplicationDbContext context) : base(context)
+        public PeriodAuditPreEvaluationRepository(ApplicationDbContext context) : base(context)
         {
         }
 
 
-        public async Task<List<AuditPeriodPreEvaluation>> GetByPeriodAuditGroupResultIdAsync(Guid periodAuditGroupResultId)
+        public async Task<List<PeriodAuditPreEvaluation>> GetByPeriodAuditGroupResultIdAsync(Guid periodAuditGroupResultId)
         {
             return await DbSet.Where(x => x.PeriodAuditGroupResultId == periodAuditGroupResultId && x.IsActive)
                 .ToListAsync();
