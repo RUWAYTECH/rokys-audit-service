@@ -12,6 +12,7 @@ namespace Rokys.Audit.DTOs.Responses.GroupingUser
         public string CreatedBy { get; set; } = string.Empty;
         public DateTime? UpdateDate { get; set; }
         public string? UpdatedBy { get; set; }
+        public string? RoleNames { get; set; }
         public EnterpriseGroupingResponseDto EnterpriseGrouping { get; set; } = null!;
         public UserReferenceResponseDto UserReference { get; set; } = null!;
     }
