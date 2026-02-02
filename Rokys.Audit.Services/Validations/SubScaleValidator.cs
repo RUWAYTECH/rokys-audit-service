@@ -19,7 +19,7 @@ namespace Rokys.Audit.Services.Validations
                 .MaximumLength(100).WithMessage("El nombre acepta como máximo 100 caracteres.");
 
             RuleFor(x => x.Value)
-                .NotEmpty().WithMessage("El valor es requerido.");
+                .NotNull().WithMessage("El valor es requerido.");
 
             RuleFor(x => x.ColorCode)
                 .NotEmpty().WithMessage("El código de color es requerido.")
