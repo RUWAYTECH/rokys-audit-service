@@ -134,7 +134,7 @@ namespace Rokys.Audit.Services.Services
 
         public async Task<ResponseDto<UserReferenceResponseDto>> UpdateByUser(Guid userReferenceId, UserReferenceRequestDto requestDto)
         {
-             var response = ResponseDto.Create<UserReferenceResponseDto>();
+            var response = ResponseDto.Create<UserReferenceResponseDto>();
             try
             {
                 var entity = await _userReferenceRepository.GetByKeyAsync(userReferenceId);
@@ -149,7 +149,7 @@ namespace Rokys.Audit.Services.Services
                 }
                 var currentUser = _httpContextAccessor.CurrentUser();
 
-                entity.UserId = requestDto.UserId;                 
+                entity.UserId = requestDto.UserId;
                 entity.EmployeeId = requestDto.EmployeeId;
                 entity.FirstName = requestDto.FirstName;
                 entity.LastName = requestDto.LastName;
@@ -160,13 +160,14 @@ namespace Rokys.Audit.Services.Services
                 entity.DocumentNumber = requestDto.DocumentNumber;
                 entity.IsActive = true;
                 entity.UpdateAudit(currentUser.UserName);
-                
+
                 _userReferenceRepository.Update(entity);
                 await _unitOfWork.CommitAsync();
 
                 response.Data = _mapper.Map<UserReferenceResponseDto>(entity);
 
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating UserReference with UserId: {UserId}", userReferenceId);
                 response.Messages.Add(new ApplicationMessage
@@ -174,7 +175,7 @@ namespace Rokys.Audit.Services.Services
                     Message = "Error interno del servidor al actualizar el usuario",
                     MessageType = ApplicationMessageType.Error
                 });
-            } 
+            }
 
             return response;
         }
@@ -637,9 +638,10 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<List<UserReferenceResponseDto>>();
             try
             {
-                var auditRoles = await _auditRoleConfigurationRepository.GetAsync(filter: x => x.EnterpriseGroupingId == enterpriseGroupingId, includeProperties: x=>x.EnterpriseGrouping.EnterpriseGroups);
+                var auditRoles = await _auditRoleConfigurationRepository.GetAsync(filter: x => x.EnterpriseGroupingId == enterpriseGroupingId, includeProperties: x => x.EnterpriseGrouping.EnterpriseGroups);
                 var roleCodes = auditRoles.Select(ar => ar.RoleCode).Distinct().ToList();
-                var users = await _userReferenceRepository.GetByRoleCode(roleCodes);
+                
+                var users = await _userReferenceRepository.GetAsync(a => a.IsActive && roleCodes.Any(rc => ("," + a.RoleCode + ",").Contains("," + rc + ",")));
                 response.Data = _mapper.Map<List<UserReferenceResponseDto>>(users);
             }
             catch (Exception ex)
@@ -671,7 +673,7 @@ namespace Rokys.Audit.Services.Services
                 }
 
                 // Filtrar GroupingUser por EnterpriseGrouping y RoleCode (si se especifica)
-                Expression<Func<GroupingUser, bool>> groupingFilter = x => 
+                Expression<Func<GroupingUser, bool>> groupingFilter = x =>
                     x.EnterpriseGroupingId == enterpriseGrouping.EnterpriseGroupingId && x.IsActive;
 
                 if (!string.IsNullOrEmpty(requestDto.RoleCode))
@@ -689,7 +691,7 @@ namespace Rokys.Audit.Services.Services
                 if (!string.IsNullOrEmpty(requestDto.Filter))
                 {
                     var searchTerm = requestDto.Filter.ToLower();
-                    filter = filter.AndAlso(x => 
+                    filter = filter.AndAlso(x =>
                         x.FirstName.ToLower().Contains(searchTerm) ||
                         x.LastName.ToLower().Contains(searchTerm) ||
                         (x.FirstName + " " + x.LastName).ToLower().Contains(searchTerm) ||

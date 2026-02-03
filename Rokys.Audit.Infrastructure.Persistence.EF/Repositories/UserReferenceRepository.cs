@@ -96,7 +96,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
                                         roleCodes.Contains(u.RoleCode) &&
                                         userIds.Contains(u.UserReferenceId));
 
-            // Aplicar filtro de búsqueda si existe
+            // Aplicar filtro de bï¿½squeda si existe
             if (!string.IsNullOrEmpty(filter))
             {
                 var searchTerm = filter.ToLower();
@@ -111,7 +111,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
             }
 
 
-            // Contar total antes de aplicar paginación
+            // Contar total antes de aplicar paginaciï¿½n
             int rowsCount = await query.CountAsync();
 
             // Aplicar ordenamiento si existe
@@ -120,7 +120,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
                 query = orderBy(query);
             }
 
-            // Aplicar paginación si se especifica
+            // Aplicar paginaciï¿½n si se especifica
             if (pageSize > 0 && pageNumber > 0)
             {
                 var items = await query
@@ -130,25 +130,10 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
                 return (items, rowsCount);
             }
 
-            // Sin paginación, devolver todos
+            // Sin paginaciï¿½n, devolver todos
             var allItems = await query.ToListAsync();
             return (allItems, rowsCount);
         }
-        public async Task<List<UserReference>> GetByRoleCode(List<string> roleCodes)
-        {
-            if (roleCodes == null || !roleCodes.Any())
-            {
-                return new List<UserReference>();
-            }
-            // Traer todos los usuarios activos
-            var activeUsers = await DbSet
-                .Where(u => u.IsActive)
-                .ToListAsync();
-            // Filtrar en memoria los que tengan alguno de los roles
-            return activeUsers
-                .Where(u => !string.IsNullOrEmpty(u.RoleCode) &&
-                           roleCodes.Any(role => u.RoleCode.Contains(role)))
-                .ToList();
-        }
+       
     }
 }

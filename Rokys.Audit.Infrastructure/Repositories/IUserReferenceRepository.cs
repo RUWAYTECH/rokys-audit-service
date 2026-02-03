@@ -69,6 +69,6 @@ namespace Rokys.Audit.Infrastructure.Repositories
             Func<IQueryable<UserReference>, IOrderedQueryable<UserReference>>? orderBy = null,
             int pageNumber = 0,
             int pageSize = 0);
-        Task<List<UserReference>> GetByRoleCode(List<string> roleCodes);
+       
     }
 }
