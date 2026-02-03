@@ -641,7 +641,28 @@ namespace Rokys.Audit.Services.Services
                 var auditRoles = await _auditRoleConfigurationRepository.GetAsync(filter: x => x.EnterpriseGroupingId == enterpriseGroupingId, includeProperties: x => x.EnterpriseGrouping.EnterpriseGroups);
                 var roleCodes = auditRoles.Select(ar => ar.RoleCode).Distinct().ToList();
                 
-                var users = await _userReferenceRepository.GetAsync(a => a.IsActive && roleCodes.Any(rc => ("," + a.RoleCode + ",").Contains("," + rc + ",")));
+                // Construir expresión dinámica con OR para cada roleCode
+                Expression<Func<UserReference, bool>> filter = a => a.IsActive;
+                
+                if (roleCodes.Any())
+                {
+                    Expression<Func<UserReference, bool>> roleFilter = null;
+                    
+                    foreach (var roleCode in roleCodes)
+                    {
+                        var rc = roleCode; // Captura para el closure
+                        Expression<Func<UserReference, bool>> condition = a => a.RoleCode.Contains(rc);
+                        
+                        roleFilter = roleFilter == null ? condition : roleFilter.OrAlso(condition);
+                    }
+                    
+                    if (roleFilter != null)
+                    {
+                        filter = filter.AndAlso(roleFilter);
+                    }
+                }
+                
+                var users = await _userReferenceRepository.GetAsync(filter);
                 response.Data = _mapper.Map<List<UserReferenceResponseDto>>(users);
             }
             catch (Exception ex)
