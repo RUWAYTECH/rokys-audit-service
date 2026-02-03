@@ -36,13 +36,13 @@ INSERT INTO [dbo].[ScaleGroup]
 (ScaleGroupId,GroupId,Code,[Name],HasSourceData,SortOrder,Weighting,Recommendation,Impact,IsActive,CreatedBy,CreationDate,UpdatedBy,UpdateDate) VALUES
 ('1f4c9a8d-0b8a-4a6e-9c5a-8d3e2f7a1b01','6f3a9d42-8a6c-4c4a-9c6a-3f9d8a2c7e91','ROD-1','Arqueos inopinados de Rodizios',0,1,10.00,NULL,NULL,1,'admin',GETDATE(),'admin',GETDATE()),
 ('2a6b7c8d-1c9e-4d5f-9a01-b2c3d4e5f602','6f3a9d42-8a6c-4c4a-9c6a-3f9d8a2c7e91','ROD-2','Consumos promedios de carne',0,2,10.00,NULL,NULL,1,'admin',GETDATE(),'admin',GETDATE()),
-('3b7d9e1a-2f3c-4a8e-b501-c6d7e8f9a703','6f3a9d42-8a6c-4c4a-9c6a-3f9d8a2c7e91','ROD-3','Diferencias de inventario de almac�n',0,3,15.00,NULL,NULL,1,'admin',GETDATE(),'admin',GETDATE()),
+('3b7d9e1a-2f3c-4a8e-b501-c6d7e8f9a703','6f3a9d42-8a6c-4c4a-9c6a-3f9d8a2c7e91','ROD-3','Diferencias de inventario de almacén',0,3,15.00,NULL,NULL,1,'admin',GETDATE(),'admin',GETDATE()),
 ('4c8e1f2a-3d5b-4e9a-b604-d7e8f9a0b804','6f3a9d42-8a6c-4c4a-9c6a-3f9d8a2c7e91','ROD-4','Tickets anulados',0,4,5.00,NULL,NULL,1,'admin',GETDATE(),'admin',GETDATE()),
-('5d9f2a3b-4c6e-4a0b-9e05-f8a1b2c3d905','6f3a9d42-8a6c-4c4a-9c6a-3f9d8a2c7e91','ROD-5','Operatividad de c�maras de video vigilancia',0,5,5.00,NULL,NULL,1,'admin',GETDATE(),'admin',GETDATE()),
-('6e0a3b4c-5d7f-4b1c-ae06-1b2c3d4e0a06','6f3a9d42-8a6c-4c4a-9c6a-3f9d8a2c7e91','ROD-6','Registro de saldos reales de �reas en los formatos establecidos',0,6,5.00,NULL,NULL,1,'admin',GETDATE(),'admin',GETDATE()),
+('5d9f2a3b-4c6e-4a0b-9e05-f8a1b2c3d905','6f3a9d42-8a6c-4c4a-9c6a-3f9d8a2c7e91','ROD-5','Operatividad de cámaras de video vigilancia',0,5,5.00,NULL,NULL,1,'admin',GETDATE(),'admin',GETDATE()),
+('6e0a3b4c-5d7f-4b1c-ae06-1b2c3d4e0a06','6f3a9d42-8a6c-4c4a-9c6a-3f9d8a2c7e91','ROD-6','Registro de saldos reales de áreas en los formatos establecidos',0,6,5.00,NULL,NULL,1,'admin',GETDATE(),'admin',GETDATE()),
 ('7f1b4c5d-6e8a-4c2d-b107-2c3d4e5f1b07','6f3a9d42-8a6c-4c4a-9c6a-3f9d8a2c7e91','ROD-7','Mermas salad bar frios y calientes',0,7,10.00,NULL,NULL,1,'admin',GETDATE(),'admin',GETDATE()),
 ('8a2c5d6e-7f9b-4d3e-c208-3d4e5f6a2c08','6f3a9d42-8a6c-4c4a-9c6a-3f9d8a2c7e91','ROD-8','Sobre stocks de insumos',0,8,10.00,NULL,NULL,1,'admin',GETDATE(),'admin',GETDATE()),
-('9b3d6e7f-8a0c-4e4f-d309-4e5f6a7b3c09','6f3a9d42-8a6c-4c4a-9c6a-3f9d8a2c7e91','ROD-9','Liquidaci�n sistema comercial',0,9,5.00,NULL,NULL,1,'admin',GETDATE(),'admin',GETDATE()),
+('9b3d6e7f-8a0c-4e4f-d309-4e5f6a7b3c09','6f3a9d42-8a6c-4c4a-9c6a-3f9d8a2c7e91','ROD-9','Liquidación sistema comercial',0,9,5.00,NULL,NULL,1,'admin',GETDATE(),'admin',GETDATE()),
 ('a0c4e7f8-9b1d-4f50-e40a-5f6a7b8c4d10','6f3a9d42-8a6c-4c4a-9c6a-3f9d8a2c7e91','ROD-10','Pago de movilidades',0,10,10.00,NULL,NULL,1,'admin',GETDATE(),'admin',GETDATE()),
 ('b1d5f8a9-0c2e-4a61-f50b-6a7b8c9d5e11','6f3a9d42-8a6c-4c4a-9c6a-3f9d8a2c7e91','ROD-11','Merma de papa amarilla frita',0,11,5.00,NULL,NULL,1,'admin',GETDATE(),'admin',GETDATE()),
 ('c2e6a9b0-1d3f-4b72-a60c-7b8c9d0e6f12','6f3a9d42-8a6c-4c4a-9c6a-3f9d8a2c7e91','ROD-12','Cumplimiento de procedimiento, quiebres de aceite quemado',0,12,10.00,NULL,NULL,1,'admin',GETDATE(),'admin',GETDATE());
@@ -76,7 +76,7 @@ VALUES('3e8f4c9a-6b2d-4d8a-9e41-2a7b9f6d5c18',@EnterpriseId,'Grupo independiente
 INSERT INTO [dbo].[ScaleGroup] (ScaleGroupId,GroupId,Code,[Name],HasSourceData,SortOrder,Weighting,Recommendation,Impact,IsActive,CreatedBy,CreationDate,UpdatedBy,UpdateDate) VALUES
 ('a1f2c7d3-0c8e-4e21-9a3b-1d9e4f5a6b01','3e8f4c9a-6b2d-4d8a-9e41-2a7b9f6d5c18','LQ-1','Mermas de salad bar',0,1,15.00,NULL,NULL,1,'admin',GETDATE(),'admin',GETDATE()),
 ('b2e4a9c1-5f6d-4a87-9e02-3c1d8f7a6b12','3e8f4c9a-6b2d-4d8a-9e41-2a7b9f6d5c18','LQ-2','Vencimientos',0,2,25.00,NULL,NULL,1,'admin',GETDATE(),'admin',GETDATE()),
-('c3d5f8a2-6e41-4c9d-8b17-4e2a1d9f0b23','3e8f4c9a-6b2d-4d8a-9e41-2a7b9f6d5c18','LQ-3','Operatividad de c�maras de video vigilancia',0,3,15.00,NULL,NULL,1,'admin',GETDATE(),'admin',GETDATE()),
-('d4a6e1f3-7b52-4f0c-9d28-5b3c2a1e9f34','3e8f4c9a-6b2d-4d8a-9e41-2a7b9f6d5c18','LQ-4','Diferencias de inventario almac�n',0,4,15.00,NULL,NULL,1,'admin',GETDATE(),'admin',GETDATE()),
+('c3d5f8a2-6e41-4c9d-8b17-4e2a1d9f0b23','3e8f4c9a-6b2d-4d8a-9e41-2a7b9f6d5c18','LQ-3','Operatividad de cámaras de video vigilancia',0,3,15.00,NULL,NULL,1,'admin',GETDATE(),'admin',GETDATE()),
+('d4a6e1f3-7b52-4f0c-9d28-5b3c2a1e9f34','3e8f4c9a-6b2d-4d8a-9e41-2a7b9f6d5c18','LQ-4','Diferencias de inventario almacén',0,4,15.00,NULL,NULL,1,'admin',GETDATE(),'admin',GETDATE()),
 ('e5b7c2a4-8c63-4a1d-8e39-6d4b3c2a1f45','3e8f4c9a-6b2d-4d8a-9e41-2a7b9f6d5c18','LQ-5','Registro de facturas y/o transferencias a otros locales',0,5,15.00,NULL,NULL,1,'admin',GETDATE(),'admin',GETDATE()),
-('f6c8d3b5-9d74-4b2e-9f40-7e5d4c3b2a56','3e8f4c9a-6b2d-4d8a-9e41-2a7b9f6d5c18','LQ-6','Ventas al cr�dito',0,6,15.00,NULL,NULL,1,'admin',GETDATE(),'admin',GETDATE());
+('f6c8d3b5-9d74-4b2e-9f40-7e5d4c3b2a56','3e8f4c9a-6b2d-4d8a-9e41-2a7b9f6d5c18','LQ-6','Ventas al crédito',0,6,15.00,NULL,NULL,1,'admin',GETDATE(),'admin',GETDATE());
