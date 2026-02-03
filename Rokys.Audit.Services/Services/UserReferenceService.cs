@@ -18,6 +18,7 @@ using Rokys.Audit.DTOs.Requests.EmployeeStore;
 using System.Security.AccessControl;
 using DocumentFormat.OpenXml.Spreadsheet;
 using System.Linq;
+using System;
 
 namespace Rokys.Audit.Services.Services
 {
@@ -633,9 +634,9 @@ namespace Rokys.Audit.Services.Services
             return response;
         }
 
-        public async Task<ResponseDto<List<UserReferenceResponseDto>>> GetUsersByEnterpriseGroupingId(Guid enterpriseGroupingId)
+        public async Task<ResponseDto<PaginationResponseDto<UserReferenceResponseDto>>> GetUsersByEnterpriseGroupingId(Guid enterpriseGroupingId, UserReferenceFilterToEnterpriseGroupingRequestDto requestDto)
         {
-            var response = ResponseDto.Create<List<UserReferenceResponseDto>>();
+            var response = ResponseDto.Create<PaginationResponseDto<UserReferenceResponseDto>>();
             try
             {
                 var auditRoles = await _auditRoleConfigurationRepository.GetAsync(filter: x => x.EnterpriseGroupingId == enterpriseGroupingId, includeProperties: x => x.EnterpriseGrouping.EnterpriseGroups);
@@ -661,9 +662,35 @@ namespace Rokys.Audit.Services.Services
                         filter = filter.AndAlso(roleFilter);
                     }
                 }
-                
-                var users = await _userReferenceRepository.GetAsync(filter);
-                response.Data = _mapper.Map<List<UserReferenceResponseDto>>(users);
+
+                if (!string.IsNullOrEmpty(requestDto.Filter))
+                {
+                    var searchTerm = requestDto.Filter.ToLower();
+                    filter = filter.AndAlso(x =>
+                        x.FirstName.ToLower().Contains(searchTerm) ||
+                        x.LastName.ToLower().Contains(searchTerm) ||
+                        (x.FirstName + " " + x.LastName).ToLower().Contains(searchTerm) ||
+                        (x.Email != null && x.Email.ToLower().Contains(searchTerm)) ||
+                        (x.PersonalEmail != null && x.PersonalEmail.ToLower().Contains(searchTerm)) ||
+                        (x.DocumentNumber != null && x.DocumentNumber.ToLower().Contains(searchTerm))
+                    );
+                }
+
+                var entities = await _userReferenceRepository.GetPagedAsync(
+                    filter: filter,
+                    orderBy: q => q.OrderBy(x => x.FirstName).ThenBy(x => x.LastName),
+                    pageNumber: requestDto.PageNumber,
+                    pageSize: requestDto.PageSize
+                );
+
+                var pagedResult = new PaginationResponseDto<UserReferenceResponseDto>
+                {
+                    Items = _mapper.Map<IEnumerable<UserReferenceResponseDto>>(entities.Items),
+                    TotalCount = entities.TotalRows,
+                    PageNumber = requestDto.PageNumber,
+                    PageSize = requestDto.PageSize
+                };
+                response.Data = pagedResult;
             }
             catch (Exception ex)
             {

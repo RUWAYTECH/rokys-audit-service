@@ -52,7 +52,7 @@ namespace Rokys.Audit.Services.Interfaces
 
         Task<ResponseDto<UserReferenceResponseDto>> UpdateByUser(Guid userReferenceId, UserReferenceRequestDto requestDto);
 
-        Task<ResponseDto<List<UserReferenceResponseDto>>> GetUsersByEnterpriseGroupingId(Guid enterpriseGroupingId);
+        Task<ResponseDto<PaginationResponseDto<UserReferenceResponseDto>>> GetUsersByEnterpriseGroupingId(Guid enterpriseGroupingId, UserReferenceFilterToEnterpriseGroupingRequestDto requestDto);
         Task<ResponseDto<PaginationResponseDto<UserReferenceResponseDto>>> GetUsersByEnterpriseIdAndRoleCodes(Guid enterpriseId, UserReferenceFilterEnterpriseRequestDto requestDto);
     }
 }
