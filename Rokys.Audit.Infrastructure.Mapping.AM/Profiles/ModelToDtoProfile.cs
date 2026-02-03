@@ -226,6 +226,9 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                             ColorCode = sc.ColorCode,
                             EnterpriseId = sc.EnterpriseId,
                             IsActive = sc.IsActive,
+                            NormalizedScore = sc.NormalizedScore,
+                            ExpectedDistribution = sc.ExpectedDistribution,
+                            LevelOrder = sc.LevelOrder,
                             CreationDate = sc.CreationDate,
                             CreatedBy = sc.CreatedBy,
                         })

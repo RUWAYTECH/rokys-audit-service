@@ -8,7 +8,6 @@ using Rokys.Audit.Common.Extensions;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.PeriodAuditGroupResult;
 using Rokys.Audit.DTOs.Responses.Common;
-using Rokys.Audit.DTOs.Responses.PeriodAudit;
 using Rokys.Audit.DTOs.Responses.PeriodAuditGroupResult;
 using Rokys.Audit.DTOs.Responses.PeriodAuditScaleResult;
 using Rokys.Audit.DTOs.Responses.ScaleGroup;
@@ -17,6 +16,7 @@ using Rokys.Audit.Infrastructure.Persistence.Abstract;
 using Rokys.Audit.Infrastructure.Repositories;
 using Rokys.Audit.Model.Tables;
 using Rokys.Audit.Services.Interfaces;
+using Rokys.Audit.Services.Services.PeriodAuditUtils;
 using System.Linq.Expressions;
 
 namespace Rokys.Audit.Services.Services
@@ -49,6 +49,9 @@ namespace Rokys.Audit.Services.Services
         private readonly ISystemConfigurationRepository _systemConfigurationRepository;
 
         private readonly IPeriodAuditActionPlanService _periodAuditActionPlanService;
+        private readonly IEnterpriseGroupingRepository _enterpriseGroupingRepository;
+        private readonly ISubScaleRepository _subScaleRepository;
+        private readonly IPeriodAuditPreEvaluationRepository _periodAuditPreEvaluationRepository;
         public PeriodAuditGroupResultService(
             IPeriodAuditGroupResultRepository repository,
             IValidator<PeriodAuditGroupResultRequestDto> validator,
@@ -74,7 +77,10 @@ namespace Rokys.Audit.Services.Services
             IUserReferenceRepository userReferenceRepository,
             IEnterpriseGroupRepository enterpriseGroupRepository,
             ISystemConfigurationRepository systemConfigurationRepository,
-            IPeriodAuditActionPlanService periodAuditActionPlanService
+            IPeriodAuditActionPlanService periodAuditActionPlanService,
+            IEnterpriseGroupingRepository enterpriseGroupingRepository,
+            ISubScaleRepository subScaleRepository,
+            IPeriodAuditPreEvaluationRepository periodAuditPreEvaluationRepository
         )
         {
             _periodAuditGroupResultRepository = repository;
@@ -102,6 +108,9 @@ namespace Rokys.Audit.Services.Services
             _enterpriseGroupRepository = enterpriseGroupRepository;
             _systemConfigurationRepository = systemConfigurationRepository;
             _periodAuditActionPlanService = periodAuditActionPlanService;
+            _enterpriseGroupingRepository = enterpriseGroupingRepository;
+            _subScaleRepository = subScaleRepository;
+            _periodAuditPreEvaluationRepository = periodAuditPreEvaluationRepository;
         }
         public async Task<ResponseDto<PeriodAuditGroupResultResponseDto>> Create(PeriodAuditGroupResultRequestDto requestDto, bool isTrasacction = false)
         {
@@ -132,7 +141,7 @@ namespace Rokys.Audit.Services.Services
                 var scaleGroups = await _scaleGroupRepository.GetByGroupIdAsync(requestDto.GroupId);
                 var currentPeriodAuditGroupResult = await _periodAuditGroupResultRepository.GetByPeriodAuditIdAsync(requestDto.PeriodAuditId);
                 var currentWeighting = currentPeriodAuditGroupResult.Sum(x => x.TotalWeighting);
-                if(currentWeighting + requestDto.TotalWeighting > 100)
+                if (currentWeighting + requestDto.TotalWeighting > 100)
                 {
                     response = ResponseDto.Error<PeriodAuditGroupResultResponseDto>($"Ya tiene asignado {currentWeighting}% de ponderación, no se puede asignar una ponderación total de {requestDto.TotalWeighting + currentWeighting}%.");
                     return response;
@@ -264,8 +273,8 @@ namespace Rokys.Audit.Services.Services
             try
             {
                 var entity = await _periodAuditGroupResultRepository.GetFirstOrDefaultAsync(
-                    filter: x => x.PeriodAuditGroupResultId == id && x.IsActive, 
-                    includeProperties: [ x => x.Group, y => y.PeriodAudit]);
+                    filter: x => x.PeriodAuditGroupResultId == id && x.IsActive,
+                    includeProperties: [x => x.Group, y => y.PeriodAudit]);
                 if (entity == null)
                 {
                     response = ResponseDto.Error<PeriodAuditGroupResultResponseDto>("No se encontró el registro.");
@@ -304,7 +313,7 @@ namespace Rokys.Audit.Services.Services
                 entity.TotalWeighting = requestDto.TotalWeighting;
                 entity.UpdateAudit(currentUser.UserName);
                 _periodAuditGroupResultRepository.Update(entity);
-                
+
                 await _unitOfWork.CommitAsync();
                 response.Data = _mapper.Map<PeriodAuditGroupResultResponseDto>(entity);
             }
@@ -341,7 +350,7 @@ namespace Rokys.Audit.Services.Services
                     orderBy: orderBy,
                     pageNumber: filterRequestDto.PageNumber,
                     pageSize: filterRequestDto.PageSize,
-                    includeProperties: [ x => x.Group, x => x.PeriodAudit]
+                    includeProperties: [x => x.Group, x => x.PeriodAudit]
 
                 );
                 var pagedResult = new PaginationResponseDto<PeriodAuditGroupResultResponseDto>
@@ -368,42 +377,76 @@ namespace Rokys.Audit.Services.Services
             {
                 var entity = await _periodAuditGroupResultRepository.GetFirstOrDefaultAsync(
                     filter: x => x.PeriodAuditGroupResultId == periodAuditGroupResultId && x.IsActive,
-                    includeProperties: [x => x.Group, y => y.PeriodAudit.Store.Enterprise.EnterpriseGroups]);
+                    includeProperties: [x => x.Group, x => x.PeriodAudit, x => x.PeriodAudit.Store]);
 
                 var periodAuditScaleResult = await _periodAuditScaleResultRepository.GetByPeriodAuditGroupResultId(periodAuditGroupResultId);
                 decimal acumulatedScore = 0;
                 foreach (var scaleResult in periodAuditScaleResult)
                 {
-                    var scaleScore = (scaleResult.AppliedWeighting / 100) *  scaleResult.ScoreValue;
+                    var scaleScore = (scaleResult.AppliedWeighting / 100) * scaleResult.ScoreValue;
                     acumulatedScore += scaleScore;
                 }
 
-                var scaleCompany = await _scaleCompanyRepository.GetConfiguredForEnterprise(entity.PeriodAudit.Store!.Enterprise!.EnterpriseGroups!.FirstOrDefault(e => e.IsActive)!.EnterpriseGroupingId, entity.PeriodAudit.Store.EnterpriseId);
+                var enterpriseGrouping = await _enterpriseGroupingRepository.GetFirstEnterpriseGroupingByEnterpriseId(entity.PeriodAudit.Store.EnterpriseId);
+
+                var scaleCompany = await _scaleCompanyRepository.GetConfiguredForEnterprise(enterpriseGrouping!.EnterpriseGroupingId, entity.PeriodAudit.Store.EnterpriseId);
+                var subScales = await _subScaleRepository.GetAsync(x => x.EnterpriseGroupingId == enterpriseGrouping.EnterpriseGroupingId && x.IsActive);
+                
                 if (scaleCompany == null || !scaleCompany.Any())
                 {
                     response = ResponseDto.Error<bool>("No se encontró la escala asociada a la empresa ni la escala por defecto.");
                     return response;
                 }
 
-                bool scaleFound = false;
-                foreach (var scale in scaleCompany)
+                if (enterpriseGrouping.ScaleType == ScaleType.Weighted && (subScales == null || !subScales.Any()))
                 {
-                    if (acumulatedScore >= scale.MinValue && acumulatedScore <= scale.MaxValue)
-                    {
-                        entity.ScaleDescription = scale.Name;
-                        entity.ScaleColor = scale.ColorCode;
-                        scaleFound = true;
-                        break;
-                    }
-                }
-                if (!scaleFound)
-                {
-                    response = ResponseDto.Error<bool>("No se encontró una escala que coincida con el puntaje obtenido.");
+                    response = ResponseDto.Error<bool>("La escala de la empresa es de tipo ponderado, pero no se encontraron subescalas definidas.");
                     return response;
                 }
 
-                entity.ScoreValue = acumulatedScore;
+                var (score, roundedScore, scaleDescription, scaleColor, calculationDetails) = PeriodAuditCalculator.CalculateScoreAndScale(
+                    acumulatedScore,
+                    scaleCompany,
+                    subScales,
+                    enterpriseGrouping.ScaleType
+                );
+
+                entity.ScaleDescription = scaleDescription;
+                entity.ScaleColor = scaleColor;
+                entity.ScoreValue = roundedScore;
                 _periodAuditGroupResultRepository.Update(entity);
+
+                // Guardar información de pre-evaluación si la escala es de tipo ponderado
+                if (enterpriseGrouping.ScaleType == ScaleType.Weighted)
+                {
+                    var existingPreEvaluation = await _periodAuditPreEvaluationRepository.GetFirstOrDefaultAsync(
+                    filter: x => x.PeriodAuditGroupResultId == periodAuditGroupResultId && x.IsActive);
+
+                    var scaleValueJSON = System.Text.Json.JsonSerializer.Serialize(calculationDetails);
+                    var currentUser = _httpContextAccessor.CurrentUser();
+
+                    if (existingPreEvaluation != null)
+                    {
+                        existingPreEvaluation.TotalWeighted = acumulatedScore;
+                        existingPreEvaluation.ScaleValueJSON = scaleValueJSON;
+                        existingPreEvaluation.TotalAcumulation = score;
+                        existingPreEvaluation.UpdateAudit(currentUser.UserName);
+                        _periodAuditPreEvaluationRepository.Update(existingPreEvaluation);
+                    }
+                    else
+                    {
+                        var preEvaluation = new PeriodAuditPreEvaluation
+                        {
+                            PeriodAuditGroupResultId = periodAuditGroupResultId,
+                            TotalWeighted = acumulatedScore,
+                            ScaleValueJSON = scaleValueJSON,
+                            TotalAcumulation = score,
+                            IsActive = true
+                        };
+                        preEvaluation.CreateAudit(currentUser.UserName);
+                        _periodAuditPreEvaluationRepository.Insert(preEvaluation);
+                    }
+                }
 
                 await _unitOfWork.CommitAsync();
 
@@ -691,14 +734,14 @@ namespace Rokys.Audit.Services.Services
             }
             return response;
         }
-    
+
         public async Task<ResponseDto<bool>> GetAllowedActionPlans(Guid id)
         {
             var response = ResponseDto.Create<bool>();
             try
             {
                 var entity = await _periodAuditRepository.GetCustomByIdAsync(filter: x => x.PeriodAuditId == id && x.IsActive);
-                
+
                 if (entity == null)
                 {
                     throw new Exception("No se encontró el registro.");
@@ -724,7 +767,7 @@ namespace Rokys.Audit.Services.Services
                 // Validar que el usuario sea participante de la auditoría con uno de los roles autorizados
                 if (entity.PeriodAuditParticipants == null || !entity.PeriodAuditParticipants.Any())
                 {
-                   throw new Exception("La auditoría no tiene participantes asignados.");
+                    throw new Exception("La auditoría no tiene participantes asignados.");
                 }
 
                 var userParticipant = entity.PeriodAuditParticipants

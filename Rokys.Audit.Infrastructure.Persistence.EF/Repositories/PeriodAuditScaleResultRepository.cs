@@ -25,7 +25,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
             var entity = await Db.PeriodAuditScaleResults
                 .AsNoTracking()
                 .Where(filter)
-                .Include(e => e.PeriodAuditGroupResult.PeriodAudit.Store.Enterprise.ScaleCompanies)
+                .Include(e => e.PeriodAuditGroupResult.PeriodAudit.Store.Enterprise.EnterpriseGroups)
                 .Include(sg => sg.ScaleGroup)
                 .Include(a => a.PeriodAuditGroupResult.PeriodAudit.PeriodAuditParticipants)
                 .ThenInclude(pa => pa.UserReference)

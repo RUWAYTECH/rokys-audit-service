@@ -10,7 +10,7 @@ BEGIN
         EnterpriseGroupingId UNIQUEIDENTIFIER NOT NULL,
         Code NVARCHAR(10) NOT NULL,
         Name NVARCHAR(100) NOT NULL,
-        Value NVARCHAR(10) NOT NULL,
+        Value DECIMAL(18,2) NOT NULL,
         ColorCode NVARCHAR(10) NOT NULL,
         IsActive BIT NOT NULL DEFAULT 1, -- Está Activo
         CreatedBy NVARCHAR(120) NOT NULL,

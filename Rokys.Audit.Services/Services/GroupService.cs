@@ -34,6 +34,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IAMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly DTOs.Common.FileSettings _fileSettings;
+        private readonly IEnterpriseGroupingRepository _enterpriseGroupingRepository;
 
         public GroupService(
             IGroupRepository groupRepository,
@@ -49,7 +50,8 @@ namespace Rokys.Audit.Services.Services
             IUnitOfWork unitOfWork,
             IAMapper mapper,
             IHttpContextAccessor httpContextAccessor,
-            DTOs.Common.FileSettings fileSettings)
+            DTOs.Common.FileSettings fileSettings,
+            IEnterpriseGroupingRepository enterpriseGroupingRepository)
         {
             _groupRepository = groupRepository;
             _scaleGroupRepository = scaleGroupRepository;
@@ -65,6 +67,7 @@ namespace Rokys.Audit.Services.Services
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
             _fileSettings = fileSettings;
+            _enterpriseGroupingRepository = enterpriseGroupingRepository;
         }
 
         public async Task<ResponseDto<GroupResponseDto>> Create(GroupRequestDto requestDto)
@@ -224,6 +227,32 @@ namespace Rokys.Audit.Services.Services
             {
                 _logger.LogError(ex.Message);
                 response = ResponseDto.Error<PaginationResponseDto<GroupResponseDto>>(ex.Message);
+            }
+            return response;
+        }
+
+        public async Task<ResponseDto<List<GroupResponseDto>>> GetConfiguredForEnterprise(Guid enterpriseId)
+        {
+            var response = ResponseDto.Create<List<GroupResponseDto>>();
+            try
+            {
+                //var filter = BuildFilter(groupFilterRequestDto);
+                Expression<Func<Group, bool>> filter = x => x.IsActive;
+
+                var enterpriseGrouping = await _enterpriseGroupingRepository.GetFirstEnterpriseGroupingByEnterpriseId(enterpriseId);
+
+                var entities = await _groupRepository.GetConfiguredForEnterprise(
+                    enterpriseGroupingId: enterpriseGrouping.EnterpriseGroupingId,
+                    enterpriseId: enterpriseId
+                );
+
+                response.Data = _mapper.Map<List<GroupResponseDto>>(entities);
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response = ResponseDto.Error<List<GroupResponseDto>>(ex.Message);
             }
             return response;
         }

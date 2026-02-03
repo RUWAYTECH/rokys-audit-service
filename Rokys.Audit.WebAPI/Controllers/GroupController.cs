@@ -35,6 +35,15 @@ namespace Rokys.Audit.WebAPI.Controllers
                 return Ok(response);
             return BadRequest(response);
         }
+
+        [HttpGet("configured-for-enterprise/{enterpriseId}")]
+        public async Task<IActionResult> GetConfiguredForEnterprise(Guid enterpriseId)
+        {
+            var result = await _groupService.GetConfiguredForEnterprise(enterpriseId);
+            if (result.IsValid)
+                return Ok(result);
+            return BadRequest(result);
+        }
         
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById([FromRoute] Guid id)

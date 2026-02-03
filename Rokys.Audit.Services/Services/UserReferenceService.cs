@@ -33,6 +33,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IAuditRoleConfigurationRepository _auditRoleConfigurationRepository;
         private readonly IStoreRepository _storeRepository;
         private readonly IGroupingUserRepository _groupingUserRepository;
+        private readonly IEnterpriseGroupingRepository _enterpriseGroupingRepository;
 
         public UserReferenceService(
             IUserReferenceRepository userReferenceRepository,
@@ -44,7 +45,8 @@ namespace Rokys.Audit.Services.Services
             IEmployeeStoreRepository employeeStoreRepository,
             IAuditRoleConfigurationRepository auditRoleConfigurationRepository,
             IStoreRepository storeRepository,
-            IGroupingUserRepository groupingUserRepository)
+            IGroupingUserRepository groupingUserRepository,
+            IEnterpriseGroupingRepository enterpriseGroupingRepository)
         {
             _userReferenceRepository = userReferenceRepository;
             _fluentValidator = fluentValidator;
@@ -56,6 +58,7 @@ namespace Rokys.Audit.Services.Services
             _auditRoleConfigurationRepository = auditRoleConfigurationRepository;
             _storeRepository = storeRepository;
             _groupingUserRepository = groupingUserRepository;
+            _enterpriseGroupingRepository = enterpriseGroupingRepository;
         }
 
         public async Task<ResponseDto<UserReferenceResponseDto>> Create(UserReferenceRequestDto requestDto)
@@ -655,33 +658,59 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<PaginationResponseDto<UserReferenceResponseDto>>();
             try
             {
-                var auditRoles = await _auditRoleConfigurationRepository.GetByEnterpriseIdAsync(enterpriseId);
-                if (requestDto.RoleCode == null)
+                // Obtener el EnterpriseGrouping asociado a la empresa
+                var enterpriseGrouping = await _enterpriseGroupingRepository.GetFirstEnterpriseGroupingByEnterpriseId(enterpriseId);
+                if (enterpriseGrouping == null)
                 {
-                    requestDto.RoleCode = string.Join(',', auditRoles.Select(ar => ar.RoleCode).Distinct());
+                    response.Messages.Add(new ApplicationMessage
+                    {
+                        Message = "No se encontró un grupo de empresas asociado a esta empresa",
+                        MessageType = ApplicationMessageType.Error
+                    });
+                    return response;
                 }
-                var listRoleCodes = requestDto.RoleCode.Split(',').Select(rc => rc.Trim()).ToList();
-                var enterpriseGroupingId = auditRoles
-                    .Where(ar => listRoleCodes.Contains(ar.RoleCode))
-                    .Select(ar => ar.EnterpriseGroupingId)
-                    .FirstOrDefault();
 
-                var groupingUsers = await _groupingUserRepository.GetAsync(
-                    filter: x => x.EnterpriseGroupingId == enterpriseGroupingId && x.IsActive
+                // Filtrar GroupingUser por EnterpriseGrouping y RoleCode (si se especifica)
+                Expression<Func<GroupingUser, bool>> groupingFilter = x => 
+                    x.EnterpriseGroupingId == enterpriseGrouping.EnterpriseGroupingId && x.IsActive;
+
+                if (!string.IsNullOrEmpty(requestDto.RoleCode))
+                {
+                    groupingFilter = groupingFilter.AndAlso(x => x.RolesCodes.Contains(requestDto.RoleCode));
+                }
+
+                var groupingUsers = await _groupingUserRepository.GetAsync(filter: groupingFilter);
+                var userReferenceIds = groupingUsers.Select(gu => gu.UserReferenceId).Distinct().ToList();
+
+                // Construir el filtro base: usuarios activos que están en GroupingUser
+                Expression<Func<UserReference, bool>> filter = x => x.IsActive && userReferenceIds.Contains(x.UserReferenceId);
+
+                // Aplicar filtro de búsqueda si existe
+                if (!string.IsNullOrEmpty(requestDto.Filter))
+                {
+                    var searchTerm = requestDto.Filter.ToLower();
+                    filter = filter.AndAlso(x => 
+                        x.FirstName.ToLower().Contains(searchTerm) ||
+                        x.LastName.ToLower().Contains(searchTerm) ||
+                        (x.FirstName + " " + x.LastName).ToLower().Contains(searchTerm) ||
+                        (x.Email != null && x.Email.ToLower().Contains(searchTerm)) ||
+                        (x.PersonalEmail != null && x.PersonalEmail.ToLower().Contains(searchTerm)) ||
+                        (x.DocumentNumber != null && x.DocumentNumber.ToLower().Contains(searchTerm))
+                    );
+                }
+
+                // Obtener resultados paginados
+                var entities = await _userReferenceRepository.GetPagedAsync(
+                    filter: filter,
+                    orderBy: q => q.OrderBy(x => x.FirstName).ThenBy(x => x.LastName),
+                    pageNumber: requestDto.PageNumber,
+                    pageSize: requestDto.PageSize
                 );
 
-                var userReferenceIdsToRoleCode = groupingUsers
-                    .Where(gu => listRoleCodes.Any(rc => gu.RolesCodes.Contains(rc)))
-                    .Select(gu => gu.UserReferenceId)
-                    .Distinct()
-                    .ToList();
-
-                var users = await _userReferenceRepository.GetByEnterpriseIdAndRoleCodesAsync(listRoleCodes, userReferenceIdsToRoleCode, requestDto.Filter, pageNumber: requestDto.PageNumber,
-                    pageSize: requestDto.PageSize);
                 var pagedResult = new PaginationResponseDto<UserReferenceResponseDto>
                 {
-                    Items = _mapper.Map<IEnumerable<UserReferenceResponseDto>>(users.items),
-                    TotalCount = users.totalCount,
+                    Items = _mapper.Map<IEnumerable<UserReferenceResponseDto>>(entities.Items),
+                    TotalCount = entities.TotalRows,
                     PageNumber = requestDto.PageNumber,
                     PageSize = requestDto.PageSize
                 };
