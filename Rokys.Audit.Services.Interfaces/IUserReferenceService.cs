@@ -43,12 +43,6 @@ namespace Rokys.Audit.Services.Interfaces
         /// <returns>Usuario encontrado o null</returns>
         Task<ResponseDto<UserReferenceResponseDto?>> GetByEmail(string email);
 
-        /// <summary>
-        /// Obtiene usuarios por código de rol
-        /// </summary>
-        /// <param name="roleCode">Código del rol</param>
-        /// <returns>Lista de usuarios con el rol especificado</returns>
-        Task<ResponseDto<List<UserReferenceResponseDto>>> GetByRoleCode(string roleCode);
 
         /// <summary>
         /// Obtiene usuarios activos
