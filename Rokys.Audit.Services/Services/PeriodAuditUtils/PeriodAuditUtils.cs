@@ -70,14 +70,33 @@ namespace Rokys.Audit.Services.Services.PeriodAuditUtils
                 // caso contrario calculatedValue = acumuladedScore >= lastElement.NormalizedScore ? ((acumulatedScore - lastElement.NormalizedScore) / (secondLastElement.NormalizedScore - lastElement.NormalizedScore)) * lastElement.ExpectedDistribution : null;
                 if (calculatedScaleCompany.Count > 1)
                 {
-                    var secondLastElement = calculatedScaleCompany[^2];
                     var lastElement = calculatedScaleCompany.Last();
-                    var hasCalculatedValueDifferent = calculatedScaleCompany
+    
+                    // Verificar si todos los elementos anteriores tienen CalculatedValue == null
+                    // (equivalente a verificar si S9==null Y T9==null Y ... todos==null en Excel)
+                    var allPreviousAreNull = calculatedScaleCompany
                         .Take(calculatedScaleCompany.Count - 1)
-                        .Any(c => c.CalculatedValue != c.NormalizedScore);
-                    var calculatedValueLast = hasCalculatedValueDifferent ?
-                        lastElement.ExpectedDistribution / 100 :
-                        (acumulatedScore >= lastElement.NormalizedScore ? ((acumulatedScore - lastElement.NormalizedScore) / (secondLastElement.NormalizedScore - lastElement.NormalizedScore)) * (lastElement.ExpectedDistribution / 100) : null);
+                        .All(c => c.CalculatedValue == null);
+                    
+                    decimal? calculatedValueLast;
+                    
+                    if (allPreviousAreNull)
+                    {
+                        // Si TODOS los anteriores son null, aplicar la fórmula del último
+                        // (equivalente al SI más interno de Excel)
+                        var secondLastElement = calculatedScaleCompany[^2];
+                        
+                        calculatedValueLast = acumulatedScore >= lastElement.NormalizedScore 
+                            ? ((acumulatedScore - lastElement.NormalizedScore) / (secondLastElement.NormalizedScore - lastElement.NormalizedScore)) * (lastElement.ExpectedDistribution / 100) 
+                            : null;
+                    }
+                    else
+                    {
+                        // Si al menos UNO tiene valor (no null), retornar ExpectedDistribution
+                        // (equivalente a retornar R4 en Excel)
+                        calculatedValueLast = lastElement.ExpectedDistribution / 100;
+                    }
+
                     calculatedScaleCompany[^1] = new
                     {
                         lastElement.Name,
