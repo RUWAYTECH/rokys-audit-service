@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Rokys.Audit.DTOs.Requests.KpiReports;
 using Rokys.Audit.Services.Interfaces;
 
 namespace Rokys.Audit.WebAPI.Controllers
@@ -20,6 +21,28 @@ namespace Rokys.Audit.WebAPI.Controllers
         public async Task<IActionResult> GetGeneralKPIs([FromRoute] int year, [FromQuery] Guid[] enterpriseIds, [FromQuery] Guid? enterpriseGroupingId)
         {
             var response = await _kpiReportsService.GetGeneralKPIsAsync(year, enterpriseIds, enterpriseGroupingId);
+
+            if (response.IsValid)
+                return Ok(response);
+
+            return BadRequest(response);
+        }
+
+        [HttpGet("data-by-participant")]
+        public async Task<IActionResult> GetDataByParticipant([FromQuery] DataByParticipantRequestDto request)
+        {
+            var response = await _kpiReportsService.GetDataByParticipantAsync(request);
+
+            if (response.IsValid)
+                return Ok(response);
+
+            return BadRequest(response);
+        }
+
+        [HttpGet("top-stores-ranking")]
+        public async Task<IActionResult> GetTopStoresRanking([FromQuery] TopRankingRequestDto request)
+        {
+            var response = await _kpiReportsService.GetTopStoresRankingAsync(request);
 
             if (response.IsValid)
                 return Ok(response);

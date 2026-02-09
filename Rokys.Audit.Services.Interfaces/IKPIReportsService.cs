@@ -1,10 +1,16 @@
 using Rokys.Audit.DTOs.Common;
+using Rokys.Audit.DTOs.Requests.KpiReports;
 using Rokys.Audit.DTOs.Responses.Common;
+using Rokys.Audit.DTOs.Responses.KpiReports;
 
 namespace Rokys.Audit.Services.Interfaces
 {
     public interface IKPIReportsService
     {
         Task<ResponseDto<object>> GetGeneralKPIsAsync(int year, Guid[] enterpriseIds, Guid? enterpriseGroupingId);
+        Task<ResponseDto<List<DataByParticipantResponseDto>>> GetDataByParticipantAsync(DataByParticipantRequestDto request);
+        Task<ResponseDto<List<StoreRankingResponseDto>>> GetTopStoresRankingAsync(TopRankingRequestDto request);
+        Task<ResponseDto<List<AuditableGroupReportResponseDto>>> GetAuditableGroupReportAsync(AuditableGroupReportRequestDto request);
     }
 }
+
