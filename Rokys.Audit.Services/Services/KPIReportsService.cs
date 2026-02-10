@@ -122,6 +122,19 @@ namespace Rokys.Audit.Services.Services
                     baseFilter = baseFilter.AndAlso(x => monthsList.Contains(x.StartDate.Month));
                 }
 
+                // Filtrar por fecha de inicio si se proporciona
+                if (request.StartDate.HasValue)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.StartDate >= request.StartDate.Value);
+                }
+
+                // Filtrar por fecha de fin si se proporciona
+                if (request.EndDate.HasValue)
+                {
+                    var endDate = request.EndDate.Value.Date.AddDays(1).AddTicks(-1);
+                    baseFilter = baseFilter.AndAlso(x => x.StartDate <= endDate);
+                }
+
                 // Filtrar por SupervisorIds si se proporciona
                 if (request.SupervisorIds != null && request.SupervisorIds.Length > 0)
                 {
@@ -365,6 +378,19 @@ namespace Rokys.Audit.Services.Services
                     baseFilter = baseFilter.AndAlso(x => monthsList.Contains(x.StartDate.Month));
                 }
 
+                // Filtrar por fecha de inicio si se proporciona
+                if (request.StartDate.HasValue)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.StartDate >= request.StartDate.Value);
+                }
+
+                // Filtrar por fecha de fin si se proporciona
+                if (request.EndDate.HasValue)
+                {
+                    var endDate = request.EndDate.Value.Date.AddDays(1).AddTicks(-1);
+                    baseFilter = baseFilter.AndAlso(x => x.StartDate <= endDate);
+                }
+
                 // Filtrar por SupervisorIds si se proporciona
                 if (request.SupervisorIds != null && request.SupervisorIds.Length > 0)
                 {
@@ -471,7 +497,7 @@ namespace Rokys.Audit.Services.Services
             return response;
         }
 
-        public async Task<ResponseDto<List<DataBySupervisorStoreResponseDto>>> GetDataBySupervisorStoreAsync(TopRankingRequestDto request)
+        public async Task<ResponseDto<List<DataBySupervisorStoreResponseDto>>> GetDataBySupervisorStoreAsync(DataBySupervisorStoreRequestDto request)
         {
             var response = ResponseDto.Create<List<DataBySupervisorStoreResponseDto>>();
             try
@@ -490,11 +516,23 @@ namespace Rokys.Audit.Services.Services
                     baseFilter = baseFilter.AndAlso(x => request.EnterpriseIds.Contains(x.Store.EnterpriseId));
                 }
 
-                // Filtrar por meses si se proporciona
-                if (!string.IsNullOrEmpty(request.Months))
+                // Filtrar por StoreIds si se proporciona
+                if (request.StoreIds != null && request.StoreIds.Length > 0)
                 {
-                    var monthsList = request.Months.Split(',').Select(m => int.Parse(m.Trim())).ToList();
-                    baseFilter = baseFilter.AndAlso(x => monthsList.Contains(x.StartDate.Month));
+                    baseFilter = baseFilter.AndAlso(x => x.StoreId.HasValue && request.StoreIds.Contains(x.StoreId.Value));
+                }
+
+                // Filtrar por fecha de inicio si se proporciona
+                if (request.StartDate.HasValue)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.StartDate >= request.StartDate.Value);
+                }
+
+                // Filtrar por fecha de fin si se proporciona
+                if (request.EndDate.HasValue)
+                {
+                    var endDate = request.EndDate.Value.Date.AddDays(1).AddTicks(-1);
+                    baseFilter = baseFilter.AndAlso(x => x.StartDate <= endDate);
                 }
 
                 // Filtrar por SupervisorIds si se proporciona
@@ -504,15 +542,6 @@ namespace Rokys.Audit.Services.Services
                         pap.IsActive
                         && pap.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code
                         && request.SupervisorIds.Contains(pap.UserReferenceId)));
-                }
-
-                // Filtrar por AuditorIds si se proporciona
-                if (request.AuditorIds != null && request.AuditorIds.Length > 0)
-                {
-                    baseFilter = baseFilter.AndAlso(x => x.PeriodAuditParticipants.Any(pap =>
-                        pap.IsActive
-                        && pap.RoleCodeSnapshot == RoleCodes.Auditor.Code
-                        && request.AuditorIds.Contains(pap.UserReferenceId)));
                 }
 
                 // Obtener auditorías con participantes
@@ -525,7 +554,7 @@ namespace Rokys.Audit.Services.Services
                         x => x.AuditStatus
                     ]);
 
-                // Extraer datos por supervisor y tienda
+                // Extraer datos por supervisor, tienda y mes
                 var supervisorStoreData = periodAudits
                     .SelectMany(pa => pa.PeriodAuditParticipants
                         .Where(pap => pap.IsActive && pap.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code)
@@ -535,18 +564,20 @@ namespace Rokys.Audit.Services.Services
                             StoreName = pa.Store?.Name,
                             StoreCode = pa.Store?.Code,
                             SupervisorId = pap.UserReferenceId,
+                            Month = pa.StartDate.Month,
                             Score = pa.ScoreValue
                         }))
                     .ToList();
 
-                // Agrupar y calcular promedios por supervisor y tienda
+                // Agrupar y calcular promedios por supervisor, tienda y mes
                 var groupedData = supervisorStoreData
                     .GroupBy(x => new
                     {
                         x.SupervisorId,
                         x.StoreId,
                         x.StoreName,
-                        x.StoreCode
+                        x.StoreCode,
+                        x.Month
                     })
                     .Select(g => new
                     {
@@ -554,6 +585,7 @@ namespace Rokys.Audit.Services.Services
                         g.Key.StoreId,
                         g.Key.StoreName,
                         g.Key.StoreCode,
+                        g.Key.Month,
                         Average = Math.Round(g.Average(x => x.Score), 2),
                         AuditCount = g.Count()
                     })
@@ -583,10 +615,12 @@ namespace Rokys.Audit.Services.Services
                     StoreId = x.StoreId?.ToString() ?? "",
                     Store = x.StoreName ?? "",
                     StoreCode = x.StoreCode ?? "",
+                    Month = x.Month.ToString("00"),
                     Average = x.Average,
                     AuditCount = x.AuditCount
                 })
                 .OrderBy(x => x.SupervisorName)
+                .ThenBy(x => x.Month)
                 .ThenByDescending(x => x.Average)
                 .ToList();
 
@@ -602,6 +636,102 @@ namespace Rokys.Audit.Services.Services
             return response;
         }
 
-        
+        public async Task<ResponseDto<List<DataByStoreResponseDto>>> GetDataByStoreAsync(DataByStoreRequestDto request)
+        {
+            var response = ResponseDto.Create<List<DataByStoreResponseDto>>();
+            try
+            {
+                _logger.LogInformation("Obteniendo calificaciones por tienda");
+
+                // Construir filtro base para auditorías
+                Expression<Func<PeriodAudit, bool>> baseFilter = x => x.IsActive
+                    && x.AuditStatus != null && x.AuditStatus.Code == AuditStatusCode.Completed
+                    && x.Store.Enterprise.EnterpriseGroups.Any(eg => eg.EnterpriseGroupingId == request.EnterpriseGroupingId && eg.IsActive);
+
+                // Filtrar por EnterpriseIds si se proporciona
+                if (request.EnterpriseIds != null && request.EnterpriseIds.Length > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => request.EnterpriseIds.Contains(x.Store.EnterpriseId));
+                }
+
+                // Filtrar por StoreIds si se proporciona
+                if (request.StoreIds != null && request.StoreIds.Length > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.StoreId.HasValue && request.StoreIds.Contains(x.StoreId.Value));
+                }
+
+                // Filtrar por fecha de inicio si se proporciona
+                if (request.StartDate.HasValue)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.StartDate >= request.StartDate.Value);
+                }
+
+                // Filtrar por fecha de fin si se proporciona
+                if (request.EndDate.HasValue)
+                {
+                    var endDate = request.EndDate.Value.Date.AddDays(1).AddTicks(-1);
+                    baseFilter = baseFilter.AndAlso(x => x.StartDate <= endDate);
+                }
+
+                // Filtrar por SupervisorIds si se proporciona
+                if (request.SupervisorIds != null && request.SupervisorIds.Length > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.PeriodAuditParticipants.Any(pap =>
+                        pap.IsActive
+                        && pap.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code
+                        && request.SupervisorIds.Contains(pap.UserReferenceId)));
+                }
+
+                // Filtrar por AuditorIds si se proporciona
+                if (request.AuditorIds != null && request.AuditorIds.Length > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.PeriodAuditParticipants.Any(pap =>
+                        pap.IsActive
+                        && pap.RoleCodeSnapshot == RoleCodes.Auditor.Code
+                        && request.AuditorIds.Contains(pap.UserReferenceId)));
+                }
+
+                // Filtrar por UnitManagerIds si se proporciona
+                if (request.UnitManagerIds != null && request.UnitManagerIds.Length > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.PeriodAuditParticipants.Any(pap =>
+                        pap.IsActive
+                        && pap.RoleCodeSnapshot == RoleCodes.UnitManager.Code
+                        && request.UnitManagerIds.Contains(pap.UserReferenceId)));
+                }
+
+                // Obtener auditorías
+                var periodAudits = await _periodAuditRepository.GetAsync(
+                    filter: baseFilter,
+                    includeProperties: [x => x.Store]);
+
+                // Agrupar por tienda y calcular promedio
+                var storeData = periodAudits
+                    .GroupBy(pa => new
+                    {
+                        pa.StoreId,
+                        StoreName = pa.Store?.Name
+                    })
+                    .Select(g => new DataByStoreResponseDto
+                    {
+                        StoreId = g.Key.StoreId?.ToString() ?? "",
+                        StoreName = g.Key.StoreName ?? "",
+                        Average = Math.Round(g.Average(x => x.ScoreValue), 2),
+                        AuditCount = g.Count()
+                    })
+                    .OrderByDescending(x => x.Average)
+                    .ToList();
+
+                response.Data = storeData;
+                _logger.LogInformation("Se generaron {Count} registros en el reporte por tienda", storeData.Count);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener calificaciones por tienda");
+                response.Messages.Add(new ApplicationMessage { Key = "Error", Message = ex.Message });
+            }
+
+            return response;
+        }
     }
 }

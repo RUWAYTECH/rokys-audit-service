@@ -60,5 +60,27 @@ namespace Rokys.Audit.WebAPI.Controllers
 
             return BadRequest(response);
         }
+
+        [HttpGet("data-by-store")]
+        public async Task<IActionResult> GetDataByStore([FromQuery] DataByStoreRequestDto request)
+        {
+            var response = await _kpiReportsService.GetDataByStoreAsync(request);
+
+            if (response.IsValid)
+                return Ok(response);
+
+            return BadRequest(response);
+        }
+
+        [HttpGet("data-by-supervisor-store")]
+        public async Task<IActionResult> GetDataBySupervisorStore([FromQuery] DataBySupervisorStoreRequestDto request)
+        {
+            var response = await _kpiReportsService.GetDataBySupervisorStoreAsync(request);
+
+            if (response.IsValid)
+                return Ok(response);
+
+            return BadRequest(response);
+        }
     }
 }

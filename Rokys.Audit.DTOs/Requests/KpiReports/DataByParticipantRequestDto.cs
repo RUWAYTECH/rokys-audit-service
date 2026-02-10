@@ -10,5 +10,7 @@ namespace Rokys.Audit.DTOs.Requests.KpiReports
     public Guid[]? AuditorIds { get; set; }
     public Guid[]? UnitManagerIds { get; set; }
     public string? Months { get; set; } = string.Empty; // Formato: "01,02,03" para filtrar por meses específicos (opcional)
+    public DateTime? StartDate { get; set; }
+    public DateTime? EndDate { get; set; }
   }
 }
