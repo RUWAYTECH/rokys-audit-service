@@ -9,7 +9,6 @@ namespace Rokys.Audit.DTOs.Requests.KpiReports
         public Guid[]? SupervisorIds { get; set; }
         public Guid[]? AuditorIds { get; set; }
         public Guid[]? GroupIds { get; set; } // IDs de grupos auditables
-        public string? Months { get; set; } // "01,02,03,04" etc.
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
     }

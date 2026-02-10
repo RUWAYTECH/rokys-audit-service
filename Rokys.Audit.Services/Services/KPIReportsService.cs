@@ -115,13 +115,6 @@ namespace Rokys.Audit.Services.Services
                     baseFilter = baseFilter.AndAlso(x => x.StoreId.HasValue && request.StoreIds.Contains(x.StoreId.Value));
                 }
 
-                // Filtrar por meses si se proporcionan
-                if (!string.IsNullOrEmpty(request.Months))
-                {
-                    var monthsList = request.Months.Split(',').Select(m => int.Parse(m.Trim())).ToList();
-                    baseFilter = baseFilter.AndAlso(x => monthsList.Contains(x.StartDate.Month));
-                }
-
                 // Filtrar por fecha de inicio si se proporciona
                 if (request.StartDate.HasValue)
                 {
@@ -243,110 +236,7 @@ namespace Rokys.Audit.Services.Services
 
             return response;
         }
-
-        public async Task<ResponseDto<List<StoreRankingResponseDto>>> GetTopStoresRankingAsync(TopRankingRequestDto request)
-        {
-            var response = ResponseDto.Create<List<StoreRankingResponseDto>>();
-            try
-            {
-                var isBestRanking = request.RankingType.Equals("best", StringComparison.CurrentCultureIgnoreCase);
-
-                var rankingTypeDisplay = isBestRanking ? "mejores tiendas" : "tiendas con mayor riesgo";
-                _logger.LogInformation("Obteniendo Top {TopCount} {RankingType}", request.TopCount, rankingTypeDisplay);
-
-                // Validar TopCount
-                if (request.TopCount <= 0)
-                {
-                    response.Messages.Add(new ApplicationMessage { Key = "ValidationError", Message = "TopCount debe ser mayor a 0" });
-                    return response;
-                }
-
-                // Construir filtro base
-                Expression<Func<PeriodAudit, bool>> baseFilter = x => x.IsActive
-                    && x.AuditStatus != null && x.AuditStatus.Code == AuditStatusCode.Completed
-                    && x.Store.Enterprise.EnterpriseGroups.Any(eg => eg.EnterpriseGroupingId == request.EnterpriseGroupingId && eg.IsActive);
-
-                // Filtrar por EnterpriseIds si se proporciona
-                if (request.EnterpriseIds != null && request.EnterpriseIds.Length > 0)
-                {
-                    baseFilter = baseFilter.AndAlso(x => request.EnterpriseIds.Contains(x.Store.EnterpriseId));
-                }
-
-                // Filtrar por meses si se proporciona
-                if (!string.IsNullOrEmpty(request.Months))
-                {
-                    var monthsList = request.Months.Split(',').Select(m => int.Parse(m.Trim())).ToList();
-                    baseFilter = baseFilter.AndAlso(x => monthsList.Contains(x.StartDate.Month));
-                }
-
-                // Filtrar por SupervisorIds si se proporciona
-                if (request.SupervisorIds != null && request.SupervisorIds.Length > 0)
-                {
-                    baseFilter = baseFilter.AndAlso(x => x.PeriodAuditParticipants.Any(pap =>
-                        pap.IsActive
-                        && pap.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code
-                        && request.SupervisorIds.Contains(pap.UserReferenceId)));
-                }
-
-                // Filtrar por AuditorIds si se proporciona
-                if (request.AuditorIds != null && request.AuditorIds.Length > 0)
-                {
-                    baseFilter = baseFilter.AndAlso(x => x.PeriodAuditParticipants.Any(pap =>
-                        pap.IsActive
-                        && pap.RoleCodeSnapshot == RoleCodes.Auditor.Code
-                        && request.AuditorIds.Contains(pap.UserReferenceId)));
-                }
-
-                // Obtener auditorías
-                var periodAudits = await _periodAuditRepository.GetAsync(
-                    filter: baseFilter,
-                    includeProperties: [x => x.Store]);
-
-                // Agrupar por tienda y calcular promedio
-                var storeAveragesQuery = periodAudits
-                    .GroupBy(pa => new
-                    {
-                        pa.StoreId,
-                        StoreName = pa.Store?.Name,
-                        StoreCode = pa.Store?.Code
-                    })
-                    .Select(g => new
-                    {
-                        g.Key.StoreId,
-                        g.Key.StoreName,
-                        g.Key.StoreCode,
-                        Average = Math.Round(g.Average(x => x.ScoreValue), 2),
-                        AuditCount = g.Count()
-                    });
-
-                // Ordenar según el tipo de ranking
-                var storeAverages = isBestRanking
-                    ? storeAveragesQuery.OrderByDescending(x => x.Average).Take(request.TopCount).ToList()
-                    : storeAveragesQuery.OrderBy(x => x.Average).Take(request.TopCount).ToList();
-
-                // Generar resultado
-                var result = storeAverages.Select((x, index) => new StoreRankingResponseDto
-                {
-                    Ranking = index + 1,
-                    StoreId = x.StoreId?.ToString() ?? "",
-                    Store = x.StoreName ?? "",
-                    StoreCode = x.StoreCode ?? "",
-                    Average = x.Average,
-                    AuditCount = x.AuditCount
-                }).ToList();
-
-                response.Data = result;
-                _logger.LogInformation("Se generaron {Count} registros en el TOP {TopCount} {RankingType}", result.Count, request.TopCount, rankingTypeDisplay);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al obtener ranking de tiendas");
-                response.Messages.Add(new ApplicationMessage { Key = "Error", Message = ex.Message });
-            }
-
-            return response;
-        }
-
+        
         public async Task<ResponseDto<List<DataByAuditableGroupResponseDto>>> GetDataByAuditableGroupAsync(DataByAuditableGroupRequestDto request)
         {
             var response = ResponseDto.Create<List<DataByAuditableGroupResponseDto>>();
@@ -369,13 +259,6 @@ namespace Rokys.Audit.Services.Services
                 if (request.StoreIds != null && request.StoreIds.Length > 0)
                 {
                     baseFilter = baseFilter.AndAlso(x => x.StoreId.HasValue && request.StoreIds.Contains(x.StoreId.Value));
-                }
-
-                // Filtrar por meses si se proporciona
-                if (!string.IsNullOrEmpty(request.Months))
-                {
-                    var monthsList = request.Months.Split(',').Select(m => int.Parse(m.Trim())).ToList();
-                    baseFilter = baseFilter.AndAlso(x => monthsList.Contains(x.StartDate.Month));
                 }
 
                 // Filtrar por fecha de inicio si se proporciona
