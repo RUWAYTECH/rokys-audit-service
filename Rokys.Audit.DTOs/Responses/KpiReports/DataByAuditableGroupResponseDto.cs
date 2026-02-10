@@ -1,6 +1,6 @@
 namespace Rokys.Audit.DTOs.Responses.KpiReports
 {
-    public class AuditableGroupReportResponseDto
+    public class DataByAuditableGroupResponseDto
     {
         public string GroupId { get; set; } = string.Empty;
         public string GroupCode { get; set; } = string.Empty;

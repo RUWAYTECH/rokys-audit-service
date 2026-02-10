@@ -323,9 +323,9 @@ namespace Rokys.Audit.Services.Services
             return response;
         }
 
-        public async Task<ResponseDto<List<AuditableGroupReportResponseDto>>> GetAuditableGroupReportAsync(AuditableGroupReportRequestDto request)
+        public async Task<ResponseDto<List<DataByAuditableGroupResponseDto>>> GetDataByAuditableGroupAsync(DataByAuditableGroupRequestDto request)
         {
-            var response = ResponseDto.Create<List<AuditableGroupReportResponseDto>>();
+            var response = ResponseDto.Create<List<DataByAuditableGroupResponseDto>>();
             try
             {
                 _logger.LogInformation("Obteniendo reporte de grupos auditables");
@@ -354,6 +354,15 @@ namespace Rokys.Audit.Services.Services
                     baseFilter = baseFilter.AndAlso(x => monthsList.Contains(x.StartDate.Month));
                 }
 
+                // Filtrar por SupervisorIds si se proporciona
+                if (request.SupervisorIds != null && request.SupervisorIds.Length > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.PeriodAuditParticipants.Any(pap =>
+                        pap.IsActive
+                        && pap.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code
+                        && request.SupervisorIds.Contains(pap.UserReferenceId)));
+                }
+
                 // Obtener auditorías
                 var periodAudits = await _periodAuditRepository.GetAsync(
                     filter: baseFilter,
@@ -363,7 +372,7 @@ namespace Rokys.Audit.Services.Services
 
                 if (!periodAuditIds.Any())
                 {
-                    response.Data = new List<AuditableGroupReportResponseDto>();
+                    response.Data = new List<DataByAuditableGroupResponseDto>();
                     return response;
                 }
 
@@ -387,7 +396,7 @@ namespace Rokys.Audit.Services.Services
                         GroupCode = x.Group?.Code,
                         GroupName = x.Group?.Name
                     })
-                    .Select(g => new AuditableGroupReportResponseDto
+                    .Select(g => new DataByAuditableGroupResponseDto
                     {
                         GroupId = g.Key.GroupId.ToString(),
                         GroupCode = g.Key.GroupCode ?? "",
@@ -404,6 +413,137 @@ namespace Rokys.Audit.Services.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al obtener reporte de grupos auditables");
+                response.Messages.Add(new ApplicationMessage { Key = "Error", Message = ex.Message });
+            }
+
+            return response;
+        }
+
+        public async Task<ResponseDto<List<DataBySupervisorStoreResponseDto>>> GetDataBySupervisorStoreAsync(TopRankingRequestDto request)
+        {
+            var response = ResponseDto.Create<List<DataBySupervisorStoreResponseDto>>();
+            try
+            {
+                _logger.LogInformation("Obteniendo datos por supervisor y tienda");
+
+                // Construir filtro base para auditorías
+                Expression<Func<PeriodAudit, bool>> baseFilter = x => x.IsActive
+                    && x.AuditStatus != null && x.AuditStatus.Code == AuditStatusCode.Completed
+                    && x.Store.Enterprise.EnterpriseGroups.Any(eg => eg.EnterpriseGroupingId == request.EnterpriseGroupingId && eg.IsActive)
+                    && x.PeriodAuditParticipants.Any(pap => pap.IsActive && pap.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code);
+
+                // Filtrar por EnterpriseIds si se proporciona
+                if (request.EnterpriseIds != null && request.EnterpriseIds.Length > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => request.EnterpriseIds.Contains(x.Store.EnterpriseId));
+                }
+
+                // Filtrar por meses si se proporciona
+                if (!string.IsNullOrEmpty(request.Months))
+                {
+                    var monthsList = request.Months.Split(',').Select(m => int.Parse(m.Trim())).ToList();
+                    baseFilter = baseFilter.AndAlso(x => monthsList.Contains(x.StartDate.Month));
+                }
+
+                // Filtrar por SupervisorIds si se proporciona
+                if (request.SupervisorIds != null && request.SupervisorIds.Length > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.PeriodAuditParticipants.Any(pap =>
+                        pap.IsActive
+                        && pap.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code
+                        && request.SupervisorIds.Contains(pap.UserReferenceId)));
+                }
+
+                // Filtrar por AuditorIds si se proporciona
+                if (request.AuditorIds != null && request.AuditorIds.Length > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.PeriodAuditParticipants.Any(pap =>
+                        pap.IsActive
+                        && pap.RoleCodeSnapshot == RoleCodes.Auditor.Code
+                        && request.AuditorIds.Contains(pap.UserReferenceId)));
+                }
+
+                // Obtener auditorías con participantes
+                var periodAudits = await _periodAuditRepository.GetAsync(
+                    filter: baseFilter,
+                    includeProperties:
+                    [
+                        x => x.Store,
+                        x => x.PeriodAuditParticipants,
+                        x => x.AuditStatus
+                    ]);
+
+                // Extraer datos por supervisor y tienda
+                var supervisorStoreData = periodAudits
+                    .SelectMany(pa => pa.PeriodAuditParticipants
+                        .Where(pap => pap.IsActive && pap.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code)
+                        .Select(pap => new
+                        {
+                            pa.StoreId,
+                            StoreName = pa.Store?.Name,
+                            StoreCode = pa.Store?.Code,
+                            SupervisorId = pap.UserReferenceId,
+                            Score = pa.ScoreValue
+                        }))
+                    .ToList();
+
+                // Agrupar y calcular promedios por supervisor y tienda
+                var groupedData = supervisorStoreData
+                    .GroupBy(x => new
+                    {
+                        x.SupervisorId,
+                        x.StoreId,
+                        x.StoreName,
+                        x.StoreCode
+                    })
+                    .Select(g => new
+                    {
+                        g.Key.SupervisorId,
+                        g.Key.StoreId,
+                        g.Key.StoreName,
+                        g.Key.StoreCode,
+                        Average = Math.Round(g.Average(x => x.Score), 2),
+                        AuditCount = g.Count()
+                    })
+                    .ToList();
+
+                // Obtener información de supervisores
+                var supervisorIds = groupedData.Select(x => x.SupervisorId).Distinct().ToList();
+                var supervisorReferences = await _periodAuditParticipantRepository.GetAsync(
+                    filter: x => supervisorIds.Contains(x.UserReferenceId),
+                    includeProperties: [x => x.UserReference]);
+
+                var supervisorDict = supervisorReferences
+                    .Where(x => x.UserReference != null)
+                    .GroupBy(x => x.UserReferenceId)
+                    .ToDictionary(
+                        g => g.Key,
+                        g => g.First().UserReference
+                    );
+
+                // Generar resultado final
+                var result = groupedData.Select(x => new DataBySupervisorStoreResponseDto
+                {
+                    SupervisorId = x.SupervisorId.ToString(),
+                    SupervisorName = supervisorDict.TryGetValue(x.SupervisorId, out var supervisor)
+                        ? $"{supervisor.FirstName} {supervisor.LastName}".Trim()
+                        : "",
+                    StoreId = x.StoreId?.ToString() ?? "",
+                    Store = x.StoreName ?? "",
+                    StoreCode = x.StoreCode ?? "",
+                    Average = x.Average,
+                    AuditCount = x.AuditCount
+                })
+                .OrderBy(x => x.SupervisorName)
+                .ThenByDescending(x => x.Average)
+                .ToList();
+
+                response.Data = result;
+                _logger.LogInformation("Se generaron {Count} registros en el reporte por supervisor y tienda", result.Count);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener datos por supervisor y tienda");
                 response.Messages.Add(new ApplicationMessage { Key = "Error", Message = ex.Message });
             }
 

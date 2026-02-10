@@ -49,5 +49,16 @@ namespace Rokys.Audit.WebAPI.Controllers
 
             return BadRequest(response);
         }
+
+        [HttpGet("data-by-auditable-group")]
+        public async Task<IActionResult> GetDataByAuditableGroup([FromQuery] DataByAuditableGroupRequestDto request)
+        {
+            var response = await _kpiReportsService.GetDataByAuditableGroupAsync(request);
+
+            if (response.IsValid)
+                return Ok(response);
+
+            return BadRequest(response);
+        }
     }
 }
