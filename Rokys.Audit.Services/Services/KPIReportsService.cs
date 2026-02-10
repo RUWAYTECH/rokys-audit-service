@@ -23,6 +23,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IPeriodAuditParticipantRepository _periodAuditParticipantRepository;
         private readonly IPeriodAuditTableScaleTemplateResultRepository _periodAuditTableScaleTemplateResultRepository;
         private readonly IPeriodAuditGroupResultRepository _periodAuditGroupResultRepository;
+        private readonly ISystemConfigurationRepository _systemConfigurationRepository;
 
         public KPIReportsService(
             IPeriodAuditRepository periodAuditRepository,
@@ -32,7 +33,8 @@ namespace Rokys.Audit.Services.Services
             IScaleCompanyRepository scaleCompanyRepository,
             IPeriodAuditParticipantRepository periodAuditParticipantRepository,
             IPeriodAuditTableScaleTemplateResultRepository periodAuditTableScaleTemplateResultRepository,
-            IPeriodAuditGroupResultRepository periodAuditGroupResultRepository)
+            IPeriodAuditGroupResultRepository periodAuditGroupResultRepository,
+            ISystemConfigurationRepository systemConfigurationRepository)
         {
             _periodAuditRepository = periodAuditRepository;
             _logger = logger;
@@ -42,6 +44,7 @@ namespace Rokys.Audit.Services.Services
             _periodAuditParticipantRepository = periodAuditParticipantRepository;
             _periodAuditTableScaleTemplateResultRepository = periodAuditTableScaleTemplateResultRepository;
             _periodAuditGroupResultRepository = periodAuditGroupResultRepository;
+            _systemConfigurationRepository = systemConfigurationRepository;
         }
 
         public async Task<ResponseDto<object>> GetGeneralKPIsAsync(int year, Guid[] enterpriseIds, Guid? enterpriseGroupingId)
@@ -119,19 +122,31 @@ namespace Rokys.Audit.Services.Services
                     baseFilter = baseFilter.AndAlso(x => monthsList.Contains(x.StartDate.Month));
                 }
 
-                // Filtrar por participantes (en BD)
-                if (request.UserReferenceIds != null && request.UserReferenceIds.Length > 0)
+                // Filtrar por SupervisorIds si se proporciona
+                if (request.SupervisorIds != null && request.SupervisorIds.Length > 0)
                 {
-                    baseFilter = baseFilter.AndAlso(x => x.PeriodAuditParticipants.Any(pap => 
-                        pap.IsActive 
-                        && pap.RoleCodeSnapshot == request.ParticipantType
-                        && request.UserReferenceIds.Contains(pap.UserReferenceId)));
+                    baseFilter = baseFilter.AndAlso(x => x.PeriodAuditParticipants.Any(pap =>
+                        pap.IsActive
+                        && pap.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code
+                        && request.SupervisorIds.Contains(pap.UserReferenceId)));
                 }
-                else
+
+                // Filtrar por AuditorIds si se proporciona
+                if (request.AuditorIds != null && request.AuditorIds.Length > 0)
                 {
-                    baseFilter = baseFilter.AndAlso(x => x.PeriodAuditParticipants.Any(pap => 
-                        pap.IsActive 
-                        && pap.RoleCodeSnapshot == request.ParticipantType));
+                    baseFilter = baseFilter.AndAlso(x => x.PeriodAuditParticipants.Any(pap =>
+                        pap.IsActive
+                        && pap.RoleCodeSnapshot == RoleCodes.Auditor.Code
+                        && request.AuditorIds.Contains(pap.UserReferenceId)));
+                }
+
+                // Filtrar por UnitManagerIds si se proporciona
+                if (request.UnitManagerIds != null && request.UnitManagerIds.Length > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.PeriodAuditParticipants.Any(pap =>
+                        pap.IsActive
+                        && pap.RoleCodeSnapshot == RoleCodes.UnitManager.Code
+                        && request.UnitManagerIds.Contains(pap.UserReferenceId)));
                 }
 
                 // Obtener auditorías con participantes
@@ -144,14 +159,10 @@ namespace Rokys.Audit.Services.Services
                         x => x.AuditStatus
                     ]);
 
-                // Extraer datos de participantes
+                // Extraer datos de participantes (solo del tipo especificado en ParticipantType)
                 var participantsData = periodAudits
                     .SelectMany(pa => pa.PeriodAuditParticipants
-                        .Where(pap => pap.IsActive 
-                            && pap.RoleCodeSnapshot == request.ParticipantType
-                            && (request.UserReferenceIds == null 
-                                || request.UserReferenceIds.Length == 0 
-                                || request.UserReferenceIds.Contains(pap.UserReferenceId)))
+                        .Where(pap => pap.IsActive && pap.RoleCodeSnapshot == request.ParticipantType)
                         .Select(pap => new
                         {
                             pa.StoreId,
@@ -363,6 +374,24 @@ namespace Rokys.Audit.Services.Services
                         && request.SupervisorIds.Contains(pap.UserReferenceId)));
                 }
 
+                // Filtrar por AuditorIds si se proporciona
+                if (request.AuditorIds != null && request.AuditorIds.Length > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.PeriodAuditParticipants.Any(pap =>
+                        pap.IsActive
+                        && pap.RoleCodeSnapshot == RoleCodes.Auditor.Code
+                        && request.AuditorIds.Contains(pap.UserReferenceId)));
+                }
+
+                // Filtrar por UnitManagerIds si se proporciona
+                if (request.UnitManagerIds != null && request.UnitManagerIds.Length > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.PeriodAuditParticipants.Any(pap =>
+                        pap.IsActive
+                        && pap.RoleCodeSnapshot == RoleCodes.UnitManager.Code
+                        && request.UnitManagerIds.Contains(pap.UserReferenceId)));
+                }
+
                 // Obtener auditorías
                 var periodAudits = await _periodAuditRepository.GetAsync(
                     filter: baseFilter,
@@ -376,7 +405,7 @@ namespace Rokys.Audit.Services.Services
                     return response;
                 }
 
-                // Obtener resultados por grupo auditable (Group)
+                // Obtener resultados por grupo auditable con sus puntos auditables
                 Expression<Func<PeriodAuditGroupResult, bool>> groupResultFilter = x => x.IsActive
                     && periodAuditIds.Contains(x.PeriodAuditId);
 
@@ -385,30 +414,53 @@ namespace Rokys.Audit.Services.Services
                     groupResultFilter = groupResultFilter.AndAlso(x => request.GroupIds.Contains(x.GroupId));
                 }
 
-                var groupResults = await _periodAuditGroupResultRepository.GetAsync(
-                    filter: groupResultFilter,
-                    includeProperties: [x => x.Group]);
+                var groupResults = await _periodAuditGroupResultRepository.GetByPeriodAuditIdWithScaleResultsAsync(filter: groupResultFilter);
 
+                // Agrupar por Group y calcular promedios
                 var result = groupResults
                     .GroupBy(x => new
                     {
-                        GroupId = x.GroupId,
                         GroupCode = x.Group?.Code,
                         GroupName = x.Group?.Name
                     })
-                    .Select(g => new DataByAuditableGroupResponseDto
+                    .Select(groupData => 
                     {
-                        GroupId = g.Key.GroupId.ToString(),
-                        GroupCode = g.Key.GroupCode ?? "",
-                        GroupName = g.Key.GroupName ?? "",
-                        Average = Math.Round(g.Average(x => x.ScoreValue), 2),
-                        AuditCount = g.Count()
+                        // Obtener todos los scale results de este grupo
+                        var allScaleResults = groupData
+                            .SelectMany(gr => gr.PeriodAuditScaleResults.Where(sr => sr.IsActive))
+                            .ToList();
+
+                        // Agrupar por ScaleGroup para obtener los puntos auditables
+                        var auditablePoints = allScaleResults
+                            .GroupBy(sr => new
+                            {
+                                ScaleCode = sr.ScaleGroup?.Code,
+                                ScaleName = sr.ScaleGroup?.Name
+                            })
+                            .Select(scaleData => new AuditablePointsResponseDto
+                            {
+                                Code = scaleData.Key.ScaleCode ?? "",
+                                Name = scaleData.Key.ScaleName ?? "",
+                                Average = Math.Round(scaleData.Average(s => s.ScoreValue), 2),
+                                AuditCount = scaleData.Count()
+                            })
+                            .OrderByDescending(ap => ap.Average)
+                            .ToArray();
+
+                        return new DataByAuditableGroupResponseDto
+                        {
+                            Code = groupData.Key.GroupCode ?? "",
+                            Name = groupData.Key.GroupName ?? "",
+                            Average = Math.Round(groupData.Average(x => x.ScoreValue), 2),
+                            AuditCount = groupData.Count(),
+                            AuditablePoints = auditablePoints
+                        };
                     })
                     .OrderByDescending(x => x.Average)
                     .ToList();
 
                 response.Data = result;
-                _logger.LogInformation("Reporte generado: {GroupCount} grupos auditables", result.Count);
+                _logger.LogInformation("Reporte generado: {GroupCount} grupos auditables con sus puntos auditables", result.Count);
             }
             catch (Exception ex)
             {
@@ -549,5 +601,7 @@ namespace Rokys.Audit.Services.Services
 
             return response;
         }
-  }
+
+        
+    }
 }
