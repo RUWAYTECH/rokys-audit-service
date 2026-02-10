@@ -82,5 +82,16 @@ namespace Rokys.Audit.WebAPI.Controllers
 
             return BadRequest(response);
         }
+
+        [HttpGet("data-by-scale")]
+        public async Task<IActionResult> GetDataByScale([FromQuery] DataByScaleRequestDto request)
+        {
+            var response = await _kpiReportsService.GetDataByScaleAsync(request);
+
+            if (response.IsValid)
+                return Ok(response);
+
+            return BadRequest(response);
+        }
     }
 }

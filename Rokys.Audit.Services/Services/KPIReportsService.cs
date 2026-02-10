@@ -733,5 +733,105 @@ namespace Rokys.Audit.Services.Services
 
             return response;
         }
+
+        public async Task<ResponseDto<List<DataByScaleResponseDto>>> GetDataByScaleAsync(DataByScaleRequestDto request)
+        {
+            var response = ResponseDto.Create<List<DataByScaleResponseDto>>();
+            try
+            {
+                _logger.LogInformation("Obteniendo promedios por escalas");
+
+                // Obtener las escalas de la compañía por EnterpriseGroupingId
+                var scaleCompanies = await _scaleCompanyRepository.GetAsync(filter: x => x.IsActive && x.EnterpriseGroupingId == request.EnterpriseGroupingId);
+
+                if (!scaleCompanies.Any())
+                {
+                    response.Messages.Add(new ApplicationMessage { Key = "ValidationError", Message = "No se encontraron escalas configuradas para este agrupamiento empresarial" });
+                    response.Data = new List<DataByScaleResponseDto>();
+                    return response;
+                }
+
+                // Construir filtro base para auditorías
+                Expression<Func<PeriodAudit, bool>> baseFilter = x => x.IsActive
+                    && x.AuditStatus != null && x.AuditStatus.Code == AuditStatusCode.Completed
+                    && x.Store.Enterprise.EnterpriseGroups.Any(eg => eg.EnterpriseGroupingId == request.EnterpriseGroupingId && eg.IsActive);
+
+                // Filtrar por EnterpriseIds si se proporciona
+                if (request.EnterpriseIds != null && request.EnterpriseIds.Length > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => request.EnterpriseIds.Contains(x.Store.EnterpriseId));
+                }
+
+                // Filtrar por StoreIds si se proporciona
+                if (request.StoreIds != null && request.StoreIds.Length > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.StoreId.HasValue && request.StoreIds.Contains(x.StoreId.Value));
+                }
+
+                // Filtrar por fecha de inicio si se proporciona
+                if (request.StartDate.HasValue)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.StartDate >= request.StartDate.Value);
+                }
+
+                // Filtrar por fecha de fin si se proporciona
+                if (request.EndDate.HasValue)
+                {
+                    var endDate = request.EndDate.Value.Date.AddDays(1).AddTicks(-1);
+                    baseFilter = baseFilter.AndAlso(x => x.StartDate <= endDate);
+                }
+
+                // Obtener auditorías
+                var periodAudits = await _periodAuditRepository.GetAsync(
+                    filter: baseFilter,
+                    includeProperties: [x => x.Store]);
+
+                if (!periodAudits.Any())
+                {
+                    response.Data = new List<DataByScaleResponseDto>();
+                    return response;
+                }
+
+                // Clasificar cada auditoría en su escala según el promedio y agrupar por escala y mes
+                var auditsByScale = periodAudits
+                    .Select(pa => new
+                    {
+                        Audit = pa,
+                        Month = pa.StartDate.Month,
+                        Scale = scaleCompanies.FirstOrDefault(sc => 
+                            pa.ScoreValue >= sc.MinValue && pa.ScoreValue <= sc.MaxValue)
+                    })
+                    .Where(x => x.Scale != null)
+                    .GroupBy(x => x.Scale!.Name)
+                    .Select(scaleGroup => new DataByScaleResponseDto
+                    {
+                        ScaleName = scaleGroup.Key,
+                        Average = Math.Round(scaleGroup.Average(x => x.Audit.ScoreValue), 2),
+                        AuditCount = scaleGroup.Count(),
+                        Months = scaleGroup
+                            .GroupBy(x => x.Month)
+                            .Select(monthGroup => new MonthlyScaleDataDto
+                            {
+                                Month = monthGroup.Key.ToString("00"),
+                                Average = Math.Round(monthGroup.Average(x => x.Audit.ScoreValue), 2),
+                                AuditCount = monthGroup.Count()
+                            })
+                            .OrderBy(m => m.Month)
+                            .ToArray()
+                    })
+                    .OrderBy(x => x.ScaleName)
+                    .ToList();
+
+                response.Data = auditsByScale;
+                _logger.LogInformation("Se generaron {Count} registros en el reporte por escalas", auditsByScale.Count);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener promedios por escalas");
+                response.Messages.Add(new ApplicationMessage { Key = "Error", Message = ex.Message });
+            }
+
+            return response;
+        }
     }
 }
