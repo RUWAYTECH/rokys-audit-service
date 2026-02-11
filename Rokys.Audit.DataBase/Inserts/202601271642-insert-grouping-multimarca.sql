@@ -186,6 +186,8 @@ VALUES
     NULL                    -- UpdateDate
 );
 
+
+-- INSERT SCENCIA
 declare @EnterpriseGroupingScenciaId uniqueidentifier = (SELECT EnterpriseGroupingId FROM dbo.EnterpriseGrouping WHERE Code = 'EG004')
 
 INSERT INTO [dbo].[EnterpriseGroup]
