@@ -100,6 +100,16 @@ namespace Rokys.Audit.Services.Services
             {
                 _logger.LogInformation("Obteniendo datos por participante");
 
+                // Obtener las escalas de la compañía por EnterpriseGroupingId
+                var scaleCompanies = await _scaleCompanyRepository.GetAsync(filter: x => x.IsActive && x.EnterpriseGroupingId == request.EnterpriseGroupingId);
+
+                if (!scaleCompanies.Any())
+                {
+                    response.Messages.Add(new ApplicationMessage { Key = "ValidationError", Message = "No se encontraron escalas configuradas para este agrupamiento empresarial" });
+                    response.Data = new List<DataByParticipantResponseDto>();
+                    return response;
+                }
+
                 // Construir filtro base
                 Expression<Func<PeriodAudit, bool>> baseFilter = x => x.IsActive
                     && x.AuditStatus != null && x.AuditStatus.Code == AuditStatusCode.Completed && x.Store.Enterprise.EnterpriseGroups.Any(eg => eg.EnterpriseGroupingId == request.EnterpriseGroupingId && eg.IsActive);
@@ -174,23 +184,51 @@ namespace Rokys.Audit.Services.Services
                         {
                             pa.StoreId,
                             StoreName = pa.Store?.Name,
-                            pa.StartDate.Month,
+                            Month = pa.StartDate.Month,
                             pap.UserReferenceId,
                             Score = pa.ScoreValue
                         }))
                     .ToList();
 
-                // Agrupar y calcular promedios
+                // Agrupar y calcular promedios por participante
                 var groupedData = participantsData
-                    .GroupBy(x => new
+                    .GroupBy(x => x.UserReferenceId)
+                    .Select(participantGroup =>
                     {
-                        x.UserReferenceId
-                    })
-                    .Select(g => new
-                    {
-                        g.Key.UserReferenceId,
-                        Average = Math.Round(g.Average(x => x.Score), 2),
-                        AuditCount = g.Count()
+                        var participantAverage = Math.Round(participantGroup.Average(x => x.Score), 2);
+                        var participantScale = scaleCompanies.FirstOrDefault(sc => 
+                            participantAverage >= sc.MinValue && participantAverage <= sc.MaxValue);
+
+                        // Agrupar por mes dentro de cada participante
+                        var monthlyData = participantGroup
+                            .GroupBy(x => x.Month)
+                            .Select(monthGroup =>
+                            {
+                                var monthAverage = Math.Round(monthGroup.Average(x => x.Score), 2);
+                                var monthScale = scaleCompanies.FirstOrDefault(sc => 
+                                    monthAverage >= sc.MinValue && monthAverage <= sc.MaxValue);
+
+                                return new
+                                {
+                                    Month = monthGroup.Key.ToString("00"),
+                                    Average = monthAverage,
+                                    AuditCount = monthGroup.Count(),
+                                    RiskLevel = monthScale?.Name ?? "",
+                                    RiskColor = monthScale?.ColorCode ?? ""
+                                };
+                            })
+                            .OrderBy(m => m.Month)
+                            .ToList();
+
+                        return new
+                        {
+                            UserReferenceId = participantGroup.Key,
+                            Average = participantAverage,
+                            AuditCount = participantGroup.Count(),
+                            RiskLevel = participantScale?.Name ?? "",
+                            RiskColor = participantScale?.ColorCode ?? "",
+                            Months = monthlyData
+                        };
                     })
                     .ToList();
 
@@ -216,7 +254,17 @@ namespace Rokys.Audit.Services.Services
                         ? $"{userRef.FirstName} {userRef.LastName}".Trim()
                         : "",
                     Average = x.Average,
-                    AuditCount = x.AuditCount
+                    AuditCount = x.AuditCount,
+                    RiskLevel = x.RiskLevel,
+                    RiskColor = x.RiskColor,
+                    Months = x.Months.Select(m => new MonthlyParticipantDataDto
+                    {
+                        Month = m.Month,
+                        Average = m.Average,
+                        AuditCount = m.AuditCount,
+                        RiskLevel = m.RiskLevel,
+                        RiskColor = m.RiskColor
+                    }).ToArray()
                 }).ToList();
 
                 response.Data = result;
