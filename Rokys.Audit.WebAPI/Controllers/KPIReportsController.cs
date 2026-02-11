@@ -82,5 +82,14 @@ namespace Rokys.Audit.WebAPI.Controllers
 
             return BadRequest(response);
         }
+
+        [HttpGet("general-by-kpis-filter")]
+        public async Task<IActionResult> GetGeneralByKPIsFilter([FromQuery] DataByFilterGeneralRequestDto request)
+        {
+            var response = await _kpiReportsService.GetGeneralByKPIsFilterAsync(request);
+            if (response.IsValid)
+                return Ok(response);
+            return BadRequest(response);
+        }
     }
 }

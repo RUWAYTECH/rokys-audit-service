@@ -13,6 +13,7 @@ namespace Rokys.Audit.Services.Interfaces
         Task<ResponseDto<List<DataBySupervisorStoreResponseDto>>> GetDataBySupervisorStoreAsync(DataBySupervisorStoreRequestDto request);
         Task<ResponseDto<List<DataByStoreResponseDto>>> GetDataByStoreAsync(DataByStoreRequestDto request);
         Task<ResponseDto<List<DataByScaleResponseDto>>> GetDataByScaleAsync(DataByScaleRequestDto request);
+        Task<ResponseDto<DataByFilterGeneralResponseDto>> GetGeneralByKPIsFilterAsync(DataByFilterGeneralRequestDto request);
     }
 }
 
