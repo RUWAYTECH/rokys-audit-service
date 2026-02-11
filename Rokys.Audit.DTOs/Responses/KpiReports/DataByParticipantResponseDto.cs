@@ -6,8 +6,6 @@ namespace Rokys.Audit.DTOs.Responses.KpiReports
         public string UserName { get; set; } = string.Empty;
         public decimal Average { get; set; }
         public int AuditCount { get; set; }
-        public string RiskLevel { get; set; } = string.Empty;
-        public string RiskColor { get; set; } = string.Empty;
         public MonthlyParticipantDataDto[] Months { get; set; } = Array.Empty<MonthlyParticipantDataDto>();
     }
 
@@ -16,7 +14,5 @@ namespace Rokys.Audit.DTOs.Responses.KpiReports
         public string Month { get; set; } = string.Empty;
         public decimal Average { get; set; }
         public int AuditCount { get; set; }
-        public string RiskLevel { get; set; } = string.Empty;
-        public string RiskColor { get; set; } = string.Empty;
     }
 }
