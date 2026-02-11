@@ -80,5 +80,16 @@ namespace Rokys.Audit.WebAPI.Controllers
 
             return BadRequest(response);
         }
+
+        [HttpGet("expired-products")]
+        public async Task<IActionResult> GetExpiredProducts([FromQuery] DataExpirationRequestDto request)
+        {
+            var response = await _kpiReportsService.GetExpiredProductsAsync(request);
+
+            if (response.IsValid)
+                return Ok(response);
+
+            return BadRequest(response);
+        }
     }
 }
