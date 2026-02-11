@@ -47,48 +47,72 @@ namespace Rokys.Audit.Services.Services
             _systemConfigurationRepository = systemConfigurationRepository;
         }
 
-        public async Task<ResponseDto<object>> GetGeneralKPIsAsync(int year, Guid[] enterpriseIds, Guid? enterpriseGroupingId)
+        public async Task<ResponseDto<DataByFilterGeneralResponseDto>> GetGeneralKPIsAsync(DataByFilterGeneralRequestDto request)
         {
-            var response = ResponseDto.Create<object>();
+            var response = ResponseDto.Create<DataByFilterGeneralResponseDto>();
             try
             {
-                _logger.LogInformation("Obteniendo KPIs generales para el año {Year}", year);
+                var loggerPrefix = $"Obteniendo KPIs generales por filtro - EnterpriseIds: {(request.StoreIds != null ? string.Join(",", request.StoreIds) : "N/A")}, StoreIds: {(request.StoreIds != null ? string.Join(",", request.StoreIds) : "N/A")}, SupervisorIds: {(request.SupervisorIds != null ? string.Join(",", request.SupervisorIds) : "N/A")}, UnitManagerIds: {(request.UnitManagerIds != null ? string.Join(",", request.UnitManagerIds) : "N/A")}, StartDate: {request.StartDate?.ToString("yyyy-MM-dd") ?? "N/A"}, EndDate: {request.EndDate?.ToString("yyyy-MM-dd") ?? "N/A"}";
+                _logger.LogInformation(loggerPrefix);
 
-                // Obtener auditorías del año especificado
-                var startDate = new DateTime(year, 1, 1);
-                var endDate = new DateTime(year, 12, 31, 23, 59, 59);
-
-                Expression<Func<PeriodAudit, bool>> baseFilter = x => x.CreationDate >= startDate &&
-                    x.CreationDate <= endDate && x.IsActive
+                Expression<Func<PeriodAudit, bool>> baseFilter = x => x.IsActive
                     && x.AuditStatus != null && x.AuditStatus.Code == AuditStatusCode.Completed;
 
-                if (enterpriseIds != null && enterpriseIds.Length > 0)
+                if (request.StoreIds != null && request.StoreIds.Length > 0)
                 {
-                    baseFilter = baseFilter.AndAlso(x => enterpriseIds.Contains(x.Store.EnterpriseId));
+                    baseFilter = baseFilter.AndAlso(x => x.StoreId.HasValue && request.StoreIds.Contains(x.StoreId.Value));
                 }
 
-                if (enterpriseGroupingId != null && enterpriseGroupingId.HasValue)
+                if (request.SupervisorIds != null && request.SupervisorIds.Length > 0)
                 {
-                    baseFilter = baseFilter.AndAlso(x => x.Store.Enterprise.EnterpriseGroups.Any(eg => eg.EnterpriseGroupingId == enterpriseGroupingId && eg.IsActive));
+                    baseFilter = baseFilter.AndAlso(x => x.PeriodAuditParticipants.Any(pap =>
+                        pap.IsActive
+                        && pap.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code
+                        && request.SupervisorIds.Contains(pap.UserReferenceId)));
+                }
+
+                if (request.UnitManagerIds != null && request.UnitManagerIds.Length > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.PeriodAuditParticipants.Any(pap =>
+                        pap.IsActive
+                        && pap.RoleCodeSnapshot == RoleCodes.UnitManager.Code
+                        && request.UnitManagerIds.Contains(pap.UserReferenceId)));
+                }
+
+                if (request.StartDate.HasValue)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.StartDate >= request.StartDate.Value);
+                }
+
+                if (request.EndDate.HasValue)
+                {
+                    var endDate = request.EndDate.Value.Date.AddDays(1).AddTicks(-1);
+                    baseFilter = baseFilter.AndAlso(x => x.StartDate <= endDate);
                 }
 
                 var periodAudits = await _periodAuditRepository.GetAsync(
                     filter: baseFilter,
-                    includeProperties:
-                    [
-                        x => x.Store.Enterprise,
-                        x => x.AuditStatus
-                    ]);
+                    includeProperties: [x => x.Store]);
 
+                var quantityAudits = periodAudits.Count();
+                var overallAverageScore = quantityAudits > 0 ? Math.Round(periodAudits.Average(x => x.ScoreValue), 2) : 0;
+                var storesAudited = periodAudits.Select(x => x.StoreId).Distinct().Count();
+                var percentageEvaluations = Convert.ToDecimal(quantityAudits > 0 ? Math.Round((double)quantityAudits / (storesAudited > 0 ? storesAudited : 1), 2) * 100 : 0);
+
+                response.Data = new DataByFilterGeneralResponseDto
+                {
+                    QuantityAudits = quantityAudits,
+                    OverallAverageScore = overallAverageScore,
+                    QuantityStores = storesAudited,
+                    PercentageEvaluations = percentageEvaluations
+                };
 
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener KPIs generales");
-                
-                response.Messages.Add( new ApplicationMessage { Key = "Error", Message = ex.Message } );
+                _logger.LogError(ex, "Error al obtener KPIs generales por filtro");
+                response.Messages.Add(new ApplicationMessage { Key = "Error", Message = ex.Message });
             }
-
             return response;
         }
 
@@ -759,75 +783,6 @@ namespace Rokys.Audit.Services.Services
                 response.Messages.Add(new ApplicationMessage { Key = "Error", Message = ex.Message });
             }
 
-            return response;
-        }
-
-        public async Task<ResponseDto<DataByFilterGeneralResponseDto>> GetGeneralByKPIsFilterAsync(DataByFilterGeneralRequestDto request)
-        {
-            var response = ResponseDto.Create<DataByFilterGeneralResponseDto>();
-            try
-            {
-                var loggerPrefix = $"Obteniendo KPIs generales por filtro - EnterpriseIds: {(request.StoreIds != null ? string.Join(",", request.StoreIds) : "N/A")}, StoreIds: {(request.StoreIds != null ? string.Join(",", request.StoreIds) : "N/A")}, SupervisorIds: {(request.SupervisorIds != null ? string.Join(",", request.SupervisorIds) : "N/A")}, UnitManagerIds: {(request.UnitManagerIds != null ? string.Join(",", request.UnitManagerIds) : "N/A")}, StartDate: {request.StartDate?.ToString("yyyy-MM-dd") ?? "N/A"}, EndDate: {request.EndDate?.ToString("yyyy-MM-dd") ?? "N/A"}";
-                _logger.LogInformation(loggerPrefix);
-
-                Expression<Func<PeriodAudit, bool>> baseFilter = x => x.IsActive
-                    && x.AuditStatus != null && x.AuditStatus.Code == AuditStatusCode.Completed;
-
-                if (request.StoreIds != null && request.StoreIds.Length > 0)
-                {
-                    baseFilter = baseFilter.AndAlso(x => x.StoreId.HasValue && request.StoreIds.Contains(x.StoreId.Value));
-                }
-
-                if (request.SupervisorIds != null && request.SupervisorIds.Length > 0)
-                {
-                    baseFilter = baseFilter.AndAlso(x => x.PeriodAuditParticipants.Any(pap =>
-                        pap.IsActive
-                        && pap.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code
-                        && request.SupervisorIds.Contains(pap.UserReferenceId)));
-                }
-
-                if (request.UnitManagerIds != null && request.UnitManagerIds.Length > 0)
-                {
-                    baseFilter = baseFilter.AndAlso(x => x.PeriodAuditParticipants.Any(pap =>
-                        pap.IsActive
-                        && pap.RoleCodeSnapshot == RoleCodes.UnitManager.Code
-                        && request.UnitManagerIds.Contains(pap.UserReferenceId)));
-                }
-
-                if (request.StartDate.HasValue)
-                {
-                    baseFilter = baseFilter.AndAlso(x => x.StartDate >= request.StartDate.Value);
-                }
-
-                if (request.EndDate.HasValue)
-                {
-                    var endDate = request.EndDate.Value.Date.AddDays(1).AddTicks(-1);
-                    baseFilter = baseFilter.AndAlso(x => x.StartDate <= endDate);
-                }
-
-                var periodAudits = await _periodAuditRepository.GetAsync(
-                    filter: baseFilter,
-                    includeProperties: [x => x.Store]);
-
-                var quantityAudits = periodAudits.Count();
-                var overallAverageScore = quantityAudits > 0 ? Math.Round(periodAudits.Average(x => x.ScoreValue), 2) : 0;
-                var storesAudited = periodAudits.Select(x => x.StoreId).Distinct().Count();
-                var percentageEvaluations = Convert.ToDecimal(quantityAudits > 0 ? Math.Round((double)quantityAudits / (storesAudited > 0 ? storesAudited : 1), 2) * 100 : 0);
-
-                response.Data = new DataByFilterGeneralResponseDto
-                {
-                    QuantityAudits = quantityAudits,
-                    OverallAverageScore = overallAverageScore,
-                    QuantityStores = storesAudited,
-                    PercentageEvaluations = percentageEvaluations
-                };
-
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al obtener KPIs generales por filtro");
-                response.Messages.Add(new ApplicationMessage { Key = "Error", Message = ex.Message });
-            }
             return response;
         }
     }
