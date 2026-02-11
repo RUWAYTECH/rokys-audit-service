@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Rokys.Audit.Common.Constant;
 using Rokys.Audit.Common.Extensions;
@@ -756,6 +757,269 @@ namespace Rokys.Audit.Services.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al obtener promedios por escalas");
+                response.Messages.Add(new ApplicationMessage { Key = "Error", Message = ex.Message });
+            }
+
+            return response;
+        }
+
+        public async Task<ResponseDto<List<DataExpirationResponseDto>>> GetExpiredProductsAsync(DataExpirationRequestDto request)
+        {
+            var response = ResponseDto.Create<List<DataExpirationResponseDto>>();
+            try
+            {
+                _logger.LogInformation("Obteniendo productos próximos a vencer");
+
+                // Construir filtro base para auditorías
+                Expression<Func<PeriodAudit, bool>> baseFilter = x => x.IsActive
+                    && x.AuditStatus != null && x.AuditStatus.Code == AuditStatusCode.Completed
+                    && x.Store.Enterprise.EnterpriseGroups.Any(eg => eg.EnterpriseGroupingId == request.EnterpriseGroupingId && eg.IsActive);
+
+                // Filtrar por EnterpriseIds si se proporciona
+                if (request.EnterpriseIds != null && request.EnterpriseIds.Length > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => request.EnterpriseIds.Contains(x.Store.EnterpriseId));
+                }
+
+                // Filtrar por StoreIds si se proporciona
+                if (request.StoreIds != null && request.StoreIds.Length > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.StoreId.HasValue && request.StoreIds.Contains(x.StoreId.Value));
+                }
+
+                // Filtrar por fecha de inicio si se proporciona
+                if (request.StartDate.HasValue)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.StartDate >= request.StartDate.Value);
+                }
+
+                // Filtrar por fecha de fin si se proporciona
+                if (request.EndDate.HasValue)
+                {
+                    var endDate = request.EndDate.Value.Date.AddDays(1).AddTicks(-1);
+                    baseFilter = baseFilter.AndAlso(x => x.StartDate <= endDate);
+                }
+
+                // Filtrar por SupervisorIds si se proporciona
+                if (request.SupervisorIds != null && request.SupervisorIds.Length > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.PeriodAuditParticipants.Any(pap =>
+                        pap.IsActive
+                        && pap.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code
+                        && request.SupervisorIds.Contains(pap.UserReferenceId)));
+                }
+
+                // Filtrar por AuditorIds si se proporciona
+                if (request.AuditorIds != null && request.AuditorIds.Length > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.PeriodAuditParticipants.Any(pap =>
+                        pap.IsActive
+                        && pap.RoleCodeSnapshot == RoleCodes.Auditor.Code
+                        && request.AuditorIds.Contains(pap.UserReferenceId)));
+                }
+
+                // Filtrar por UnitManagerIds si se proporciona
+                if (request.UnitManagerIds != null && request.UnitManagerIds.Length > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.PeriodAuditParticipants.Any(pap =>
+                        pap.IsActive
+                        && pap.RoleCodeSnapshot == RoleCodes.UnitManager.Code
+                        && request.UnitManagerIds.Contains(pap.UserReferenceId)));
+                }
+
+                // Filtrar solo auditorías que tengan un punto auditable con código "INV-5"
+                baseFilter = baseFilter.AndAlso(x => x.PeriodAuditGroupResults.Any(gr =>
+                    gr.IsActive &&
+                    gr.PeriodAuditScaleResults.Any(sr =>
+                        sr.IsActive &&
+                        sr.ScaleGroup != null &&
+                        sr.ScaleGroup.Code == "INV-5" &&
+                        sr.PeriodAuditTableScaleTemplateResults.Any(t => t.IsActive && t.Code == "inv")
+                    )
+                ));
+
+                var audits = await _periodAuditRepository.GetAsync(
+                    filter: baseFilter,
+                    includeProperties: [
+                        x => x.Store,
+                        x => x.PeriodAuditParticipants
+                    ]);
+
+                if (!audits.Any())
+                {
+                    response.Data = new List<DataExpirationResponseDto>();
+                    _logger.LogInformation("No se encontraron auditorías con productos");
+                    return response;
+                }
+
+                var auditIds = audits.Select(x => x.PeriodAuditId).ToList();
+
+                // Obtener información de supervisores
+                var supervisorParticipants = audits
+                    .SelectMany(a => a.PeriodAuditParticipants
+                        .Where(p => p.IsActive && p.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code)
+                        .Select(p => new { a.PeriodAuditId, p.UserReferenceId }))
+                    .GroupBy(x => x.PeriodAuditId)
+                    .ToDictionary(g => g.Key, g => g.First().UserReferenceId);
+
+                var supervisorIds = supervisorParticipants.Values.Distinct().ToList();
+                var supervisorReferences = await _periodAuditParticipantRepository.GetAsync(
+                    filter: x => supervisorIds.Contains(x.UserReferenceId),
+                    includeProperties: [x => x.UserReference]);
+
+                var supervisorDict = supervisorReferences
+                    .Where(x => x.UserReference != null)
+                    .GroupBy(x => x.UserReferenceId)
+                    .ToDictionary(
+                        g => g.Key,
+                        g => g.First().UserReference
+                    );
+
+                // Obtener las tablas con el punto auditable INV-5
+                var tables = await _periodAuditTableScaleTemplateResultRepository.GetAsync(
+                    filter: t => t.IsActive
+                        && auditIds.Contains(t.PeriodAuditScaleResult!.PeriodAuditGroupResult!.PeriodAuditId)
+                        && t.PeriodAuditScaleResult!.ScaleGroup!.Code == "INV-5" && t.Code == "inv",
+                    includeProperties:
+                    [
+                        t => t.PeriodAuditScaleResult!.PeriodAuditGroupResult!.PeriodAudit!.Store,
+                        t => t.PeriodAuditScaleResult.ScaleGroup!,
+                        t => t.PeriodAuditFieldValues!
+                    ]);
+
+                // Procesar los datos horizontales
+                var result = new List<DataExpirationResponseDto>();
+
+                foreach (var table in tables)
+                {
+                    var audit = table.PeriodAuditScaleResult?.PeriodAuditGroupResult?.PeriodAudit;
+                    
+                    // Obtener información del supervisor
+                    var supervisorId = supervisorParticipants.TryGetValue(audit?.PeriodAuditId ?? Guid.Empty, out var supId) ? supId : Guid.Empty;
+                    var supervisorName = supervisorDict.TryGetValue(supervisorId, out var supervisor)
+                        ? $"{supervisor.FirstName} {supervisor.LastName}".Trim()
+                        : "";
+                    
+                    // Preparar campos genéricos una sola vez por tabla
+                    var auditDate = audit?.StartDate ?? DateTime.MinValue;
+                    var auditId = audit?.PeriodAuditId.ToString() ?? "";
+                    var storeName = audit?.Store?.Name ?? "";
+                    var storeId = audit?.Store?.StoreId;
+                    var year = auditDate.Year;
+                    var month = auditDate.Month.ToString("D2");
+                    var supervisorIdStr = supervisorId.ToString();
+                    
+                    // Obtener todos los campos con TableDataHorizontal
+                    var fieldValues = table.PeriodAuditFieldValues?
+                        .Where(f => f.IsActive 
+                            && !string.IsNullOrEmpty(f.TableDataHorizontal)
+                            && f.FieldCode != null)
+                        .ToList();
+
+                    if (fieldValues == null || !fieldValues.Any())
+                        continue;
+
+                    // Recopilar todas las filas de todos los campos
+                    var rowsData = new Dictionary<int, Dictionary<string, object?>>();
+
+                    foreach (var field in fieldValues)
+                    {
+                        try
+                        {
+                            var horizontalData = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(field.TableDataHorizontal);
+
+                            if (horizontalData != null && horizontalData.Any())
+                            {
+                                foreach (var rowData in horizontalData)
+                                {
+                                    var rowNumber = rowData.ContainsKey("row") ? ((JsonElement)rowData["row"]).GetInt32() : 0;
+
+                                    // Crear el registro de la fila si no existe
+                                    if (!rowsData.ContainsKey(rowNumber))
+                                    {
+                                        rowsData[rowNumber] = new Dictionary<string, object?>();
+                                    }
+
+                                    // Agregar el valor del campo usando el FieldCode como nombre de propiedad
+                                    if (rowData.ContainsKey("value"))
+                                    {
+                                        var valueElement = rowData["value"];
+                                        object? fieldValue = null;
+
+                                        if (valueElement is JsonElement je)
+                                        {
+                                            fieldValue = je.ValueKind switch
+                                            {
+                                                JsonValueKind.String => je.GetString(),
+                                                JsonValueKind.Number => je.TryGetInt32(out var intVal) ? (object)intVal : je.GetDouble(),
+                                                JsonValueKind.True => true,
+                                                JsonValueKind.False => false,
+                                                JsonValueKind.Null => null,
+                                                _ => je.ToString()
+                                            };
+                                        }
+                                        else
+                                        {
+                                            fieldValue = valueElement;
+                                        }
+
+                                        // Usar el FieldCode como nombre de la propiedad
+                                        rowsData[rowNumber][field.FieldCode!] = fieldValue;
+                                    }
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, "Error al procesar TableDataHorizontal para campo {FieldCode}", field.FieldCode);
+                        }
+                    }
+
+                    // Agregar todas las filas al resultado con campos genéricos
+                    foreach (var row in rowsData.OrderBy(r => r.Key))
+                    {
+                        var description = row.Value.ContainsKey("insumo") ? row.Value["insumo"]?.ToString() : null;
+                        var observation = row.Value.ContainsKey("cond_producto") ? row.Value["cond_producto"]?.ToString() : null;
+                        
+                        decimal cost = 0m;
+                        if (row.Value.ContainsKey("cost") && row.Value["cost"] != null)
+                        {
+                            var costValue = row.Value["cost"];
+                            if (costValue is JsonElement costJe)
+                            {
+                                cost = costJe.ValueKind == JsonValueKind.Number 
+                                    ? costJe.TryGetDecimal(out var decVal) ? decVal : (decimal)costJe.GetDouble()
+                                    : decimal.TryParse(costJe.GetString(), out var strVal) ? strVal : 0m;
+                            }
+                            else if (decimal.TryParse(costValue.ToString(), out var parsedVal))
+                            {
+                                cost = parsedVal;
+                            }
+                        }
+
+                        result.Add(new DataExpirationResponseDto
+                        {
+                            AuditId = auditId,
+                            StoreName = storeName,
+                            StoreId = storeId,
+                            AuditDate = auditDate,
+                            Year = year,
+                            Month = month,
+                            SupervisorId = supervisorIdStr,
+                            SupervisorName = supervisorName,
+                            Description = description,
+                            Cost = cost,
+                            Observation = observation
+                        });
+                    }
+                }
+
+                response.Data = result;
+                _logger.LogInformation("Se encontraron {Count} registros de productos", result.Count);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener productos próximos a vencer");
                 response.Messages.Add(new ApplicationMessage { Key = "Error", Message = ex.Message });
             }
 
