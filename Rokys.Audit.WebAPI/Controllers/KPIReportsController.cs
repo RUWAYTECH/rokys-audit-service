@@ -17,14 +17,12 @@ namespace Rokys.Audit.WebAPI.Controllers
             _kpiReportsService = kpiReportsService;
         }
 
-        [HttpGet("general/{year:int}")]
-        public async Task<IActionResult> GetGeneralKPIs([FromRoute] int year, [FromQuery] Guid[] enterpriseIds, [FromQuery] Guid? enterpriseGroupingId)
+        [HttpGet("general-by-kpis-filter")]
+        public async Task<IActionResult> GetGeneralKPIs([FromQuery] DataByFilterGeneralRequestDto request)
         {
-            var response = await _kpiReportsService.GetGeneralKPIsAsync(year, enterpriseIds, enterpriseGroupingId);
-
+            var response = await _kpiReportsService.GetGeneralKPIsAsync(request);
             if (response.IsValid)
                 return Ok(response);
-
             return BadRequest(response);
         }
 
