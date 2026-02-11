@@ -427,6 +427,24 @@ namespace Rokys.Audit.Services.Services
                         && request.SupervisorIds.Contains(pap.UserReferenceId)));
                 }
 
+                // Filtrar por AuditorIds si se proporciona
+                if (request.AuditorIds != null && request.AuditorIds.Length > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.PeriodAuditParticipants.Any(pap =>
+                        pap.IsActive
+                        && pap.RoleCodeSnapshot == RoleCodes.Auditor.Code
+                        && request.AuditorIds.Contains(pap.UserReferenceId)));
+                }
+
+                // Filtrar por UnitManagerIds si se proporciona
+                if (request.UnitManagerIds != null && request.UnitManagerIds.Length > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.PeriodAuditParticipants.Any(pap =>
+                        pap.IsActive
+                        && pap.RoleCodeSnapshot == RoleCodes.UnitManager.Code
+                        && request.UnitManagerIds.Contains(pap.UserReferenceId)));
+                }
+
                 // Obtener auditorías con participantes
                 var periodAudits = await _periodAuditRepository.GetAsync(
                     filter: baseFilter,
@@ -662,6 +680,33 @@ namespace Rokys.Audit.Services.Services
                 {
                     var endDate = request.EndDate.Value.Date.AddDays(1).AddTicks(-1);
                     baseFilter = baseFilter.AndAlso(x => x.StartDate <= endDate);
+                }
+
+                // Filtrar por SupervisorIds si se proporciona
+                if (request.SupervisorIds != null && request.SupervisorIds.Length > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.PeriodAuditParticipants.Any(pap =>
+                        pap.IsActive
+                        && pap.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code
+                        && request.SupervisorIds.Contains(pap.UserReferenceId)));
+                }
+
+                // Filtrar por AuditorIds si se proporciona
+                if (request.AuditorIds != null && request.AuditorIds.Length > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.PeriodAuditParticipants.Any(pap =>
+                        pap.IsActive
+                        && pap.RoleCodeSnapshot == RoleCodes.Auditor.Code
+                        && request.AuditorIds.Contains(pap.UserReferenceId)));
+                }
+
+                // Filtrar por UnitManagerIds si se proporciona
+                if (request.UnitManagerIds != null && request.UnitManagerIds.Length > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.PeriodAuditParticipants.Any(pap =>
+                        pap.IsActive
+                        && pap.RoleCodeSnapshot == RoleCodes.UnitManager.Code
+                        && request.UnitManagerIds.Contains(pap.UserReferenceId)));
                 }
 
                 // Obtener auditorías
