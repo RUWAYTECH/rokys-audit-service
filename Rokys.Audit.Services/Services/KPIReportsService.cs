@@ -514,7 +514,7 @@ namespace Rokys.Audit.Services.Services
                         ? $"{supervisor.FirstName} {supervisor.LastName}".Trim()
                         : "",
                     StoreId = x.StoreId?.ToString() ?? "",
-                    Store = x.StoreName ?? "",
+                    StoreName = x.StoreName ?? "",
                     StoreCode = x.StoreCode ?? "",
                     Month = x.Month.ToString("00"),
                     Average = x.Average,
