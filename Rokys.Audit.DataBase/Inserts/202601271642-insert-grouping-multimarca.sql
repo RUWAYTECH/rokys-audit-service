@@ -157,3 +157,31 @@ VALUES
     NULL,                   -- UpdatedBy
     NULL                    -- UpdateDate
 );
+
+
+--INSERT BRASS
+
+declare @EnterpriseGroupingBrassId uniqueidentifier = (SELECT EnterpriseGroupingId FROM dbo.EnterpriseGrouping WHERE Code = 'EG003')
+
+INSERT INTO [dbo].[EnterpriseGroup]
+(
+    EnterpriseGroupId,
+    EnterpriseId,
+    EnterpriseGroupingId,
+    IsActive,
+    CreatedBy,
+    CreationDate,
+    UpdatedBy,
+    UpdateDate
+)
+VALUES
+(
+    NEWID(),                -- EnterpriseGroupId
+    (SELECT EnterpriseId FROM dbo.Enterprise WHERE Code = '20608029207'),
+    @EnterpriseGroupingBrassId,  -- EnterpriseGroupingId (GUID)
+    1,                      -- IsActive
+    'Admin',                -- CreatedBy
+    GETDATE(),              -- CreationDate
+    NULL,                   -- UpdatedBy
+    NULL                    -- UpdateDate
+);
