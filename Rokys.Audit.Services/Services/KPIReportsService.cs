@@ -184,18 +184,13 @@ namespace Rokys.Audit.Services.Services
                 var groupedData = participantsData
                     .GroupBy(x => new
                     {
-                        x.StoreId,
-                        x.StoreName,
-                        x.Month,
                         x.UserReferenceId
                     })
                     .Select(g => new
                     {
-                        g.Key.StoreId,
-                        g.Key.StoreName,
-                        Month = g.Key.Month.ToString("00"),
                         g.Key.UserReferenceId,
-                        Average = Math.Round(g.Average(x => x.Score), 2)
+                        Average = Math.Round(g.Average(x => x.Score), 2),
+                        AuditCount = g.Count()
                     })
                     .ToList();
 
@@ -216,14 +211,12 @@ namespace Rokys.Audit.Services.Services
                 // Generar resultado final
                 var result = groupedData.Select(x => new DataByParticipantResponseDto
                 {
-                    StoreId = x.StoreId?.ToString() ?? "",
-                    Store = x.StoreName ?? "",
-                    Month = x.Month,
                     UserReferenceId = x.UserReferenceId.ToString(),
                     UserName = userReferenceDict.TryGetValue(x.UserReferenceId, out var userRef)
                         ? $"{userRef.FirstName} {userRef.LastName}".Trim()
                         : "",
-                    Average = x.Average
+                    Average = x.Average,
+                    AuditCount = x.AuditCount
                 }).ToList();
 
                 response.Data = result;
@@ -244,6 +237,16 @@ namespace Rokys.Audit.Services.Services
             try
             {
                 _logger.LogInformation("Obteniendo reporte de grupos auditables");
+
+                // Obtener las escalas de la compañía por EnterpriseGroupingId
+                var scaleCompanies = await _scaleCompanyRepository.GetAsync(filter: x => x.IsActive && x.EnterpriseGroupingId == request.EnterpriseGroupingId);
+
+                if (!scaleCompanies.Any())
+                {
+                    response.Messages.Add(new ApplicationMessage { Key = "ValidationError", Message = "No se encontraron escalas configuradas para este agrupamiento empresarial" });
+                    response.Data = new List<DataByAuditableGroupResponseDto>();
+                    return response;
+                }
 
                 // Construir filtro base para auditorías
                 Expression<Func<PeriodAudit, bool>> baseFilter = x => x.IsActive
@@ -347,22 +350,37 @@ namespace Rokys.Audit.Services.Services
                                 ScaleCode = sr.ScaleGroup?.Code,
                                 ScaleName = sr.ScaleGroup?.Name
                             })
-                            .Select(scaleData => new AuditablePointsResponseDto
+                            .Select(scaleData =>
                             {
-                                Code = scaleData.Key.ScaleCode ?? "",
-                                Name = scaleData.Key.ScaleName ?? "",
-                                Average = Math.Round(scaleData.Average(s => s.ScoreValue), 2),
-                                AuditCount = scaleData.Count()
+                                var average = Math.Round(scaleData.Average(s => s.ScoreValue), 2);
+                                var scale = scaleCompanies.FirstOrDefault(sc => 
+                                    average >= sc.MinValue && average <= sc.MaxValue);
+
+                                return new AuditablePointsResponseDto
+                                {
+                                    Code = scaleData.Key.ScaleCode ?? "",
+                                    Name = scaleData.Key.ScaleName ?? "",
+                                    Average = average,
+                                    AuditCount = scaleData.Count(),
+                                    RiskLevel = scale?.Name ?? "",
+                                    RiskColor = scale?.ColorCode ?? ""
+                                };
                             })
                             .OrderByDescending(ap => ap.Average)
                             .ToArray();
+
+                        var groupAverage = Math.Round(groupData.Average(x => x.ScoreValue), 2);
+                        var groupScale = scaleCompanies.FirstOrDefault(sc => 
+                            groupAverage >= sc.MinValue && groupAverage <= sc.MaxValue);
 
                         return new DataByAuditableGroupResponseDto
                         {
                             Code = groupData.Key.GroupCode ?? "",
                             Name = groupData.Key.GroupName ?? "",
-                            Average = Math.Round(groupData.Average(x => x.ScoreValue), 2),
+                            Average = groupAverage,
                             AuditCount = groupData.Count(),
+                            RiskLevel = groupScale?.Name ?? "",
+                            RiskColor = groupScale?.ColorCode ?? "",
                             AuditablePoints = auditablePoints
                         };
                     })
@@ -545,6 +563,16 @@ namespace Rokys.Audit.Services.Services
             {
                 _logger.LogInformation("Obteniendo calificaciones por tienda");
 
+                // Obtener las escalas de la compañía por EnterpriseGroupingId
+                var scaleCompanies = await _scaleCompanyRepository.GetAsync(filter: x => x.IsActive && x.EnterpriseGroupingId == request.EnterpriseGroupingId);
+
+                if (!scaleCompanies.Any())
+                {
+                    response.Messages.Add(new ApplicationMessage { Key = "ValidationError", Message = "No se encontraron escalas configuradas para este agrupamiento empresarial" });
+                    response.Data = new List<DataByStoreResponseDto>();
+                    return response;
+                }
+
                 // Construir filtro base para auditorías
                 Expression<Func<PeriodAudit, bool>> baseFilter = x => x.IsActive
                     && x.AuditStatus != null && x.AuditStatus.Code == AuditStatusCode.Completed
@@ -607,19 +635,50 @@ namespace Rokys.Audit.Services.Services
                     filter: baseFilter,
                     includeProperties: [x => x.Store]);
 
-                // Agrupar por tienda y calcular promedio
+                // Agrupar por tienda y calcular promedio general y datos por mes
                 var storeData = periodAudits
                     .GroupBy(pa => new
                     {
                         pa.StoreId,
                         StoreName = pa.Store?.Name
                     })
-                    .Select(g => new DataByStoreResponseDto
+                    .Select(storeGroup =>
                     {
-                        StoreId = g.Key.StoreId?.ToString() ?? "",
-                        StoreName = g.Key.StoreName ?? "",
-                        Average = Math.Round(g.Average(x => x.ScoreValue), 2),
-                        AuditCount = g.Count()
+                        var storeAverage = Math.Round(storeGroup.Average(x => x.ScoreValue), 2);
+                        var storeScale = scaleCompanies.FirstOrDefault(sc => 
+                            storeAverage >= sc.MinValue && storeAverage <= sc.MaxValue);
+
+                        // Agrupar por mes dentro de cada tienda
+                        var monthlyData = storeGroup
+                            .GroupBy(pa => pa.StartDate.Month)
+                            .Select(monthGroup =>
+                            {
+                                var monthAverage = Math.Round(monthGroup.Average(x => x.ScoreValue), 2);
+                                var monthScale = scaleCompanies.FirstOrDefault(sc => 
+                                    monthAverage >= sc.MinValue && monthAverage <= sc.MaxValue);
+
+                                return new MonthlyStoreDataDto
+                                {
+                                    Month = monthGroup.Key.ToString("00"),
+                                    Average = monthAverage,
+                                    AuditCount = monthGroup.Count(),
+                                    RiskLevel = monthScale?.Name ?? "",
+                                    RiskColor = monthScale?.ColorCode ?? ""
+                                };
+                            })
+                            .OrderBy(m => m.Month)
+                            .ToArray();
+
+                        return new DataByStoreResponseDto
+                        {
+                            StoreId = storeGroup.Key.StoreId?.ToString() ?? "",
+                            StoreName = storeGroup.Key.StoreName ?? "",
+                            Average = storeAverage,
+                            AuditCount = storeGroup.Count(),
+                            RiskLevel = storeScale?.Name ?? "",
+                            RiskColor = storeScale?.ColorCode ?? "",
+                            Months = monthlyData
+                        };
                     })
                     .OrderByDescending(x => x.Average)
                     .ToList();
