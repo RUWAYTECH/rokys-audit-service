@@ -15,16 +15,16 @@ INSERT INTO [dbo].[ScaleGroup] (ScaleGroupId,GroupId,Code,[Name],HasSourceData,S
 ('504afdd8-a1a4-4312-a348-5884554c4927','044c67f8-1120-4073-af68-1e35590b5906','EAR-3','Diferencias de inventario de almacén',0,3,5.00,NULL,NULL,1,'admin','2026-01-30T17:08:10.5760185','admin','2026-01-30T17:08:10.5760196'),
 ('fa9a9df3-4fd5-4e8f-9f1e-5ad245c46d3b','044c67f8-1120-4073-af68-1e35590b5906','EAR-4','Registro facturas y/o transferencias de otros locales',0,4,5.00,NULL,NULL,1,'admin','2026-01-30T17:09:08.2555144','admin','2026-01-30T17:09:08.2555154'),
 ('7c151b33-c806-49ff-9b46-31f8305b724e','044c67f8-1120-4073-af68-1e35590b5906','EAR-5','Operatividad de cámaras de video vigilancia',0,5,5.00,NULL,NULL,1,'admin','2026-01-30T17:12:00.5080741','admin','2026-01-30T17:12:00.5080751'),
-('7c111b32-c301-41ff-1b16-51f3325b734e','044c67f8-1120-4073-af68-1e35590b5906','EAR-6','Registro de saldos reales de áreas en los formatos establecidos',0,5,5.00,NULL,NULL,1,'admin','2026-01-30T17:12:00.5080741','admin','2026-01-30T17:12:00.5080751'),
-('c6afa306-5360-4c96-ae89-34ddc1f57bb2','044c67f8-1120-4073-af68-1e35590b5906','EAR-7','Mermas salad bar frios y calientes',0,6,5.00,NULL,NULL,1,'admin','2026-01-30T17:24:15.8152730','admin','2026-01-30T17:24:15.8152741'),
-('a428fe0f-7406-4dc4-ad51-e7bde77adde2','044c67f8-1120-4073-af68-1e35590b5906','EAR-8','Sobre stocks de insumos',0,7,10.00,NULL,NULL,1,'admin','2026-01-30T17:24:28.3329472','admin','2026-01-30T17:24:28.3329483'),
-('0b4ec161-d07c-4920-8e86-77343b414769','044c67f8-1120-4073-af68-1e35590b5906','EAR-9','Liquidacion sistema comercial',0,8,5.00,NULL,NULL,1,'admin','2026-01-30T17:24:41.1250389','admin','2026-01-30T17:24:41.1250400'),
-('6723d827-92ca-4b0e-a8aa-dbd19ad53947','044c67f8-1120-4073-af68-1e35590b5906','EAR-10','Pago de movilidades',0,9,5.00,NULL,NULL,1,'admin','2026-01-30T17:24:54.5716604','admin','2026-01-30T17:24:54.5716615'),
-('d606c309-9d89-4866-aa86-1daa0032d335','044c67f8-1120-4073-af68-1e35590b5906','EAR-11','Merma de papa amarilla frita',0,10,5.00,NULL,NULL,1,'admin','2026-01-30T17:25:06.6836921','admin','2026-01-30T17:25:06.6836932'),
-('0591d3a6-dd4d-4e39-9af0-e6ec828320ff','044c67f8-1120-4073-af68-1e35590b5906','EAR-12','Diferencias de pollo',0,11,10.00,NULL,NULL,1,'admin','2026-01-30T17:25:16.4595245','admin','2026-01-30T17:25:16.4595256'),
-('951adf55-838a-4fc1-9be2-7640632eec72','044c67f8-1120-4073-af68-1e35590b5906','EAR-13','Salida de consumo Buffet/Sin receta',0,12,5.00,NULL,NULL,1,'admin','2026-01-30T17:25:28.1020078','admin','2026-01-30T17:25:28.1020089'),
-('48613d9b-d0e5-48e2-9575-4da76b0a4e55','044c67f8-1120-4073-af68-1e35590b5906','EAR-14','Cumplimiento procedimiento aceite quemado',0,13,10.00,NULL,NULL,1,'admin','2026-01-30T17:25:44.9479988','admin','2026-01-30T17:25:44.9480000'),
-('bac4eada-ff4a-4b89-a6e7-5f81e722bd35','044c67f8-1120-4073-af68-1e35590b5906','EAR-15','Diferencia de sazon',0,14,5.00,NULL,NULL,1,'admin','2026-01-30T17:25:54.5016546','admin','2026-01-30T17:25:54.5016561');
+('7c111b32-c301-41ff-1b16-51f3325b734e','044c67f8-1120-4073-af68-1e35590b5906','EAR-6','Registro de saldos reales de áreas en los formatos establecidos',0,6,5.00,NULL,NULL,1,'admin','2026-01-30T17:12:00.5080741','admin','2026-01-30T17:12:00.5080751'),
+('c6afa306-5360-4c96-ae89-34ddc1f57bb2','044c67f8-1120-4073-af68-1e35590b5906','EAR-7','Mermas salad bar frios y calientes',0,7,5.00,NULL,NULL,1,'admin','2026-01-30T17:24:15.8152730','admin','2026-01-30T17:24:15.8152741'),
+('a428fe0f-7406-4dc4-ad51-e7bde77adde2','044c67f8-1120-4073-af68-1e35590b5906','EAR-8','Sobre stocks de insumos',0,8,10.00,NULL,NULL,1,'admin','2026-01-30T17:24:28.3329472','admin','2026-01-30T17:24:28.3329483'),
+('0b4ec161-d07c-4920-8e86-77343b414769','044c67f8-1120-4073-af68-1e35590b5906','EAR-9','Liquidacion sistema comercial',0,9,5.00,NULL,NULL,1,'admin','2026-01-30T17:24:41.1250389','admin','2026-01-30T17:24:41.1250400'),
+('6723d827-92ca-4b0e-a8aa-dbd19ad53947','044c67f8-1120-4073-af68-1e35590b5906','EAR-10','Pago de movilidades',0,10,5.00,NULL,NULL,1,'admin','2026-01-30T17:24:54.5716604','admin','2026-01-30T17:24:54.5716615'),
+('d606c309-9d89-4866-aa86-1daa0032d335','044c67f8-1120-4073-af68-1e35590b5906','EAR-11','Merma de papa amarilla frita',0,11,5.00,NULL,NULL,1,'admin','2026-01-30T17:25:06.6836921','admin','2026-01-30T17:25:06.6836932'),
+('0591d3a6-dd4d-4e39-9af0-e6ec828320ff','044c67f8-1120-4073-af68-1e35590b5906','EAR-12','Diferencias de pollo',0,12,10.00,NULL,NULL,1,'admin','2026-01-30T17:25:16.4595245','admin','2026-01-30T17:25:16.4595256'),
+('951adf55-838a-4fc1-9be2-7640632eec72','044c67f8-1120-4073-af68-1e35590b5906','EAR-13','Salida de consumo Buffet/Sin receta',0,13,5.00,NULL,NULL,1,'admin','2026-01-30T17:25:28.1020078','admin','2026-01-30T17:25:28.1020089'),
+('48613d9b-d0e5-48e2-9575-4da76b0a4e55','044c67f8-1120-4073-af68-1e35590b5906','EAR-14','Cumplimiento procedimiento aceite quemado',0,14,10.00,NULL,NULL,1,'admin','2026-01-30T17:25:44.9479988','admin','2026-01-30T17:25:44.9480000'),
+('bac4eada-ff4a-4b89-a6e7-5f81e722bd35','044c67f8-1120-4073-af68-1e35590b5906','EAR-15','Diferencia de sazon',0,15,5.00,NULL,NULL,1,'admin','2026-01-30T17:25:54.5016546','admin','2026-01-30T17:25:54.5016561');
 
 SELECT @EnterpriseId = EnterpriseId FROM [dbo].[Enterprise]
 WHERE [Code] = '20517656217' AND IsActive = 1;
