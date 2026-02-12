@@ -404,7 +404,7 @@ namespace Rokys.Audit.Services.Services
                             {
                                 var average = Math.Round(scaleData.Average(s => s.ScoreValue), 2);
                                 var scale = scaleCompanies.FirstOrDefault(sc => 
-                                    average >= sc.MinValue && average <= sc.MaxValue);
+                                    average > (sc.MinValue - 1) && average <= sc.MaxValue);
 
                                 return new AuditablePointsResponseDto
                                 {
@@ -421,7 +421,7 @@ namespace Rokys.Audit.Services.Services
 
                         var groupAverage = Math.Round(groupData.Average(x => x.ScoreValue), 2);
                         var groupScale = scaleCompanies.FirstOrDefault(sc => 
-                            groupAverage >= sc.MinValue && groupAverage <= sc.MaxValue);
+                            groupAverage > (sc.MinValue - 1) && groupAverage <= sc.MaxValue);
 
                         return new DataByAuditableGroupResponseDto
                         {
@@ -696,7 +696,7 @@ namespace Rokys.Audit.Services.Services
                     {
                         var storeAverage = Math.Round(storeGroup.Average(x => x.ScoreValue), 2);
                         var storeScale = scaleCompanies.FirstOrDefault(sc => 
-                            storeAverage >= sc.MinValue && storeAverage <= sc.MaxValue);
+                            storeAverage > (sc.MinValue - 1) && storeAverage <= sc.MaxValue);
 
                         // Agrupar por mes dentro de cada tienda
                         var monthlyData = storeGroup
@@ -705,7 +705,7 @@ namespace Rokys.Audit.Services.Services
                             {
                                 var monthAverage = Math.Round(monthGroup.Average(x => x.ScoreValue), 2);
                                 var monthScale = scaleCompanies.FirstOrDefault(sc => 
-                                    monthAverage >= sc.MinValue && monthAverage <= sc.MaxValue);
+                                    monthAverage > (sc.MinValue - 1) && monthAverage <= sc.MaxValue);
 
                                 return new MonthlyStoreDataDto
                                 {
@@ -837,7 +837,7 @@ namespace Rokys.Audit.Services.Services
                         Audit = pa,
                         Month = pa.StartDate.Month,
                         Scale = scaleCompanies.FirstOrDefault(sc => 
-                            pa.ScoreValue >= sc.MinValue && pa.ScoreValue <= sc.MaxValue)
+                            pa.ScoreValue > (sc.MinValue - 1) && pa.ScoreValue <= sc.MaxValue)
                     })
                     .Where(x => x.Scale != null)
                     .GroupBy(x => x.Scale!.Name)
@@ -877,6 +877,43 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<List<DataExpirationResponseDto>>();
             try
             {
+                var config = await _systemConfigurationRepository.GetFirstOrDefaultAsync(x => x.IsActive && x.ConfigKey == SystemConfigKey.ExpiredProductConfig.Code);
+
+                string scaleGroupCode = "INV-5";
+                string tableCode = "inv";
+                string fieldCodeInsumo = "insumo";
+                string fieldCodeCondProducto = "cond_producto";
+                string fieldCodeCost = "cost";
+
+                if (config != null)
+                {
+                    // configvalue = {"scaleGroup": "INV-5", "table": "inv", "productField": "insumo", "conditionField": "cond_producto", "costField": "cost"}
+                    var configValues = JsonSerializer.Deserialize<Dictionary<string, string>>(config.ConfigValue);
+                    if (configValues != null)
+                    {
+                        if (configValues.TryGetValue("scaleGroup", out var configScaleGroup))
+                        {
+                            scaleGroupCode = configScaleGroup;
+                        }
+                        if (configValues.TryGetValue("table", out var configTable))
+                        {
+                            tableCode = configTable;
+                        }
+                        if (configValues.TryGetValue("productField", out var configProductField))
+                        {
+                            fieldCodeInsumo = configProductField;
+                        }
+                        if (configValues.TryGetValue("conditionField", out var configConditionField))
+                        {
+                            fieldCodeCondProducto = configConditionField;
+                        }
+                        if (configValues.TryGetValue("costField", out var configCostField))
+                        {
+                            fieldCodeCost = configCostField;
+                        }
+                    }
+                }
+                
                 _logger.LogInformation("Obteniendo productos próximos a vencer");
 
                 // Construir filtro base para auditorías
@@ -942,8 +979,8 @@ namespace Rokys.Audit.Services.Services
                     gr.PeriodAuditScaleResults.Any(sr =>
                         sr.IsActive &&
                         sr.ScaleGroup != null &&
-                        sr.ScaleGroup.Code == "INV-5" &&
-                        sr.PeriodAuditTableScaleTemplateResults.Any(t => t.IsActive && t.Code == "inv")
+                        sr.ScaleGroup.Code == scaleGroupCode &&
+                        sr.PeriodAuditTableScaleTemplateResults.Any(t => t.IsActive && t.Code == tableCode)
                     )
                 ));
 
@@ -988,7 +1025,7 @@ namespace Rokys.Audit.Services.Services
                 var tables = await _periodAuditTableScaleTemplateResultRepository.GetAsync(
                     filter: t => t.IsActive
                         && auditIds.Contains(t.PeriodAuditScaleResult!.PeriodAuditGroupResult!.PeriodAuditId)
-                        && t.PeriodAuditScaleResult!.ScaleGroup!.Code == "INV-5" && t.Code == "inv",
+                        && t.PeriodAuditScaleResult!.ScaleGroup!.Code == scaleGroupCode && t.Code == tableCode,
                     includeProperties:
                     [
                         t => t.PeriodAuditScaleResult!.PeriodAuditGroupResult!.PeriodAudit!.Store,
@@ -1087,13 +1124,13 @@ namespace Rokys.Audit.Services.Services
                     // Agregar todas las filas al resultado con campos genéricos
                     foreach (var row in rowsData.OrderBy(r => r.Key))
                     {
-                        var description = row.Value.ContainsKey("insumo") ? row.Value["insumo"]?.ToString() : null;
-                        var observation = row.Value.ContainsKey("cond_producto") ? row.Value["cond_producto"]?.ToString() : null;
+                        var description = row.Value.ContainsKey(fieldCodeInsumo) ? row.Value[fieldCodeInsumo]?.ToString() : null;
+                        var observation = row.Value.ContainsKey(fieldCodeCondProducto) ? row.Value[fieldCodeCondProducto]?.ToString() : null;
                         
                         decimal cost = 0m;
-                        if (row.Value.ContainsKey("cost") && row.Value["cost"] != null)
+                        if (row.Value.ContainsKey(fieldCodeCost) && row.Value[fieldCodeCost] != null)
                         {
-                            var costValue = row.Value["cost"];
+                            var costValue = row.Value[fieldCodeCost];
                             if (costValue is JsonElement costJe)
                             {
                                 cost = costJe.ValueKind == JsonValueKind.Number 

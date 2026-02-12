@@ -717,7 +717,7 @@ namespace Rokys.Audit.Services.Services
                     string riskColor = "#FFFFFF";
                     foreach (var scale in currentScales)
                     {
-                        if (averageScore >= scale.MinValue && averageScore <= scale.MaxValue)
+                        if (averageScore > (scale.MinValue - 1) && averageScore <= scale.MaxValue)
                         {
                             riskLevel = scale.Name;
                             riskColor = scale.ColorCode ?? "#FFFFFF";
@@ -799,7 +799,7 @@ namespace Rokys.Audit.Services.Services
                 string globalRiskColor = "#FFFFFF";
                 foreach (var scale in scaleCompanies)
                 {
-                    if (globalAverage >= scale.MinValue && globalAverage <= scale.MaxValue)
+                    if (globalAverage > (scale.MinValue - 1) && globalAverage <= scale.MaxValue)
                     {
                         globalRiskLevel = scale.Name;
                         globalRiskColor = scale.ColorCode ?? "#FFFFFF";

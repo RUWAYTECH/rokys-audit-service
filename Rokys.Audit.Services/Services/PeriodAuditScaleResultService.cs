@@ -533,7 +533,7 @@ namespace Rokys.Audit.Services.Services
                 {
                     foreach (var scale in scaleCompany)
                     {
-                        if (periodAuditScaleResults.ScoreValue <= scale.MaxValue && periodAuditScaleResults.ScoreValue >= scale.MinValue)
+                        if (periodAuditScaleResults.ScoreValue <= scale.MaxValue && periodAuditScaleResults.ScoreValue > (scale.MinValue - 1))
                         {
                             periodAuditScaleResults.ScaleColor = scale.ColorCode;
                             periodAuditScaleResults.ScaleDescription = scale.Name;

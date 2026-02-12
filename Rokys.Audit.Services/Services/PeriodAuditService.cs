@@ -496,7 +496,7 @@ namespace Rokys.Audit.Services.Services
                 bool scaleFound = false;
                 foreach (var scale in scaleCompany)
                 {
-                    if (acumulatedScore >= scale.MinValue && acumulatedScore <= scale.MaxValue)
+                    if (acumulatedScore > (scale.MinValue - 1) && acumulatedScore <= scale.MaxValue)
                     {
                         entity.ScaleName = scale.Name;
                         entity.ScaleCode = scale.Code;

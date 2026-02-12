@@ -119,7 +119,7 @@ namespace Rokys.Audit.Services.Services.PeriodAuditUtils
 
             foreach (var scale in scaleCompany)
             {
-                if (roundedScore >= scale.MinValue && roundedScore <= scale.MaxValue)
+                if (roundedScore > (scale.MinValue - 1) && roundedScore <= scale.MaxValue)
                 {
                     scaleDescription = scale.Name ?? string.Empty;
                     scaleColor = scale.ColorCode ?? string.Empty;
