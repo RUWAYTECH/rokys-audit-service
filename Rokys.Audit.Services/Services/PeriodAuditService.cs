@@ -421,9 +421,10 @@ namespace Rokys.Audit.Services.Services
                 var enterpriseGroupingIds = userGroupings?.Select(ug => ug.EnterpriseGroupingId).Distinct().ToList() ?? new List<Guid>();
                 
                 // 3. Aplicar el filtro para que la auditoría pertenezca a una empresa
-                filter = filter.AndAlso(x => x.Store.Enterprise.EnterpriseGroups.Any(eg => 
-                    enterpriseGroupingIds.Contains(eg.EnterpriseGroupingId) && eg.IsActive
-                ));
+                if (!currentUser.RoleCodes.Contains(RoleCodes.Administrator.Code))
+                {
+                    filter = filter.AndAlso(x => x.Store.Enterprise.EnterpriseGroups.Any(eg => enterpriseGroupingIds.Contains(eg.EnterpriseGroupingId) && eg.IsActive));
+                }
                 // END: Filtro
 
                 Func<IQueryable<PeriodAudit>, IOrderedQueryable<PeriodAudit>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
