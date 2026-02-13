@@ -57,12 +57,8 @@ namespace Rokys.Audit.Services.Services
                 _logger.LogInformation(loggerPrefix);
 
                 Expression<Func<PeriodAudit, bool>> baseFilter = x => x.IsActive
-                    && x.AuditStatus != null && x.AuditStatus.Code == AuditStatusCode.Completed;
-
-                if (request.EnterpriseGrouping != Guid.Empty)
-                {
-                    baseFilter = baseFilter.AndAlso(x => x.Store.Enterprise.EnterpriseGroups.Any(eg => eg.EnterpriseGroupingId == request.EnterpriseGrouping && eg.IsActive));
-                }
+                    && x.AuditStatus != null && x.AuditStatus.Code == AuditStatusCode.Completed
+                    && x.Store.Enterprise.EnterpriseGroups.Any(eg => eg.EnterpriseGroupingId == request.EnterpriseGroupingId && eg.IsActive);
 
                 if (request.EnterpriseIds != null)
                 {
