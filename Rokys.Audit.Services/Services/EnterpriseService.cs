@@ -130,19 +130,6 @@ namespace Rokys.Audit.Services.Services
                 }
 
                 var dto = _mapper.Map<EnterpriseResponseDto>(entity);
-
-                if (entity.Theme != null)
-                {
-                    dto.PrimaryColor = entity.Theme.PrimaryColor;
-                    dto.SecondaryColor = entity.Theme.SecondaryColor;
-                    dto.AccentColor = entity.Theme.AccentColor;
-                    dto.BackgroundColor = entity.Theme.BackgroundColor;
-                    dto.TextColor = entity.Theme.TextColor;
-
-                    dto.LogoData = entity.Theme.LogoData;
-                    dto.LogoContentType = entity.Theme.LogoContentType;
-                    dto.LogoFileName = entity.Theme.LogoFileName;
-                }
                 response.Data = _mapper.Map<EnterpriseResponseDto>(entity);
             }
             catch (Exception ex)
@@ -173,35 +160,14 @@ namespace Rokys.Audit.Services.Services
                 if (requestDto.EndDate.HasValue)
                     filter = filter.AndAlso(x => x.CreationDate <= requestDto.EndDate.Value);
 
-                Func<IQueryable<Enterprise>, IOrderedQueryable<Enterprise>> orderBy = q => q.OrderBy(x => x.Name);
 
-                var entities = await _enterpriseRepository.GetPagedAsync(
+                var entities = await _enterpriseRepository.GetCustomPagedAsync(
                     filter: filter,
-                    orderBy: orderBy,
                     pageNumber: requestDto.PageNumber,
-                    pageSize: requestDto.PageSize,
-                    includeProperties: e => e.Theme
+                    pageSize: requestDto.PageSize
                 );
 
                 var items = _mapper.Map<List<EnterpriseResponseDto>>(entities.Items);
-
-                foreach (var item in items)
-                {
-                    var entity = entities.Items.First(e => e.EnterpriseId == item.EnterpriseId);
-
-                    if (entity.Theme != null)
-                    {
-                        item.PrimaryColor = entity.Theme.PrimaryColor;
-                        item.SecondaryColor = entity.Theme.SecondaryColor;
-                        item.AccentColor = entity.Theme.AccentColor;
-                        item.BackgroundColor = entity.Theme.BackgroundColor;
-                        item.TextColor = entity.Theme.TextColor;
-
-                        item.LogoData = entity.Theme.LogoData;
-                        item.LogoContentType = entity.Theme.LogoContentType;
-                        item.LogoFileName = entity.Theme.LogoFileName;
-                    }
-                }
 
                 var pagedResult = new PaginationResponseDto<EnterpriseResponseDto>
                 {
@@ -334,24 +300,6 @@ namespace Rokys.Audit.Services.Services
                 );
 
                 var items = _mapper.Map<List<EnterpriseResponseDto>>(entities.Items);
-
-                foreach (var item in items)
-                {
-                    var entity = entities.Items.First(e => e.EnterpriseId == item.EnterpriseId);
-
-                    if (entity.Theme != null)
-                    {
-                        item.PrimaryColor = entity.Theme.PrimaryColor;
-                        item.SecondaryColor = entity.Theme.SecondaryColor;
-                        item.AccentColor = entity.Theme.AccentColor;
-                        item.BackgroundColor = entity.Theme.BackgroundColor;
-                        item.TextColor = entity.Theme.TextColor;
-
-                        item.LogoData = entity.Theme.LogoData;
-                        item.LogoContentType = entity.Theme.LogoContentType;
-                        item.LogoFileName = entity.Theme.LogoFileName;
-                    }
-                }
 
                 var pagedResult = new PaginationResponseDto<EnterpriseResponseDto>
                 {

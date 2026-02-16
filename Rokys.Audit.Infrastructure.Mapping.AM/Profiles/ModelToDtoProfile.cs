@@ -97,7 +97,16 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                 {
                     dest.ScaleGroupName = src.ScaleGroup.Name;
                 });
-            CreateMap<Enterprise, EnterpriseResponseDto>();
+            CreateMap<Enterprise, EnterpriseResponseDto>()
+                .AfterMap((src, dest) =>
+                {
+                    dest.EnterpriseGroupingName = src.EnterpriseGroups?
+                        .FirstOrDefault(eg => eg.IsActive)?
+                        .EnterpriseGrouping?
+                        .Name;
+                });
+
+            CreateMap<EnterpriseTheme, EnterpriseThemeResponseDto>();
             CreateMap<AuditRoleConfiguration, AuditRoleConfigurationResponseDto>()
                 .AfterMap((src, dest) =>
                 {
@@ -133,23 +142,6 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                 dest.StoreName = src.Store?.Name ?? string.Empty;
                 dest.ScaleCode = src.ScaleCode ?? string.Empty;
                 dest.ActionPlanCompletedDate = src.ActionPlanCompletedDate;
-
-                if (src.AuditStatus != null)
-                {
-                    dest.AuditStatus = new AuditStatusResponseDto
-                    {
-                        AuditStatusId = src.AuditStatus.AuditStatusId,
-                        Name = src.AuditStatus.Name,
-                        ColorCode = src.AuditStatus.ColorCode,
-                        Code = src.AuditStatus.Code,
-                        IsActive = src.AuditStatus.IsActive,
-                        CreatedBy = src.AuditStatus.CreatedBy,
-                        CreationDate = src.AuditStatus.CreationDate,
-                        UpdatedBy = src.AuditStatus.UpdatedBy,
-                        UpdateDate = src.AuditStatus.UpdateDate
-                    };
-                }
-
                 // Map participants
                 if (src.PeriodAuditParticipants != null)
                 {
@@ -174,6 +166,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                         .ToList() ?? new List<PeriodAuditParticipantResponseDto>();
                 }
             });
+            CreateMap<PeriodAuditParticipant, PeriodAuditParticipantResponseDto>();
             CreateMap<AuditStatus, AuditStatusResponseDto>();
             CreateMap<UserReference, UserReferenceResponseDto>();
             CreateMap<EmployeeStore, EmployeeStoreResponseDto>();
@@ -358,33 +351,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                         UpdateDate = EnterpriseGroup.UpdateDate
                     }).ToList();
                 });
-            CreateMap<GroupingUser, GroupingUserResponseDto>()
-                .AfterMap((src, dest) =>
-                {
-                    dest.EnterpriseGrouping = src.EnterpriseGrouping != null ? new EnterpriseGroupingResponseDto
-                    {
-                        EnterpriseGroupingId = src.EnterpriseGrouping.EnterpriseGroupingId,
-                        Name = src.EnterpriseGrouping.Name,
-                        Code = src.EnterpriseGrouping.Code,
-                        IsActive = src.EnterpriseGrouping.IsActive,
-                        CreatedBy = src.EnterpriseGrouping.CreatedBy,
-                        CreationDate = src.EnterpriseGrouping.CreationDate,
-                        UpdatedBy = src.EnterpriseGrouping.UpdatedBy,
-                        UpdateDate = src.EnterpriseGrouping.UpdateDate
-                    } : null;
-                    dest.UserReference = src.UserReference != null ? new UserReferenceResponseDto
-                    {
-                        UserReferenceId = src.UserReference.UserReferenceId,
-                        FirstName = src.UserReference.FirstName,
-                        LastName = src.UserReference.LastName,
-                        Email = src.UserReference.Email,
-                        IsActive = src.UserReference.IsActive,
-                        CreatedBy = src.UserReference.CreatedBy,
-                        CreationDate = src.UserReference.CreationDate,
-                        UpdatedBy = src.UserReference.UpdatedBy,
-                        UpdateDate = src.UserReference.UpdateDate
-                    } : null;
-                });
+            CreateMap<GroupingUser, GroupingUserResponseDto>();
         }
     }
 }
