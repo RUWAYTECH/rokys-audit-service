@@ -10,5 +10,6 @@ namespace Rokys.Audit.Services.Interfaces
         Task<ResponseDto<PaginationResponseDto<EnterpriseResponseDto>>> GetPaged(EnterpriseFilterRequestDto requestDto);
         Task<ResponseDto<EnterpriseResponseDto>> Update(Guid id, EnterpriseUpdateRequestDto requestDto);
         Task<ResponseDto<EnterpriseResponseDto>> Create(EnterpriseCreateRequestDto requestDto);
+        Task<ResponseDto<PaginationResponseDto<EnterpriseResponseDto>>> GetByCurrentUserGroup(EnterpriseFilterRequestDto requestDto);
     }
 }

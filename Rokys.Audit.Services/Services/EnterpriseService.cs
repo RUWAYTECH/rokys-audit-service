@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Reatil.Services.Services;
+using Rokys.Audit.Common.Constant;
 using Rokys.Audit.Common.Extensions;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.Enterprise;
@@ -292,6 +293,82 @@ namespace Rokys.Audit.Services.Services
                 theme.CreateAudit(userName);
                 _enterpriseThemeRepository.Insert(theme);
             }
+        }
+
+        // Método adicional para obtener todas las empresas activas que estan configuradas al grupo donde esta el usuario actualmente logueado
+        public async Task<ResponseDto<PaginationResponseDto<EnterpriseResponseDto>>> GetByCurrentUserGroup(EnterpriseFilterRequestDto requestDto)
+        {
+            var response = ResponseDto.Create<PaginationResponseDto<EnterpriseResponseDto>>();
+            try
+            {
+                var currentUser = _httpContextAccessor.CurrentUser();
+                
+                Expression<Func<Enterprise, bool>> filter = x => x.IsActive;
+
+                // Si el usuario NO es appadmin, aplicar filtro de grupo
+                if (currentUser.RoleCodes == null || !currentUser.RoleCodes.Any(r => r.Equals(RoleCodes.Administrator.Code, StringComparison.OrdinalIgnoreCase)))
+                {
+                    filter = filter.AndAlso(x => x.EnterpriseGroups.Any(eg => eg.EnterpriseGrouping.GroupingUsers.Any(gu => gu.UserReferenceId == currentUser.UserReferenceId && gu.IsActive) && eg.IsActive));
+                }
+
+                if (!string.IsNullOrEmpty(requestDto.Filter))
+                    filter = filter.AndAlso(x => x.Name.Contains(requestDto.Filter));
+
+                if (requestDto.EnterpriseGroupingId.HasValue)
+                    filter = filter.AndAlso(x => x.EnterpriseGroups.Any(eg => eg.EnterpriseGroupingId == requestDto.EnterpriseGroupingId.Value && eg.IsActive));
+
+                if (requestDto.StartDate.HasValue)
+                    filter = filter.AndAlso(x => x.CreationDate >= requestDto.StartDate.Value);
+
+                if (requestDto.EndDate.HasValue)
+                    filter = filter.AndAlso(x => x.CreationDate <= requestDto.EndDate.Value);
+
+                Func<IQueryable<Enterprise>, IOrderedQueryable<Enterprise>> orderBy = q => q.OrderBy(x => x.Name);
+
+                var entities = await _enterpriseRepository.GetPagedAsync(
+                    filter: filter,
+                    orderBy: orderBy,
+                    pageNumber: requestDto.PageNumber,
+                    pageSize: requestDto.PageSize,
+                    includeProperties: e => e.Theme
+                );
+
+                var items = _mapper.Map<List<EnterpriseResponseDto>>(entities.Items);
+
+                foreach (var item in items)
+                {
+                    var entity = entities.Items.First(e => e.EnterpriseId == item.EnterpriseId);
+
+                    if (entity.Theme != null)
+                    {
+                        item.PrimaryColor = entity.Theme.PrimaryColor;
+                        item.SecondaryColor = entity.Theme.SecondaryColor;
+                        item.AccentColor = entity.Theme.AccentColor;
+                        item.BackgroundColor = entity.Theme.BackgroundColor;
+                        item.TextColor = entity.Theme.TextColor;
+
+                        item.LogoData = entity.Theme.LogoData;
+                        item.LogoContentType = entity.Theme.LogoContentType;
+                        item.LogoFileName = entity.Theme.LogoFileName;
+                    }
+                }
+
+                var pagedResult = new PaginationResponseDto<EnterpriseResponseDto>
+                {
+                    Items = items,
+                    TotalCount = entities.TotalRows,
+                    PageNumber = requestDto.PageNumber,
+                    PageSize = requestDto.PageSize
+                };
+
+                response.Data = pagedResult;
+            }
+            catch (Exception ex)
+            {
+                response = ResponseDto.Error<PaginationResponseDto<EnterpriseResponseDto>>(ex.Message);
+                _logger.LogError(ex.Message);
+            }
+            return response;
         }
     }
 }
