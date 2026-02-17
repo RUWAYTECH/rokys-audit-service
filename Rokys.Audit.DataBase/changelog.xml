@@ -44,5 +44,8 @@
 <include file="./Inserts/202601291511-insert-new-audit-role-configuration-multimarca.sql" relativeToChangelogFile="true"/>
 <include file="./Inserts/202602021644-insert-group-multimarca.sql" relativeToChangelogFile="true"/>
 <include file="./Inserts/202602110936-insert-configuration-multimarca.sql" relativeToChangelogFile="true"/>
+<include file="./Inserts/202602111404-update-group-by-enterprise-scencia.sql" relativeToChangelogFile="true"/>
+<include file="./Inserts/202602131142-insert-system-configuration.sql" relativeToChangelogFile="true"/>
+<include file="./Inserts/202602131522-insert-new-audit-role-configuration-brass-scencia.sql" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

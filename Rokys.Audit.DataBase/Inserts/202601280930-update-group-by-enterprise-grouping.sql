@@ -6,11 +6,12 @@ declare @EnterpriseMultimarcaTuristicaId uniqueidentifier = (SELECT EnterpriseId
 declare @EnterpriseMultimarcaVienaId uniqueidentifier = (SELECT EnterpriseId FROM dbo.Enterprise WHERE Code = '20601824265')
 declare @EnterpriseMultimarcaDekiruId uniqueidentifier = (SELECT EnterpriseId FROM dbo.Enterprise WHERE Code = '20612441198')
 declare @EnterpriseMultimarcaIndependenciaId uniqueidentifier = (SELECT EnterpriseId FROM dbo.Enterprise WHERE Code = '20517656217')
+declare @EnterpriseScenciaNorChickenId uniqueidentifier = (SELECT EnterpriseId FROM dbo.Enterprise WHERE Code = '20418463644')
 
 declare @EnterpriseGroupingBrassId uniqueidentifier = (SELECT EnterpriseGroupingId FROM dbo.EnterpriseGrouping WHERE Code = 'EG003')
 
 DELETE FROM [dbo].[EnterpriseGroup]
-WHERE EnterpriseId IN (@EnterpriseBrassBentenId, @EnterpriseMultimarcaTuristicaId, @EnterpriseMultimarcaVienaId, @EnterpriseMultimarcaDekiruId, @EnterpriseMultimarcaIndependenciaId)
+WHERE EnterpriseId IN (@EnterpriseBrassBentenId, @EnterpriseMultimarcaTuristicaId, @EnterpriseMultimarcaVienaId, @EnterpriseMultimarcaDekiruId, @EnterpriseMultimarcaIndependenciaId, @EnterpriseScenciaNorChickenId)
 AND EnterpriseGroupingId = @EnterpriseGroupingId;
 
 UPDATE dbo.[Group]

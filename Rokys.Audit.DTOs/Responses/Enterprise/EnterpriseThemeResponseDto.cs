@@ -1,6 +1,6 @@
 ﻿namespace Rokys.Audit.DTOs.Responses.Enterprise
 {
-    class EnterpriseThemeResponseDto
+    public class EnterpriseThemeResponseDto
     {
         public Guid EnterpriseThemeId { get; set; }
         public Guid EnterpriseId { get; set; }
