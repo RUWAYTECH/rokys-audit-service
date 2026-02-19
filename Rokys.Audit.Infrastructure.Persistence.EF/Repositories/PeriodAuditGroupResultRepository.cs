@@ -25,6 +25,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
             IQueryable<PeriodAuditGroupResult> query = _context.PeriodAuditGroupResults
                 .Where(filter ?? (pagr => pagr.IsActive)) // Si no se proporciona un filtro, se aplica uno que solo incluye resultados activos
                 .Include(pagr => pagr.Group)
+                .Include(pagr => pagr.PeriodAudit)
                 .Include(pagr => pagr.PeriodAuditScaleResults)
                     .ThenInclude(pasr => pasr.ScaleGroup);
             return await query

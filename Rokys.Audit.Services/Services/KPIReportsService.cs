@@ -385,6 +385,9 @@ namespace Rokys.Audit.Services.Services
 
                 var groupResults = await _periodAuditGroupResultRepository.GetByPeriodAuditIdWithScaleResultsAsync(filter: groupResultFilter);
 
+                // Crear diccionario de fechas de auditoría
+                var auditDates = periodAudits.ToDictionary(pa => pa.PeriodAuditId, pa => pa.StartDate.Month);
+
                 // Agrupar por Group y calcular promedios
                 var result = groupResults
                     .GroupBy(x => new
@@ -394,21 +397,53 @@ namespace Rokys.Audit.Services.Services
                     })
                     .Select(groupData => 
                     {
-                        // Obtener todos los scale results de este grupo
+                        // Obtener todos los scale results de este grupo con el mes
                         var allScaleResults = groupData
-                            .SelectMany(gr => gr.PeriodAuditScaleResults.Where(sr => sr.IsActive))
+                            .SelectMany(gr => gr.PeriodAuditScaleResults
+                                .Where(sr => sr.IsActive)
+                                .Select(sr => new
+                                {
+                                    ScaleResult = sr,
+                                    Month = auditDates.TryGetValue(gr.PeriodAuditId, out var month) ? month : 0
+                                }))
                             .ToList();
 
                         // Agrupar por ScaleGroup para obtener los puntos auditables
                         var auditablePoints = allScaleResults
                             .GroupBy(sr => new
                             {
-                                ScaleCode = sr.ScaleGroup?.Code,
-                                ScaleName = sr.ScaleGroup?.Name
+                                ScaleCode = sr.ScaleResult.ScaleGroup?.Code,
+                                ScaleName = sr.ScaleResult.ScaleGroup?.Name
                             })
                             .Select(scaleData =>
                             {
-                                var average = Math.Round(scaleData.Average(s => s.ScoreValue), 2);
+                                // Agrupar por mes primero
+                                var monthlyData = scaleData
+                                    .Where(s => s.Month > 0)
+                                    .GroupBy(s => s.Month)
+                                    .Select(monthGroup =>
+                                    {
+                                        var monthAverage = Math.Round(monthGroup.Average(s => s.ScaleResult.ScoreValue), 2);
+                                        var monthScale = scaleCompanies.FirstOrDefault(sc =>
+                                            monthAverage > (sc.MinValue - 1) && monthAverage <= sc.MaxValue);
+
+                                        return new MonthlyAuditablePointDataDto
+                                        {
+                                            Month = monthGroup.Key.ToString("00"),
+                                            Average = monthAverage,
+                                            AuditCount = monthGroup.Count(),
+                                            RiskLevel = monthScale?.Name ?? "",
+                                            RiskColor = monthScale?.ColorCode ?? ""
+                                        };
+                                    })
+                                    .OrderBy(m => m.Month)
+                                    .ToArray();
+
+                                // Calcular promedio general como promedio de los promedios mensuales
+                                var average = monthlyData.Any() 
+                                    ? Math.Round(monthlyData.Average(m => m.Average), 2)
+                                    : 0;
+                                
                                 var scale = scaleCompanies.FirstOrDefault(sc => 
                                     average > (sc.MinValue - 1) && average <= sc.MaxValue);
 
@@ -419,7 +454,8 @@ namespace Rokys.Audit.Services.Services
                                     Average = average,
                                     AuditCount = scaleData.Count(),
                                     RiskLevel = scale?.Name ?? "",
-                                    RiskColor = scale?.ColorCode ?? ""
+                                    RiskColor = scale?.ColorCode ?? "",
+                                    Months = monthlyData
                                 };
                             })
                             .OrderByDescending(ap => ap.Average)
