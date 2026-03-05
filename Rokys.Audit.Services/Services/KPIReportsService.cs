@@ -392,7 +392,7 @@ namespace Rokys.Audit.Services.Services
                 var result = groupResults
                     .GroupBy(x => new
                     {
-                        GroupCode = x.Group?.Code,
+                        //GroupCode = x.Group?.Code,
                         GroupName = x.Group?.Name
                     })
                     .Select(groupData => 
@@ -467,7 +467,7 @@ namespace Rokys.Audit.Services.Services
 
                         return new DataByAuditableGroupResponseDto
                         {
-                            Code = groupData.Key.GroupCode ?? "",
+                            Code = "", // No se tiene un código específico para el grupo auditable en la información disponible
                             Name = groupData.Key.GroupName ?? "",
                             Average = groupAverage,
                             AuditCount = groupData.Count(),
