@@ -88,13 +88,13 @@ namespace Rokys.Audit.Services.Services
 
                 if (request.StartDate.HasValue)
                 {
-                    baseFilter = baseFilter.AndAlso(x => x.StartDate >= request.StartDate.Value);
+                    baseFilter = baseFilter.AndAlso(x => x.CreationDate >= request.StartDate.Value);
                 }
 
                 if (request.EndDate.HasValue)
                 {
                     var endDate = request.EndDate.Value.Date.AddDays(1).AddTicks(-1);
-                    baseFilter = baseFilter.AndAlso(x => x.StartDate <= endDate);
+                    baseFilter = baseFilter.AndAlso(x => x.CreationDate <= endDate);
                 }
 
                 var periodAudits = await _periodAuditRepository.GetAsync(
@@ -149,14 +149,14 @@ namespace Rokys.Audit.Services.Services
                 // Filtrar por fecha de inicio si se proporciona
                 if (request.StartDate.HasValue)
                 {
-                    baseFilter = baseFilter.AndAlso(x => x.StartDate >= request.StartDate.Value);
+                    baseFilter = baseFilter.AndAlso(x => x.CreationDate >= request.StartDate.Value);
                 }
 
                 // Filtrar por fecha de fin si se proporciona
                 if (request.EndDate.HasValue)
                 {
                     var endDate = request.EndDate.Value.Date.AddDays(1).AddTicks(-1);
-                    baseFilter = baseFilter.AndAlso(x => x.StartDate <= endDate);
+                    baseFilter = baseFilter.AndAlso(x => x.CreationDate <= endDate);
                 }
 
                 // Filtrar por SupervisorIds si se proporciona
@@ -204,7 +204,7 @@ namespace Rokys.Audit.Services.Services
                         {
                             pa.StoreId,
                             StoreName = pa.Store?.Name,
-                            Month = pa.StartDate.Month,
+                            Month = pa.CreationDate.Month,
                             pap.UserReferenceId,
                             Score = pa.ScoreValue
                         }))
@@ -324,14 +324,14 @@ namespace Rokys.Audit.Services.Services
                 // Filtrar por fecha de inicio si se proporciona
                 if (request.StartDate.HasValue)
                 {
-                    baseFilter = baseFilter.AndAlso(x => x.StartDate >= request.StartDate.Value);
+                    baseFilter = baseFilter.AndAlso(x => x.CreationDate >= request.StartDate.Value);
                 }
 
                 // Filtrar por fecha de fin si se proporciona
                 if (request.EndDate.HasValue)
                 {
                     var endDate = request.EndDate.Value.Date.AddDays(1).AddTicks(-1);
-                    baseFilter = baseFilter.AndAlso(x => x.StartDate <= endDate);
+                    baseFilter = baseFilter.AndAlso(x => x.CreationDate <= endDate);
                 }
 
                 // Filtrar por SupervisorIds si se proporciona
@@ -386,7 +386,7 @@ namespace Rokys.Audit.Services.Services
                 var groupResults = await _periodAuditGroupResultRepository.GetByPeriodAuditIdWithScaleResultsAsync(filter: groupResultFilter);
 
                 // Crear diccionario de fechas de auditoría
-                var auditDates = periodAudits.ToDictionary(pa => pa.PeriodAuditId, pa => pa.StartDate.Month);
+                var auditDates = periodAudits.ToDictionary(pa => pa.PeriodAuditId, pa => pa.CreationDate.Month);
 
                 // Agrupar por Group y calcular promedios
                 var result = groupResults
@@ -519,14 +519,14 @@ namespace Rokys.Audit.Services.Services
                 // Filtrar por fecha de inicio si se proporciona
                 if (request.StartDate.HasValue)
                 {
-                    baseFilter = baseFilter.AndAlso(x => x.StartDate >= request.StartDate.Value);
+                    baseFilter = baseFilter.AndAlso(x => x.CreationDate >= request.StartDate.Value);
                 }
 
                 // Filtrar por fecha de fin si se proporciona
                 if (request.EndDate.HasValue)
                 {
                     var endDate = request.EndDate.Value.Date.AddDays(1).AddTicks(-1);
-                    baseFilter = baseFilter.AndAlso(x => x.StartDate <= endDate);
+                    baseFilter = baseFilter.AndAlso(x => x.CreationDate <= endDate);
                 }
 
                 // Filtrar por SupervisorIds si se proporciona
@@ -576,7 +576,7 @@ namespace Rokys.Audit.Services.Services
                             StoreName = pa.Store?.Name,
                             StoreCode = pa.Store?.Code,
                             SupervisorId = pap.UserReferenceId,
-                            Month = pa.StartDate.Month,
+                            Month = pa.CreationDate.Month,
                             Score = pa.ScoreValue
                         }))
                     .ToList();
@@ -685,14 +685,14 @@ namespace Rokys.Audit.Services.Services
                 // Filtrar por fecha de inicio si se proporciona
                 if (request.StartDate.HasValue)
                 {
-                    baseFilter = baseFilter.AndAlso(x => x.StartDate >= request.StartDate.Value);
+                    baseFilter = baseFilter.AndAlso(x => x.CreationDate >= request.StartDate.Value);
                 }
 
                 // Filtrar por fecha de fin si se proporciona
                 if (request.EndDate.HasValue)
                 {
                     var endDate = request.EndDate.Value.Date.AddDays(1).AddTicks(-1);
-                    baseFilter = baseFilter.AndAlso(x => x.StartDate <= endDate);
+                    baseFilter = baseFilter.AndAlso(x => x.CreationDate <= endDate);
                 }
 
                 // Filtrar por SupervisorIds si se proporciona
@@ -742,7 +742,7 @@ namespace Rokys.Audit.Services.Services
 
                         // Agrupar por mes dentro de cada tienda
                         var monthlyData = storeGroup
-                            .GroupBy(pa => pa.StartDate.Month)
+                            .GroupBy(pa => pa.CreationDate.Month)
                             .Select(monthGroup =>
                             {
                                 var monthAverage = Math.Round(monthGroup.Average(x => x.ScoreValue), 2);
@@ -824,14 +824,14 @@ namespace Rokys.Audit.Services.Services
                 // Filtrar por fecha de inicio si se proporciona
                 if (request.StartDate.HasValue)
                 {
-                    baseFilter = baseFilter.AndAlso(x => x.StartDate >= request.StartDate.Value);
+                    baseFilter = baseFilter.AndAlso(x => x.CreationDate >= request.StartDate.Value);
                 }
 
                 // Filtrar por fecha de fin si se proporciona
                 if (request.EndDate.HasValue)
                 {
                     var endDate = request.EndDate.Value.Date.AddDays(1).AddTicks(-1);
-                    baseFilter = baseFilter.AndAlso(x => x.StartDate <= endDate);
+                    baseFilter = baseFilter.AndAlso(x => x.CreationDate <= endDate);
                 }
 
                 // Filtrar por SupervisorIds si se proporciona
@@ -877,7 +877,7 @@ namespace Rokys.Audit.Services.Services
                     .Select(pa => new
                     {
                         Audit = pa,
-                        Month = pa.StartDate.Month,
+                        Month = pa.CreationDate.Month,
                         Scale = scaleCompanies.FirstOrDefault(sc => 
                             pa.ScoreValue > (sc.MinValue - 1) && pa.ScoreValue <= sc.MaxValue)
                     })
@@ -978,14 +978,14 @@ namespace Rokys.Audit.Services.Services
                 // Filtrar por fecha de inicio si se proporciona
                 if (request.StartDate.HasValue)
                 {
-                    baseFilter = baseFilter.AndAlso(x => x.StartDate >= request.StartDate.Value);
+                    baseFilter = baseFilter.AndAlso(x => x.CreationDate >= request.StartDate.Value);
                 }
 
                 // Filtrar por fecha de fin si se proporciona
                 if (request.EndDate.HasValue)
                 {
                     var endDate = request.EndDate.Value.Date.AddDays(1).AddTicks(-1);
-                    baseFilter = baseFilter.AndAlso(x => x.StartDate <= endDate);
+                    baseFilter = baseFilter.AndAlso(x => x.CreationDate <= endDate);
                 }
 
                 // Filtrar por SupervisorIds si se proporciona
@@ -1089,7 +1089,7 @@ namespace Rokys.Audit.Services.Services
                         : "";
                     
                     // Preparar campos genéricos una sola vez por tabla
-                    var auditDate = audit?.StartDate ?? DateTime.MinValue;
+                    var auditDate = audit?.CreationDate ?? DateTime.MinValue;
                     var auditId = audit?.PeriodAuditId.ToString() ?? "";
                     var storeName = audit?.Store?.Name ?? "";
                     var storeId = audit?.Store?.StoreId;
