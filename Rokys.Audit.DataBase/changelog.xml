@@ -38,14 +38,16 @@
 <include file="./Inserts/202601221032-system-config.sql" relativeToChangelogFile="true"/>
 <include file="./Inserts/202601261840-update-audit-role-configuration-enterprise-grouping.sql" relativeToChangelogFile="true"/>
 <include file="./Inserts/202601271005-update-scale-company-enterprise-grouping.sql" relativeToChangelogFile="true"/>
-<include file="./Inserts/202602020001-grouping-user-insert-by-eg001.sql" relativeToChangelogFile="true"/>
 <include file="./Inserts/202601271642-insert-grouping-multimarca.sql" relativeToChangelogFile="true"/>
 <include file="./Inserts/202601280930-update-group-by-enterprise-grouping.sql" relativeToChangelogFile="true"/>
 <include file="./Inserts/202601291511-insert-new-audit-role-configuration-multimarca.sql" relativeToChangelogFile="true"/>
+<include file="./Inserts/202602020001-grouping-user-insert-by-eg001.sql" relativeToChangelogFile="true"/>
 <include file="./Inserts/202602021644-insert-group-multimarca.sql" relativeToChangelogFile="true"/>
 <include file="./Inserts/202602110936-insert-configuration-multimarca.sql" relativeToChangelogFile="true"/>
 <include file="./Inserts/202602111404-update-group-by-enterprise-scencia.sql" relativeToChangelogFile="true"/>
 <include file="./Inserts/202602131142-insert-system-configuration.sql" relativeToChangelogFile="true"/>
 <include file="./Inserts/202602131522-insert-new-audit-role-configuration-brass-scencia.sql" relativeToChangelogFile="true"/>
+<include file="./Inserts/202603042310-insert-scale-company.sql" relativeToChangelogFile="true"/>
+
 
 </databaseChangeLog>
