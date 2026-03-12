@@ -45,7 +45,7 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
             var normalizedCode = code.ToLower();
 
             var exists = await _context.ScaleGroups
-                .AnyAsync(x => x.Group.EnterpriseId == group.Group.EnterpriseId &&
+                .AnyAsync(x => x.Group.EnterpriseGroupingId == group.Group.EnterpriseGroupingId &&
                                x.Code.ToLower() == normalizedCode &&
                                (excludeId == null || x.ScaleGroupId != excludeId) &&
                                x.IsActive);
