@@ -138,7 +138,7 @@ namespace Rokys.Audit.Services.Services.Emails
             }
         }
 
-        private static async Task<List<(int nro, string proceso, string observations, string impact, string recommendation, string valorized)>> GetAuditDataForPdf(
+        public static async Task<List<(int nro, string proceso, string observations, string impact, string recommendation, string valorized)>> GetAuditDataForPdf(
             PeriodAudit audit,
             IPeriodAuditGroupResultRepository periodAuditGroupResultRepository)
         {

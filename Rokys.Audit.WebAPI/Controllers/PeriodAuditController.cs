@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.PeriodAudit;
@@ -104,6 +104,18 @@ namespace Rokys.Audit.WebAPI.Controllers
         public async Task<IActionResult> SendActionPlanCompletedNotification([FromRoute] Guid periodAuditId)
         {
             var response = await _service.SendActionPlanCompletedNotification(periodAuditId);
+            if (response.IsValid)
+                return Ok(response);
+            return BadRequest(response);
+        }
+
+        /// <summary>
+        /// Descarga el informe PDF de una auditoría (solo si está finalizada)
+        /// </summary>
+        [HttpGet("{periodAuditId}/report-pdf")]
+        public async Task<IActionResult> DownloadAuditReportPdf([FromRoute] Guid periodAuditId)
+        {
+            var response = await _service.DownloadAuditReportPdf(periodAuditId);
             if (response.IsValid)
                 return Ok(response);
             return BadRequest(response);

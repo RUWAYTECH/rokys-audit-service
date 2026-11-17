@@ -1,4 +1,4 @@
-using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
+﻿using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using DocumentFormat.OpenXml.Vml.Office;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
@@ -1026,6 +1026,36 @@ namespace Rokys.Audit.Services.Services
         public async Task<ResponseDto<bool>> GetAllowedActionPlans(Guid id)
         {
            return await _periodAuditGroupResultService.GetAllowedActionPlans(id);
+        }
+
+        public async Task<ResponseDto<Rokys.Audit.DTOs.Responses.Reports.ExportReportResultDto>> DownloadAuditReportPdf(Guid periodAuditId)
+        {
+            var response = ResponseDto.Create<Rokys.Audit.DTOs.Responses.Reports.ExportReportResultDto>();
+            try
+            {
+                var audit = await _periodAuditRepository.GetCustomByIdAsync(filter: x => x.PeriodAuditId == periodAuditId && x.IsActive);
+                if (audit == null)
+                    return ResponseDto.Error<Rokys.Audit.DTOs.Responses.Reports.ExportReportResultDto>("No se encontró la auditoría.");
+
+                if (audit.AuditStatus?.Code != AuditStatusCode.Completed)
+                    return ResponseDto.Error<Rokys.Audit.DTOs.Responses.Reports.ExportReportResultDto>("El informe solo se puede descargar cuando la auditoría está finalizada.");
+
+                var auditData = await BuildSendEmail.GetAuditDataForPdf(audit, _periodAuditGroupResultRepository);
+                var pdfBytes = await Rokys.Audit.Services.Services.Pdf.AuditPdfGenerator.GenerateAuditReportPdf(audit, auditData);
+
+                response.Data = new Rokys.Audit.DTOs.Responses.Reports.ExportReportResultDto
+                {
+                    FileBase64 = Convert.ToBase64String(pdfBytes),
+                    FileName = $"{audit.CorrelativeNumber}.pdf",
+                    MimeType = "application/pdf"
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error generando el PDF de la auditoría {Id}", periodAuditId);
+                response = ResponseDto.Error<Rokys.Audit.DTOs.Responses.Reports.ExportReportResultDto>("Error al generar el informe PDF.");
+            }
+            return response;
         }
 
         public async Task<ResponseDto> SendActionPlanCompletedNotification(Guid periodAuditId)

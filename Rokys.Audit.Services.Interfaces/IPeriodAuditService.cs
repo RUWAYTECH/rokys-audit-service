@@ -1,4 +1,4 @@
-using Rokys.Audit.DTOs.Requests.PeriodAudit;
+﻿using Rokys.Audit.DTOs.Requests.PeriodAudit;
 using Rokys.Audit.DTOs.Responses.PeriodAudit;
 using Rokys.Audit.DTOs.Responses.Common;
 using Rokys.Audit.DTOs.Common;
@@ -16,5 +16,6 @@ namespace Rokys.Audit.Services.Interfaces
         Task<ResponseDto<PeriodAuditReportResponseDto>> Export(PeriodAuditExportRequestDto requestDto);
         Task<ResponseDto<bool>> GetAllowedActionPlans(Guid periodAuditId);
         Task<ResponseDto> SendActionPlanCompletedNotification(Guid periodAuditId);
+        Task<ResponseDto<Rokys.Audit.DTOs.Responses.Reports.ExportReportResultDto>> DownloadAuditReportPdf(Guid periodAuditId);
     }
 }
