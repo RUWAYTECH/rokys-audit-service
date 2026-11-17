@@ -79,5 +79,21 @@ namespace Rokys.Audit.WebAPI.Controllers
                 return Ok(response);
             return BadRequest(response);
         }
+        [HttpGet("by-enterprise-grouping-id/{enterpriseGroupingId}")]
+        public async Task<IActionResult> GetUsersByEnterpriseGroupingId([FromRoute] Guid enterpriseGroupingId, [FromQuery] UserReferenceFilterToEnterpriseGroupingRequestDto requestDto)
+        {
+            var response = await _userReferenceService.GetUsersByEnterpriseGroupingId(enterpriseGroupingId, requestDto);
+            if (response.IsValid)
+                return Ok(response);
+            return BadRequest(response);
+        }
+        [HttpGet("get-by-enterprise-id-and-roles/{enterpriseId}")]
+        public async Task<IActionResult> GetUsersByEnterpriseIdAndRoleCodes([FromRoute] Guid enterpriseId, [FromQuery] UserReferenceFilterEnterpriseRequestDto userReferenceFilterEnterpriseRequestDto)
+        {
+            var response = await _userReferenceService.GetUsersByEnterpriseIdAndRoleCodes(enterpriseId, userReferenceFilterEnterpriseRequestDto);
+            if (response.IsValid)
+                return Ok(response);
+            return BadRequest(response);
+        }
     }
 }

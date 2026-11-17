@@ -12,6 +12,7 @@ using Rokys.Audit.DTOs.Requests.PeriodAuditScaleResult;
 using Rokys.Audit.DTOs.Responses.Common;
 using Rokys.Audit.DTOs.Responses.PeriodAuditScaleResult;
 using Rokys.Audit.DTOs.Responses.ScaleGroup;
+using Rokys.Audit.DTOs.Responses.SubScale;
 using Rokys.Audit.Infrastructure.IMapping;
 using Rokys.Audit.Infrastructure.Persistence.Abstract;
 using Rokys.Audit.Infrastructure.Repositories;
@@ -46,6 +47,9 @@ namespace Rokys.Audit.Services.Services
         private readonly ICriteriaSubResultRepository _criteriaSubResultRepository;
         private readonly IPeriodAuditRepository _periodAuditRepository;
         private readonly IScaleGroupRepository _scaleGroupRepository;
+        private readonly IEnterpriseGroupRepository _enterpriseGroupRepository;
+        private readonly ISubScaleRepository _subScaleRepository;
+        private readonly IEnterpriseGroupingRepository _enterpriseGroupingRepository;
 
         public PeriodAuditScaleResultService(
             IPeriodAuditScaleResultRepository repository,
@@ -70,7 +74,10 @@ namespace Rokys.Audit.Services.Services
             IPeriodAuditFieldValuesRepository periodAuditFieldValuesRepository,
             ICriteriaSubResultRepository criteriaSubResultRepository,
             IPeriodAuditRepository periodAuditRepository,
-            IScaleGroupRepository scaleGroupRepository)
+            IScaleGroupRepository scaleGroupRepository,
+            IEnterpriseGroupRepository enterpriseGroupRepository,
+            ISubScaleRepository subScaleRepository,
+            IEnterpriseGroupingRepository enterpriseGroupingRepository)
         {
             _repository = repository;
             _validator = validator;
@@ -95,6 +102,9 @@ namespace Rokys.Audit.Services.Services
             _criteriaSubResultRepository = criteriaSubResultRepository;
             _periodAuditRepository = periodAuditRepository;
             _scaleGroupRepository = scaleGroupRepository;
+            _enterpriseGroupRepository = enterpriseGroupRepository;
+            _subScaleRepository = subScaleRepository;
+            _enterpriseGroupingRepository = enterpriseGroupingRepository;
         }
 
         public async Task<ResponseDto<PeriodAuditScaleResultResponseDto>> Create(PeriodAuditScaleResultRequestDto requestDto)
@@ -353,15 +363,16 @@ namespace Rokys.Audit.Services.Services
                     response.Messages.Add(new ApplicationMessage { Message = "No se encontro la entidad", MessageType = ApplicationMessageType.Error });
                     return response;
                 }
-                if (entity.PeriodAuditGroupResult.PeriodAudit.Store.Enterprise.ScaleCompanies == null ||
-                    !entity.PeriodAuditGroupResult.PeriodAudit.Store.Enterprise.ScaleCompanies.Any())
-                {
-                    var defaultScaleCompanies = await _scaleCompanyRepository.GetAsync(filter: e => e.EnterpriseId == null);
-                    if (defaultScaleCompanies != null && defaultScaleCompanies.Any())
-                    {
-                        entity.PeriodAuditGroupResult.PeriodAudit.Store.Enterprise.ScaleCompanies = defaultScaleCompanies.ToList();
-                    }
-                }
+                var enterpriseGrouping = await _enterpriseGroupingRepository.GetFirstEnterpriseGroupingByEnterpriseId(entity.PeriodAuditGroupResult.PeriodAudit.Store.EnterpriseId);
+                var scaleCompanies = await _scaleCompanyRepository.GetConfiguredForEnterprise(
+                    enterpriseGroupingId: enterpriseGrouping.EnterpriseGroupingId,
+                    enterpriseId: entity.PeriodAuditGroupResult.PeriodAudit.Store.EnterpriseId
+                );
+
+                entity.PeriodAuditGroupResult.PeriodAudit.Store.Enterprise.ScaleCompanies = scaleCompanies.ToList();
+
+                var subScales = await _subScaleRepository.GetAsync(filter: x => x.EnterpriseGroupingId == enterpriseGrouping.EnterpriseGroupingId && x.IsActive);
+
                 var fileDataSourceTemplate = (DataSourceFiles?)null;
                 var fileDataSource = (DataSourceFiles?)null;
                 if (entity.ScaleGroup.HasSourceData == true)
@@ -411,6 +422,8 @@ namespace Rokys.Audit.Services.Services
                     }
                 }
                 var customDto = _mapper.Map<PeriodAuditScaleResultCustomResponseDto>(entity);
+                customDto.SubScales = _mapper.Map<List<SubScaleResponseDto>>(subScales);
+                customDto.ScaleType = enterpriseGrouping.ScaleType;
                 customDto.ScaleGroup.DataSourceTemplate = fileDataSourceTemplate;
                 customDto.ScaleGroup.DataSource = fileDataSource;
                 var currentUser = _httpContextAccessor.CurrentUser();
@@ -484,15 +497,14 @@ namespace Rokys.Audit.Services.Services
                 }
 
                 var customResponse = await this.GetByIdCustomData(periodAuditScaleResultId);
-                var scaleCompany = await _scaleCompanyRepository.GetAsync(x => x.EnterpriseId == customResponse.Data.PeriodAudit.EnterpriseId && x.IsActive);
+
+                var enterpriseGrouping = await _enterpriseGroupingRepository.GetFirstEnterpriseGroupingByEnterpriseId(customResponse.Data.PeriodAudit.EnterpriseId.Value);
+                var scaleCompany = await _scaleCompanyRepository.GetConfiguredForEnterprise(enterpriseGrouping?.EnterpriseGroupingId, customResponse.Data.PeriodAudit.EnterpriseId.Value);
+                var subScales = await _subScaleRepository.GetAsync(filter: x => x.EnterpriseGroupingId == enterpriseGrouping.EnterpriseGroupingId && x.IsActive);
                 if (scaleCompany == null || !scaleCompany.Any())
                 {
-                    scaleCompany = await _scaleCompanyRepository.GetAsync(filter: e => e.EnterpriseId == null);
-                    if (scaleCompany == null || !scaleCompany.Any())
-                    {
-                        response = ResponseDto.Error<bool>("No se encontró la escala asociada a la empresa ni la escala por defecto.");
-                        return response;
-                    }
+                    response = ResponseDto.Error<bool>("No se encontró la escala asociada a la empresa ni la escala por defecto.");
+                    return response;
                 }
 
                 periodAuditScaleResults.ScoreValue = scoringCriteriaResult.Score;
@@ -505,17 +517,32 @@ namespace Rokys.Audit.Services.Services
 
                 // Actualizar color y descripción de la escala según el nuevo puntaje
                 bool foundScale = false;
-                foreach (var scale in scaleCompany)
+                if (enterpriseGrouping.ScaleType == ScaleType.Weighted)
                 {
-                    if (periodAuditScaleResults.ScoreValue <= scale.MaxValue && periodAuditScaleResults.ScoreValue >= scale.MinValue)
+                    foreach (var scale in subScales)
                     {
-                        periodAuditScaleResults.ScaleColor = scale.ColorCode;
-                        periodAuditScaleResults.ScaleDescription = scale.Name;
-                        foundScale = true;
-                        break;
+                        if (scale.Value == periodAuditScaleResults.ScoreValue)
+                        {
+                            periodAuditScaleResults.ScaleColor = scale.ColorCode;
+                            periodAuditScaleResults.ScaleDescription = scale.Name;
+                            foundScale = true;
+                            break;
+                        }
                     }
-
+                } else
+                {
+                    foreach (var scale in scaleCompany)
+                    {
+                        if (periodAuditScaleResults.ScoreValue <= scale.MaxValue && periodAuditScaleResults.ScoreValue > (scale.MinValue - 1))
+                        {
+                            periodAuditScaleResults.ScaleColor = scale.ColorCode;
+                            periodAuditScaleResults.ScaleDescription = scale.Name;
+                            foundScale = true;
+                            break;
+                        }
+                    }
                 }
+
                 if (!foundScale)
                 {
                     response.WithMessage("No se encontró una escala correspondiente para el puntaje obtenido", null, ApplicationMessageType.Error);

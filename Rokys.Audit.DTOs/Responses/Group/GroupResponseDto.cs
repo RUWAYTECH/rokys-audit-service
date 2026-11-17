@@ -6,6 +6,7 @@ namespace Rokys.Audit.DTOs.Responses.Group
     {
         public Guid GroupId { get; set; }
         public string? EnterpriseName { get; set; }
+        public string? EnterpriseGroupingName { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreationDate { get; set; }
         public string CreatedBy { get; set; } = string.Empty;

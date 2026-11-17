@@ -8,7 +8,7 @@ namespace Rokys.Audit.DTOs.Requests.Group
         /// <summary>
         /// ID de la empresa donde se creará el grupo clonado
         /// </summary>
-        public Guid EnterpriseId { get; set; }
+        public Guid? EnterpriseId { get; set; }
 
         /// <summary>
         /// ID del grupo a clonar
@@ -18,5 +18,7 @@ namespace Rokys.Audit.DTOs.Requests.Group
         public string Name { get; set; }
 
         public decimal Weighting { get; set; }
+        public string Code { get; set; }
+        public Guid? EnterpriseGroupingId { get; set; }
     }
 }

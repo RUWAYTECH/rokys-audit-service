@@ -1,0 +1,16 @@
+﻿using Rokys.Audit.DTOs.Common;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Rokys.Audit.DTOs.Requests.GroupingUser
+{
+    public class GroupingUserFilterRequestDto : PaginationRequestDto
+    {
+        public Guid EnterpriseGroupingId { get; set; }
+        public Guid? UserReferenceId { get; set; }
+        public string? RoleCode { get; set; }
+    }
+}

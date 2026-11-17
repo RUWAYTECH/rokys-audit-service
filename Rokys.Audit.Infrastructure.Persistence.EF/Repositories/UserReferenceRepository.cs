@@ -56,25 +56,84 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Repositories
         public async Task<bool> ExistsByUserIdAsync(Guid userId, Guid? excludeId = null)
         {
             var query = DbSet.Where(ur => ur.UserId == userId && ur.IsActive);
-            
+
             if (excludeId.HasValue)
             {
                 query = query.Where(ur => ur.UserReferenceId != excludeId.Value);
             }
-            
+
             return await query.AnyAsync();
         }
 
         public async Task<bool> ExistsByEmployeeIdAsync(Guid employeeId, Guid? excludeId = null)
         {
             var query = DbSet.Where(ur => ur.EmployeeId == employeeId);
-            
+
             if (excludeId.HasValue)
             {
                 query = query.Where(ur => ur.UserReferenceId != excludeId.Value);
             }
-            
+
             return await query.AnyAsync();
         }
+
+        public async Task<(List<UserReference> items, int totalCount)> GetByEnterpriseIdAndRoleCodesAsync(
+            List<string> roleCodes,
+            List<Guid> userIds,
+            string? filter = null,
+            Func<IQueryable<UserReference>, IOrderedQueryable<UserReference>>? orderBy = null,
+            int pageNumber = 0,
+            int pageSize = 0
+            )
+        {
+            if (roleCodes == null || !roleCodes.Any())
+            {
+                return (new List<UserReference>(), 0);
+            }
+
+            var query = DbSet.Where(u => u.IsActive &&
+                                        !string.IsNullOrEmpty(u.RoleCode) &&
+                                        roleCodes.Contains(u.RoleCode) &&
+                                        userIds.Contains(u.UserReferenceId));
+
+            // Aplicar filtro de b�squeda si existe
+            if (!string.IsNullOrEmpty(filter))
+            {
+                var searchTerm = filter.ToLower();
+                query = query.Where(x =>
+                    x.FirstName.ToLower().Contains(searchTerm) ||
+                    x.LastName.ToLower().Contains(searchTerm) ||
+                    (x.FirstName + " " + x.LastName).ToLower().Contains(searchTerm) ||
+                    (x.Email != null && x.Email.ToLower().Contains(searchTerm)) ||
+                    (x.PersonalEmail != null && x.PersonalEmail.ToLower().Contains(searchTerm)) ||
+                    (x.DocumentNumber != null && x.DocumentNumber.ToLower().Contains(searchTerm)) ||
+                    (x.RoleName != null && x.RoleName.ToLower().Contains(searchTerm)));
+            }
+
+
+            // Contar total antes de aplicar paginaci�n
+            int rowsCount = await query.CountAsync();
+
+            // Aplicar ordenamiento si existe
+            if (orderBy != null)
+            {
+                query = orderBy(query);
+            }
+
+            // Aplicar paginaci�n si se especifica
+            if (pageSize > 0 && pageNumber > 0)
+            {
+                var items = await query
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+                return (items, rowsCount);
+            }
+
+            // Sin paginaci�n, devolver todos
+            var allItems = await query.ToListAsync();
+            return (allItems, rowsCount);
+        }
+       
     }
 }

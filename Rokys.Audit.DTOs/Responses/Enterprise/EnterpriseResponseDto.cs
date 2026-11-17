@@ -10,5 +10,7 @@ namespace Rokys.Audit.DTOs.Responses.Enterprise
         public string? UpdatedBy { get; set; }
         public DateTime? UpdateDate { get; set; }
         public bool IsActive { get; set; }
+        public string? EnterpriseGroupingName { get; set; }
+        public EnterpriseThemeResponseDto? Theme { get; set; }
     }
 }

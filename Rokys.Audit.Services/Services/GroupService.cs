@@ -34,6 +34,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IAMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly DTOs.Common.FileSettings _fileSettings;
+        private readonly IEnterpriseGroupingRepository _enterpriseGroupingRepository;
 
         public GroupService(
             IGroupRepository groupRepository,
@@ -49,7 +50,8 @@ namespace Rokys.Audit.Services.Services
             IUnitOfWork unitOfWork,
             IAMapper mapper,
             IHttpContextAccessor httpContextAccessor,
-            DTOs.Common.FileSettings fileSettings)
+            DTOs.Common.FileSettings fileSettings,
+            IEnterpriseGroupingRepository enterpriseGroupingRepository)
         {
             _groupRepository = groupRepository;
             _scaleGroupRepository = scaleGroupRepository;
@@ -65,6 +67,7 @@ namespace Rokys.Audit.Services.Services
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
             _fileSettings = fileSettings;
+            _enterpriseGroupingRepository = enterpriseGroupingRepository;
         }
 
         public async Task<ResponseDto<GroupResponseDto>> Create(GroupRequestDto requestDto)
@@ -196,6 +199,9 @@ namespace Rokys.Audit.Services.Services
                 if (groupFilterRequestDto.EnterpriseId.HasValue)
                     filter = filter.AndAlso(x => x.EnterpriseId == groupFilterRequestDto.EnterpriseId.Value);
 
+                if (groupFilterRequestDto.EnterpriseGroupingId.HasValue)
+                    filter = filter.AndAlso(x => x.EnterpriseGroupingId == groupFilterRequestDto.EnterpriseGroupingId.Value);
+
                 Func<IQueryable<Group>, IOrderedQueryable<Group>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 
                 var entities = await _groupRepository.GetPagedAsync(
@@ -203,7 +209,7 @@ namespace Rokys.Audit.Services.Services
                     orderBy: orderBy,
                     pageNumber: groupFilterRequestDto.PageNumber,
                     pageSize: groupFilterRequestDto.PageSize,
-                    includeProperties: [ x => x.Enterprise]
+                    includeProperties: [ x => x.Enterprise, eg => eg.EnterpriseGrouping]
                 );
 
                 var pagedResult = new PaginationResponseDto<GroupResponseDto>
@@ -225,12 +231,38 @@ namespace Rokys.Audit.Services.Services
             return response;
         }
 
+        public async Task<ResponseDto<List<GroupResponseDto>>> GetConfiguredForEnterprise(Guid enterpriseId)
+        {
+            var response = ResponseDto.Create<List<GroupResponseDto>>();
+            try
+            {
+                //var filter = BuildFilter(groupFilterRequestDto);
+                Expression<Func<Group, bool>> filter = x => x.IsActive;
+
+                var enterpriseGrouping = await _enterpriseGroupingRepository.GetFirstEnterpriseGroupingByEnterpriseId(enterpriseId);
+
+                var entities = await _groupRepository.GetConfiguredForEnterprise(
+                    enterpriseGroupingId: enterpriseGrouping.EnterpriseGroupingId,
+                    enterpriseId: enterpriseId
+                );
+
+                response.Data = _mapper.Map<List<GroupResponseDto>>(entities);
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response = ResponseDto.Error<List<GroupResponseDto>>(ex.Message);
+            }
+            return response;
+        }
+
         public async Task<ResponseDto<GroupResponseDto>> GetById(Guid id)
         {
             var response = ResponseDto.Create<GroupResponseDto>();
             try
             {
-                var entity = await _groupRepository.GetFirstOrDefaultAsync(filter: x => x.GroupId == id && x.IsActive, includeProperties: [x => x.Enterprise]);
+                var entity = await _groupRepository.GetFirstOrDefaultAsync(filter: x => x.GroupId == id && x.IsActive, includeProperties: [x => x.Enterprise, eg => eg.EnterpriseGrouping]);
                 if (entity == null)
                 {
                     response = ResponseDto.Error<GroupResponseDto>("No se encontró el grupo.");
@@ -307,9 +339,11 @@ namespace Rokys.Audit.Services.Services
                 var clonedGroup = new Group
                 {
                     GroupId = Guid.NewGuid(),
-                    EnterpriseId = requestDto.EnterpriseId,
+                    EnterpriseId = requestDto.EnterpriseId ?? null,
                     SortOrder = originalGroup.SortOrder,
                     Name = requestDto.Name,
+                    Code = requestDto.Code,
+                    EnterpriseGroupingId = requestDto.EnterpriseGroupingId,
                     Weighting = requestDto.Weighting,
                     IsActive = true
                 };
@@ -545,7 +579,7 @@ namespace Rokys.Audit.Services.Services
                 {
                     OriginalGroupId = requestDto.GroupId,
                     ClonedGroupId = clonedGroup.GroupId,
-                    EnterpriseId = requestDto.EnterpriseId,
+                    EnterpriseId = requestDto.EnterpriseId ?? null,
                     GroupName = clonedGroup.Name,
                     ScaleGroupsCloned = scaleGroupsCount,
                     TableScaleTemplatesCloned = tableScaleTemplatesCount,

@@ -9,6 +9,6 @@ namespace Rokys.Audit.Services.Interfaces
     {
         Task<ResponseDto<List<AuditRoleConfigurationResponseDto>>> GetActiveConfigurationsAsync();
         Task<ResponseDto<PaginationResponseDto<AuditRoleConfigurationResponseDto>>> GetPaged(AuditRoleConfigurationFilterRequestDto requestDto);
-        Task<ResponseDto<bool>> ChangeOrder(int currentPosition, int newPosition);
+        Task<ResponseDto<bool>> ChangeOrder(int currentPosition, int newPosition, Guid? enterpriseId);
     }
 }

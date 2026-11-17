@@ -4,6 +4,6 @@ namespace Rokys.Audit.DTOs.Requests.ScaleCompany
 {
     public class ScaleCompanyRequestDto: ScaleCompanyDto 
     {
-    
+        public new Guid EnterpriseGroupingId { get; set; }
     }
 }

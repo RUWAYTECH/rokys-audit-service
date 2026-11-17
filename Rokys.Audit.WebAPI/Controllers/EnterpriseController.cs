@@ -24,6 +24,15 @@ namespace Rokys.Audit.WebAPI.Controllers
             return BadRequest(response);
         }
 
+        [HttpGet("by-current-user-group")]
+        public async Task<IActionResult> GetByCurrentUserGroup([FromQuery] EnterpriseFilterRequestDto enterpriseFilterRequestDto)
+        {
+            var response = await _enterpriseService.GetByCurrentUserGroup(enterpriseFilterRequestDto);
+            if (response.IsValid)
+                return Ok(response);
+            return BadRequest(response);
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById([FromRoute] Guid id)
         {

@@ -61,11 +61,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Elementos de la solución",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rokys.Audit.Subscription.Hub", "Rokys.Audit.Subscription.Hub\Rokys.Audit.Subscription.Hub.csproj", "{7C070DC5-4B2D-5045-A2AD-6F657A060C3D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ruway.Events.Command", "..\ruway-rabbitmq-events-shared\Ruway.Events.Command\Ruway.Events.Command.csproj", "{048549F6-A869-4A1A-B2BE-39687739AA76}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ruway.Events.Command", "ruway-rabbitmq-events-shared\Ruway.Events.Command\Ruway.Events.Command.csproj", "{048549F6-A869-4A1A-B2BE-39687739AA76}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ruway.Events.Command.Interfaces", "..\ruway-rabbitmq-events-shared\Ruway.Events.Command.Interfaces\Ruway.Events.Command.Interfaces.csproj", "{3AF4E7F2-2C35-4241-AF9C-2389FC54E76F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ruway.Events.Command.Interfaces", "ruway-rabbitmq-events-shared\Ruway.Events.Command.Interfaces\Ruway.Events.Command.Interfaces.csproj", "{3AF4E7F2-2C35-4241-AF9C-2389FC54E76F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventSubscriberConsoleApp", "..\ruway-rabbitmq-events-shared\EventSubscriberConsoleApp\EventSubscriberConsoleApp.csproj", "{331FB0A2-55B7-30EB-FB2F-2CB75811FD19}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventSubscriberConsoleApp", "ruway-rabbitmq-events-shared\EventSubscriberConsoleApp\EventSubscriberConsoleApp.csproj", "{331FB0A2-55B7-30EB-FB2F-2CB75811FD19}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -15,6 +15,10 @@ using Rokys.Audit.Services.Interfaces;
 using System.Linq.Expressions;
 using Rokys.Audit.Common.Extensions;
 using Rokys.Audit.DTOs.Requests.EmployeeStore;
+using System.Security.AccessControl;
+using DocumentFormat.OpenXml.Spreadsheet;
+using System.Linq;
+using System;
 
 namespace Rokys.Audit.Services.Services
 {
@@ -27,6 +31,10 @@ namespace Rokys.Audit.Services.Services
         private readonly IAMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IEmployeeStoreRepository _employeeStoreRepository;
+        private readonly IAuditRoleConfigurationRepository _auditRoleConfigurationRepository;
+        private readonly IStoreRepository _storeRepository;
+        private readonly IGroupingUserRepository _groupingUserRepository;
+        private readonly IEnterpriseGroupingRepository _enterpriseGroupingRepository;
 
         public UserReferenceService(
             IUserReferenceRepository userReferenceRepository,
@@ -35,7 +43,11 @@ namespace Rokys.Audit.Services.Services
             IUnitOfWork unitOfWork,
             IAMapper mapper,
             IHttpContextAccessor httpContextAccessor,
-            IEmployeeStoreRepository employeeStoreRepository)
+            IEmployeeStoreRepository employeeStoreRepository,
+            IAuditRoleConfigurationRepository auditRoleConfigurationRepository,
+            IStoreRepository storeRepository,
+            IGroupingUserRepository groupingUserRepository,
+            IEnterpriseGroupingRepository enterpriseGroupingRepository)
         {
             _userReferenceRepository = userReferenceRepository;
             _fluentValidator = fluentValidator;
@@ -44,6 +56,10 @@ namespace Rokys.Audit.Services.Services
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
             _employeeStoreRepository = employeeStoreRepository;
+            _auditRoleConfigurationRepository = auditRoleConfigurationRepository;
+            _storeRepository = storeRepository;
+            _groupingUserRepository = groupingUserRepository;
+            _enterpriseGroupingRepository = enterpriseGroupingRepository;
         }
 
         public async Task<ResponseDto<UserReferenceResponseDto>> Create(UserReferenceRequestDto requestDto)
@@ -119,7 +135,7 @@ namespace Rokys.Audit.Services.Services
 
         public async Task<ResponseDto<UserReferenceResponseDto>> UpdateByUser(Guid userReferenceId, UserReferenceRequestDto requestDto)
         {
-             var response = ResponseDto.Create<UserReferenceResponseDto>();
+            var response = ResponseDto.Create<UserReferenceResponseDto>();
             try
             {
                 var entity = await _userReferenceRepository.GetByKeyAsync(userReferenceId);
@@ -134,7 +150,7 @@ namespace Rokys.Audit.Services.Services
                 }
                 var currentUser = _httpContextAccessor.CurrentUser();
 
-                entity.UserId = requestDto.UserId;                 
+                entity.UserId = requestDto.UserId;
                 entity.EmployeeId = requestDto.EmployeeId;
                 entity.FirstName = requestDto.FirstName;
                 entity.LastName = requestDto.LastName;
@@ -145,13 +161,14 @@ namespace Rokys.Audit.Services.Services
                 entity.DocumentNumber = requestDto.DocumentNumber;
                 entity.IsActive = true;
                 entity.UpdateAudit(currentUser.UserName);
-                
+
                 _userReferenceRepository.Update(entity);
                 await _unitOfWork.CommitAsync();
 
                 response.Data = _mapper.Map<UserReferenceResponseDto>(entity);
 
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating UserReference with UserId: {UserId}", userReferenceId);
                 response.Messages.Add(new ApplicationMessage
@@ -159,7 +176,7 @@ namespace Rokys.Audit.Services.Services
                     Message = "Error interno del servidor al actualizar el usuario",
                     MessageType = ApplicationMessageType.Error
                 });
-            } 
+            }
 
             return response;
         }
@@ -421,6 +438,15 @@ namespace Rokys.Audit.Services.Services
                         x.RoleCode != null && x.RoleCode.ToLower().Contains(roleCode)
                     );
                 }
+
+                if (paginationRequestDto.EnterpriseGroupingId.HasValue)
+                {
+                    var groupingUsers = await _groupingUserRepository.GetAsync(filter: x => x.EnterpriseGroupingId == paginationRequestDto.EnterpriseGroupingId.Value);
+                    var userReferenceIds = groupingUsers.Select(gu => gu.UserReferenceId).ToList();
+                    filter = filter.AndAlso(x => userReferenceIds.Contains(x.UserReferenceId));
+                }
+
+
                 Func<IQueryable<UserReference>, IOrderedQueryable<UserReference>> orderBy = q => q.OrderBy(x => x.FirstName).ThenBy(x => x.LastName);
 
                 var entities = await _userReferenceRepository.GetPagedAsync(
@@ -605,6 +631,150 @@ namespace Rokys.Audit.Services.Services
                 });
             }
 
+            return response;
+        }
+
+        public async Task<ResponseDto<PaginationResponseDto<UserReferenceResponseDto>>> GetUsersByEnterpriseGroupingId(Guid enterpriseGroupingId, UserReferenceFilterToEnterpriseGroupingRequestDto requestDto)
+        {
+            var response = ResponseDto.Create<PaginationResponseDto<UserReferenceResponseDto>>();
+            try
+            {
+                var auditRoles = await _auditRoleConfigurationRepository.GetAsync(filter: x => x.EnterpriseGroupingId == enterpriseGroupingId, includeProperties: x => x.EnterpriseGrouping.EnterpriseGroups);
+                var roleCodes = auditRoles.Select(ar => ar.RoleCode).Distinct().ToList();
+                
+                // Construir expresión dinámica con OR para cada roleCode
+                Expression<Func<UserReference, bool>> filter = a => a.IsActive;
+                
+                if (roleCodes.Any())
+                {
+                    Expression<Func<UserReference, bool>> roleFilter = null;
+                    
+                    foreach (var roleCode in roleCodes)
+                    {
+                        var rc = roleCode; // Captura para el closure
+                        Expression<Func<UserReference, bool>> condition = a => a.RoleCode.Contains(rc);
+                        
+                        roleFilter = roleFilter == null ? condition : roleFilter.OrAlso(condition);
+                    }
+                    
+                    if (roleFilter != null)
+                    {
+                        filter = filter.AndAlso(roleFilter);
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(requestDto.Filter))
+                {
+                    var searchTerm = requestDto.Filter.ToLower();
+                    filter = filter.AndAlso(x =>
+                        x.FirstName.ToLower().Contains(searchTerm) ||
+                        x.LastName.ToLower().Contains(searchTerm) ||
+                        (x.FirstName + " " + x.LastName).ToLower().Contains(searchTerm) ||
+                        (x.Email != null && x.Email.ToLower().Contains(searchTerm)) ||
+                        (x.PersonalEmail != null && x.PersonalEmail.ToLower().Contains(searchTerm)) ||
+                        (x.DocumentNumber != null && x.DocumentNumber.ToLower().Contains(searchTerm))
+                    );
+                }
+
+                var entities = await _userReferenceRepository.GetPagedAsync(
+                    filter: filter,
+                    orderBy: q => q.OrderBy(x => x.FirstName).ThenBy(x => x.LastName),
+                    pageNumber: requestDto.PageNumber,
+                    pageSize: requestDto.PageSize
+                );
+
+                var pagedResult = new PaginationResponseDto<UserReferenceResponseDto>
+                {
+                    Items = _mapper.Map<IEnumerable<UserReferenceResponseDto>>(entities.Items),
+                    TotalCount = entities.TotalRows,
+                    PageNumber = requestDto.PageNumber,
+                    PageSize = requestDto.PageSize
+                };
+                response.Data = pagedResult;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all active UserReferences");
+                response.Messages.Add(new ApplicationMessage
+                {
+                    Message = "Error interno del servidor al obtener todos los usuarios activos",
+                    MessageType = ApplicationMessageType.Error
+                });
+            }
+            return response;
+        }
+        public async Task<ResponseDto<PaginationResponseDto<UserReferenceResponseDto>>> GetUsersByEnterpriseIdAndRoleCodes(Guid enterpriseId, UserReferenceFilterEnterpriseRequestDto requestDto)
+        {
+            var response = ResponseDto.Create<PaginationResponseDto<UserReferenceResponseDto>>();
+            try
+            {
+                // Obtener el EnterpriseGrouping asociado a la empresa
+                var enterpriseGrouping = await _enterpriseGroupingRepository.GetFirstEnterpriseGroupingByEnterpriseId(enterpriseId);
+                if (enterpriseGrouping == null)
+                {
+                    response.Messages.Add(new ApplicationMessage
+                    {
+                        Message = "No se encontró un grupo de empresas asociado a esta empresa",
+                        MessageType = ApplicationMessageType.Error
+                    });
+                    return response;
+                }
+
+                // Filtrar GroupingUser por EnterpriseGrouping y RoleCode (si se especifica)
+                Expression<Func<GroupingUser, bool>> groupingFilter = x =>
+                    x.EnterpriseGroupingId == enterpriseGrouping.EnterpriseGroupingId && x.IsActive;
+
+                if (!string.IsNullOrEmpty(requestDto.RoleCode))
+                {
+                    groupingFilter = groupingFilter.AndAlso(x => x.RolesCodes.Contains(requestDto.RoleCode));
+                }
+
+                var groupingUsers = await _groupingUserRepository.GetAsync(filter: groupingFilter);
+                var userReferenceIds = groupingUsers.Select(gu => gu.UserReferenceId).Distinct().ToList();
+
+                // Construir el filtro base: usuarios activos que están en GroupingUser
+                Expression<Func<UserReference, bool>> filter = x => x.IsActive && userReferenceIds.Contains(x.UserReferenceId);
+
+                // Aplicar filtro de búsqueda si existe
+                if (!string.IsNullOrEmpty(requestDto.Filter))
+                {
+                    var searchTerm = requestDto.Filter.ToLower();
+                    filter = filter.AndAlso(x =>
+                        x.FirstName.ToLower().Contains(searchTerm) ||
+                        x.LastName.ToLower().Contains(searchTerm) ||
+                        (x.FirstName + " " + x.LastName).ToLower().Contains(searchTerm) ||
+                        (x.Email != null && x.Email.ToLower().Contains(searchTerm)) ||
+                        (x.PersonalEmail != null && x.PersonalEmail.ToLower().Contains(searchTerm)) ||
+                        (x.DocumentNumber != null && x.DocumentNumber.ToLower().Contains(searchTerm))
+                    );
+                }
+
+                // Obtener resultados paginados
+                var entities = await _userReferenceRepository.GetPagedAsync(
+                    filter: filter,
+                    orderBy: q => q.OrderBy(x => x.FirstName).ThenBy(x => x.LastName),
+                    pageNumber: requestDto.PageNumber,
+                    pageSize: requestDto.PageSize
+                );
+
+                var pagedResult = new PaginationResponseDto<UserReferenceResponseDto>
+                {
+                    Items = _mapper.Map<IEnumerable<UserReferenceResponseDto>>(entities.Items),
+                    TotalCount = entities.TotalRows,
+                    PageNumber = requestDto.PageNumber,
+                    PageSize = requestDto.PageSize
+                };
+                response.Data = pagedResult;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting UserReferences by EnterpriseId and RoleCodes");
+                response.Messages.Add(new ApplicationMessage
+                {
+                    Message = "Error interno del servidor al obtener los usuarios por empresa y roles",
+                    MessageType = ApplicationMessageType.Error
+                });
+            }
             return response;
         }
     }

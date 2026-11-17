@@ -62,13 +62,6 @@ namespace Rokys.Audit.Services.Services
                     return response;
                 }
 
-                // Verificar si ya existe un código duplicado
-                var existsByCode = await _scaleGroupRepository.ExistsByCodeAsync(requestDto.Code);
-                if (existsByCode)
-                {
-                    response.Messages.Add(new ApplicationMessage { Message = "Ya existe un grupo de escala con este código.", MessageType = ApplicationMessageType.Error });
-                    return response;
-                }
                 var currentUser = _httpContextAccessor.CurrentUser();
                 var entity = _mapper.Map<ScaleGroup>(requestDto);
 

@@ -90,6 +90,11 @@ namespace Rokys.Audit.Infrastructure.Persistence.EF.Storage.Configuration
 
             builder.HasIndex(ur => new { ur.IsActive, ur.RoleCode })
                 .HasDatabaseName("IX_UserReference_Active_Role");
+
+            builder.HasMany(u => u.GroupingUsers)
+                .WithOne(gu => gu.UserReference)
+                .HasForeignKey(gu => gu.UserReferenceId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

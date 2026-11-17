@@ -14,6 +14,7 @@ using Rokys.Audit.Infrastructure.IMapping;
 using Rokys.Audit.DTOs.Responses.AuditStatus;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Rokys.Audit.Services.Services.ReportUtils;
+using System.Linq;
 
 namespace Rokys.Audit.Services.Services
 {
@@ -48,7 +49,7 @@ namespace Rokys.Audit.Services.Services
             _periodAuditTableScaleTemplateResultRepository = periodAuditTableScaleTemplateResultRepository;
         }
 
-        public async Task<ResponseDto<DashboardDataResponseDto>> GetDashboardEvolutionsDataAsync(int year, Guid[] enterpriseIds)
+        public async Task<ResponseDto<DashboardDataResponseDto>> GetDashboardEvolutionsDataAsync(int year, Guid[] enterpriseIds, Guid? enterpriseGroupingId)
         {
             var response = ResponseDto.Create<DashboardDataResponseDto>();
             try
@@ -65,6 +66,10 @@ namespace Rokys.Audit.Services.Services
                     baseFilter = baseFilter.AndAlso(x => enterpriseIds.Contains(x.Store.EnterpriseId));
                 }
 
+                if (enterpriseGroupingId != null && enterpriseGroupingId.HasValue)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.Store.Enterprise.EnterpriseGroups.Any(eg => eg.EnterpriseGroupingId == enterpriseGroupingId && eg.IsActive));
+                }
 
                 var periodAudits = await _periodAuditRepository.GetAsync(
                     filter: baseFilter, includeProperties:
@@ -214,7 +219,7 @@ namespace Rokys.Audit.Services.Services
 
 
 
-        public async Task<ResponseDto<DashboardDataResponseDto>> GetDashboardSupervisorsDataAsync(int year, Guid[] enterpriseIds, Guid[] supervisorIds)
+        public async Task<ResponseDto<DashboardDataResponseDto>> GetDashboardSupervisorsDataAsync(int year, Guid[] enterpriseIds, Guid[] supervisorIds, Guid? enterpriseGroupingId)
         {
             var response = ResponseDto.Create<DashboardDataResponseDto>();
             try
@@ -232,6 +237,11 @@ namespace Rokys.Audit.Services.Services
                 if (enterpriseIds != null && enterpriseIds.Length > 0)
                 {
                     baseFilter = baseFilter.AndAlso(x => enterpriseIds.Contains(x.Store.EnterpriseId));
+                }
+
+                if (enterpriseGroupingId.HasValue)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.Store.Enterprise.EnterpriseGroups.Any(eg => eg.EnterpriseGroupingId == enterpriseGroupingId && eg.IsActive));
                 }
 
                 // Obtener TODAS las auditorías de la empresa para el promedio general
@@ -407,7 +417,7 @@ namespace Rokys.Audit.Services.Services
             return response;
         }
 
-        public async Task<ResponseDto<DashboardDataResponseDto>> GetDashboardStoresDataAsync(int year, Guid[] enterpriseIds, Guid[] storeIds)
+        public async Task<ResponseDto<DashboardDataResponseDto>> GetDashboardStoresDataAsync(int year, Guid[] enterpriseIds, Guid[] storeIds, Guid? enterpriseGroupingId)
         {
             var response = ResponseDto.Create<DashboardDataResponseDto>();
             try
@@ -427,6 +437,11 @@ namespace Rokys.Audit.Services.Services
                 if (enterpriseIds != null && enterpriseIds.Length > 0)
                 {
                     baseFilter = baseFilter.AndAlso(x => enterpriseIds.Contains(x.Store.EnterpriseId));
+                }
+
+                if (enterpriseGroupingId.HasValue)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.Store.Enterprise.EnterpriseGroups.Any(eg => eg.EnterpriseGroupingId == enterpriseGroupingId && eg.IsActive));
                 }
 
                 // Obtener TODAS las auditorías de la empresa para el promedio general
@@ -596,6 +611,12 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<PeriodAuditReportResponseDto>();
             try
             {
+                if (!reportSearchFilterRequestDto.EnterpriseGroupingId.HasValue)
+                {
+                    response = ResponseDto.Error<PeriodAuditReportResponseDto>("El campo EnterpriseGroupingId es obligatorio.");
+                    return response;
+                }
+
                 Expression<Func<PeriodAudit, bool>> filter = x => x.IsActive;
 
                 if (reportSearchFilterRequestDto.StoreId.HasValue)
@@ -609,6 +630,9 @@ namespace Rokys.Audit.Services.Services
 
                 if (reportSearchFilterRequestDto.SupervisorId.HasValue)
                     filter = filter.AndAlso(x => x.PeriodAuditParticipants.Any(p => p.UserReferenceId == reportSearchFilterRequestDto.SupervisorId.Value && p.RoleCodeSnapshot == RoleCodes.JobSupervisor.Code) && x.IsActive);
+
+                if (reportSearchFilterRequestDto.EnterpriseGroupingId.HasValue)
+                    filter = filter.AndAlso(x => x.Store.Enterprise.EnterpriseGroups.Any(eg => eg.EnterpriseGroupingId == reportSearchFilterRequestDto.EnterpriseGroupingId.Value && eg.IsActive));
 
                 // Filtro por rango de fechas
                 if (reportSearchFilterRequestDto.ReportDateInit.HasValue && reportSearchFilterRequestDto.ReportDateFinish.HasValue)
@@ -661,14 +685,10 @@ namespace Rokys.Audit.Services.Services
                     filter: filter
                 );
 
-                IEnumerable<ScaleCompany> scaleCompanies = [];
-
-                if (reportSearchFilterRequestDto.EnterpriseId.HasValue)
-                {
-                    scaleCompanies = await _scaleCompanyRepository.GetAsync(
-                        filter: x => x.EnterpriseId == reportSearchFilterRequestDto.EnterpriseId.Value && x.IsActive
-                    );
-                }
+                IEnumerable<ScaleCompany> scaleCompanies = await _scaleCompanyRepository.GetConfiguredForEnterprise(
+                    enterpriseGroupingId: reportSearchFilterRequestDto.EnterpriseGroupingId,
+                    enterpriseId: reportSearchFilterRequestDto.EnterpriseId ?? Guid.Empty
+                );
 
 
                 var storeGroups = entities.GroupBy(e => e.StoreId);
@@ -687,17 +707,17 @@ namespace Rokys.Audit.Services.Services
                     decimal averageScore = totalAudits > 0 ? totalScore / totalAudits : 0;
                     IEnumerable<ScaleCompany> currentScales = scaleCompanies;
 
-                    if (currentScales == null || !currentScales.Any())
+                    /* if (currentScales == null || !currentScales.Any())
                     {
                         currentScales = await _scaleCompanyRepository.GetAsync(
                             filter: x => x.EnterpriseId == storeEntity.Store.EnterpriseId || x.EnterpriseId == null && x.IsActive
                         );
-                    }
+                    } */
                     string riskLevel = "Sin Escala";
                     string riskColor = "#FFFFFF";
                     foreach (var scale in currentScales)
                     {
-                        if (averageScore >= scale.MinValue && averageScore <= scale.MaxValue)
+                        if (averageScore > (scale.MinValue - 1) && averageScore <= scale.MaxValue)
                         {
                             riskLevel = scale.Name;
                             riskColor = scale.ColorCode ?? "#FFFFFF";
@@ -779,7 +799,7 @@ namespace Rokys.Audit.Services.Services
                 string globalRiskColor = "#FFFFFF";
                 foreach (var scale in scaleCompanies)
                 {
-                    if (globalAverage >= scale.MinValue && globalAverage <= scale.MaxValue)
+                    if (globalAverage > (scale.MinValue - 1) && globalAverage <= scale.MaxValue)
                     {
                         globalRiskLevel = scale.Name;
                         globalRiskColor = scale.ColorCode ?? "#FFFFFF";
@@ -870,6 +890,19 @@ namespace Rokys.Audit.Services.Services
                     && x.PeriodAuditScaleResult.PeriodAuditGroupResult != null
                     && x.PeriodAuditScaleResult.PeriodAuditGroupResult.PeriodAudit != null;
 
+                if (request.EnterpriseGroupingId != Guid.Empty)
+                {
+                    baseFilter = baseFilter.AndAlso(x => x.PeriodAuditScaleResult!.PeriodAuditGroupResult!.PeriodAudit!.Store!.Enterprise.EnterpriseGroups.Any(eg => eg.EnterpriseGroupingId == request.EnterpriseGroupingId && eg.IsActive));
+                }
+                else
+                {
+                    response = ResponseDto.Error<ExportReportResultDto>("El campo Grupo de Empresa es obligatorio.");
+                    return response;
+                }
+                if (request.GroupsIds != null && request.GroupsIds.Count > 0)
+                {
+                    baseFilter = baseFilter.AndAlso(x => request.GroupsIds.Contains(x.PeriodAuditScaleResult!.PeriodAuditGroupResult!.GroupId));
+                }
                 // Filtro por empresas
                 if (request.EnterpriseIds != null && request.EnterpriseIds.Count > 0)
                 {

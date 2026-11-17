@@ -8,7 +8,7 @@
 	
 
 <!-- INIT -->
-<include file="./Init/DataInitial.sql" relativeToChangelogFile="true"/>
+<!-- <include file="./Init/DataInitial.sql" relativeToChangelogFile="true"/> -->
 
 
 <!-- TABLES -->
@@ -16,6 +16,18 @@
 <include file="./Table/202601151204-add-action-plan-table.sql" relativeToChangelogFile="true"/>
 <include file="./Table/202601201258-enterprise-group-configurations.sql" relativeToChangelogFile="true"/>
 <include file="./Table/202601211451-period-audit-add-action-plan-completed-date.sql" relativeToChangelogFile="true"/>
+<include file="./Table/202601201840-enterprise-theme.sql" relativeToChangelogFile="true"/>
+<include file="./Table/202601231250-group.sql" relativeToChangelogFile="true"/>
+<include file="./Table/202601231500-scale-company.sql" relativeToChangelogFile="true"/>
+<include file="./Table/202601231502-sub-scale.sql" relativeToChangelogFile="true"/>
+<include file="./Table/202601201643-01-audit-role-configuration-add-columns.sql" relativeToChangelogFile="true"/>
+<include file="./Table/202601201643-02-audit-role-configuration-add-fks.sql" relativeToChangelogFile="true"/>
+<include file="./Table/202601201643-03-audit-role-configuration-update-constraints.sql" relativeToChangelogFile="true"/>
+<include file="./Table/202601291114-period-audit-group-result.sql" relativeToChangelogFile="true"/>
+<include file="./Table/202601291503-grouping-user-table.sql" relativeToChangelogFile="true"/>
+<include file="./Table/202601291259-enterprise-grouping.sql" relativeToChangelogFile="true"/>
+<include file="./Table/202601291303-enteprise-groping-constraint-scaletype.sql" relativeToChangelogFile="true"/>
+<include file="./Table/202602021413-period-audit-pre-evaluation.sql" relativeToChangelogFile="true"/>
 
 <!-- INSERTS -->
 <include file="./Inserts/202510010123-InsertAuditStatus.sql" relativeToChangelogFile="true"/>
@@ -24,5 +36,19 @@
 <include file="./Inserts/202601210918-enterprise-group-insert-by-ruc.sql" relativeToChangelogFile="true"/>
 <include file="./Inserts/202601220914-measure-type.sql" relativeToChangelogFile="true"/>
 <include file="./Inserts/202601221032-system-config.sql" relativeToChangelogFile="true"/>
+<include file="./Inserts/202601261840-update-audit-role-configuration-enterprise-grouping.sql" relativeToChangelogFile="true"/>
+<include file="./Inserts/202601271005-update-scale-company-enterprise-grouping.sql" relativeToChangelogFile="true"/>
+<include file="./Inserts/202601271642-insert-grouping-multimarca.sql" relativeToChangelogFile="true"/>
+<include file="./Inserts/202601280930-update-group-by-enterprise-grouping.sql" relativeToChangelogFile="true"/>
+<include file="./Inserts/202601291511-insert-new-audit-role-configuration-multimarca.sql" relativeToChangelogFile="true"/>
+<include file="./Inserts/202602020001-grouping-user-insert-by-eg001.sql" relativeToChangelogFile="true"/>
+<include file="./Inserts/202602021644-insert-group-multimarca.sql" relativeToChangelogFile="true"/>
+<include file="./Inserts/202602110936-insert-configuration-multimarca.sql" relativeToChangelogFile="true"/>
+<include file="./Inserts/202602111404-update-group-by-enterprise-scencia.sql" relativeToChangelogFile="true"/>
+<include file="./Inserts/202602131142-insert-system-configuration.sql" relativeToChangelogFile="true"/>
+<include file="./Inserts/202602131522-insert-new-audit-role-configuration-brass-scencia.sql" relativeToChangelogFile="true"/>
+<include file="./Inserts/202603042310-insert-scale-company.sql" relativeToChangelogFile="true"/>
+<include file="./Inserts/20260304121544-insert-scencia.sql" relativeToChangelogFile="true"/>
+
 
 </databaseChangeLog>

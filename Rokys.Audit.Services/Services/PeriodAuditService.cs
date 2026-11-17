@@ -52,6 +52,7 @@ namespace Rokys.Audit.Services.Services
         private readonly IEmailService _emailService;
         private readonly IPeriodAuditParticipantRepository _periodAuditParticipantRepository;
         private readonly IAuditRoleConfigurationRepository _auditRoleConfigurationRepository;
+        private readonly IGroupingUserRepository _groupingUserRepository;
         private readonly WebAppSettings _webAppSettings;
         private readonly FileSettings _fileSettings;
         private readonly IServiceScopeFactory _serviceScopeFactory;
@@ -76,11 +77,13 @@ namespace Rokys.Audit.Services.Services
             IPeriodAuditScaleSubResultRepository periodAuditScaleSubResultRepository,
             IPeriodAuditScoringCriteriaResultRepository periodAuditScoringCriteriaResultRepository,
             IGroupRepository groupRepository,
+            IEnterpriseRepository enterpriseRepository,
             IPeriodAuditGroupResultService periodAuditGroupResultService,
             IStoreRepository storeRepository,
             IEmailService emailService,
             IPeriodAuditParticipantRepository periodAuditParticipantRepository,
             IAuditRoleConfigurationRepository auditRoleConfigurationRepository,
+            IGroupingUserRepository groupingUserRepository,
             WebAppSettings webAppSettings,
             FileSettings fileSettings,
             IServiceScopeFactory serviceScopeFactory)
@@ -104,11 +107,13 @@ namespace Rokys.Audit.Services.Services
             _periodAuditScaleSubResultRepository = periodAuditScaleSubResultRepository;
             _periodAuditScoringCriteriaResultRepository = periodAuditScoringCriteriaResultRepository;
             _groupRepository = groupRepository;
+            _enterpriseRepository = enterpriseRepository;
             _periodAuditGroupResultService = periodAuditGroupResultService;
             _storeRepository = storeRepository;
             _emailService = emailService;
             _periodAuditParticipantRepository = periodAuditParticipantRepository;
             _auditRoleConfigurationRepository = auditRoleConfigurationRepository;
+            _groupingUserRepository = groupingUserRepository;
             _webAppSettings = webAppSettings;
             _fileSettings = fileSettings;
             _serviceScopeFactory = serviceScopeFactory;
@@ -159,15 +164,19 @@ namespace Rokys.Audit.Services.Services
                 }
                 _periodAuditRepository.Insert(entity);
 
-                var store = await _storeRepository.GetFirstOrDefaultAsync(filter: x => x.StoreId == entity.StoreId && x.IsActive);
-                var group = await _groupRepository.GetAsync(filter: x => x.EnterpriseId == store.EnterpriseId && x.IsActive,
-                                                    orderBy: q => q.OrderBy(x => x.SortOrder));
+                var store = await _storeRepository.GetFirstOrDefaultAsync(filter: x => x.StoreId == entity.StoreId && x.IsActive, includeProperties: [x => x.Enterprise!.EnterpriseGroups]);
+                var group = await _groupRepository.GetConfiguredForEnterprise(
+                    store!.Enterprise!.EnterpriseGroups!.FirstOrDefault(e => e.IsActive)!.EnterpriseGroupingId,
+                    store.EnterpriseId
+                );
+
                 // Crear resultados de grupo de auditoría asociados a la nueva auditoría
                 foreach (var grp in group)
                 {
                     var newPeriodAuditGroupResult = new PeriodAuditGroupResultRequestDto
                     {
                         PeriodAuditId = entity.PeriodAuditId,
+                        Code = grp.Code,
                         GroupId = grp.GroupId,
                         ScoreValue = 0,
                         TotalWeighting = grp.Weighting,
@@ -379,6 +388,9 @@ namespace Rokys.Audit.Services.Services
                 if (paginationRequestDto.StoreId.HasValue)
                     filter = filter.AndAlso(x => x.StoreId == paginationRequestDto.StoreId.Value && x.IsActive);
 
+                if (paginationRequestDto.EnterpriseGroupingId.HasValue)
+                    filter = filter.AndAlso(x => x.Store.Enterprise.EnterpriseGroups.Any(eg => eg.EnterpriseGroupingId == paginationRequestDto.EnterpriseGroupingId.Value && eg.IsActive));
+
                 if (paginationRequestDto.EnterpriseId.HasValue)
                     filter = filter.AndAlso(x => x.Store.EnterpriseId == paginationRequestDto.EnterpriseId.Value && x.IsActive);
 
@@ -399,6 +411,21 @@ namespace Rokys.Audit.Services.Services
                     filter = filter.AndAlso(x => x.PeriodAuditParticipants.Any(p => p.UserReferenceId == currentUser.UserReferenceId && (p.RoleCodeSnapshot == RoleCodes.StoreAdmin.Code || p.RoleCodeSnapshot == RoleCodes.AssistantAdministrative.Code) && p.IsActive));
                 }
 
+                // START: Filtro - solo listar las auditorías asociadas a los GroupingUser del usuario actual
+                // 1. Recuperar los GroupingUser activos para el usuario actual
+                var userGroupings = await _groupingUserRepository.GetAsync(
+                    filter: gu => gu.UserReferenceId == currentUser.UserReferenceId && gu.IsActive
+                );
+
+                // 2. Extraer los EnterpriseGroupingId de esos GroupingUser
+                var enterpriseGroupingIds = userGroupings?.Select(ug => ug.EnterpriseGroupingId).Distinct().ToList() ?? new List<Guid>();
+                
+                // 3. Aplicar el filtro para que la auditoría pertenezca a una empresa
+                if (!currentUser.RoleCodes.Contains(RoleCodes.Administrator.Code))
+                {
+                    filter = filter.AndAlso(x => x.Store.Enterprise.EnterpriseGroups.Any(eg => enterpriseGroupingIds.Contains(eg.EnterpriseGroupingId) && eg.IsActive));
+                }
+                // END: Filtro
 
                 Func<IQueryable<PeriodAudit>, IOrderedQueryable<PeriodAudit>> orderBy = q => q.OrderByDescending(x => x.CreationDate);
 
@@ -446,7 +473,7 @@ namespace Rokys.Audit.Services.Services
             var response = ResponseDto.Create<bool>();
             try
             {
-                var entity = await _periodAuditRepository.GetFirstOrDefaultAsync(x => x.PeriodAuditId == periodAuditId && x.IsActive, includeProperties: [x => x.Store]);
+                var entity = await _periodAuditRepository.GetFirstOrDefaultAsync(x => x.PeriodAuditId == periodAuditId && x.IsActive, includeProperties: [x => x.Store!.Enterprise!.EnterpriseGroups]);
                 if (entity == null)
                 {
                     response = ResponseDto.Error<bool>("No se encontró el registro.");
@@ -459,22 +486,18 @@ namespace Rokys.Audit.Services.Services
                     var score = groupResult.ScoreValue * (groupResult.TotalWeighting / 100);
                     acumulatedScore += score;
                 }
-                var scaleCompany = await _scaleCompanyRepository.GetByEnterpriseIdAsync(entity.Store!.EnterpriseId);
+
+                var scaleCompany = await _scaleCompanyRepository.GetConfiguredForEnterprise(entity.Store!.Enterprise!.EnterpriseGroups!.FirstOrDefault(e => e.IsActive)!.EnterpriseGroupingId, entity.Store.EnterpriseId);
                 if (scaleCompany == null || !scaleCompany.Any())
                 {
-                    scaleCompany = await _scaleCompanyRepository.GetAsync(filter: e => e.EnterpriseId == null);
-
-                    if (scaleCompany == null || !scaleCompany.Any())
-                    {
-                        response = ResponseDto.Error<bool>("No se encontró la escala asociada a la empresa ni la escala por defecto.");
-                        return response;
-                    }
+                    response = ResponseDto.Error<bool>("No se encontró la escala asociada a la empresa ni la escala por defecto.");
+                    return response;
                 }
 
                 bool scaleFound = false;
                 foreach (var scale in scaleCompany)
                 {
-                    if (acumulatedScore >= scale.MinValue && acumulatedScore <= scale.MaxValue)
+                    if (acumulatedScore > (scale.MinValue - 1) && acumulatedScore <= scale.MaxValue)
                     {
                         entity.ScaleName = scale.Name;
                         entity.ScaleCode = scale.Code;
@@ -761,12 +784,15 @@ namespace Rokys.Audit.Services.Services
                         endDate = parsedEnd;
                 }
 
-
                 if (!string.IsNullOrEmpty(requestDto.Filter))
                     filter = filter.AndAlso(x => x.GlobalObservations.Contains(requestDto.Filter) && x.IsActive);
 
                 if (requestDto.StoreId.HasValue)
                     filter = filter.AndAlso(x => x.StoreId == requestDto.StoreId.Value && x.IsActive);
+
+                if (requestDto.EnterpriseGroupingId.HasValue)
+                    filter = filter.AndAlso(x => x.Store.Enterprise.EnterpriseGroups.Any(eg => eg.EnterpriseGroupingId == requestDto.EnterpriseGroupingId.Value && eg.IsActive));
+
                 if (requestDto.EnterpriseId.HasValue)
                     filter = filter.AndAlso(x => x.Store.EnterpriseId == requestDto.EnterpriseId.Value && x.IsActive);
 

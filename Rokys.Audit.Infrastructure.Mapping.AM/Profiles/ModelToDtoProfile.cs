@@ -9,6 +9,7 @@ using Rokys.Audit.DTOs.Responses.MaintenanceTable;
 using Rokys.Audit.DTOs.Responses.MaintenanceDetailTable;
 using Rokys.Audit.DTOs.Responses.Proveedor;
 using Rokys.Audit.DTOs.Responses.ScaleCompany;
+using Rokys.Audit.DTOs.Responses.SubScale;
 using Rokys.Audit.DTOs.Responses.ScaleGroup;
 using Rokys.Audit.DTOs.Responses.ScoringCriteria;
 using Rokys.Audit.DTOs.Responses.Store;
@@ -30,6 +31,9 @@ using Rokys.Audit.DTOs.Responses.PeriodAuditParticipant;
 using Rokys.Audit.DTOs.Responses.SubstitutionHistory;
 using Rokys.Audit.DTOs.Common;
 using Rokys.Audit.DTOs.Requests.PeriodAudit;
+using Rokys.Audit.DTOs.Responses.EnterpriseGrouping;
+using Rokys.Audit.DTOs.Responses.EnterpriseGroup;
+using Rokys.Audit.DTOs.Responses.GroupingUser;
 
 namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
 {
@@ -71,11 +75,19 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                 .AfterMap((src, dest) =>
                 {
                     dest.EnterpriseName = src.Enterprise?.Name;
+                    dest.EnterpriseGroupingName = src.EnterpriseGrouping?.Name;
+                    dest.EnterpriseNames = src.EnterpriseGrouping?.EnterpriseGroups?.Where(eg => eg.IsActive).Select(eg => eg.Enterprise != null ? eg.Enterprise.Name : string.Empty).ToList() ?? new List<string>();
+                });
+            CreateMap<SubScale, SubScaleResponseDto>()
+                .AfterMap((src, dest) =>
+                {
+                    dest.EnterpriseGroupingName = src.EnterpriseGrouping?.Name;
                 });
             CreateMap<ScaleGroup, ScaleGroupResponseDto>();
             CreateMap<Group, GroupResponseDto>().AfterMap((src, dest) =>
             {
                 dest.EnterpriseName = src.Enterprise?.Name;
+                dest.EnterpriseGroupingName = src.EnterpriseGrouping?.Name;
             });
             CreateMap<CriteriaSubResult, CriteriaSubResultResponseDto>();
             CreateMap<PeriodAuditFieldValues, PeriodAuditFieldValuesResponseDto>();
@@ -85,8 +97,22 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                 {
                     dest.ScaleGroupName = src.ScaleGroup.Name;
                 });
-            CreateMap<Enterprise, EnterpriseResponseDto>();
-            CreateMap<AuditRoleConfiguration, AuditRoleConfigurationResponseDto>();
+            CreateMap<Enterprise, EnterpriseResponseDto>()
+                .AfterMap((src, dest) =>
+                {
+                    dest.EnterpriseGroupingName = src.EnterpriseGroups?
+                        .FirstOrDefault(eg => eg.IsActive)?
+                        .EnterpriseGrouping?
+                        .Name;
+                });
+
+            CreateMap<EnterpriseTheme, EnterpriseThemeResponseDto>();
+            CreateMap<AuditRoleConfiguration, AuditRoleConfigurationResponseDto>()
+                .AfterMap((src, dest) =>
+                {
+                    dest.EnterpriseGroupingName = src.EnterpriseGrouping.Name;
+                    dest.EnterpriseNames = src.EnterpriseGrouping?.EnterpriseGroups?.Where(eg => eg.IsActive).Select(eg => eg.Enterprise != null ? eg.Enterprise.Name : string.Empty).ToList() ?? new List<string>();
+                });
             CreateMap<PeriodAuditParticipant, PeriodAuditParticipantDto>();
             CreateMap<PeriodAuditParticipant, PeriodAuditParticipantResponseDto>()
                 .AfterMap((src, dest) =>
@@ -116,23 +142,6 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                 dest.StoreName = src.Store?.Name ?? string.Empty;
                 dest.ScaleCode = src.ScaleCode ?? string.Empty;
                 dest.ActionPlanCompletedDate = src.ActionPlanCompletedDate;
-
-                if (src.AuditStatus != null)
-                {
-                    dest.AuditStatus = new AuditStatusResponseDto
-                    {
-                        AuditStatusId = src.AuditStatus.AuditStatusId,
-                        Name = src.AuditStatus.Name,
-                        ColorCode = src.AuditStatus.ColorCode,
-                        Code = src.AuditStatus.Code,
-                        IsActive = src.AuditStatus.IsActive,
-                        CreatedBy = src.AuditStatus.CreatedBy,
-                        CreationDate = src.AuditStatus.CreationDate,
-                        UpdatedBy = src.AuditStatus.UpdatedBy,
-                        UpdateDate = src.AuditStatus.UpdateDate
-                    };
-                }
-
                 // Map participants
                 if (src.PeriodAuditParticipants != null)
                 {
@@ -157,6 +166,7 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                         .ToList() ?? new List<PeriodAuditParticipantResponseDto>();
                 }
             });
+            CreateMap<PeriodAuditParticipant, PeriodAuditParticipantResponseDto>();
             CreateMap<AuditStatus, AuditStatusResponseDto>();
             CreateMap<UserReference, UserReferenceResponseDto>();
             CreateMap<EmployeeStore, EmployeeStoreResponseDto>();
@@ -209,6 +219,9 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                             ColorCode = sc.ColorCode,
                             EnterpriseId = sc.EnterpriseId,
                             IsActive = sc.IsActive,
+                            NormalizedScore = sc.NormalizedScore,
+                            ExpectedDistribution = sc.ExpectedDistribution,
+                            LevelOrder = sc.LevelOrder,
                             CreationDate = sc.CreationDate,
                             CreatedBy = sc.CreatedBy,
                         })
@@ -320,6 +333,25 @@ namespace Rokys.Audit.Infrastructure.Mapping.AM.Profiles
                 });
 
             CreateMap<PeriodAuditActionPlan, PeriodAuditActionPlanResponseDto>();
+            CreateMap<EnterpriseGroup, EnterpriseGroupResponseDto>();
+            CreateMap<EnterpriseGrouping, EnterpriseGroupingResponseDto>()
+                .AfterMap((src, dest) =>
+                {
+                    dest.Groupings = src.EnterpriseGroups.Select(EnterpriseGroup => new EnterpriseGroupResponseDto
+                    {
+                        EnterpriseGroupId = EnterpriseGroup.EnterpriseGroupId,
+                        EnterpriseId = EnterpriseGroup.EnterpriseId,
+                        EnterpriseName = EnterpriseGroup.Enterprise != null ? EnterpriseGroup.Enterprise.Name : string.Empty,
+                        EnterpriseCode = EnterpriseGroup.Enterprise != null ? EnterpriseGroup.Enterprise.Code : string.Empty,
+                        EnterpriseGroupingId = EnterpriseGroup.EnterpriseGroupingId,
+                        IsActive = EnterpriseGroup.IsActive,
+                        CreatedBy = EnterpriseGroup.CreatedBy,
+                        CreationDate = EnterpriseGroup.CreationDate,
+                        UpdatedBy = EnterpriseGroup.UpdatedBy,
+                        UpdateDate = EnterpriseGroup.UpdateDate
+                    }).ToList();
+                });
+            CreateMap<GroupingUser, GroupingUserResponseDto>();
         }
     }
 }

@@ -145,7 +145,9 @@ namespace Rokys.Audit.Services.Services.Emails
             var auditData = new List<(int nro, string proceso, string observations, string impact, string recommendation, string valorized)>();
 
             // Obtener los resultados de grupo con sus resultados de escala INCLUYENDO las relaciones
-            var groupResults = await periodAuditGroupResultRepository.GetByPeriodAuditIdWithScaleResultsAsync(audit.PeriodAuditId);
+            var groupResults = await periodAuditGroupResultRepository.GetByPeriodAuditIdWithScaleResultsAsync(
+                pagr => pagr.PeriodAuditId == audit.PeriodAuditId && pagr.IsActive
+            );
 
             int nro = 1;
             foreach (var groupResult in groupResults)

@@ -29,5 +29,7 @@ namespace Rokys.Audit.DTOs.Requests.Reports
         /// </summary>
         public DateTime? BeginDate { get; set; }
         public DateTime? EndDate { get; set; }
+        public Guid EnterpriseGroupingId { get; set; }
+        public List<Guid>? GroupsIds { get; set; }
     }
 }

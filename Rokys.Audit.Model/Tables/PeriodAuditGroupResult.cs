@@ -16,6 +16,7 @@ namespace Rokys.Audit.Model.Tables
     public virtual Group? Group { get; set; }
     public string? ScaleColor { get; set; }
     public bool? HasEvidence { get; set; }
+    public string? Code { get; set; }
     public bool IsActive { get; set; } = true;
     public virtual ICollection<PeriodAuditScaleResult> PeriodAuditScaleResults { get; set; } = new List<PeriodAuditScaleResult>();
     }

@@ -24,5 +24,6 @@ namespace Rokys.Audit.Services.Interfaces
         /// <param name="newPosition">Nueva posición del grupo</param>
         /// <returns>Resultado del cambio de orden</returns>
         Task<ResponseDto<bool>> ChangeOrder(Guid enterpriseId, int currentPosition, int newPosition);
+        Task<ResponseDto<List<GroupResponseDto>>> GetConfiguredForEnterprise(Guid enterpriseId);
     }
 }
