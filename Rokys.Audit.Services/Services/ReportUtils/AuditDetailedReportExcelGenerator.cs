@@ -147,21 +147,27 @@ namespace Rokys.Audit.Services.Services.ReportUtils
         {
             foreach (var item in group)
             {
-                // 1️⃣ Tomamos un field solo para saber cuántas filas existen
-                var firstFieldJson = item.PeriodAuditFieldValues?
-                    .FirstOrDefault()?
-                    .TableDataHorizontal ?? "[]";
+                var tbFields = item.PeriodAuditFieldValues?
+                    .Where(f => f.IsActive)
+                    .OrderBy(f => f.SortOrder)
+                    .ToList() ?? new List<PeriodAuditFieldValues>();
 
-                var firstFieldData = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(firstFieldJson);
+                var parsedFields = tbFields
+                    .Select(f => ParseHorizontalData(f.TableDataHorizontal))
+                    .ToList();
 
-                if (firstFieldData == null || !firstFieldData.Any())
-                    return;
-
-                // 2️⃣ Recorremos filas
-                foreach (var rowIndex in firstFieldData
-                    .Select(h => ((JsonElement)h["row"]).GetInt32())
+                // Las filas se toman de todos los campos: un campo vacío no debe ocultar las filas de los demás
+                var rowIndexes = parsedFields
+                    .SelectMany(rows => rows.Keys)
                     .Distinct()
-                    .OrderBy(x => x))
+                    .OrderBy(x => x)
+                    .ToList();
+
+                // Una auditoría sin filas no debe cortar las de las tiendas siguientes
+                if (rowIndexes.Count == 0)
+                    continue;
+
+                foreach (var rowIndex in rowIndexes)
                 {
                     col = 1;
                     worksheet.Cell(currentRow, col).Value = item.PeriodAuditScaleResult?.PeriodAuditGroupResult?.PeriodAudit?.Store?.Enterprise?.Name ?? "";
@@ -173,27 +179,9 @@ namespace Rokys.Audit.Services.Services.ReportUtils
                     worksheet.Cell(currentRow, col).Value = item.PeriodAuditScaleResult?.PeriodAuditGroupResult?.PeriodAudit?.AuditStatus?.Name ?? "";
                     col++;
 
-                    var tbFields = item.PeriodAuditFieldValues?
-                        .OrderBy(f => f.SortOrder)
-                        .ToList() ?? new List<PeriodAuditFieldValues>();
-
-                    // 3️⃣ Recorremos campos
-                    foreach (var field in tbFields)
+                    foreach (var fieldRows in parsedFields)
                     {
-                        var fieldJson = field.TableDataHorizontal ?? "[]";
-
-                        var fieldData = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(fieldJson);
-
-                        var cellData = fieldData?
-                            .FirstOrDefault(h => ((JsonElement)h["row"]).GetInt32() == rowIndex);
-
-                        object? value = cellData?.GetValueOrDefault("value");
-
-                        if (value is JsonElement je)
-                        {
-                            value = ConvertJsonElementToObject(je);
-                        }
-
+                        fieldRows.TryGetValue(rowIndex, out var value);
                         worksheet.Cell(currentRow, col).Value = ObjectToXLCellValue(value);
                         col++;
                     }
@@ -201,6 +189,35 @@ namespace Rokys.Audit.Services.Services.ReportUtils
                     currentRow++;
                 }
             }
+        }
+
+        private static Dictionary<int, object?> ParseHorizontalData(string? json)
+        {
+            var result = new Dictionary<int, object?>();
+            if (string.IsNullOrWhiteSpace(json))
+                return result;
+
+            List<Dictionary<string, JsonElement>>? rows;
+            try
+            {
+                rows = JsonSerializer.Deserialize<List<Dictionary<string, JsonElement>>>(json);
+            }
+            catch (JsonException)
+            {
+                return result;
+            }
+
+            foreach (var row in rows ?? [])
+            {
+                if (!row.TryGetValue("row", out var rowElement) || !rowElement.TryGetInt32(out var rowIndex))
+                    continue;
+
+                result[rowIndex] = row.TryGetValue("value", out var valueElement)
+                    ? ConvertJsonElementToObject(valueElement)
+                    : null;
+            }
+
+            return result;
         }
 
 
